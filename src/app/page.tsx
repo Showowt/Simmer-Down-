@@ -81,14 +81,14 @@ export default function Home() {
               href="/menu"
               className="group inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-orange-500/25"
             >
-              Order Now
+              Ordenar Ahora
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/menu"
               className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-4 text-lg font-semibold backdrop-blur-sm transition-all border border-white/20"
             >
-              15% Off First Order
+              15% Descuento Primera Orden
             </Link>
           </motion.div>
 
@@ -110,7 +110,7 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent"
+            className="w-px h-12 bg-white/30"
           />
         </div>
       </section>
@@ -120,10 +120,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="text-orange-400 font-semibold tracking-widest uppercase text-sm mb-4">
-              The Menu
+              El Menú
             </p>
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Signature Pizzas
+              Pizzas Signature
             </h2>
           </div>
 
@@ -192,7 +192,7 @@ export default function Home() {
               href="/menu"
               className="group inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-orange-500/25"
             >
-              View Full Menu
+              Ver Menú Completo
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -289,8 +289,8 @@ export default function Home() {
                 {/* Open Now Badge */}
                 <div className="absolute top-4 left-4">
                   <span className="inline-flex items-center gap-2 bg-green-500/90 text-white text-sm font-semibold px-3 py-1">
-                    <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    Open Now
+                    <span className="w-2 h-2 bg-white animate-pulse" />
+                    Abierto
                   </span>
                 </div>
 
@@ -311,15 +311,15 @@ export default function Home() {
                   <div className="flex gap-3">
                     <a
                       href={`tel:${location.phone.replace(/\s/g, '')}`}
-                      className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 text-center font-semibold transition-colors"
+                      className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 text-center font-semibold transition-colors min-h-[56px] flex items-center justify-center"
                     >
-                      Call
+                      Llamar
                     </a>
                     <Link
                       href="/menu"
-                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 text-center font-semibold transition-colors"
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 text-center font-semibold transition-colors min-h-[56px] flex items-center justify-center"
                     >
-                      Order Here
+                      Ordenar Aquí
                     </Link>
                   </div>
                 </div>

@@ -120,7 +120,7 @@ export default function LocationsPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Find Us
+              Encuéntranos
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Nuestras Ubicaciones
@@ -200,8 +200,8 @@ export default function LocationsPage() {
                     <div className="flex items-start gap-3">
                       <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-white">Mon - Thu: {location.hours.weekday}</p>
-                        <p className="text-zinc-500 text-sm">Fri - Sun: {location.hours.weekend}</p>
+                        <p className="text-white">{location.hours.weekday}</p>
+                        {location.hours.weekend && <p className="text-zinc-500 text-sm">{location.hours.weekend}</p>}
                       </div>
                     </div>
 
@@ -211,7 +211,7 @@ export default function LocationsPage() {
                         <a href={`tel:${location.phone.replace(/\s/g, '')}`} className="text-white hover:text-orange-400 transition-colors">
                           {location.phone}
                         </a>
-                        <p className="text-zinc-500 text-sm">Call or WhatsApp</p>
+                        <p className="text-zinc-500 text-sm">Llamar o WhatsApp</p>
                       </div>
                     </div>
                   </div>
@@ -234,17 +234,17 @@ export default function LocationsPage() {
                       href={location.mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-semibold transition-colors"
+                      className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
                     >
                       <Navigation className="w-5 h-5" />
-                      Get Directions
+                      Cómo Llegar
                     </a>
                     <a
                       href={`tel:${location.phone.replace(/\s/g, '')}`}
-                      className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 font-semibold transition-colors"
+                      className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
                     >
                       <Phone className="w-5 h-5" />
-                      Call Now
+                      Llamar
                     </a>
                   </div>
                 </div>

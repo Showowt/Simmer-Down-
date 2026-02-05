@@ -7,17 +7,17 @@ import { Instagram, Facebook, Send } from 'lucide-react'
 const footerLinks = {
   menu: [
     { label: 'Pizzas', href: '/menu' },
-    { label: 'Sides', href: '/menu' },
-    { label: 'Drinks', href: '/menu' },
+    { label: 'Acompañamientos', href: '/menu' },
+    { label: 'Bebidas', href: '/menu' },
   ],
   company: [
-    { label: 'About', href: '/about' },
-    { label: 'Locations', href: '/locations' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'Nosotros', href: '/about' },
+    { label: 'Ubicaciones', href: '/locations' },
+    { label: 'Contacto', href: '/contact' },
   ],
   legal: [
-    { label: 'Privacy', href: '/privacy' },
-    { label: 'Terms', href: '/terms' },
+    { label: 'Privacidad', href: '/privacy' },
+    { label: 'Términos', href: '/terms' },
   ],
 }
 
@@ -50,7 +50,7 @@ export default function Footer() {
             {subscribed ? (
               <div className="flex items-center gap-2 text-green-500 font-medium">
                 <Send className="w-4 h-4" />
-                Thanks! Check your inbox.
+                ¡Gracias! Revisa tu bandeja de entrada.
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2 w-full md:w-auto">
@@ -58,15 +58,15 @@ export default function Footer() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Tu correo electrónico"
                   required
                   className="flex-1 md:w-64 px-4 py-3 bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500 transition-colors"
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors"
+                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors min-h-[48px]"
                 >
-                  Subscribe
+                  Suscribirse
                 </button>
               </form>
             )}
@@ -108,7 +108,7 @@ export default function Footer() {
 
           {/* Menu Links */}
           <div>
-            <h4 className="text-sm font-medium text-white mb-4">Menu</h4>
+            <h4 className="text-sm font-medium text-white mb-4">Menú</h4>
             <ul className="space-y-3">
               {footerLinks.menu.map((link) => (
                 <li key={link.label}>
@@ -125,7 +125,7 @@ export default function Footer() {
 
           {/* Company Links */}
           <div>
-            <h4 className="text-sm font-medium text-white mb-4">Company</h4>
+            <h4 className="text-sm font-medium text-white mb-4">Compañía</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
@@ -162,7 +162,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-zinc-600">
-            &copy; {new Date().getFullYear()} Simmer Down. All rights reserved.
+            &copy; {new Date().getFullYear()} Simmer Down. Todos los derechos reservados.
           </p>
           <div className="flex gap-6">
             {footerLinks.legal.map((link) => (

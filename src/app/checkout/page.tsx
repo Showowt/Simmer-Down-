@@ -31,8 +31,8 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-zinc-950 pt-32">
         <div className="max-w-2xl mx-auto px-4">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-zinc-800 rounded w-1/3" />
-            <div className="h-48 bg-zinc-800 rounded" />
+            <div className="h-8 bg-zinc-800 w-1/3" />
+            <div className="h-48 bg-zinc-800" />
           </div>
         </div>
       </div>
@@ -114,10 +114,10 @@ export default function CheckoutPage() {
             className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Cart
+            Volver al Carrito
           </Link>
-          <h1 className="text-3xl font-black text-white">Checkout</h1>
-          <p className="text-zinc-500">Complete your order</p>
+          <h1 className="text-3xl font-black text-white">Finalizar Pedido</h1>
+          <p className="text-zinc-500">Completa tu orden</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -126,14 +126,14 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+            className="bg-zinc-900 border border-zinc-800 p-6"
           >
-            <h2 className="text-lg font-bold text-white mb-4">Order Type</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Tipo de Pedido</h2>
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setOrderType('delivery')}
-                className={`p-4 rounded-xl border-2 flex items-center justify-center gap-3 transition-all ${
+                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] ${
                   orderType === 'delivery'
                     ? 'border-orange-500 bg-orange-500/10 text-orange-400'
                     : 'border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -145,14 +145,14 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setOrderType('pickup')}
-                className={`p-4 rounded-xl border-2 flex items-center justify-center gap-3 transition-all ${
+                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] ${
                   orderType === 'pickup'
                     ? 'border-orange-500 bg-orange-500/10 text-orange-400'
                     : 'border-zinc-800 text-zinc-400 hover:border-zinc-700'
                 }`}
               >
                 <Store className="w-5 h-5" />
-                <span className="font-medium">Pickup</span>
+                <span className="font-medium">Recoger</span>
               </button>
             </div>
           </motion.div>
@@ -162,13 +162,13 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+            className="bg-zinc-900 border border-zinc-800 p-6"
           >
-            <h2 className="text-lg font-bold text-white mb-4">Contact Information</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Información de Contacto</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">
-                  Name *
+                  Nombre *
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -177,15 +177,15 @@ export default function CheckoutPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
-                    placeholder="Your name"
+                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                    placeholder="Tu nombre"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">
-                  Phone *
+                  Teléfono *
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
                     placeholder="+503 XXXX-XXXX"
                   />
                 </div>
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
 
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-2">
-                  Email (optional)
+                  Correo (opcional)
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -212,8 +212,8 @@ export default function CheckoutPage() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
-                    placeholder="your@email.com"
+                    className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                    placeholder="tu@email.com"
                   />
                 </div>
               </div>
@@ -225,18 +225,18 @@ export default function CheckoutPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+              className="bg-zinc-900 border border-zinc-800 p-6"
             >
-              <h2 className="text-lg font-bold text-white mb-4">Delivery Address</h2>
+              <h2 className="text-lg font-bold text-white mb-4">Dirección de Envío</h2>
               <div className="relative">
                 <MapPin className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
                 <textarea
                   required
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition resize-none"
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition resize-none"
                   rows={3}
-                  placeholder="Enter your full delivery address"
+                  placeholder="Ingresa tu dirección completa"
                 />
               </div>
             </motion.div>
@@ -247,17 +247,17 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+            className="bg-zinc-900 border border-zinc-800 p-6"
           >
-            <h2 className="text-lg font-bold text-white mb-4">Special Instructions</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Instrucciones Especiales</h2>
             <div className="relative">
               <FileText className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition resize-none"
+                className="w-full pl-12 pr-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition resize-none"
                 rows={2}
-                placeholder="Any special requests? (allergies, extra napkins, etc.)"
+                placeholder="¿Alguna solicitud especial? (alergias, servilletas extra, etc.)"
               />
             </div>
           </motion.div>
@@ -267,9 +267,9 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+            className="bg-zinc-900 border border-zinc-800 p-6"
           >
-            <h2 className="text-lg font-bold text-white mb-4">Order Summary</h2>
+            <h2 className="text-lg font-bold text-white mb-4">Resumen del Pedido</h2>
             <div className="space-y-3">
               {items.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
@@ -285,8 +285,8 @@ export default function CheckoutPage() {
                   <span className="text-white">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Delivery</span>
-                  <span className="text-white">{deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : 'Free'}</span>
+                  <span className="text-zinc-500">Envío</span>
+                  <span className="text-white">{deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : 'Gratis'}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg pt-2 border-t border-zinc-800">
                   <span className="text-white">Total</span>
@@ -301,14 +301,14 @@ export default function CheckoutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 flex items-center gap-4"
+            className="bg-zinc-900/50 border border-zinc-800 p-4 flex items-center gap-4"
           >
-            <div className="w-10 h-10 bg-orange-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-orange-500/10 flex items-center justify-center flex-shrink-0">
               <CreditCard className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <p className="text-white text-sm font-medium">Cash on {orderType === 'delivery' ? 'Delivery' : 'Pickup'}</p>
-              <p className="text-zinc-500 text-xs">Payment will be collected when you receive your order</p>
+              <p className="text-white text-sm font-medium">Pago en {orderType === 'delivery' ? 'Entrega' : 'Recogida'}</p>
+              <p className="text-zinc-500 text-xs">El pago se realizará cuando recibas tu pedido</p>
             </div>
           </motion.div>
 
@@ -319,17 +319,17 @@ export default function CheckoutPage() {
             transition={{ delay: 0.6 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-zinc-600 disabled:to-zinc-600 text-white py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950 active:scale-[0.98] disabled:cursor-not-allowed"
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-600 text-white py-4 font-bold text-lg transition-colors flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950 active:scale-[0.98] disabled:cursor-not-allowed min-h-[56px]"
           >
             {loading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Placing Order...
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin" />
+                Procesando...
               </>
             ) : (
               <>
                 <Lock className="w-5 h-5" />
-                Place Order • ${total.toFixed(2)}
+                Confirmar Pedido • ${total.toFixed(2)}
               </>
             )}
           </motion.button>

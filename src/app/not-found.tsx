@@ -16,7 +16,7 @@ export default function NotFound() {
         <motion.div
           animate={{ rotate: [0, -10, 10, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2, repeatDelay: 3 }}
-          className="w-32 h-32 bg-orange-500/10 border border-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-8"
+          className="w-32 h-32 bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-8"
         >
           <span className="text-7xl">🍕</span>
         </motion.div>
@@ -48,33 +48,33 @@ export default function NotFound() {
 
         {/* Message */}
         <h2 className="text-2xl font-bold text-white mb-4">
-          Oops! This page got eaten
+          ¡Ups! Esta página fue devorada
         </h2>
         <p className="text-zinc-400 mb-8">
-          Looks like someone was hungrier than expected. The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          Parece que alguien tenía más hambre de lo esperado. La página que buscas no existe o ha sido movida.
         </p>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/"
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-3 rounded-full font-semibold transition-all"
+            className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
           >
             <Home className="w-5 h-5" />
-            Back to Home
+            Volver al Inicio
           </Link>
           <Link
             href="/menu"
-            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 rounded-full font-semibold transition-all"
+            className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
           >
             <Search className="w-5 h-5" />
-            Browse Menu
+            Ver Menú
           </Link>
         </div>
 
         {/* Fun suggestion */}
         <p className="text-zinc-600 text-sm mt-12">
-          Pro tip: Order a pizza while you&apos;re here. It&apos;ll make everything better.
+          Tip: Ordena una pizza mientras estás aquí. Todo mejora con pizza.
         </p>
       </motion.div>
     </div>

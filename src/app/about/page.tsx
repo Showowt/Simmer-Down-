@@ -17,44 +17,44 @@ import Link from 'next/link'
 const values = [
   {
     icon: Heart,
-    title: 'Made with Love',
-    description: 'Every pizza is crafted with passion and care, just like we\'d make for our own family.',
+    title: 'Hecho con Amor',
+    description: 'Cada pizza está elaborada con pasión y cuidado, como si la hiciéramos para nuestra propia familia.',
   },
   {
     icon: Leaf,
-    title: 'Fresh & Local',
-    description: 'We source ingredients from local farms and markets, supporting our Salvadoran community.',
+    title: 'Fresco y Local',
+    description: 'Obtenemos ingredientes de granjas y mercados locales, apoyando a nuestra comunidad salvadoreña.',
   },
   {
     icon: Users,
-    title: 'Community First',
-    description: 'More than a restaurant, we\'re a gathering place where memories are made.',
+    title: 'Comunidad Primero',
+    description: 'Más que un restaurante, somos un punto de encuentro donde se crean memorias.',
   },
   {
     icon: Sparkles,
-    title: 'Good Vibes Only',
-    description: 'We believe great food tastes even better in a warm, welcoming atmosphere.',
+    title: 'Solo Buenas Vibras',
+    description: 'Creemos que la buena comida sabe mejor en un ambiente cálido y acogedor.',
   },
 ]
 
 const team = [
   {
     name: 'Chef Marco Rivera',
-    role: 'Executive Chef & Co-Founder',
+    role: 'Chef Ejecutivo y Cofundador',
     image: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400',
-    bio: 'Trained in Naples, Marco brings authentic Italian technique with Salvadoran soul.',
+    bio: 'Entrenado en Nápoles, Marco trae técnica italiana auténtica con alma salvadoreña.',
   },
   {
     name: 'Isabella Méndez',
-    role: 'Co-Founder & CEO',
+    role: 'Cofundadora y CEO',
     image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400',
-    bio: 'A hospitality veteran who dreamed of bringing world-class pizza to El Salvador.',
+    bio: 'Una veterana de la hospitalidad que soñó con traer pizza de clase mundial a El Salvador.',
   },
   {
     name: 'Carlos Hernández',
-    role: 'Head of Operations',
+    role: 'Director de Operaciones',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    bio: 'Ensures every location delivers the same exceptional Simmer Down experience.',
+    bio: 'Asegura que cada ubicación entregue la misma experiencia excepcional Simmer Down.',
   },
 ]
 
@@ -87,7 +87,7 @@ export default function AboutPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Our Story
+              Nuestra Historia
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Restaurante y Destino Gastro-Musical
@@ -182,10 +182,10 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              What We Believe
+              Lo Que Creemos
             </span>
             <h2 className="text-4xl md:text-5xl font-black text-white">
-              Our Values
+              Nuestros Valores
             </h2>
           </div>
 
@@ -212,10 +212,10 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              The Team
+              El Equipo
             </span>
             <h2 className="text-4xl md:text-5xl font-black text-white">
-              Meet the Family
+              Conoce a la Familia
             </h2>
           </div>
 
@@ -250,10 +250,10 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Our Journey
+              Nuestro Camino
             </span>
             <h2 className="text-4xl md:text-5xl font-black text-white">
-              Milestones
+              Hitos
             </h2>
           </div>
 
@@ -289,24 +289,24 @@ export default function AboutPage() {
       <section className="py-24 bg-orange-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Come Be Part of Our Story
+            Sé Parte de Nuestra Historia
           </h2>
           <p className="text-xl text-white/90 mb-10">
-            Visit us today and experience the Simmer Down difference.
+            Visítanos hoy y experimenta la diferencia Simmer Down.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/menu"
-              className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-8 py-4 font-semibold transition-colors"
+              className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
             >
-              Order Now
+              Ordenar Ahora
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/locations"
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors"
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
             >
-              Find a Location
+              Encontrar Ubicación
             </Link>
           </div>
         </div>

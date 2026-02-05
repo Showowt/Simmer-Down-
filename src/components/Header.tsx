@@ -8,10 +8,10 @@ import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 
 const navLinks = [
-  { href: '/menu', label: 'Menu' },
-  { href: '/locations', label: 'Locations' },
-  { href: '/about', label: 'About' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/menu', label: 'Menú' },
+  { href: '/locations', label: 'Ubicaciones' },
+  { href: '/about', label: 'Nosotros' },
+  { href: '/contact', label: 'Contacto' },
 ]
 
 export default function Header() {
@@ -81,7 +81,7 @@ export default function Header() {
                 <ShoppingBag className="w-5 h-5" />
                 {mounted && itemCount > 0 && (
                   <span className="flex items-center gap-1 text-sm font-medium">
-                    <span className="bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    <span className="bg-orange-500 text-white text-xs w-5 h-5 flex items-center justify-center">
                       {itemCount}
                     </span>
                     <span className="hidden sm:inline text-white">
@@ -94,9 +94,9 @@ export default function Header() {
               {/* Order CTA - Desktop */}
               <Link
                 href="/menu"
-                className="hidden md:flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 text-sm font-semibold transition-all hover:translate-y-[-1px]"
+                className="hidden md:flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 text-sm font-semibold transition-all hover:translate-y-[-1px] min-h-[44px]"
               >
-                Order Now
+                Ordenar
               </Link>
 
               {/* Mobile Menu Toggle */}
@@ -155,9 +155,9 @@ export default function Header() {
                 <Link
                   href="/menu"
                   onClick={() => setIsOpen(false)}
-                  className="block w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-center text-lg font-semibold transition-colors"
+                  className="block w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-center text-lg font-semibold transition-colors min-h-[56px]"
                 >
-                  Order Now
+                  Ordenar Ahora
                 </Link>
 
                 {/* Cart summary in mobile menu */}
@@ -169,7 +169,7 @@ export default function Header() {
                   >
                     <span className="flex items-center gap-2">
                       <ShoppingBag className="w-5 h-5" />
-                      {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                      {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
                     </span>
                     <span className="font-semibold">${getSubtotal().toFixed(2)}</span>
                   </Link>

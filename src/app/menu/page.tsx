@@ -9,11 +9,11 @@ import { useCartStore } from '@/store/cart'
 import { useToastStore } from '@/components/Toast'
 
 const categories = [
-  { id: 'all', name: 'All' },
+  { id: 'all', name: 'Todos' },
   { id: 'pizza', name: 'Pizzas' },
-  { id: 'sides', name: 'Sides' },
-  { id: 'drinks', name: 'Drinks' },
-  { id: 'desserts', name: 'Desserts' },
+  { id: 'sides', name: 'Acompañamientos' },
+  { id: 'drinks', name: 'Bebidas' },
+  { id: 'desserts', name: 'Postres' },
 ]
 
 // Extended menu item type with dietary tags
@@ -178,7 +178,7 @@ function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
 
   const handleAdd = () => {
     addItem(item)
-    addToast(`${item.name} added to cart`, 'success')
+    addToast(`${item.name} agregado al carrito`, 'success')
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }
@@ -252,12 +252,12 @@ function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
         {added ? (
           <>
             <Check className="w-4 h-4" />
-            Added to Cart
+            Agregado
           </>
         ) : (
           <>
             <Plus className="w-4 h-4" />
-            Add to Cart
+            Agregar
           </>
         )}
       </button>
@@ -303,10 +303,10 @@ export default function MenuPage() {
       <section className="py-16 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6">
           <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-            Menu
+            Menú
           </h1>
           <p className="text-lg text-zinc-400">
-            Wood-fired pizzas, fresh sides, and house-made drinks.
+            Pizzas artesanales, acompañamientos frescos y bebidas de la casa.
           </p>
         </div>
       </section>
@@ -340,8 +340,8 @@ export default function MenuPage() {
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square bg-zinc-900 mb-4" />
-                  <div className="h-4 bg-zinc-900 rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-zinc-900 rounded w-1/2" />
+                  <div className="h-4 bg-zinc-900 w-3/4 mb-2" />
+                  <div className="h-3 bg-zinc-900 w-1/2" />
                 </div>
               ))}
             </div>
@@ -367,7 +367,7 @@ export default function MenuPage() {
 
           {filteredItems.length === 0 && !loading && (
             <div className="text-center py-16">
-              <p className="text-zinc-500">No items found</p>
+              <p className="text-zinc-500">No se encontraron productos</p>
             </div>
           )}
         </div>
