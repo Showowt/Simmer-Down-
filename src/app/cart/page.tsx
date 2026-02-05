@@ -108,17 +108,19 @@ export default function CartPage() {
                   <p className="text-orange-400 font-bold">${item.price.toFixed(2)}</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" role="group" aria-label={`Quantity for ${item.name}`}>
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition text-white"
+                    className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition text-white focus:outline-none focus:ring-2 focus:ring-orange-500 active:scale-95"
+                    aria-label={`Decrease quantity of ${item.name}`}
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-8 text-center font-semibold text-white">{item.quantity}</span>
+                  <span className="w-8 text-center font-semibold text-white" aria-live="polite">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition text-white"
+                    className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center transition text-white focus:outline-none focus:ring-2 focus:ring-orange-500 active:scale-95"
+                    aria-label={`Increase quantity of ${item.name}`}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -166,7 +168,7 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="mt-6 w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-orange-500/25"
+                className="mt-6 w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-orange-500/25 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-900 active:scale-[0.98]"
               >
                 Checkout <ArrowRight className="w-5 h-5" />
               </Link>

@@ -34,8 +34,9 @@ export default function MenuCard({ item }: MenuCardProps) {
         {item.image_url ? (
           <img
             src={item.image_url}
-            alt={item.name}
+            alt={`${item.name} - ${item.description}`}
             className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
@@ -57,13 +58,14 @@ export default function MenuCard({ item }: MenuCardProps) {
           </div>
         )}
 
-        {/* Quick add button on hover */}
+        {/* Quick add button - visible on mobile, hover on desktop */}
         {item.available && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             whileHover={{ scale: 1.05 }}
-            className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2"
+            className="absolute bottom-4 right-4 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 shadow-lg shadow-orange-500/25 focus:outline-none focus:ring-2 focus:ring-orange-500 active:scale-95"
             onClick={handleAdd}
+            aria-label={`Add ${item.name} to cart`}
           >
             <Plus className="w-4 h-4" />
             Add
@@ -104,7 +106,8 @@ export default function MenuCard({ item }: MenuCardProps) {
                 exit={{ scale: 0 }}
                 onClick={handleAdd}
                 disabled={!item.available}
-                className="w-10 h-10 bg-zinc-800 hover:bg-orange-500 text-white rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-10 h-10 bg-zinc-800 hover:bg-orange-500 text-white rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-900 active:scale-95"
+                aria-label={`Add ${item.name} to cart`}
               >
                 <Plus className="w-5 h-5" />
               </motion.button>

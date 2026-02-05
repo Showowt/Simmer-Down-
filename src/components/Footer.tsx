@@ -110,8 +110,8 @@ export default function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-zinc-900 hover:bg-orange-500 border border-zinc-800 hover:border-orange-500 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-all"
-                    aria-label={social.label}
+                    className="w-10 h-10 bg-zinc-900 hover:bg-orange-500 border border-zinc-800 hover:border-orange-500 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
+                    aria-label={`Follow us on ${social.label}`}
                   >
                     <Icon className="w-5 h-5" />
                   </a>

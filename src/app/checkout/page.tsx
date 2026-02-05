@@ -319,7 +319,7 @@ export default function CheckoutPage() {
             transition={{ delay: 0.6 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-zinc-600 disabled:to-zinc-600 text-white py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-zinc-600 disabled:to-zinc-600 text-white py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950 active:scale-[0.98] disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

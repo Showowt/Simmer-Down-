@@ -91,8 +91,9 @@ function FeaturedPizzaCard({ pizza, badge, index }: { pizza: MenuItem; badge: st
       <div className="aspect-square overflow-hidden">
         <img
           src={pizza.image_url || ''}
-          alt={pizza.name}
+          alt={`${pizza.name} pizza - ${pizza.description}`}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          loading="lazy"
         />
       </div>
 
@@ -123,7 +124,8 @@ function FeaturedPizzaCard({ pizza, badge, index }: { pizza: MenuItem; badge: st
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
                 onClick={handleAdd}
-                className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-400 hover:text-white transition-colors flex items-center gap-2"
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/25 active:scale-95 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
+                aria-label={`Add ${pizza.name} to cart`}
               >
                 <Plus className="w-4 h-4" />
                 Add to Cart
@@ -213,7 +215,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-[0.9] mb-6"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.9] mb-6"
             >
               <span className="text-white">Pizza &</span>
               <br />
@@ -240,17 +242,17 @@ export default function Home() {
             >
               <Link
                 href="/menu"
-                className="group flex items-center gap-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all hover:shadow-2xl hover:shadow-orange-500/30 hover:scale-105"
+                className="group flex items-center gap-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all hover:shadow-2xl hover:shadow-orange-500/30 hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-black"
               >
                 Order Now
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/menu"
-                className="group flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all"
+                href="/about"
+                className="group flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all focus:outline-none focus:ring-2 focus:ring-white/50"
               >
                 <Play className="w-5 h-5" />
-                Watch Our Story
+                Our Story
               </Link>
             </motion.div>
           </div>
@@ -427,8 +429,9 @@ export default function Home() {
                 <div className="flex items-center gap-4">
                   <img
                     src={testimonial.image}
-                    alt={testimonial.name}
+                    alt={`Photo of ${testimonial.name}, ${testimonial.role}`}
                     className="w-12 h-12 rounded-full object-cover"
+                    loading="lazy"
                   />
                   <div>
                     <p className="font-semibold text-white">{testimonial.name}</p>

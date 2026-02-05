@@ -90,7 +90,8 @@ export default function Header() {
               {/* Cart */}
               <Link
                 href="/cart"
-                className="relative p-2 text-zinc-400 hover:text-white transition-colors"
+                className="relative p-2 text-zinc-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950 rounded-lg"
+                aria-label={`Shopping cart${mounted && itemCount > 0 ? `, ${itemCount} items` : ''}`}
               >
                 <ShoppingBag className="w-5 h-5" />
                 {mounted && itemCount > 0 && (
@@ -107,7 +108,7 @@ export default function Header() {
               {/* Order CTA */}
               <Link
                 href="/menu"
-                className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:shadow-lg hover:shadow-orange-500/25"
+                className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-5 py-2.5 rounded-full font-semibold text-sm transition-all hover:shadow-lg hover:shadow-orange-500/25 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-950 active:scale-95"
               >
                 Order Now
               </Link>
@@ -115,7 +116,9 @@ export default function Header() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden p-2 text-white"
+                className="lg:hidden p-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-lg"
+                aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={isOpen}
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
