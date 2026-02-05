@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function ConsoleEasterEgg() {
+  const [konamiActive, setKonamiActive] = useState(false)
+
   useEffect(() => {
     // ASCII Art Pizza
     const pizzaArt = `
@@ -29,7 +31,7 @@ export default function ConsoleEasterEgg() {
     🔥 We're hiring developers who love pizza!
     📧 dev@simmerdown.sv
 
-    Try typing: SimmerDown.secretMenu()
+    Try: SimmerDown.secretMenu() | Konami code: ↑↑↓↓←→←→BA
 `
 
     console.log(
@@ -37,7 +39,7 @@ export default function ConsoleEasterEgg() {
       'font-family: monospace; color: #f97316; font-size: 10px; line-height: 1.2;'
     )
 
-    // Add a secret function to window
+    // Add secret functions to window
     if (typeof window !== 'undefined') {
       (window as any).SimmerDown = {
         secretMenu: () => {
@@ -70,6 +72,62 @@ export default function ConsoleEasterEgg() {
         }
       }
     }
+
+    // Konami Code Easter Egg: ↑ ↑ ↓ ↓ ← → ← → B A
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA']
+    let konamiIndex = 0
+
+    const createPizzaRain = () => {
+      const pizzaCount = 30
+      for (let i = 0; i < pizzaCount; i++) {
+        setTimeout(() => {
+          const pizza = document.createElement('div')
+          pizza.innerHTML = '🍕'
+          pizza.style.cssText = `
+            position: fixed;
+            top: -50px;
+            left: ${Math.random() * 100}%;
+            font-size: ${20 + Math.random() * 30}px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: pizzaFall 3s linear forwards;
+          `
+          document.body.appendChild(pizza)
+          setTimeout(() => pizza.remove(), 3000)
+        }, i * 100)
+      }
+
+      // Add animation keyframes if not already present
+      if (!document.getElementById('pizza-rain-styles')) {
+        const style = document.createElement('style')
+        style.id = 'pizza-rain-styles'
+        style.textContent = `
+          @keyframes pizzaFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          }
+        `
+        document.head.appendChild(style)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === konamiCode[konamiIndex]) {
+        konamiIndex++
+        if (konamiIndex === konamiCode.length) {
+          setKonamiActive(true)
+          konamiIndex = 0
+          console.log('%c🎮 KONAMI CODE ACTIVATED! 🍕', 'font-size: 24px; color: #f97316;')
+          console.log('%cYou found the secret! Free breadsticks with your next order! Use code: KONAMI', 'font-size: 14px; color: #22c55e;')
+          createPizzaRain()
+        }
+      } else {
+        konamiIndex = 0
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   return null
