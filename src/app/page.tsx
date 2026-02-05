@@ -57,7 +57,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-200 mb-4 max-w-2xl mx-auto font-medium"
           >
-            72-Hour Fermented Dough · 900°F Wood Fire · Naples Training
+            Restaurante y Destino Gastro-Musical · 12 Años · 5 Ubicaciones
           </motion.p>
 
           <motion.p
@@ -66,8 +66,8 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base text-zinc-400 mb-10 max-w-xl mx-auto"
           >
-            El Salvador's highest-rated artisan pizza. Fresh local ingredients.
-            Delivered hot in 30 minutes.
+            Hay lugares que se visitan. Y hay lugares que se recuerdan.
+            Simmer Down es parte de la memoria de El Salvador.
           </motion.p>
 
           {/* CTAs - Both Transactional */}
@@ -99,9 +99,9 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="flex flex-wrap justify-center gap-8 mt-12 text-sm text-zinc-400"
           >
-            <span>🔥 Wood-Fired</span>
-            <span>🚀 30 Min Delivery</span>
-            <span>📍 2 Locations</span>
+            <span>🔥 Pizzas Artesanales</span>
+            <span>🎵 Destino Gastro-Musical</span>
+            <span>📍 5 Ubicaciones</span>
           </motion.div>
         </div>
 
@@ -205,41 +205,41 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-orange-400 font-semibold tracking-widest uppercase text-sm mb-4">
-                Why We're Different
+                Nuestra Esencia
               </p>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-                Crafted, Not Made
+                Más Que Un Restaurante
               </h2>
               <div className="space-y-4 text-zinc-300 text-lg leading-relaxed">
                 <p>
-                  <strong className="text-white">72-hour fermented dough</strong> — slow fermentation
-                  develops complex flavors and perfect texture.
+                  <strong className="text-white">Santa Ana</strong> — nuestro origen, donde todo comenzó.
+                  Tradición, historia y el encanto de una ciudad que respira cultura.
                 </p>
                 <p>
-                  <strong className="text-white">900°F wood-fired oven</strong> — authentic Neapolitan
-                  baking creates the signature char and crisp.
+                  <strong className="text-white">Lago de Coatepeque</strong> — una experiencia frente a una
+                  maravilla natural del mundo, contemplativa y memorable.
                 </p>
                 <p>
-                  <strong className="text-white">Naples-trained chef</strong> — Marco trained at
-                  Associazione Verace Pizza Napoletana in Italy.
+                  <strong className="text-white">San Benito</strong> — el punto urbano, vibrante y cosmopolita,
+                  ideal para encuentros y noches largas.
                 </p>
                 <p>
-                  <strong className="text-white">Local Salvadoran ingredients</strong> — fresh produce
-                  from farms within 50km of San Salvador.
+                  <strong className="text-white">Surf City</strong> — frente al mar, con la energía del surf,
+                  el atardecer y la libertad que solo la costa ofrece.
                 </p>
               </div>
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-semibold mt-8 transition-colors"
               >
-                Meet the team
+                Conoce nuestra historia
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="relative">
               <img
                 src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80"
-                alt="Chef preparing artisan pizza dough with traditional Neapolitan technique"
+                alt="Pizza artesanal Simmer Down"
                 className="w-full aspect-square object-cover"
               />
             </div>
@@ -252,28 +252,28 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="text-orange-400 font-semibold tracking-widest uppercase text-sm mb-4">
-              Visit Us
+              Encuéntranos
             </p>
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Two Locations
+              5 Ubicaciones
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
-                name: 'Zona Rosa',
-                address: 'Boulevard del Hipódromo #510',
-                phone: '+503 2263-7890',
-                hours: 'Daily 11am – 11pm',
+                name: 'Santa Ana',
+                address: '1ra Calle Pte y Callejuela Sur Catedral',
+                phone: '+503 2445-5999',
+                hours: 'Dom–Jue 11am–9pm | Vie–Sáb 11am–10pm',
                 image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
               },
               {
-                name: 'Escalón',
-                address: 'Paseo General Escalón #4518',
-                phone: '+503 2264-5678',
-                hours: 'Daily 11am – 10pm',
-                image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+                name: 'Coatepeque',
+                address: 'Calle Principal al Lago #119',
+                phone: '+503 6831-6907',
+                hours: 'Dom–Jue 11am–8pm | Vie–Sáb 11am–9pm',
+                image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80',
               },
             ].map((location) => (
               <div key={location.name} className="group relative overflow-hidden bg-zinc-900">
@@ -333,19 +333,19 @@ export default function Home() {
       <section className="py-24 md:py-32 bg-orange-500">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-            Hungry? We deliver.
+            Tu próxima experiencia te espera
           </h2>
           <p className="text-xl text-white/90 mb-4">
-            Fresh from our oven to your door in 30 minutes.
+            Delivery y para llevar disponible en todas nuestras ubicaciones.
           </p>
           <p className="text-lg text-white/70 mb-10">
-            Use code <span className="font-bold text-white">FIRST15</span> for 15% off your first order.
+            12 años creando momentos. Siempre hay un lugar reservado para ti.
           </p>
           <Link
             href="/menu"
             className="group inline-flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-10 py-5 text-xl font-semibold transition-all hover:translate-y-[-2px]"
           >
-            Start Your Order
+            Ver Menú
             <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

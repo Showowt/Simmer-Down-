@@ -41,10 +41,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h3 className="text-lg font-semibold text-white mb-1">
-                Get 15% off your first order
+                Únete a la familia Simmer Down
               </h3>
               <p className="text-sm text-zinc-500">
-                Subscribe for exclusive deals and pizza news.
+                Recibe ofertas exclusivas y noticias de eventos.
               </p>
             </div>
             {subscribed ? (
@@ -82,7 +82,7 @@ export default function Footer() {
               Simmer Down
             </Link>
             <p className="mt-4 text-sm text-zinc-500 leading-relaxed">
-              Wood-fired artisan pizza in San Salvador, El Salvador.
+              Restaurante y Destino Gastro-Musical. 12 años en El Salvador.
             </p>
             <div className="flex gap-4 mt-6">
               <a
@@ -142,19 +142,19 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-sm font-medium text-white mb-4">Contact</h4>
+            <h4 className="text-sm font-medium text-white mb-4">Contacto</h4>
             <ul className="space-y-3 text-sm text-zinc-500">
               <li>
-                <a href="tel:+50322637890" className="hover:text-white transition-colors">
-                  +503 2263-7890
+                <a href="tel:+50324455999" className="hover:text-white transition-colors">
+                  +503 2445-5999 (Santa Ana)
                 </a>
               </li>
               <li>
-                <a href="mailto:hello@simmerdown.sv" className="hover:text-white transition-colors">
-                  hello@simmerdown.sv
+                <a href="tel:+50374877792" className="hover:text-white transition-colors">
+                  +503 7487-7792 (San Benito)
                 </a>
               </li>
-              <li>San Salvador, El Salvador</li>
+              <li>El Salvador · 5 Ubicaciones</li>
             </ul>
           </div>
         </div>

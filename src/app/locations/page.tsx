@@ -7,45 +7,98 @@ import Link from 'next/link'
 const locations = [
   {
     id: 1,
-    name: 'Zona Rosa',
-    tagline: 'Our Flagship Location',
-    address: 'Boulevard del Hipódromo #510, Colonia San Benito',
-    city: 'San Salvador, El Salvador',
-    phone: '+503 2263-7890',
-    whatsapp: '+503 7890-1234',
+    name: 'Santa Ana',
+    tagline: 'Donde Todo Comenzó',
+    address: '1ra Calle Pte y Callejuela Sur Catedral',
+    city: 'Santa Ana, El Salvador',
+    phone: '+503 2445-5999',
     hours: {
-      weekday: '11:00 AM - 11:00 PM',
-      weekend: '11:00 AM - 12:00 AM',
+      weekday: 'Dom – Jue: 11am – 9pm',
+      weekend: 'Vie – Sáb: 11am – 10pm',
     },
-    features: ['Outdoor Patio', 'Full Bar', 'Private Events', 'Free WiFi', 'Valet Parking'],
+    features: ['Frente a Catedral', 'Historia', 'Cultura', 'Terraza'],
     image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.6929,-89.2365',
-    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.1234567890123!2d-89.2365!3d13.6929!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDQxJzM0LjQiTiA4OcKwMTQnMTEuNCJX!5e0!3m2!1sen!2s!4v1234567890',
-    lat: 13.6929,
-    lng: -89.2365,
+    mapUrl: 'https://maps.google.com/maps?q=13.9942,-89.5597',
+    lat: 13.9942,
+    lng: -89.5597,
     rating: 4.9,
-    reviews: 1250,
+    reviews: 2100,
   },
   {
     id: 2,
-    name: 'Escalón',
-    tagline: 'Cozy Neighborhood Spot',
-    address: 'Paseo General Escalón #4518, entre 87 y 89 Av. Norte',
-    city: 'San Salvador, El Salvador',
-    phone: '+503 2264-5678',
-    whatsapp: '+503 7890-5678',
+    name: 'Coatepeque',
+    tagline: 'Vista al Lago',
+    address: 'Calle Principal al Lago de Coatepeque #119',
+    city: 'Lago de Coatepeque, El Salvador',
+    phone: '+503 6831-6907',
     hours: {
-      weekday: '11:00 AM - 10:00 PM',
-      weekend: '11:00 AM - 11:00 PM',
+      weekday: 'Dom – Jue: 11am – 8pm',
+      weekend: 'Vie – Sáb: 11am – 9pm',
     },
-    features: ['Family Friendly', 'Takeout Window', 'Free WiFi', 'Street Parking', 'Kids Menu'],
+    features: ['Vista al Lago', 'Atardeceres', 'Naturaleza', 'Terraza'],
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200',
+    mapUrl: 'https://maps.google.com/maps?q=13.8667,-89.5500',
+    lat: 13.8667,
+    lng: -89.5500,
+    rating: 4.9,
+    reviews: 1850,
+  },
+  {
+    id: 3,
+    name: 'San Benito',
+    tagline: 'El Punto Urbano',
+    address: 'Boulevard El Hipódromo #548, San Benito',
+    city: 'San Salvador, El Salvador',
+    phone: '+503 7487-7792',
+    hours: {
+      weekday: 'Lun – Mié: 12–2:30pm, 5:30–9pm',
+      weekend: 'Jue: 12–2:30pm, 5:30–10pm | Vie–Sáb: 12pm–11pm',
+    },
+    features: ['Zona Rosa', 'Vida Nocturna', 'Cosmopolita', 'Full Bar'],
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.7012,-89.2456',
-    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.1234567890123!2d-89.2456!3d13.7012!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDQyJzA0LjMiTiA4OcKwMTQnNDQuMiJX!5e0!3m2!1sen!2s!4v1234567890',
-    lat: 13.7012,
-    lng: -89.2456,
+    mapUrl: 'https://maps.google.com/maps?q=13.6929,-89.2365',
+    lat: 13.6929,
+    lng: -89.2365,
     rating: 4.8,
-    reviews: 890,
+    reviews: 1420,
+  },
+  {
+    id: 4,
+    name: 'Simmer Garden',
+    tagline: 'Ruta de las Flores',
+    address: 'Kilómetro 91.5, San José La Majada',
+    city: 'Juayúa, Sonsonate, El Salvador',
+    phone: '+503 6990-4674',
+    hours: {
+      weekday: 'Dom – Jue: 11am – 8pm',
+      weekend: 'Vie – Sáb: 11am – 8:30pm',
+    },
+    features: ['Ruta de las Flores', 'Jardín', 'Montaña', 'Naturaleza'],
+    image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1200',
+    mapUrl: 'https://maps.google.com/maps?q=13.8467,-89.7456',
+    lat: 13.8467,
+    lng: -89.7456,
+    rating: 4.9,
+    reviews: 980,
+  },
+  {
+    id: 5,
+    name: 'Surf City',
+    tagline: 'Frente al Mar',
+    address: 'Hotel Casa Santa Emilia, Conchalio 2',
+    city: 'La Libertad, El Salvador',
+    phone: '+503 7576-4655',
+    hours: {
+      weekday: 'Miércoles – Domingo: 12pm – 8pm',
+      weekend: '',
+    },
+    features: ['Playa', 'Surf', 'Atardeceres', 'Brisa Marina'],
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200',
+    mapUrl: 'https://maps.google.com/maps?q=13.4833,-89.3333',
+    lat: 13.4833,
+    lng: -89.3333,
+    rating: 4.8,
+    reviews: 760,
   },
 ]
 
@@ -69,12 +122,12 @@ export default function LocationsPage() {
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
               Find Us
             </span>
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
-              Our Locations
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Nuestras Ubicaciones
             </h1>
             <p className="text-xl text-zinc-400">
-              Visit us at one of our locations across San Salvador.
-              Each spot offers the same great pizza with its own unique vibe.
+              5 destinos únicos en El Salvador. Cada ubicación tiene su propia personalidad,
+              pero todas comparten la misma alma Simmer Down.
             </p>
           </motion.div>
         </div>
@@ -201,7 +254,7 @@ export default function LocationsPage() {
         </div>
       </section>
 
-      {/* Coming Soon */}
+      {/* 12 Years */}
       <section className="py-24 bg-zinc-900/50 border-t border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
@@ -210,20 +263,20 @@ export default function LocationsPage() {
             viewport={{ once: true }}
           >
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Coming Soon
+              12 Años de Historia
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-6">
-              New Locations Opening 2025
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Una experiencia que deja huella
             </h2>
             <p className="text-zinc-400 max-w-2xl mx-auto mb-8">
-              We&apos;re expanding! New locations coming to Santa Tecla and Antiguo Cuscatlán.
-              Sign up to be the first to know when we open.
+              Desde Santa Ana hasta Surf City, Simmer Down acompaña a locales y viajeros
+              en algunos de los destinos más emblemáticos de El Salvador.
             </p>
             <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 bg-white hover:bg-zinc-200 text-black px-8 py-4 font-semibold transition-colors"
+              href="/menu"
+              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 font-semibold transition-colors"
             >
-              Get Notified
+              Ver Menú
             </Link>
           </motion.div>
         </div>

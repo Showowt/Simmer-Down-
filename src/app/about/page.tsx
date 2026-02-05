@@ -59,11 +59,11 @@ const team = [
 ]
 
 const milestones = [
-  { year: '2024', event: 'Simmer Down opens in Zona Rosa' },
-  { year: '2024', event: 'Launched SimmerLovers loyalty program' },
-  { year: '2024', event: 'Second location opens in Escalón' },
-  { year: '2025', event: 'Reached 50,000 loyal customers' },
-  { year: '2025', event: 'Planning expansion to Santa Tecla' },
+  { year: '2013', event: 'Simmer Down abre en Santa Ana, frente a la Catedral' },
+  { year: '2016', event: 'Segunda ubicación en Lago de Coatepeque' },
+  { year: '2019', event: 'Expansión a San Benito, San Salvador' },
+  { year: '2022', event: 'Simmer Garden abre en Juayúa, Ruta de las Flores' },
+  { year: '2024', event: 'Surf City: nuestra quinta ubicación frente al mar' },
 ]
 
 export default function AboutPage() {
@@ -89,12 +89,12 @@ export default function AboutPage() {
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
               Our Story
             </span>
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
-              Pizza with Purpose
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Restaurante y Destino Gastro-Musical
             </h1>
             <p className="text-xl text-zinc-400">
-              We started with a simple dream: to bring world-class pizza and
-              unforgettable experiences to El Salvador. Here&apos;s how it all began.
+              Hay lugares que se visitan. Y hay lugares que se recuerdan.
+              Simmer Down es parte de la memoria de El Salvador.
             </p>
           </motion.div>
         </div>
@@ -109,28 +109,27 @@ export default function AboutPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl md:text-4xl font-black text-white mb-6">
-                From a Dream to Your Plate
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                Nuestra Historia
               </h2>
               <div className="space-y-4 text-zinc-400">
                 <p>
-                  Simmer Down was born from a late-night conversation between two friends
-                  who shared a love for great pizza and an even greater love for El Salvador.
+                  Nacimos en Santa Ana, frente a su histórica catedral, como un punto de encuentro
+                  donde el tiempo baja la velocidad, la conversación fluye y la comida se disfruta sin prisa.
                 </p>
                 <p>
-                  Chef Marco, after years training in Naples and working in top pizzerias
-                  across Europe, returned home with a mission: to bring authentic wood-fired
-                  pizza to San Salvador, but with a distinctly Salvadoran twist.
+                  Desde entonces, nos hemos convertido en un referente gastronómico que acompaña
+                  viajes, celebraciones, reencuentros y primeras veces. Para muchos, Simmer Down es nostalgia.
+                  Para otros, es un descubrimiento.
                 </p>
                 <p>
-                  Together with Isabella, a hospitality industry veteran, they opened the
-                  first Simmer Down in Zona Rosa in 2024. The concept was simple — combine
-                  the best ingredients, traditional techniques, and an atmosphere where
-                  everyone feels welcome.
+                  Nuestra cocina se inspira en lo artesanal, en el fuego lento y en recetas que respetan
+                  el ingrediente y celebran el sabor. Pizzas artesanales, pastas, carnes, platos para compartir
+                  y opciones para todos los gustos.
                 </p>
                 <p>
-                  The name &ldquo;Simmer Down&rdquo; captures our philosophy: slow down, relax,
-                  and enjoy life&apos;s simple pleasures with good food and good company.
+                  Pero Simmer Down no es solo lo que servimos en la mesa. Es el ambiente. Es la música.
+                  Es la vista. Es la sensación de estar exactamente donde debes estar.
                 </p>
               </div>
             </motion.div>
@@ -171,10 +170,10 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Quote className="w-12 h-12 text-orange-400 mx-auto mb-6" />
           <blockquote className="text-2xl md:text-3xl text-white font-medium italic mb-6">
-            &ldquo;We don&apos;t just make pizza. We create moments. Every slice tells a story,
-            every visit becomes a memory.&rdquo;
+            &ldquo;Creemos que la mejor gastronomía no solo alimenta: conecta, emociona y permanece.
+            Por eso cuidamos cada detalle, para que cada visita se sienta familiar.&rdquo;
           </blockquote>
-          <cite className="text-zinc-500">— Chef Marco Rivera, Co-Founder</cite>
+          <cite className="text-zinc-500">— Simmer Down, 12 años de historia</cite>
         </div>
       </section>
 
