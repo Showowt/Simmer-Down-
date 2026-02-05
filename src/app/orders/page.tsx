@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle, Clock, ChefHat, Package, Truck, Search, Phone, MapPin, ArrowLeft } from 'lucide-react'
+import { CheckCircle, Clock, ChefHat, Package, Truck, Search, Phone, MapPin, ArrowLeft, MessageCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Order } from '@/lib/types'
 import Link from 'next/link'
@@ -287,19 +287,30 @@ function OrderTracker() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4">
-              <Link
-                href="/menu"
-                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-medium text-center transition"
-              >
-                Back to Menu
-              </Link>
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <Link
+                  href="/menu"
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-medium text-center transition"
+                >
+                  Back to Menu
+                </Link>
+                <a
+                  href="tel:+50322637890"
+                  className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl font-medium text-center transition flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-5 h-5" />
+                  Call
+                </a>
+              </div>
               <a
-                href="tel:+50322637890"
-                className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white py-3 rounded-xl font-medium text-center transition flex items-center justify-center gap-2"
+                href={`https://wa.me/50378901234?text=${encodeURIComponent(`Hola! Quisiera información sobre mi orden #${order.order_number || order.id.slice(0, 8)}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium text-center transition flex items-center justify-center gap-2"
               >
-                <Phone className="w-5 h-5" />
-                Call Restaurant
+                <MessageCircle className="w-5 h-5" />
+                Chat via WhatsApp
               </a>
             </div>
           </motion.div>

@@ -12,7 +12,8 @@ import {
   Clock,
   ArrowUpRight,
   Flame,
-  Heart
+  Heart,
+  MessageCircle
 } from 'lucide-react'
 
 const footerLinks = {
@@ -184,10 +185,25 @@ export default function Footer() {
                   <Phone className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-white font-medium">+503 2222-3333</p>
-                  <p className="text-zinc-400 text-sm">Call or WhatsApp</p>
+                  <a href="tel:+50322637890" className="text-white font-medium hover:text-orange-400 transition">+503 2263-7890</a>
+                  <p className="text-zinc-400 text-sm">Call us anytime</p>
                 </div>
               </div>
+
+              <a
+                href="https://wa.me/50378901234?text=Hola!%20Quiero%20hacer%20un%20pedido"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-green-600/10 border border-green-600/20 rounded-xl hover:bg-green-600/20 transition group"
+              >
+                <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-medium group-hover:text-green-400 transition">WhatsApp</p>
+                  <p className="text-zinc-400 text-sm">Pedidos por chat</p>
+                </div>
+              </a>
             </div>
           </div>
         </div>

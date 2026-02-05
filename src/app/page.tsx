@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 import {
   ArrowRight,
   Flame,
@@ -15,32 +16,125 @@ import {
   Sparkles,
   Users,
   Award,
-  Heart
+  Heart,
+  Check,
+  Plus
 } from 'lucide-react'
+import { useCartStore } from '@/store/cart'
+import { MenuItem } from '@/lib/types'
 
-const featuredPizzas = [
+const featuredPizzas: MenuItem[] = [
   {
+    id: 'home-1',
     name: 'The Salvadoreño',
     description: 'Local chorizo, queso fresco, jalapeños, cilantro',
     price: 18.99,
-    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600',
-    badge: 'Signature',
+    image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600',
+    category: 'pizza',
+    available: true,
+    created_at: new Date().toISOString(),
   },
   {
+    id: 'home-2',
     name: 'Truffle Mushroom',
     description: 'Wild mushrooms, truffle oil, fontina, arugula',
     price: 22.99,
-    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600',
-    badge: 'Chef\'s Pick',
+    image_url: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600',
+    category: 'pizza',
+    available: true,
+    created_at: new Date().toISOString(),
   },
   {
+    id: 'home-3',
     name: 'Spicy Diavola',
     description: 'Spicy salami, Calabrian chilis, honey drizzle',
     price: 19.99,
-    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600',
-    badge: 'Fan Favorite',
+    image_url: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600',
+    category: 'pizza',
+    available: true,
+    created_at: new Date().toISOString(),
   },
 ]
+
+const pizzaBadges: Record<string, string> = {
+  'home-1': 'Signature',
+  'home-2': "Chef's Pick",
+  'home-3': 'Fan Favorite',
+}
+
+function FeaturedPizzaCard({ pizza, badge, index }: { pizza: MenuItem; badge: string; index: number }) {
+  const addItem = useCartStore((state) => state.addItem)
+  const [added, setAdded] = useState(false)
+
+  const handleAdd = () => {
+    addItem(pizza)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.15 }}
+      viewport={{ once: true }}
+      className="group relative bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden hover:border-zinc-700 transition-all"
+    >
+      {/* Badge */}
+      <div className="absolute top-4 left-4 z-10">
+        <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+          {badge}
+        </span>
+      </div>
+
+      {/* Image */}
+      <div className="aspect-square overflow-hidden">
+        <img
+          src={pizza.image_url || ''}
+          alt={pizza.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-white mb-2">{pizza.name}</h3>
+        <p className="text-zinc-400 text-sm mb-4">{pizza.description}</p>
+        <div className="flex items-center justify-between">
+          <span className="text-2xl font-black text-orange-400">
+            ${pizza.price.toFixed(2)}
+          </span>
+          <AnimatePresence mode="wait">
+            {added ? (
+              <motion.span
+                key="added"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                Added!
+              </motion.span>
+            ) : (
+              <motion.button
+                key="add"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                onClick={handleAdd}
+                className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-400 hover:text-white transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add to Cart
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
 
 const stats = [
   { value: '50K+', label: 'Happy Customers' },
@@ -255,44 +349,7 @@ export default function Home() {
           {/* Pizza Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredPizzas.map((pizza, i) => (
-              <motion.div
-                key={pizza.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15 }}
-                viewport={{ once: true }}
-                className="group relative bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden hover:border-zinc-700 transition-all"
-              >
-                {/* Badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    {pizza.badge}
-                  </span>
-                </div>
-
-                {/* Image */}
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={pizza.image}
-                    alt={pizza.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{pizza.name}</h3>
-                  <p className="text-zinc-400 text-sm mb-4">{pizza.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-orange-400">
-                      ${pizza.price}
-                    </span>
-                    <button className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-400 transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+              <FeaturedPizzaCard key={pizza.id} pizza={pizza} badge={pizzaBadges[pizza.id]} index={i} />
             ))}
           </div>
         </div>

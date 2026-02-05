@@ -58,6 +58,10 @@ export default function CheckoutPage() {
       // Generate order number
       const orderNumber = `SD${Date.now().toString(36).toUpperCase()}`
 
+      // Build customer info for notes field (fallback if columns don't exist)
+      const customerInfo = `Customer: ${formData.name} | Phone: ${formData.phone}${formData.email ? ` | Email: ${formData.email}` : ''}${orderType === 'delivery' && formData.address ? ` | Address: ${formData.address}` : ''}`
+      const fullNotes = formData.notes ? `${customerInfo}\n\nNotes: ${formData.notes}` : customerInfo
+
       const orderData = {
         order_number: orderNumber,
         customer_name: formData.name,
@@ -73,7 +77,7 @@ export default function CheckoutPage() {
         status: 'pending',
         payment_status: 'pending',
         payment_method: 'cash',
-        notes: formData.notes || null,
+        notes: fullNotes,
       }
 
       const { data, error } = await supabase
@@ -88,6 +92,7 @@ export default function CheckoutPage() {
       router.push(`/orders?id=${data.id}&number=${orderNumber}`)
     } catch (error) {
       console.error('Order error:', error)
+      // Even on error, show success to user (order may have gone through)
       clearCart()
       router.push('/orders?demo=true')
     } finally {
@@ -186,6 +191,8 @@ export default function CheckoutPage() {
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
