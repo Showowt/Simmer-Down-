@@ -3,12 +3,18 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, MapPin, Clock, Star } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for fire particles (client-side only, non-essential)
+const FireParticles = dynamic(() => import('@/components/FireParticles'), {
+  ssr: false,
+})
 
 export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero - Clear Value Prop */}
-      <section className="relative min-h-[90vh] flex items-center justify-center">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
@@ -18,6 +24,9 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-black/70" />
         </div>
+
+        {/* Fire Particles - Signature Experience */}
+        <FireParticles />
 
         {/* Content */}
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">

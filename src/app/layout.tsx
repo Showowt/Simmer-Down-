@@ -3,6 +3,8 @@ import { Inter, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ToastContainer from '@/components/Toast'
+import ConsoleEasterEgg from '@/components/ConsoleEasterEgg'
 import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({
@@ -87,6 +89,8 @@ export default function RootLayout({
         <Header />
         <main id="main-content">{children}</main>
         <Footer />
+        <ToastContainer />
+        <ConsoleEasterEgg />
         <Analytics />
 
         {/* LocalBusiness + Restaurant Schema */}

@@ -6,6 +6,7 @@ import { Plus, Check } from 'lucide-react'
 import { MenuItem } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/store/cart'
+import { useToastStore } from '@/components/Toast'
 
 const categories = [
   { id: 'all', name: 'All' },
@@ -172,10 +173,12 @@ const tagIcons: Record<string, { icon: string; label: string }> = {
 
 function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
   const addItem = useCartStore((state) => state.addItem)
+  const addToast = useToastStore((state) => state.addToast)
   const [added, setAdded] = useState(false)
 
   const handleAdd = () => {
     addItem(item)
+    addToast(`${item.name} added to cart`, 'success')
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
   }

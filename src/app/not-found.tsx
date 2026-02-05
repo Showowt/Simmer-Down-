@@ -21,8 +21,30 @@ export default function NotFound() {
           <span className="text-7xl">🍕</span>
         </motion.div>
 
-        {/* Error Code */}
-        <h1 className="text-8xl font-black text-gradient mb-4">404</h1>
+        {/* Error Code - Animated */}
+        <div className="text-8xl font-black text-zinc-800 mb-4 select-none">
+          <motion.span
+            animate={{ rotate: [0, -10, 10, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            className="inline-block"
+          >
+            4
+          </motion.span>
+          <motion.span
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            className="inline-block text-orange-500"
+          >
+            0
+          </motion.span>
+          <motion.span
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut', delay: 0.5 }}
+            className="inline-block"
+          >
+            4
+          </motion.span>
+        </div>
 
         {/* Message */}
         <h2 className="text-2xl font-bold text-white mb-4">
