@@ -20,6 +20,9 @@ const locations = [
     features: ['Outdoor Patio', 'Full Bar', 'Private Events', 'Free WiFi', 'Valet Parking'],
     image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
     mapUrl: 'https://maps.google.com/maps?q=13.6929,-89.2365',
+    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.1234567890123!2d-89.2365!3d13.6929!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDQxJzM0LjQiTiA4OcKwMTQnMTEuNCJX!5e0!3m2!1sen!2s!4v1234567890',
+    lat: 13.6929,
+    lng: -89.2365,
     rating: 4.9,
     reviews: 1250,
   },
@@ -38,6 +41,9 @@ const locations = [
     features: ['Family Friendly', 'Takeout Window', 'Free WiFi', 'Street Parking', 'Kids Menu'],
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200',
     mapUrl: 'https://maps.google.com/maps?q=13.7012,-89.2456',
+    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.1234567890123!2d-89.2456!3d13.7012!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTPCsDQyJzA0LjMiTiA4OcKwMTQnNDQuMiJX!5e0!3m2!1sen!2s!4v1234567890',
+    lat: 13.7012,
+    lng: -89.2456,
     rating: 4.8,
     reviews: 890,
   },
@@ -87,22 +93,38 @@ export default function LocationsPage() {
                 viewport={{ once: true }}
                 className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
               >
-                {/* Image */}
-                <div className={`relative overflow-hidden rounded-3xl ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
-                  <div className="aspect-[4/3] relative">
+                {/* Image & Map */}
+                <div className={`space-y-4 ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
+                  {/* Image */}
+                  <div className="relative overflow-hidden aspect-[16/9]">
                     <img
                       src={location.image}
-                      alt={location.name}
+                      alt={`${location.name} restaurant interior`}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                     {/* Rating Badge */}
-                    <div className="absolute top-4 left-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 flex items-center gap-2">
+                    <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-3 py-1.5 flex items-center gap-2">
                       <Star className="w-4 h-4 text-orange-400 fill-orange-400" />
-                      <span className="text-white font-semibold">{location.rating}</span>
-                      <span className="text-white/70 text-sm">({location.reviews} reviews)</span>
+                      <span className="text-white font-semibold text-sm">{location.rating}</span>
+                      <span className="text-white/70 text-sm">({location.reviews})</span>
                     </div>
+                  </div>
+
+                  {/* Interactive Map */}
+                  <div className="aspect-[16/9] bg-zinc-900 relative overflow-hidden">
+                    <iframe
+                      src={`https://www.google.com/maps?q=${location.lat},${location.lng}&z=15&output=embed`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`Map of ${location.name} location`}
+                      className="absolute inset-0"
+                    />
                   </div>
                 </div>
 
@@ -114,33 +136,29 @@ export default function LocationsPage() {
                   </h2>
 
                   <div className="space-y-4 mb-8">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5 text-orange-400" />
-                      </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-white font-medium">{location.address}</p>
-                        <p className="text-zinc-500">{location.city}</p>
+                        <p className="text-white">{location.address}</p>
+                        <p className="text-zinc-500 text-sm">{location.city}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Clock className="w-5 h-5 text-orange-400" />
-                      </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-white font-medium">Mon - Thu: {location.hours.weekday}</p>
-                        <p className="text-zinc-500">Fri - Sun: {location.hours.weekend}</p>
+                        <p className="text-white">Mon - Thu: {location.hours.weekday}</p>
+                        <p className="text-zinc-500 text-sm">Fri - Sun: {location.hours.weekend}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-5 h-5 text-orange-400" />
-                      </div>
+                    <div className="flex items-start gap-3">
+                      <Phone className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="text-white font-medium">{location.phone}</p>
-                        <p className="text-zinc-500">Call or WhatsApp</p>
+                        <a href={`tel:${location.phone.replace(/\s/g, '')}`} className="text-white hover:text-orange-400 transition-colors">
+                          {location.phone}
+                        </a>
+                        <p className="text-zinc-500 text-sm">Call or WhatsApp</p>
                       </div>
                     </div>
                   </div>
@@ -150,7 +168,7 @@ export default function LocationsPage() {
                     {location.features.map((feature) => (
                       <span
                         key={feature}
-                        className="bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-full text-sm"
+                        className="bg-zinc-900 text-zinc-400 px-3 py-1 text-sm"
                       >
                         {feature}
                       </span>
@@ -158,19 +176,19 @@ export default function LocationsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap gap-3">
                     <a
                       href={location.mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-6 py-3 rounded-full font-semibold transition-all"
+                      className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-semibold transition-colors"
                     >
                       <Navigation className="w-5 h-5" />
                       Get Directions
                     </a>
                     <a
-                      href={`tel:${location.phone}`}
-                      className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-6 py-3 rounded-full font-semibold transition-all"
+                      href={`tel:${location.phone.replace(/\s/g, '')}`}
+                      className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 font-semibold transition-colors"
                     >
                       <Phone className="w-5 h-5" />
                       Call Now
@@ -203,7 +221,7 @@ export default function LocationsPage() {
             </p>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-white hover:bg-zinc-100 text-black px-8 py-4 rounded-full font-semibold transition-all"
+              className="inline-flex items-center gap-2 bg-white hover:bg-zinc-200 text-black px-8 py-4 font-semibold transition-colors"
             >
               Get Notified
             </Link>
