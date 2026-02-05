@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Instagram, Facebook } from 'lucide-react'
+import { Instagram, Facebook, Send } from 'lucide-react'
 
 const footerLinks = {
   menu: [
@@ -21,8 +22,58 @@ const footerLinks = {
 }
 
 export default function Footer() {
+  const [email, setEmail] = useState('')
+  const [subscribed, setSubscribed] = useState(false)
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email) {
+      setSubscribed(true)
+      setEmail('')
+    }
+  }
+
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800">
+      {/* Newsletter Section */}
+      <div className="border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-1">
+                Get 15% off your first order
+              </h3>
+              <p className="text-sm text-zinc-500">
+                Subscribe for exclusive deals and pizza news.
+              </p>
+            </div>
+            {subscribed ? (
+              <div className="flex items-center gap-2 text-green-500 font-medium">
+                <Send className="w-4 h-4" />
+                Thanks! Check your inbox.
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex gap-2 w-full md:w-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="flex-1 md:w-64 px-4 py-3 bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors"
+                >
+                  Subscribe
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
           {/* Brand */}

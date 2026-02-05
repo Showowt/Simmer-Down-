@@ -15,7 +15,13 @@ const categories = [
   { id: 'desserts', name: 'Desserts' },
 ]
 
-const demoItems: MenuItem[] = [
+// Extended menu item type with dietary tags
+interface ExtendedMenuItem extends MenuItem {
+  size?: string
+  tags?: string[]
+}
+
+const demoItems: ExtendedMenuItem[] = [
   {
     id: '1',
     name: 'The Salvadoreño',
@@ -25,6 +31,8 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
+    tags: ['spicy'],
   },
   {
     id: '2',
@@ -35,6 +43,8 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
+    tags: ['vegetarian'],
   },
   {
     id: '3',
@@ -45,6 +55,7 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
   },
   {
     id: '4',
@@ -55,6 +66,8 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
+    tags: ['vegetarian'],
   },
   {
     id: '5',
@@ -65,6 +78,8 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
+    tags: ['spicy'],
   },
   {
     id: '6',
@@ -75,6 +90,7 @@ const demoItems: MenuItem[] = [
     category: 'pizza',
     available: true,
     created_at: new Date().toISOString(),
+    size: '12"',
   },
   {
     id: '7',
@@ -85,6 +101,7 @@ const demoItems: MenuItem[] = [
     category: 'sides',
     available: true,
     created_at: new Date().toISOString(),
+    tags: ['vegetarian'],
   },
   {
     id: '8',
@@ -95,6 +112,7 @@ const demoItems: MenuItem[] = [
     category: 'sides',
     available: true,
     created_at: new Date().toISOString(),
+    tags: ['vegetarian', 'gluten-free'],
   },
   {
     id: '9',
@@ -105,6 +123,8 @@ const demoItems: MenuItem[] = [
     category: 'drinks',
     available: true,
     created_at: new Date().toISOString(),
+    size: '16oz',
+    tags: ['vegan', 'gluten-free'],
   },
   {
     id: '10',
@@ -115,6 +135,8 @@ const demoItems: MenuItem[] = [
     category: 'drinks',
     available: true,
     created_at: new Date().toISOString(),
+    size: '16oz',
+    tags: ['vegan', 'gluten-free'],
   },
   {
     id: '11',
@@ -125,6 +147,7 @@ const demoItems: MenuItem[] = [
     category: 'desserts',
     available: true,
     created_at: new Date().toISOString(),
+    tags: ['vegetarian'],
   },
   {
     id: '12',
@@ -135,10 +158,19 @@ const demoItems: MenuItem[] = [
     category: 'desserts',
     available: true,
     created_at: new Date().toISOString(),
+    tags: ['vegetarian'],
   },
 ]
 
-function MenuItemCard({ item }: { item: MenuItem }) {
+// Dietary tag icons
+const tagIcons: Record<string, { icon: string; label: string }> = {
+  vegetarian: { icon: '🌱', label: 'Vegetarian' },
+  vegan: { icon: '🌿', label: 'Vegan' },
+  'gluten-free': { icon: '🌾', label: 'Gluten-Free' },
+  spicy: { icon: '🌶️', label: 'Spicy' },
+}
+
+function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
   const addItem = useCartStore((state) => state.addItem)
   const [added, setAdded] = useState(false)
 
@@ -151,7 +183,7 @@ function MenuItemCard({ item }: { item: MenuItem }) {
   return (
     <div className="group">
       {/* Image */}
-      <div className="aspect-square bg-zinc-900 overflow-hidden mb-4">
+      <div className="aspect-square bg-zinc-900 overflow-hidden mb-4 relative">
         {item.image_url ? (
           <img
             src={item.image_url}
@@ -166,15 +198,39 @@ function MenuItemCard({ item }: { item: MenuItem }) {
             </span>
           </div>
         )}
+
+        {/* Dietary tags overlay */}
+        {item.tags && item.tags.length > 0 && (
+          <div className="absolute top-3 left-3 flex gap-1">
+            {item.tags.map((tag) => (
+              tagIcons[tag] && (
+                <span
+                  key={tag}
+                  className="bg-black/70 backdrop-blur-sm px-2 py-1 text-xs text-white flex items-center gap-1"
+                  title={tagIcons[tag].label}
+                >
+                  {tagIcons[tag].icon}
+                </span>
+              )
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="flex justify-between items-start gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-white mb-1">{item.name}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-white">{item.name}</h3>
+            {item.size && (
+              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5">
+                {item.size}
+              </span>
+            )}
+          </div>
           <p className="text-sm text-zinc-500 line-clamp-2">{item.description}</p>
         </div>
-        <span className="text-orange-400 font-medium whitespace-nowrap">
+        <span className="text-white font-semibold whitespace-nowrap">
           ${item.price.toFixed(2)}
         </span>
       </div>
@@ -183,17 +239,17 @@ function MenuItemCard({ item }: { item: MenuItem }) {
       <button
         onClick={handleAdd}
         disabled={!item.available}
-        className={`mt-4 w-full py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+        className={`mt-4 w-full py-3 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
           added
             ? 'bg-green-600 text-white'
-            : 'bg-zinc-900 text-white hover:bg-orange-500'
+            : 'bg-zinc-900 text-white hover:bg-orange-500 active:scale-[0.98]'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
         aria-label={`Add ${item.name} to cart`}
       >
         {added ? (
           <>
             <Check className="w-4 h-4" />
-            Added
+            Added to Cart
           </>
         ) : (
           <>
@@ -207,7 +263,7 @@ function MenuItemCard({ item }: { item: MenuItem }) {
 }
 
 export default function MenuPage() {
-  const [items, setItems] = useState<MenuItem[]>(demoItems)
+  const [items, setItems] = useState<ExtendedMenuItem[]>(demoItems)
   const [activeCategory, setActiveCategory] = useState('all')
   const [loading, setLoading] = useState(true)
 
