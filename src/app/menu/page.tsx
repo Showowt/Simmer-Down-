@@ -238,16 +238,16 @@ function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
         </span>
       </div>
 
-      {/* Add Button */}
+      {/* Add Button - 56px minimum touch target */}
       <button
         onClick={handleAdd}
         disabled={!item.available}
-        className={`mt-4 w-full py-3 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+        className={`mt-4 w-full min-h-[56px] py-3 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
           added
             ? 'bg-green-600 text-white'
             : 'bg-zinc-900 text-white hover:bg-orange-500 active:scale-[0.98]'
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-        aria-label={`Add ${item.name} to cart`}
+        } disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950`}
+        aria-label={`Agregar ${item.name} al carrito`}
       >
         {added ? (
           <>
@@ -314,15 +314,15 @@ export default function MenuPage() {
       {/* Filters */}
       <section className="sticky top-20 z-30 bg-zinc-950 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="flex gap-1 py-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-5 py-3 min-h-[44px] text-sm font-medium whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                   activeCategory === cat.id
                     ? 'bg-white text-black'
-                    : 'text-zinc-400 hover:text-white'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 {cat.name}

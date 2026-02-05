@@ -50,16 +50,18 @@ export default function ToastContainer() {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${
+            className={`flex items-center gap-3 px-4 py-3 shadow-lg ${
               toast.type === 'success'
                 ? 'bg-zinc-900 border border-green-500/30'
                 : toast.type === 'error'
                 ? 'bg-zinc-900 border border-red-500/30'
                 : 'bg-zinc-900 border border-zinc-700'
             }`}
+            role="alert"
+            aria-live="polite"
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              className={`w-8 h-8 flex items-center justify-center ${
                 toast.type === 'success'
                   ? 'bg-green-500/20 text-green-500'
                   : toast.type === 'error'
