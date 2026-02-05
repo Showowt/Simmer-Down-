@@ -54,17 +54,25 @@ export default function CheckoutPage() {
 
     try {
       const supabase = createClient()
+
+      // Generate order number
+      const orderNumber = `SD${Date.now().toString(36).toUpperCase()}`
+
       const orderData = {
+        order_number: orderNumber,
         customer_name: formData.name,
         customer_phone: formData.phone,
         customer_email: formData.email || null,
         delivery_address: orderType === 'delivery' ? formData.address : null,
-        order_type: orderType,
-        items: items,
+        is_delivery: orderType === 'delivery',
+        items_json: items,
+        items_description: items.map(i => `${i.quantity}x ${i.name}`).join(', '),
         subtotal: subtotal,
         delivery_fee: deliveryFee,
         total: total,
         status: 'pending',
+        payment_status: 'pending',
+        payment_method: 'cash',
         notes: formData.notes || null,
       }
 
@@ -77,7 +85,7 @@ export default function CheckoutPage() {
       if (error) throw error
 
       clearCart()
-      router.push(`/orders?id=${data.id}`)
+      router.push(`/orders?id=${data.id}&number=${orderNumber}`)
     } catch (error) {
       console.error('Order error:', error)
       clearCart()
