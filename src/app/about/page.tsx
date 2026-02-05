@@ -143,23 +143,23 @@ export default function AboutPage() {
             >
               <img
                 src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400"
-                alt="Pizza"
-                className="rounded-2xl w-full h-48 object-cover"
+                alt="Wood-fired pizza with fresh toppings"
+                className="w-full h-48 object-cover"
               />
               <img
                 src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=400"
-                alt="Oven"
-                className="rounded-2xl w-full h-48 object-cover mt-8"
+                alt="Traditional pizza oven"
+                className="w-full h-48 object-cover mt-8"
               />
               <img
                 src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400"
-                alt="Ingredients"
-                className="rounded-2xl w-full h-48 object-cover"
+                alt="Fresh pizza ingredients"
+                className="w-full h-48 object-cover"
               />
               <img
                 src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400"
-                alt="Restaurant"
-                className="rounded-2xl w-full h-48 object-cover mt-8"
+                alt="Restaurant interior"
+                className="w-full h-48 object-cover mt-8"
               />
             </motion.div>
           </div>
@@ -190,7 +190,7 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {values.map((value, i) => (
               <motion.div
                 key={value.title}
@@ -198,13 +198,10 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center"
               >
-                <div className="w-16 h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <value.icon className="w-8 h-8 text-orange-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-zinc-500">{value.description}</p>
+                <value.icon className="w-8 h-8 text-orange-400 mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">{value.title}</h3>
+                <p className="text-zinc-500 text-sm">{value.description}</p>
               </motion.div>
             ))}
           </div>
@@ -231,20 +228,18 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.15 }}
                 viewport={{ once: true }}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+                className="group"
               >
-                <div className="aspect-square overflow-hidden">
+                <div className="aspect-[3/4] overflow-hidden mb-4">
                   <img
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-1">{member.name}</h3>
-                  <p className="text-orange-400 text-sm font-medium mb-3">{member.role}</p>
-                  <p className="text-zinc-500 text-sm">{member.bio}</p>
-                </div>
+                <h3 className="text-xl font-semibold text-white mb-1">{member.name}</h3>
+                <p className="text-orange-400 text-sm font-medium mb-2">{member.role}</p>
+                <p className="text-zinc-500 text-sm">{member.bio}</p>
               </motion.div>
             ))}
           </div>
@@ -265,9 +260,9 @@ export default function AboutPage() {
 
           <div className="relative">
             {/* Line */}
-            <div className="absolute left-8 top-0 bottom-0 w-px bg-zinc-800" />
+            <div className="absolute left-3 top-3 bottom-3 w-px bg-zinc-800" />
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {milestones.map((milestone, i) => (
                 <motion.div
                   key={i}
@@ -275,14 +270,14 @@ export default function AboutPage() {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
                   viewport={{ once: true }}
-                  className="flex items-center gap-6"
+                  className="flex items-start gap-6"
                 >
-                  <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center flex-shrink-0 relative z-10">
-                    <Flame className="w-6 h-6 text-orange-400" />
+                  <div className="w-6 h-6 bg-orange-500 flex items-center justify-center flex-shrink-0 relative z-10">
+                    <Flame className="w-3 h-3 text-white" />
                   </div>
-                  <div>
-                    <span className="text-orange-400 font-bold">{milestone.year}</span>
-                    <p className="text-white font-medium">{milestone.event}</p>
+                  <div className="pt-0.5">
+                    <span className="text-orange-400 text-sm font-semibold">{milestone.year}</span>
+                    <p className="text-white">{milestone.event}</p>
                   </div>
                 </motion.div>
               ))}
@@ -292,25 +287,25 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-gradient-to-r from-orange-600 to-amber-500">
+      <section className="py-24 bg-orange-500">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Come Be Part of Our Story
           </h2>
           <p className="text-xl text-white/90 mb-10">
-            Visit us today and experience the Simmer Down difference for yourself.
+            Visit us today and experience the Simmer Down difference.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/menu"
-              className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-8 py-4 rounded-full font-bold text-lg transition-all"
+              className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-8 py-4 font-semibold transition-colors"
             >
               Order Now
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/locations"
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-8 py-4 rounded-full font-semibold text-lg transition-all"
+              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors"
             >
               Find a Location
             </Link>
