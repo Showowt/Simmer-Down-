@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     description: 'Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80',
         width: 1200,
         height: 630,
         alt: 'Simmer Down - Restaurante y Destino Gastro-Musical en El Salvador',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Simmer Down | Restaurante y Destino Gastro-Musical',
     description: '12 años creando memorias. 5 ubicaciones en El Salvador.',
-    images: ['/og-image.jpg'],
+    images: ['https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80'],
   },
   robots: {
     index: true,
@@ -110,7 +110,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Restaurant',
               name: 'Simmer Down',
-              image: 'https://simmer-down.vercel.app/og-image.jpg',
+              image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80',
               '@id': 'https://simmer-down.vercel.app',
               url: 'https://simmer-down.vercel.app',
               telephone: '+503-2445-5999',
