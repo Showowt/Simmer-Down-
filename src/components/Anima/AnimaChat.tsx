@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X, Send, Sparkles, Pizza, MapPin, Calendar, Gift } from 'lucide-react'
+import { X, Send, Flame, ChevronRight, Sparkles } from 'lucide-react'
 import { useAnimaStore } from '@/store/anima'
 
 interface Message {
@@ -29,9 +29,9 @@ const quickActions: AnimaAction[] = [
 // ANIMA personality responses
 const animaResponses: Record<string, string[]> = {
   greeting: [
-    '¡Hola! Soy Anima, el alma de Simmer Down. ¿En qué puedo ayudarte hoy?',
-    '¡Bienvenido a Simmer Down! Soy Anima. ¿Qué se te antoja?',
-    '¡Qué gusto verte! Soy Anima. ¿Listo para algo delicioso?',
+    '¡Hola! Soy ANIMA, el alma de Simmer Down. ¿En qué puedo ayudarte hoy?',
+    '¡Bienvenido a Simmer Down! Soy ANIMA. ¿Qué se te antoja?',
+    '¡Qué gusto verte! Soy ANIMA. ¿Listo para algo delicioso?',
   ],
   menu: [
     '¡Excelente elección! Nuestro menú tiene pizzas artesanales que te van a encantar. ¿Te llevo al menú o prefieres que te recomiende algo?',
@@ -49,6 +49,14 @@ const animaResponses: Record<string, string[]> = {
     '¡Siempre hay algo pasando! Desde noches de música en vivo hasta cenas exclusivas. ¿Te cuento qué viene?',
     'Los eventos de Simmer Down son legendarios. ¿Buscas algo específico o te sorprendo?',
   ],
+  surprise: [
+    '¡Me encanta cuando me dejan elegir! Basándome en lo que está saliendo perfecto del horno ahora mismo... te recomiendo The Salvadoreño con nuestra Horchata de la casa. ¡Combinación ganadora!',
+    '¿Aventurero, eh? Hoy el chef está inspirado con la Truffle Mushroom. Es una experiencia. ¿Te animas?',
+  ],
+  help: [
+    'Claro que te ayudo. ¿Prefieres algo clásico como nuestra Margherita o algo más atrevido? ¿Tienes alguna preferencia dietética que deba conocer?',
+    'Para eso estoy. Cuéntame: ¿buscas algo ligero, algo contundente, o algo para compartir?',
+  ],
   default: [
     'Mmm, déjame pensar... ¿Puedes darme más detalles?',
     'Interesante pregunta. ¿Me cuentas más?',
@@ -56,24 +64,79 @@ const animaResponses: Record<string, string[]> = {
   ],
 }
 
+// Proactive prompts based on context
+const proactivePrompts = [
+  { trigger: 'evening', message: '¿Una pizza para la cena? The Salvadoreño está saliendo perfecto del horno.' },
+  { trigger: 'weekend', message: '¡Fin de semana! ¿Reservo tu mesa favorita?' },
+  { trigger: 'returning', message: '¡Qué bueno verte de nuevo! ¿Lo de siempre?' },
+  { trigger: 'default', message: '¿Hambre? Te ayudo a encontrar tu pizza perfecta.' },
+]
+
 function getAnimaResponse(action: string): string {
   const responses = animaResponses[action] || animaResponses.default
   return responses[Math.floor(Math.random() * responses.length)]
 }
 
+function getProactivePrompt(visitCount: number): string {
+  const hour = new Date().getHours()
+  const day = new Date().getDay()
+
+  if (visitCount > 2) {
+    return proactivePrompts.find(p => p.trigger === 'returning')?.message || ''
+  }
+  if (day === 0 || day === 6) {
+    return proactivePrompts.find(p => p.trigger === 'weekend')?.message || ''
+  }
+  if (hour >= 17 && hour <= 21) {
+    return proactivePrompts.find(p => p.trigger === 'evening')?.message || ''
+  }
+  return proactivePrompts.find(p => p.trigger === 'default')?.message || ''
+}
+
+type ChatState = 'collapsed' | 'proactive' | 'expanded'
+
 export default function AnimaChat() {
-  const { isOpen, setIsOpen, customerName, loyaltyTier } = useAnimaStore()
+  const { isOpen, setIsOpen, customerName, loyaltyTier, visitCount, hasSeenWelcome, setHasSeenWelcome } = useAnimaStore()
+  const [chatState, setChatState] = useState<ChatState>('collapsed')
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [showProactive, setShowProactive] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Initialize with greeting
+  // Handle proactive popup after delay
+  useEffect(() => {
+    if (!hasSeenWelcome && !isOpen) {
+      const timer = setTimeout(() => {
+        setShowProactive(true)
+        setChatState('proactive')
+      }, 8000) // Show proactive after 8 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [hasSeenWelcome, isOpen])
+
+  // Open chat handler
+  const openChat = () => {
+    setIsOpen(true)
+    setChatState('expanded')
+    setShowProactive(false)
+    setHasSeenWelcome(true)
+  }
+
+  // Dismiss proactive
+  const dismissProactive = () => {
+    setShowProactive(false)
+    setChatState('collapsed')
+    setHasSeenWelcome(true)
+  }
+
+  // Initialize with greeting when expanded
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const greeting = customerName
-        ? `¡${customerName}! Qué gusto verte de nuevo. ${loyaltyTier === 'gold' ? 'Como miembro Gold, tienes acceso a ofertas exclusivas hoy. ' : ''}¿En qué te ayudo?`
+        ? `¡${customerName}! Qué gusto verte de nuevo. ${loyaltyTier === 'gold' || loyaltyTier === 'platinum' ? 'Como miembro ' + loyaltyTier.charAt(0).toUpperCase() + loyaltyTier.slice(1) + ', tienes acceso a ofertas exclusivas hoy. ' : ''}¿En qué te ayudo?`
         : getAnimaResponse('greeting')
 
       setMessages([
@@ -111,7 +174,6 @@ export default function AnimaChat() {
     setMessages((prev) => [...prev, userMessage])
     setIsTyping(true)
 
-    // Simulate ANIMA thinking
     setTimeout(() => {
       const animaMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -138,11 +200,14 @@ export default function AnimaChat() {
     setInput('')
     setIsTyping(true)
 
-    // Detect intent and respond
     const lowerInput = input.toLowerCase()
     let responseType = 'default'
 
-    if (lowerInput.includes('menu') || lowerInput.includes('pizza') || lowerInput.includes('comer')) {
+    if (lowerInput.includes('sorprend') || lowerInput.includes('elige') || lowerInput.includes('recomienda')) {
+      responseType = 'surprise'
+    } else if (lowerInput.includes('ayuda') || lowerInput.includes('ayúda') || lowerInput.includes('no sé')) {
+      responseType = 'help'
+    } else if (lowerInput.includes('menu') || lowerInput.includes('menú') || lowerInput.includes('pizza') || lowerInput.includes('comer')) {
       responseType = 'menu'
     } else if (lowerInput.includes('pedido') || lowerInput.includes('orden')) {
       responseType = 'orders'
@@ -164,46 +229,118 @@ export default function AnimaChat() {
     }, 1000 + Math.random() * 800)
   }
 
+  const closeChat = () => {
+    setIsOpen(false)
+    setChatState('collapsed')
+  }
+
   return (
     <>
-      {/* ANIMA Floating Button */}
-      <motion.button
-        onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 w-14 h-14 bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 transition-all ${isOpen ? 'scale-0' : 'scale-100'}`}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        aria-label="Abrir chat con Anima"
-      >
-        <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-zinc-950 animate-pulse" />
-      </motion.button>
+      {/* ANIMA Collapsed State - Floating Flame Button */}
+      <AnimatePresence>
+        {!isOpen && chatState === 'collapsed' && !showProactive && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            onClick={openChat}
+            className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-lg shadow-[#FF6B35]/30 transition-all group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Hablar con ANIMA"
+          >
+            {/* Breathing animation ring */}
+            <span className="absolute inset-0 bg-[#FF6B35] animate-ping opacity-20" />
+            <Flame className="w-7 h-7 relative z-10 group-hover:animate-bounce" />
+            {/* Online indicator */}
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#4CAF50] border-2 border-[#2D2A26]" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-      {/* ANIMA Chat Window */}
+      {/* ANIMA Proactive State - Popup Suggestion */}
+      <AnimatePresence>
+        {showProactive && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 right-6 z-50 w-80 bg-[#252320] border border-[#3D3936] shadow-2xl"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-[#3D3936]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#FF6B35] flex items-center justify-center animate-pulse">
+                  <Flame className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[#FFF8F0] text-sm">ANIMA</h3>
+                  <p className="text-xs text-[#4CAF50] flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-[#4CAF50] animate-pulse" />
+                    En línea
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={dismissProactive}
+                className="p-1.5 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Proactive Message */}
+            <div className="p-4">
+              <p className="text-[#FFF8F0] text-sm mb-4">
+                {getProactivePrompt(visitCount)}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={openChat}
+                  className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  Sí, platiquemos
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={dismissProactive}
+                  className="px-4 bg-[#3D3936] hover:bg-[#4A4642] text-[#B8B0A8] py-3 text-sm transition-colors"
+                >
+                  Ahora no
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ANIMA Expanded State - Full Chat */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-100px)] bg-zinc-900 border border-zinc-800 flex flex-col shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[600px] max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900">
+            <div className="flex items-center justify-between p-4 border-b border-[#3D3936] bg-[#252320]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-orange-500 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-[#FF6B35] flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Anima</h3>
-                  <p className="text-xs text-green-400 flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 animate-pulse" />
-                    En línea
+                  <h3 className="font-semibold text-[#FFF8F0]">ANIMA</h3>
+                  <p className="text-xs text-[#4CAF50] flex items-center gap-1">
+                    <span className="w-2 h-2 bg-[#4CAF50] animate-pulse" />
+                    El alma de Simmer Down
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 text-zinc-400 hover:text-white transition-colors"
+                onClick={closeChat}
+                className="p-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
                 aria-label="Cerrar chat"
               >
                 <X className="w-5 h-5" />
@@ -222,20 +359,20 @@ export default function AnimaChat() {
                   <div
                     className={`max-w-[85%] ${
                       message.role === 'user'
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-zinc-800 text-zinc-100'
+                        ? 'bg-[#FF6B35] text-white'
+                        : 'bg-[#252320] text-[#FFF8F0] border border-[#3D3936]'
                     } p-3 text-sm`}
                   >
                     {message.content}
 
                     {/* Quick Actions */}
                     {message.actions && (
-                      <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-zinc-700">
+                      <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-[#3D3936]">
                         {message.actions.map((action) => (
                           <button
                             key={action.action}
                             onClick={() => handleQuickAction(action.action)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-zinc-200 text-xs font-medium transition-colors"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] text-xs font-medium transition-colors"
                           >
                             {action.icon} {action.label}
                           </button>
@@ -253,10 +390,10 @@ export default function AnimaChat() {
                   animate={{ opacity: 1 }}
                   className="flex justify-start"
                 >
-                  <div className="bg-zinc-800 p-3 flex gap-1">
-                    <span className="w-2 h-2 bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="bg-[#252320] border border-[#3D3936] p-3 flex gap-1.5">
+                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </motion.div>
               )}
@@ -265,7 +402,7 @@ export default function AnimaChat() {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-zinc-800">
+            <div className="p-4 border-t border-[#3D3936] bg-[#252320]">
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
@@ -279,12 +416,12 @@ export default function AnimaChat() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Escribe un mensaje..."
-                  className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 text-sm"
+                  className="flex-1 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] text-sm"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim()}
-                  className="px-4 bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-700 text-white transition-colors"
+                  className="px-4 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white transition-colors"
                   aria-label="Enviar mensaje"
                 >
                   <Send className="w-5 h-5" />

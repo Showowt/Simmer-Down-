@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, MapPin, Clock, Star, ChefHat, Flame, Music, Users, Phone } from 'lucide-react'
+import { ArrowRight, MapPin, Clock, Star, ChefHat, Flame, Music, Users, Phone, Sparkles, Shuffle, ListChecks, HelpCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useAnimaStore } from '@/store/anima'
 import { useEffect, useState } from 'react'
@@ -10,52 +10,52 @@ import { useEffect, useState } from 'react'
 // Dynamic imports for client-only components
 const FireParticles = dynamic(() => import('@/components/FireParticles'), { ssr: false })
 
-// Location data with personalities
+// Location data with personalities and proper images
 const locations = [
   {
     name: 'Santa Ana',
     vibe: 'El Origen',
-    description: 'Frente a la catedral, donde todo comenzó',
+    description: 'Frente a la catedral, donde todo comenzó hace 12 años',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     phone: '+503 2445-5999',
     hours: 'Dom-Jue 11am-9pm | Vie-Sáb 11am-10pm',
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
     isOpen: true,
   },
   {
     name: 'Coatepeque',
     vibe: 'Vista al Lago',
-    description: 'Frente a una maravilla natural',
+    description: 'Pizza con la mejor vista del volcán y el lago',
     address: 'Calle Principal al Lago #119',
     phone: '+503 6831-6907',
     hours: 'Dom-Jue 11am-8pm | Vie-Sáb 11am-9pm',
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80',
     isOpen: true,
   },
   {
     name: 'San Benito',
     vibe: 'Urbano y Vibrante',
-    description: 'El corazón cosmopolita',
+    description: 'El corazón cosmopolita de San Salvador',
     address: 'Boulevard del Hipódromo, San Benito',
     phone: '+503 2263-7890',
     hours: 'Lun-Dom 11am-11pm',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80',
     isOpen: true,
   },
   {
     name: 'Juayúa',
     vibe: 'Simmer Garden',
-    description: 'La Ruta de las Flores',
+    description: 'Jardín secreto en la Ruta de las Flores',
     address: 'Calle Principal, Centro Histórico',
     phone: '+503 7890-1234',
     hours: 'Vie-Dom 11am-8pm',
-    image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=800&q=80',
     isOpen: false,
   },
   {
     name: 'Surf City',
     vibe: 'Frente al Mar',
-    description: 'Atardecer, surf y libertad',
+    description: 'Atardecer, surf, pizza y libertad',
     address: 'Boulevard Costa del Sol',
     phone: '+503 7654-3210',
     hours: 'Lun-Dom 10am-10pm',
@@ -64,11 +64,11 @@ const locations = [
   },
 ]
 
-// Signature pizzas
+// Signature pizzas with proper images
 const signaturePizzas = [
   {
     name: 'The Salvadoreño',
-    description: 'Chorizo artesanal, queso fresco, jalapeños encurtidos, cilantro',
+    description: 'Chorizo artesanal salvadoreño, queso fresco, jalapeños encurtidos, cilantro fresco',
     price: '$18.99',
     image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80',
     badge: 'Signature',
@@ -76,28 +76,29 @@ const signaturePizzas = [
   },
   {
     name: 'Truffle Mushroom',
-    description: 'Hongos silvestres, aceite de trufa, fontina, arúgula',
+    description: 'Mix de hongos silvestres, aceite de trufa negra, queso fontina, arúgula baby',
     price: '$22.99',
-    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',
-    badge: 'Popular',
+    image: 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=600&q=80',
+    badge: 'Chef Choice',
     tags: ['vegetarian'],
   },
   {
     name: 'Margherita DOP',
-    description: 'San Marzano, mozzarella di bufala, albahaca fresca',
+    description: 'Tomate San Marzano DOP, mozzarella di bufala, albahaca fresca, aceite de oliva',
     price: '$16.99',
-    image: 'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',
     badge: 'Clásica',
     tags: ['vegetarian'],
   },
 ]
 
-// Live activity simulation
+// Live activity events for ticker
 const liveActivities = [
-  { location: 'Santa Ana', item: 'The Salvadoreño', time: 'hace 2 min' },
-  { location: 'San Benito', item: 'Truffle Mushroom', time: 'hace 5 min' },
-  { location: 'Coatepeque', item: 'Margherita', time: 'hace 8 min' },
-  { location: 'Surf City', item: 'BBQ Chicken', time: 'hace 12 min' },
+  { location: 'Santa Ana', item: 'The Salvadoreño', time: 'hace 2 min', type: 'order' },
+  { location: 'San Benito', item: 'Truffle Mushroom', time: 'hace 5 min', type: 'order' },
+  { location: 'Coatepeque', item: 'Margherita DOP', time: 'hace 8 min', type: 'order' },
+  { location: 'Surf City', item: 'BBQ Chicken', time: 'hace 12 min', type: 'order' },
+  { location: 'Santa Ana', item: 'María G.', time: 'hace 15 min', type: 'review' },
 ]
 
 // Live Activity Ticker Component
@@ -108,9 +109,19 @@ function LiveActivityTicker() {
         {[...liveActivities, ...liveActivities].map((activity, i) => (
           <div key={i} className="flex items-center gap-3 px-8 whitespace-nowrap">
             <span className="live-dot" />
-            <span className="text-[#FFF8F0] font-medium">{activity.location}</span>
-            <span className="text-[#B8B0A8]">ordenó</span>
-            <span className="text-[#FF6B35] font-semibold">{activity.item}</span>
+            {activity.type === 'order' ? (
+              <>
+                <span className="text-[#FFF8F0] font-medium">{activity.location}</span>
+                <span className="text-[#B8B0A8]">ordenó</span>
+                <span className="text-[#FF6B35] font-semibold">{activity.item}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-[#FFF8F0] font-medium">{activity.item}</span>
+                <span className="text-[#B8B0A8]">dejó reseña</span>
+                <span className="text-[#FF6B35]">★★★★★</span>
+              </>
+            )}
             <span className="text-[#6B6560] text-sm">{activity.time}</span>
           </div>
         ))}
@@ -119,9 +130,9 @@ function LiveActivityTicker() {
   )
 }
 
-// Personalized Section Component
+// Personalized Section Component with all variants
 function PersonalizedSection() {
-  const { customerName, visitCount, memory, getTimeGreeting } = useAnimaStore()
+  const { customerName, visitCount, memory, getTimeGreeting, loyaltyTier, loyaltyPoints, setIsOpen } = useAnimaStore()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -130,9 +141,12 @@ function PersonalizedSection() {
 
   if (!mounted) return null
 
-  const isReturning = visitCount > 1
-  const isVIP = visitCount > 10 || memory.totalOrders > 5
+  const isVIP = visitCount > 10 || memory.totalOrders > 5 || loyaltyTier === 'gold' || loyaltyTier === 'platinum'
+  const isReturning = visitCount > 1 && visitCount <= 10
+  const isLapsed = memory.lastVisit && new Date().getTime() - new Date(memory.lastVisit).getTime() > 30 * 24 * 60 * 60 * 1000 // 30 days
+  const isAnonymous = visitCount <= 1 && !customerName
 
+  // VIP Experience - Círculo Interno
   if (isVIP && customerName) {
     return (
       <section className="py-12 bg-[#1F1D1A]">
@@ -140,34 +154,75 @@ function PersonalizedSection() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#252320] border border-[#FF6B35]/30 p-8"
+            className="bg-gradient-to-r from-[#252320] to-[#2D2A26] border border-[#FF6B35]/30 p-8"
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-3 h-3 bg-[#FF6B35] animate-pulse" />
-              <span className="text-[#FF6B35] font-handwritten text-2xl">VIP Experience</span>
+              <span className="text-[#FF6B35] font-handwritten text-2xl">Círculo Interno</span>
             </div>
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
               {getTimeGreeting()}, {customerName}
             </h2>
             <p className="text-[#B8B0A8] mb-6">
               {memory.totalOrders} pedidos y contando. Tu mesa favorita siempre está lista.
+              {loyaltyPoints > 100 && ` Tienes ${loyaltyPoints} puntos disponibles.`}
             </p>
-            {memory.favoriteItems.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <span className="text-[#6B6560] text-sm">Tus favoritos:</span>
-                {memory.favoriteItems.map((item) => (
-                  <span key={item} className="bg-[#3D3936] text-[#FFF8F0] px-3 py-1 text-sm">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="flex flex-wrap gap-4">
+              {memory.favoriteItems.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[#6B6560] text-sm">Tus favoritos:</span>
+                  {memory.favoriteItems.slice(0, 3).map((item) => (
+                    <span key={item} className="bg-[#3D3936] text-[#FFF8F0] px-3 py-1 text-sm">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <Link
+                href="/menu"
+                className="ml-auto bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2"
+              >
+                Pedir lo de siempre
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>
     )
   }
 
+  // Lapsed Customer - Te Extrañamos
+  if (isLapsed && customerName) {
+    return (
+      <section className="py-12 bg-[#1F1D1A]">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#252320] border border-[#3D3936] p-8 text-center"
+          >
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">Te extrañamos</p>
+            <h2 className="font-display text-3xl text-[#FFF8F0] mb-4">
+              ¡{customerName}, tanto tiempo!
+            </h2>
+            <p className="text-[#B8B0A8] mb-6 max-w-lg mx-auto">
+              Ha pasado un tiempo desde tu última visita. Tenemos novedades en el menú que te van a encantar.
+            </p>
+            <Link
+              href="/menu"
+              className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold transition-colors"
+            >
+              Ver qué hay de nuevo
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+    )
+  }
+
+  // Returning Customer - Tu Rincón
   if (isReturning) {
     return (
       <section className="py-12 bg-[#1F1D1A]">
@@ -177,10 +232,46 @@ function PersonalizedSection() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">Qué bueno verte de nuevo</p>
-            <h2 className="font-display text-3xl text-[#FFF8F0]">
-              {getTimeGreeting()}. Visita #{visitCount}
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">Tu Rincón</p>
+            <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
+              {getTimeGreeting()}. {customerName ? `${customerName}, qué bueno verte.` : 'Qué bueno verte de nuevo.'}
             </h2>
+            <p className="text-[#B8B0A8]">
+              Visita #{visitCount}. {memory.preferredLocation && `Tu ubicación favorita: ${memory.preferredLocation}.`}
+            </p>
+          </motion.div>
+        </div>
+      </section>
+    )
+  }
+
+  // Anonymous - Meet ANIMA
+  if (isAnonymous) {
+    return (
+      <section className="py-12 bg-[#1F1D1A]">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#252320] border border-[#3D3936] p-8 flex flex-col md:flex-row items-center gap-8"
+          >
+            <div className="w-16 h-16 bg-[#FF6B35] flex items-center justify-center flex-shrink-0">
+              <Flame className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <p className="font-handwritten text-xl text-[#FF6B35] mb-1">Conoce a ANIMA</p>
+              <h3 className="font-display text-2xl text-[#FFF8F0] mb-2">Tu guía personal de Simmer Down</h3>
+              <p className="text-[#B8B0A8]">
+                ANIMA te ayuda a descubrir el menú, recordar tus favoritos y encontrar tu próxima experiencia perfecta.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
+            >
+              Platiquemos
+              <Sparkles className="w-4 h-4" />
+            </button>
           </motion.div>
         </div>
       </section>
@@ -188,6 +279,107 @@ function PersonalizedSection() {
   }
 
   return null
+}
+
+// Menu Discovery with ANIMA Interaction Buttons
+function MenuDiscoveryTeaser() {
+  const { setIsOpen } = useAnimaStore()
+
+  const handleAnimaAction = (action: string) => {
+    setIsOpen(true)
+    // ANIMA will pick up the context from the action
+  }
+
+  return (
+    <section className="py-24 md:py-32 bg-[#2D2A26]">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-12">
+          <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+            Desde el horno
+          </p>
+          <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight mb-6">
+            Nuestras Especialidades
+          </h2>
+
+          {/* ANIMA Interaction Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            <button
+              onClick={() => handleAnimaAction('surprise')}
+              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
+            >
+              <Shuffle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
+              <span className="text-[#FFF8F0] font-medium">Sorpréndeme</span>
+            </button>
+            <Link
+              href="/menu"
+              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
+            >
+              <ListChecks className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
+              <span className="text-[#FFF8F0] font-medium">Sé lo que quiero</span>
+            </Link>
+            <button
+              onClick={() => handleAnimaAction('help')}
+              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
+            >
+              <HelpCircle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
+              <span className="text-[#FFF8F0] font-medium">Ayúdame a elegir</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {signaturePizzas.map((pizza, i) => (
+            <motion.div
+              key={pizza.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+              className="group"
+            >
+              <div className="aspect-square overflow-hidden mb-6 relative bg-[#252320]">
+                <img
+                  src={pizza.image}
+                  alt={pizza.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                {pizza.badge && (
+                  <span className="absolute top-4 left-4 bg-[#FF6B35] text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
+                    {pizza.badge}
+                  </span>
+                )}
+                {pizza.tags?.includes('vegetarian') && (
+                  <span className="absolute top-4 right-4 text-xl" title="Vegetariana">
+                    🌱
+                  </span>
+                )}
+                {pizza.tags?.includes('spicy') && (
+                  <span className="absolute top-4 right-4 text-xl" title="Picante">
+                    🌶️
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-display text-xl text-[#FFF8F0]">{pizza.name}</h3>
+                <span className="text-white text-xl font-bold">{pizza.price}</span>
+              </div>
+              <p className="text-[#B8B0A8]">{pizza.description}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="text-center mt-16">
+          <Link
+            href="/menu"
+            className="group inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
+          >
+            Ver Menú Completo
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 export default function Home() {
@@ -209,7 +401,7 @@ export default function Home() {
         <div className="absolute inset-0">
           <img
             src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1920&q=80"
-            alt="Pizza artesanal Simmer Down"
+            alt="Pizza artesanal saliendo del horno de leña"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-[#2D2A26]/80" />
@@ -305,7 +497,7 @@ export default function Home() {
           >
             <div className="flex items-center gap-2">
               <ChefHat className="w-4 h-4 text-[#FF6B35]" />
-              <span>Pizzas Artesanales</span>
+              <span>Horno de Leña</span>
             </div>
             <div className="flex items-center gap-2">
               <Music className="w-4 h-4 text-[#FF6B35]" />
@@ -313,7 +505,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-              <span>4.9 Rating</span>
+              <span>4.9 de 2,500+ Reseñas</span>
             </div>
           </motion.div>
         </div>
@@ -334,70 +526,8 @@ export default function Home() {
       {/* Personalized Section */}
       <PersonalizedSection />
 
-      {/* Menu Discovery Teaser */}
-      <section className="py-24 md:py-32 bg-[#2D2A26]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Desde el horno
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight">
-              Nuestras Especialidades
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {signaturePizzas.map((pizza, i) => (
-              <motion.div
-                key={pizza.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group"
-              >
-                <div className="aspect-square overflow-hidden mb-6 relative bg-[#252320]">
-                  <img
-                    src={pizza.image}
-                    alt={pizza.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {pizza.badge && (
-                    <span className="absolute top-4 left-4 bg-[#FF6B35] text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
-                      {pizza.badge}
-                    </span>
-                  )}
-                  {pizza.tags?.includes('vegetarian') && (
-                    <span className="absolute top-4 right-4 text-xl" title="Vegetariana">
-                      🌱
-                    </span>
-                  )}
-                  {pizza.tags?.includes('spicy') && (
-                    <span className="absolute top-4 right-4 text-xl" title="Picante">
-                      🌶️
-                    </span>
-                  )}
-                </div>
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-display text-xl text-[#FFF8F0]">{pizza.name}</h3>
-                  <span className="text-white text-xl font-bold">{pizza.price}</span>
-                </div>
-                <p className="text-[#B8B0A8]">{pizza.description}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="text-center mt-16">
-            <Link
-              href="/menu"
-              className="group inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
-            >
-              Ver Menú Completo
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Menu Discovery Teaser with ANIMA Buttons */}
+      <MenuDiscoveryTeaser />
 
       {/* Locations Pulse */}
       <section className="py-24 md:py-32 bg-[#252320]">
@@ -424,10 +554,10 @@ export default function Home() {
                 <div className="aspect-[4/3]">
                   <img
                     src={location.image}
-                    alt={location.name}
+                    alt={`Simmer Down ${location.name} - ${location.vibe}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-[#2D2A26]/70" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2A26] via-[#2D2A26]/50 to-transparent" />
                 </div>
 
                 {/* Status Badge */}
@@ -526,7 +656,7 @@ export default function Home() {
             >
               <img
                 src="https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=800&q=80"
-                alt="Chef preparando pizza artesanal"
+                alt="Chef preparando pizza artesanal en horno de leña"
                 className="w-full aspect-square object-cover"
               />
               <div className="absolute inset-0 border border-[#FF6B35]/20" />
@@ -551,7 +681,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {[
-              { icon: Music, title: 'Jazz & Pizza Nights', desc: 'Cada viernes en Zona Rosa' },
+              { icon: Music, title: 'Jazz & Pizza Nights', desc: 'Cada viernes en San Benito' },
               { icon: ChefHat, title: 'Talleres de Pizza', desc: 'Aprende con nuestros chefs' },
               { icon: Users, title: 'Eventos Privados', desc: 'Tu celebración perfecta' },
             ].map((item, i) => (
