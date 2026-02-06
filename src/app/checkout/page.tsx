@@ -3,10 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { MapPin, Phone, User, Mail, FileText, Truck, Store, ArrowLeft, Lock, CreditCard, AlertCircle } from 'lucide-react'
+import { MapPin, Phone, User, Mail, FileText, Truck, Store, ArrowLeft, Lock, CreditCard, AlertCircle, ChevronDown } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+
+interface Location {
+  id: string
+  name: string
+  slug: string
+  address_line1: string
+  city: string
+  is_accepting_orders: boolean
+  delivery_enabled: boolean
+  delivery_fee: number
+}
+
+// Fallback locations if database not configured
+const fallbackLocations: Location[] = [
+  { id: 'santa-ana', name: 'Santa Ana', slug: 'santa-ana', address_line1: '1ra Calle Pte y Callejuela Sur Catedral', city: 'Santa Ana', is_accepting_orders: true, delivery_enabled: true, delivery_fee: 3.99 },
+  { id: 'coatepeque', name: 'Lago de Coatepeque', slug: 'coatepeque', address_line1: 'Calle Principal al Lago #119', city: 'Coatepeque', is_accepting_orders: true, delivery_enabled: true, delivery_fee: 4.99 },
+  { id: 'san-benito', name: 'San Benito', slug: 'san-benito', address_line1: 'Boulevard del Hipódromo', city: 'San Salvador', is_accepting_orders: true, delivery_enabled: true, delivery_fee: 2.99 },
+  { id: 'surf-city', name: 'Surf City', slug: 'surf-city', address_line1: 'Hotel Casa Santa Emilia', city: 'La Libertad', is_accepting_orders: true, delivery_enabled: true, delivery_fee: 5.99 },
+]
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -15,16 +34,46 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery')
+  const [locations, setLocations] = useState<Location[]>(fallbackLocations)
+  const [selectedLocation, setSelectedLocation] = useState<string>('')
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     address: '',
+    city: '',
     notes: '',
   })
 
   useEffect(() => {
     setMounted(true)
+
+    // Fetch locations from database
+    async function fetchLocations() {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('locations')
+          .select('id, name, slug, address_line1, city, is_accepting_orders, delivery_enabled, delivery_fee')
+          .eq('is_active', true)
+          .eq('is_accepting_orders', true)
+          .order('name')
+
+        if (error) throw error
+        if (data && data.length > 0) {
+          setLocations(data)
+          setSelectedLocation(data[0].id)
+        } else {
+          // Use fallback and set first as selected
+          setSelectedLocation(fallbackLocations[0].id)
+        }
+      } catch (err) {
+        console.log('Using fallback locations')
+        setSelectedLocation(fallbackLocations[0].id)
+      }
+    }
+
+    fetchLocations()
   }, [])
 
   if (!mounted) {
@@ -46,7 +95,8 @@ export default function CheckoutPage() {
   }
 
   const subtotal = getSubtotal()
-  const deliveryFee = orderType === 'delivery' ? 3.99 : 0
+  const currentLocation = locations.find(l => l.id === selectedLocation)
+  const deliveryFee = orderType === 'delivery' && currentLocation?.delivery_enabled ? (currentLocation.delivery_fee || 3.99) : 0
   const total = subtotal + deliveryFee
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,45 +104,65 @@ export default function CheckoutPage() {
     setLoading(true)
     setError('')
 
+    if (!selectedLocation) {
+      setError('Por favor selecciona una ubicación')
+      setLoading(false)
+      return
+    }
+
     try {
       const supabase = createClient()
 
-      // Generate order number
-      const orderNumber = `SD${Date.now().toString(36).toUpperCase()}`
-
-      // Build customer info for notes field (fallback if columns don't exist)
-      const customerInfo = `Cliente: ${formData.name} | Tel: ${formData.phone}${formData.email ? ` | Email: ${formData.email}` : ''}${orderType === 'delivery' && formData.address ? ` | Dirección: ${formData.address}` : ''}`
-      const fullNotes = formData.notes ? `${customerInfo}\n\nNotas: ${formData.notes}` : customerInfo
-
+      // Prepare order data matching the production schema
       const orderData = {
-        order_number: orderNumber,
+        location_id: selectedLocation,
+        order_type: orderType, // enum: 'delivery' | 'pickup'
+        status: 'pending',
         customer_name: formData.name,
         customer_phone: formData.phone,
         customer_email: formData.email || null,
-        delivery_address: orderType === 'delivery' ? formData.address : null,
-        is_delivery: orderType === 'delivery',
-        items_json: items,
-        items_description: items.map(i => `${i.quantity}x ${i.name}`).join(', '),
+        delivery_address_line1: orderType === 'delivery' ? formData.address : null,
+        delivery_city: orderType === 'delivery' ? formData.city : null,
+        delivery_instructions: orderType === 'delivery' ? formData.notes : null,
+        customer_notes: formData.notes || null,
         subtotal: subtotal,
         delivery_fee: deliveryFee,
-        total: total,
-        status: 'pending',
-        payment_status: 'pending',
-        payment_method: 'cash',
-        notes: fullNotes,
+        total_amount: total,
+        order_source: 'website',
       }
 
-      const { data, error: dbError } = await supabase
+      // Insert order
+      const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([orderData])
-        .select()
+        .select('id, order_number')
         .single()
 
-      if (dbError) throw dbError
+      if (orderError) throw orderError
+
+      // Insert order items
+      const orderItems = items.map(item => ({
+        order_id: order.id,
+        menu_item_id: item.id.length === 36 ? item.id : null, // Only use if UUID
+        item_name: item.name,
+        item_description: item.description || null,
+        unit_price: item.price,
+        quantity: item.quantity,
+        line_total: item.price * item.quantity,
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
+
+      if (itemsError) {
+        console.warn('Order items insert failed, order still created:', itemsError)
+        // Don't throw - order was created successfully
+      }
 
       // Only clear cart on successful order
       clearCart()
-      router.push(`/orders?id=${data.id}&number=${orderNumber}`)
+      router.push(`/orders?id=${order.id}&number=${order.order_number}`)
     } catch (err) {
       console.error('Error al procesar pedido:', err)
       // Don't clear cart on error - keep items for retry
@@ -171,6 +241,34 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
+          {/* Location Selection */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-[#252320] border border-[#3D3936] p-6"
+          >
+            <h2 className="font-display text-lg text-[#FFF8F0] mb-4">Ubicación</h2>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
+              <select
+                value={selectedLocation}
+                onChange={(e) => setSelectedLocation(e.target.value)}
+                className="w-full pl-12 pr-10 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition appearance-none cursor-pointer"
+              >
+                {locations.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.name} - {loc.city}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
+            </div>
+            {currentLocation && orderType === 'delivery' && !currentLocation.delivery_enabled && (
+              <p className="mt-2 text-sm text-[#FF6B35]">Esta ubicación no ofrece delivery. Por favor selecciona Recoger.</p>
+            )}
+          </motion.div>
+
           {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -245,18 +343,32 @@ export default function CheckoutPage() {
               className="bg-[#252320] border border-[#3D3936] p-6"
             >
               <h2 className="font-display text-lg text-[#FFF8F0] mb-4">Dirección de Envío</h2>
-              <div className="relative">
-                <label htmlFor="address" className="sr-only">Dirección completa</label>
-                <MapPin className="absolute left-4 top-4 w-5 h-5 text-[#6B6560]" />
-                <textarea
-                  id="address"
-                  required
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
-                  rows={3}
-                  placeholder="Ingresa tu dirección completa"
-                />
+              <div className="space-y-4">
+                <div className="relative">
+                  <label htmlFor="address" className="sr-only">Dirección</label>
+                  <MapPin className="absolute left-4 top-4 w-5 h-5 text-[#6B6560]" />
+                  <textarea
+                    id="address"
+                    required
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
+                    rows={2}
+                    placeholder="Calle, número, colonia, referencias"
+                  />
+                </div>
+                <div className="relative">
+                  <label htmlFor="city" className="sr-only">Ciudad</label>
+                  <input
+                    id="city"
+                    type="text"
+                    required
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
+                    placeholder="Ciudad"
+                  />
+                </div>
               </div>
             </motion.div>
           )}
