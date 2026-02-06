@@ -3,10 +3,13 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle, Clock, ChefHat, Package, Truck, Search, Phone, ArrowLeft, MessageCircle } from 'lucide-react'
+import { CheckCircle, Clock, ChefHat, Package, Truck, Search, Phone, ArrowLeft, MessageCircle, PartyPopper } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Order } from '@/lib/types'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+const Confetti = dynamic(() => import('@/components/Confetti'), { ssr: false })
 
 const statusSteps = [
   { id: 'pending', label: 'Recibido', icon: Clock },
@@ -25,12 +28,21 @@ function OrderTracker() {
   const [searchId, setSearchId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [isNewOrder, setIsNewOrder] = useState(false)
 
   useEffect(() => {
     if (orderId) {
       fetchOrder(orderId)
+      // Check if this is a new order (just placed)
+      if (orderNumber) {
+        setIsNewOrder(true)
+        setShowConfetti(true)
+        // Stop confetti after animation
+        setTimeout(() => setShowConfetti(false), 4000)
+      }
     }
-  }, [orderId])
+  }, [orderId, orderNumber])
 
   const fetchOrder = async (id: string) => {
     setLoading(true)
@@ -163,16 +175,39 @@ function OrderTracker() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            {/* Success Header */}
-            <div className="bg-[#4CAF50]/10 border border-[#4CAF50]/20 p-6 flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#4CAF50]/20 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-[#4CAF50]" />
+            {/* Confetti for new orders */}
+            <Confetti active={showConfetti} duration={4000} />
+
+            {/* Success Header - Extra celebratory for new orders */}
+            {isNewOrder ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', bounce: 0.5 }}
+                className="bg-gradient-to-r from-[#4CAF50]/20 to-[#FF6B35]/20 border border-[#4CAF50]/30 p-8 text-center"
+              >
+                <motion.div
+                  animate={{ rotate: [0, -10, 10, -10, 0] }}
+                  transition={{ repeat: 2, duration: 0.5 }}
+                  className="w-20 h-20 bg-[#4CAF50]/20 flex items-center justify-center mx-auto mb-4"
+                >
+                  <PartyPopper className="w-10 h-10 text-[#4CAF50]" />
+                </motion.div>
+                <h2 className="text-2xl font-bold text-[#FFF8F0] mb-2">¡Pedido Realizado!</h2>
+                <p className="text-[#B8B0A8]">Tu pedido #{order.order_number || order.id.slice(0, 8)} está en camino</p>
+                <p className="text-[#FF6B35] font-medium mt-2">Tiempo estimado: 30-45 minutos</p>
+              </motion.div>
+            ) : (
+              <div className="bg-[#4CAF50]/10 border border-[#4CAF50]/20 p-6 flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#4CAF50]/20 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-[#4CAF50]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-[#FFF8F0]">¡Pedido Confirmado!</h2>
+                  <p className="text-[#B8B0A8] text-sm">Pedido #{order.order_number || order.id.slice(0, 8)}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-[#FFF8F0]">¡Pedido Confirmado!</h2>
-                <p className="text-[#B8B0A8] text-sm">Pedido #{order.order_number || order.id.slice(0, 8)}</p>
-              </div>
-            </div>
+            )}
 
             {/* Order Status */}
             <div className="bg-[#252320] border border-[#3D3936] p-6">

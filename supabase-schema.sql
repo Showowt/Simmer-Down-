@@ -53,6 +53,33 @@ CREATE TABLE IF NOT EXISTS locations (
 );
 
 -- =====================
+-- CONTACT SUBMISSIONS TABLE
+-- =====================
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(50),
+  reason VARCHAR(100) NOT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'read', 'responded', 'archived')),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Contact submissions: Public insert, admin read
+ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit contact form"
+  ON contact_submissions FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Staff can view contact submissions"
+  ON contact_submissions FOR SELECT
+  USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('admin', 'staff'))
+  );
+
+-- =====================
 -- ORDERS TABLE
 -- =====================
 CREATE TABLE IF NOT EXISTS orders (
