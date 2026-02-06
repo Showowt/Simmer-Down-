@@ -1,362 +1,288 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { MapPin, Clock, Phone, Navigation, Star, Wifi, Car, Heart, Sparkles, Music, Waves, Mountain, Coffee } from 'lucide-react'
+import { MapPin, Clock, Phone, Navigation, Heart, Flame, Star, Music, Waves, Mountain, Coffee } from 'lucide-react'
 import Link from 'next/link'
 import { useAnimaStore } from '@/store/anima'
-import dynamic from 'next/dynamic'
-
-// Dynamic import for LocationPulse
-const LocationPulse = dynamic(
-  () => import('@/components/Anima/LiveKitchen').then((mod) => ({ default: mod.LocationPulse })),
-  { ssr: false }
-)
-
-// Location Personalities - The soul of each location
-const locationPersonalities: Record<string, {
-  vibe: string
-  description: string
-  icon: React.ElementType
-  color: string
-  signature: string
-}> = {
-  'Santa Ana': {
-    vibe: 'Nostalgia y Tradición',
-    description: 'El original. Donde los recuerdos se forjan y las tradiciones comienzan.',
-    icon: Coffee,
-    color: 'from-amber-500 to-orange-600',
-    signature: 'Atardecer en la terraza con vista a la Catedral'
-  },
-  'Coatepeque': {
-    vibe: 'Contemplativo y Sereno',
-    description: 'Una experiencia frente a una maravilla natural. Aquí el tiempo se detiene.',
-    icon: Mountain,
-    color: 'from-blue-500 to-cyan-600',
-    signature: 'Pizza con vista al lago al atardecer'
-  },
-  'San Benito': {
-    vibe: 'Urbano y Cosmopolita',
-    description: 'El punto de encuentro de la ciudad. Vibrante, moderno, inolvidable.',
-    icon: Music,
-    color: 'from-purple-500 to-pink-600',
-    signature: 'Noches largas con música en vivo'
-  },
-  'Simmer Garden': {
-    vibe: 'Natural y Acogedor',
-    description: 'En la Ruta de las Flores, donde la naturaleza abraza cada momento.',
-    icon: Mountain,
-    color: 'from-green-500 to-emerald-600',
-    signature: 'Brunch dominical en el jardín'
-  },
-  'Surf City': {
-    vibe: 'Libre y Aventurero',
-    description: 'Frente al mar, con la energía del surf y la libertad de la costa.',
-    icon: Waves,
-    color: 'from-cyan-500 to-blue-600',
-    signature: 'Sunset sessions con vista al Pacífico'
-  },
-}
+import { useState, useEffect } from 'react'
 
 const locations = [
   {
-    id: 1,
+    id: 'santa-ana',
     name: 'Santa Ana',
-    tagline: 'Donde Todo Comenzó',
+    vibe: 'El Origen',
+    personality: 'Tradición, historia y el encanto de una ciudad que respira cultura',
+    description: 'Frente a la histórica catedral de Santa Ana, donde todo comenzó hace 12 años. El lugar donde nació la magia Simmer Down.',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana, El Salvador',
     phone: '+503 2445-5999',
     hours: {
-      weekday: 'Dom – Jue: 11am – 9pm',
-      weekend: 'Vie – Sáb: 11am – 10pm',
+      weekday: 'Dom–Jue: 11:00 AM – 9:00 PM',
+      weekend: 'Vie–Sáb: 11:00 AM – 10:00 PM',
     },
-    features: ['Frente a Catedral', 'Historia', 'Cultura', 'Terraza'],
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.9942,-89.5597',
-    lat: 13.9942,
-    lng: -89.5597,
+    features: ['Vista a la Catedral', 'Música en Vivo', 'Terraza'],
+    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
+    icon: Coffee,
+    isOpen: true,
     rating: 4.9,
     reviews: 2100,
+    mapUrl: 'https://maps.google.com/?q=Santa+Ana+Cathedral+El+Salvador',
   },
   {
-    id: 2,
-    name: 'Coatepeque',
-    tagline: 'Vista al Lago',
-    address: 'Calle Principal al Lago de Coatepeque #119',
+    id: 'coatepeque',
+    name: 'Lago de Coatepeque',
+    vibe: 'Vista al Lago',
+    personality: 'Una experiencia frente a una maravilla natural del mundo',
+    description: 'Contempla el atardecer sobre el lago volcánico mientras disfrutas de nuestras especialidades. Una experiencia única en El Salvador.',
+    address: 'Calle Principal al Lago #119',
     city: 'Lago de Coatepeque, El Salvador',
     phone: '+503 6831-6907',
     hours: {
-      weekday: 'Dom – Jue: 11am – 8pm',
-      weekend: 'Vie – Sáb: 11am – 9pm',
+      weekday: 'Dom–Jue: 11:00 AM – 8:00 PM',
+      weekend: 'Vie–Sáb: 11:00 AM – 9:00 PM',
     },
-    features: ['Vista al Lago', 'Atardeceres', 'Naturaleza', 'Terraza'],
-    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.8667,-89.5500',
-    lat: 13.8667,
-    lng: -89.5500,
+    features: ['Vista al Lago', 'Atardeceres', 'Zona Privada'],
+    image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80',
+    icon: Mountain,
+    isOpen: true,
     rating: 4.9,
     reviews: 1850,
+    mapUrl: 'https://maps.google.com/?q=Lago+de+Coatepeque+El+Salvador',
   },
   {
-    id: 3,
+    id: 'san-benito',
     name: 'San Benito',
-    tagline: 'El Punto Urbano',
-    address: 'Boulevard El Hipódromo #548, San Benito',
+    vibe: 'Urbano y Vibrante',
+    personality: 'El punto urbano, vibrante y cosmopolita de San Salvador',
+    description: 'En el corazón de la Zona Rosa, ideal para encuentros, cenas de negocios y noches largas con buena música.',
+    address: 'Boulevard del Hipódromo, Colonia San Benito',
     city: 'San Salvador, El Salvador',
     phone: '+503 7487-7792',
     hours: {
-      weekday: 'Lun – Mié: 12–2:30pm, 5:30–9pm',
-      weekend: 'Jue: 12–2:30pm, 5:30–10pm | Vie–Sáb: 12pm–11pm',
+      weekday: 'Lun–Dom: 11:00 AM – 11:00 PM',
+      weekend: 'Viernes y Sábados hasta medianoche',
     },
-    features: ['Zona Rosa', 'Vida Nocturna', 'Cosmopolita', 'Full Bar'],
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.6929,-89.2365',
-    lat: 13.6929,
-    lng: -89.2365,
+    features: ['Zona Rosa', 'Jazz Nights', 'Valet Parking'],
+    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+    icon: Music,
+    isOpen: true,
     rating: 4.8,
     reviews: 1420,
+    mapUrl: 'https://maps.google.com/?q=San+Benito+San+Salvador',
   },
   {
-    id: 4,
+    id: 'juayua',
     name: 'Simmer Garden',
-    tagline: 'Ruta de las Flores',
+    vibe: 'Ruta de las Flores',
+    personality: 'La Ruta de las Flores en su máxima expresión',
+    description: 'Rodeado de naturaleza y el encanto del pueblo mágico de Juayúa. Perfecto para escapadas de fin de semana.',
     address: 'Kilómetro 91.5, San José La Majada',
     city: 'Juayúa, Sonsonate, El Salvador',
     phone: '+503 6990-4674',
     hours: {
-      weekday: 'Dom – Jue: 11am – 8pm',
-      weekend: 'Vie – Sáb: 11am – 8:30pm',
+      weekday: 'Vie–Dom: 11:00 AM – 8:00 PM',
+      weekend: 'Cerrado Lun–Jue',
     },
-    features: ['Ruta de las Flores', 'Jardín', 'Montaña', 'Naturaleza'],
-    image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.8467,-89.7456',
-    lat: 13.8467,
-    lng: -89.7456,
+    features: ['Jardín', 'Café de Altura', 'Montaña'],
+    image: 'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80',
+    icon: Coffee,
+    isOpen: false,
     rating: 4.9,
     reviews: 980,
+    mapUrl: 'https://maps.google.com/?q=Juayua+El+Salvador',
   },
   {
-    id: 5,
+    id: 'surf-city',
     name: 'Surf City',
-    tagline: 'Frente al Mar',
+    vibe: 'Frente al Mar',
+    personality: 'Atardecer, surf y libertad que solo la costa ofrece',
+    description: 'Nuestra ubicación más nueva, donde el océano y la pizza se encuentran. El spot perfecto después de surfear.',
     address: 'Hotel Casa Santa Emilia, Conchalio 2',
     city: 'La Libertad, El Salvador',
     phone: '+503 7576-4655',
     hours: {
-      weekday: 'Miércoles – Domingo: 12pm – 8pm',
-      weekend: '',
+      weekday: 'Mié–Dom: 12:00 PM – 8:00 PM',
+      weekend: 'Happy Hour 4–7 PM',
     },
-    features: ['Playa', 'Surf', 'Atardeceres', 'Brisa Marina'],
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200',
-    mapUrl: 'https://maps.google.com/maps?q=13.4833,-89.3333',
-    lat: 13.4833,
-    lng: -89.3333,
+    features: ['Vista al Mar', 'Surf Vibes', 'Cócteles'],
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    icon: Waves,
+    isOpen: true,
     rating: 4.8,
     reviews: 760,
+    mapUrl: 'https://maps.google.com/?q=El+Tunco+El+Salvador',
   },
 ]
 
-const amenityIcons: Record<string, React.ElementType> = {
-  'Free WiFi': Wifi,
-  'Parking': Car,
-  'Street Parking': Car,
-}
-
 export default function LocationsPage() {
-  const { memory, setPreferredLocation, getTimeGreeting } = useAnimaStore()
-  const preferredLocation = memory.preferredLocation
+  const { memory, setPreferredLocation } = useAnimaStore()
+  const [mounted, setMounted] = useState(false)
 
-  const handleSetPreferred = (locationName: string) => {
-    setPreferredLocation(locationName)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleSetFavorite = (locationId: string) => {
+    setPreferredLocation(locationId)
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24">
-      {/* Hero with Personalization */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#2D2A26] pt-24">
+      {/* Hero */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-oven-warmth opacity-50" />
+        <div className="max-w-6xl mx-auto px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              {getTimeGreeting()}
-            </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              {preferredLocation ? (
-                <>
-                  Tu Lugar Favorito:
-                  <span className="text-gradient block">{preferredLocation}</span>
-                </>
-              ) : (
-                'Nuestras Ubicaciones'
-              )}
-            </h1>
-            <p className="text-xl text-zinc-400">
-              5 destinos únicos en El Salvador. Cada ubicación tiene su propia personalidad,
-              pero todas comparten la misma alma Simmer Down.
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+              5 destinos únicos
             </p>
-
-            {/* Location Pulse - Live Activity */}
-            <div className="mt-8 flex justify-center">
-              <LocationPulse />
-            </div>
+            <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
+              Nuestras Ubicaciones
+            </h1>
+            <p className="text-xl text-[#B8B0A8]">
+              Cada ubicación cuenta su propia historia. Encuentra tu favorita.
+            </p>
           </motion.div>
         </div>
       </section>
 
       {/* Locations Grid */}
-      <section className="pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-16">
+      <section className="py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="space-y-20">
             {locations.map((location, i) => (
               <motion.div
                 key={location.id}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`}
               >
-                {/* Image & Map */}
-                <div className={`space-y-4 ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
-                  {/* Image */}
-                  <div className="relative overflow-hidden aspect-[16/9]">
+                {/* Image */}
+                <div className={`relative ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
+                  <div className="aspect-[4/3] overflow-hidden">
                     <img
                       src={location.image}
-                      alt={`${location.name} restaurant interior`}
+                      alt={location.name}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                    {/* Rating Badge */}
-                    <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-3 py-1.5 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-orange-400 fill-orange-400" />
-                      <span className="text-white font-semibold text-sm">{location.rating}</span>
-                      <span className="text-white/70 text-sm">({location.reviews})</span>
-                    </div>
                   </div>
 
-                  {/* Interactive Map */}
-                  <div className="aspect-[16/9] bg-zinc-900 relative overflow-hidden">
-                    <iframe
-                      src={`https://www.google.com/maps?q=${location.lat},${location.lng}&z=15&output=embed`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={`Map of ${location.name} location`}
-                      className="absolute inset-0"
-                    />
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className={`${i % 2 === 1 ? 'lg:order-1' : ''}`}>
-                  {/* Location Personality */}
-                  {locationPersonalities[location.name] && (
-                    <div className={`mb-6 p-4 bg-gradient-to-r ${locationPersonalities[location.name].color} bg-opacity-10 border-l-4 border-current`}
-                         style={{ borderColor: 'rgb(249 115 22)' }}>
-                      <div className="flex items-center gap-2 mb-2">
-                        {(() => {
-                          const PersonalityIcon = locationPersonalities[location.name].icon
-                          return <PersonalityIcon className="w-5 h-5 text-orange-400" />
-                        })()}
-                        <span className="text-orange-400 font-semibold text-sm uppercase tracking-wide">
-                          {locationPersonalities[location.name].vibe}
-                        </span>
-                      </div>
-                      <p className="text-zinc-300 text-sm">{locationPersonalities[location.name].description}</p>
-                      <p className="text-zinc-500 text-xs mt-2 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
-                        {locationPersonalities[location.name].signature}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-orange-400 text-sm font-medium">{location.tagline}</span>
-                    {preferredLocation === location.name && (
-                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 flex items-center gap-1">
-                        <Heart className="w-3 h-3 fill-current" /> Tu favorito
+                  {/* Status Badge */}
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    {location.isOpen ? (
+                      <span className="inline-flex items-center gap-2 bg-[#4CAF50] text-white text-sm font-semibold px-4 py-2">
+                        <span className="w-2 h-2 bg-white animate-pulse" />
+                        Abierto
+                      </span>
+                    ) : (
+                      <span className="bg-[#6B6560] text-white text-sm font-semibold px-4 py-2">
+                        Cerrado
                       </span>
                     )}
+                    <span className="inline-flex items-center gap-1 bg-[#2D2A26]/80 text-white text-sm px-3 py-2">
+                      <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
+                      {location.rating}
+                    </span>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-black text-white mt-2 mb-6">
-                    {location.name}
-                  </h2>
 
-                  <div className="space-y-4 mb-8">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-white">{location.address}</p>
-                        <p className="text-zinc-500 text-sm">{location.city}</p>
-                      </div>
+                  {/* Favorite Button */}
+                  {mounted && (
+                    <button
+                      onClick={() => handleSetFavorite(location.id)}
+                      className={`absolute top-4 right-4 w-12 h-12 flex items-center justify-center transition-colors ${
+                        memory.preferredLocation === location.id
+                          ? 'bg-[#FF6B35] text-white'
+                          : 'bg-[#2D2A26]/80 text-[#B8B0A8] hover:text-[#FF6B35]'
+                      }`}
+                      aria-label={memory.preferredLocation === location.id ? 'Tu ubicación favorita' : 'Marcar como favorita'}
+                    >
+                      <Heart className={`w-6 h-6 ${memory.preferredLocation === location.id ? 'fill-white' : ''}`} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className={i % 2 === 1 ? 'lg:order-1' : ''}>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-[#FF6B35]/10 flex items-center justify-center">
+                      <location.icon className="w-7 h-7 text-[#FF6B35]" />
                     </div>
-
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-white">{location.hours.weekday}</p>
-                        {location.hours.weekend && <p className="text-zinc-500 text-sm">{location.hours.weekend}</p>}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <Phone className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <a href={`tel:${location.phone.replace(/\s/g, '')}`} className="text-white hover:text-orange-400 transition-colors">
-                          {location.phone}
-                        </a>
-                        <p className="text-zinc-500 text-sm">Llamar o WhatsApp</p>
-                      </div>
+                    <div>
+                      <p className="font-handwritten text-xl text-[#FF6B35]">{location.vibe}</p>
+                      <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0]">{location.name}</h2>
                     </div>
                   </div>
+
+                  <p className="text-[#B8B0A8] mb-6 text-lg leading-relaxed">
+                    {location.description}
+                  </p>
 
                   {/* Features */}
-                  <div className="flex flex-wrap gap-2 mb-8">
+                  <div className="flex flex-wrap gap-2 mb-6">
                     {location.features.map((feature) => (
                       <span
                         key={feature}
-                        className="bg-zinc-900 text-zinc-400 px-3 py-1 text-sm"
+                        className="bg-[#252320] border border-[#3D3936] text-[#B8B0A8] px-4 py-2 text-sm"
                       >
                         {feature}
                       </span>
                     ))}
                   </div>
 
+                  {/* Details */}
+                  <div className="space-y-4 mb-8 bg-[#252320] border border-[#3D3936] p-6">
+                    <div className="flex items-start gap-4">
+                      <MapPin className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-[#FFF8F0]">{location.address}</p>
+                        <p className="text-[#6B6560] text-sm">{location.city}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <Clock className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-[#FFF8F0]">{location.hours.weekday}</p>
+                        <p className="text-[#6B6560] text-sm">{location.hours.weekend}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Phone className="w-5 h-5 text-[#FF6B35] flex-shrink-0" />
+                      <a href={`tel:${location.phone.replace(/\s/g, '')}`} className="text-[#FFF8F0] hover:text-[#FF6B35] transition-colors">
+                        {location.phone}
+                      </a>
+                    </div>
+                  </div>
+
                   {/* Actions */}
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-4">
+                    <Link
+                      href="/menu"
+                      className="inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition-all min-h-[56px]"
+                    >
+                      Ordenar Aquí
+                    </Link>
                     <a
                       href={location.mapUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
+                      className="inline-flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#3D3936] text-[#FFF8F0] px-6 py-4 font-semibold border border-[#3D3936] transition-all min-h-[56px]"
                     >
                       <Navigation className="w-5 h-5" />
                       Cómo Llegar
                     </a>
                     <a
                       href={`tel:${location.phone.replace(/\s/g, '')}`}
-                      className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 font-semibold transition-colors min-h-[56px]"
+                      className="inline-flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#3D3936] text-[#FFF8F0] px-6 py-4 font-semibold border border-[#3D3936] transition-all min-h-[56px]"
                     >
                       <Phone className="w-5 h-5" />
                       Llamar
                     </a>
-                    <button
-                      onClick={() => handleSetPreferred(location.name)}
-                      className={`flex items-center gap-2 px-6 py-3 font-semibold transition-colors min-h-[56px] ${
-                        preferredLocation === location.name
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800'
-                      }`}
-                    >
-                      <Heart className={`w-5 h-5 ${preferredLocation === location.name ? 'fill-current' : ''}`} />
-                      {preferredLocation === location.name ? 'Favorito' : 'Guardar'}
-                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -365,27 +291,24 @@ export default function LocationsPage() {
         </div>
       </section>
 
-      {/* 12 Years */}
-      <section className="py-24 bg-zinc-900/50 border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* CTA */}
+      <section className="py-24 bg-[#FF6B35]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              12 Años de Historia
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-              Una experiencia que deja huella
+            <Flame className="w-12 h-12 text-white mx-auto mb-6" />
+            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
+              Te Esperamos
             </h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto mb-8">
-              Desde Santa Ana hasta Surf City, Simmer Down acompaña a locales y viajeros
-              en algunos de los destinos más emblemáticos de El Salvador.
+            <p className="text-xl text-white/90 mb-10">
+              12 años de historia. 5 destinos únicos. Una sola experiencia Simmer Down.
             </p>
             <Link
               href="/menu"
-              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 font-semibold transition-colors"
+              className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition-all min-h-[56px]"
             >
               Ver Menú
             </Link>

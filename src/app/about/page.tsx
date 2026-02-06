@@ -6,14 +6,13 @@ import {
   Flame,
   Leaf,
   Users,
-  Award,
-  Target,
   Sparkles,
   ArrowRight,
-  Quote
+  Quote,
+  Music,
+  ChefHat
 } from 'lucide-react'
 import Link from 'next/link'
-import { useAnimaStore } from '@/store/anima'
 
 const values = [
   {
@@ -68,10 +67,8 @@ const milestones = [
 ]
 
 export default function AboutPage() {
-  const { getTimeGreeting, visitCount } = useAnimaStore()
-
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24">
+    <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -80,22 +77,23 @@ export default function AboutPage() {
             alt="Pizza making"
             className="w-full h-full object-cover opacity-20"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-950/80 to-zinc-950" />
+          <div className="absolute inset-0 bg-[#2D2A26]/90" />
+          <div className="absolute inset-0 bg-oven-warmth" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-6xl mx-auto px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              {visitCount > 1 ? `${getTimeGreeting()} · ` : ''}Nuestra Historia
-            </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+              Nuestra Historia
+            </p>
+            <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
               Restaurante y Destino Gastro-Musical
             </h1>
-            <p className="text-xl text-zinc-400">
+            <p className="text-xl text-[#B8B0A8]">
               Hay lugares que se visitan. Y hay lugares que se recuerdan.
               Simmer Down es parte de la memoria de El Salvador.
             </p>
@@ -105,19 +103,22 @@ export default function AboutPage() {
 
       {/* Story */}
       <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+                Desde 2013
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6">
                 Nuestra Historia
               </h2>
-              <div className="space-y-4 text-zinc-400">
+              <div className="space-y-4 text-[#B8B0A8] text-lg leading-relaxed">
                 <p>
-                  Nacimos en Santa Ana, frente a su histórica catedral, como un punto de encuentro
+                  Nacimos en <strong className="text-[#FFF8F0]">Santa Ana</strong>, frente a su histórica catedral, como un punto de encuentro
                   donde el tiempo baja la velocidad, la conversación fluye y la comida se disfruta sin prisa.
                 </p>
                 <p>
@@ -130,7 +131,7 @@ export default function AboutPage() {
                   el ingrediente y celebran el sabor. Pizzas artesanales, pastas, carnes, platos para compartir
                   y opciones para todos los gustos.
                 </p>
-                <p>
+                <p className="italic text-[#FFF8F0]">
                   Pero Simmer Down no es solo lo que servimos en la mesa. Es el ambiente. Es la música.
                   Es la vista. Es la sensación de estar exactamente donde debes estar.
                 </p>
@@ -169,25 +170,25 @@ export default function AboutPage() {
       </section>
 
       {/* Quote */}
-      <section className="py-24 bg-zinc-900/50 border-y border-zinc-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Quote className="w-12 h-12 text-orange-400 mx-auto mb-6" />
-          <blockquote className="text-2xl md:text-3xl text-white font-medium italic mb-6">
+      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <Quote className="w-12 h-12 text-[#FF6B35] mx-auto mb-6" />
+          <blockquote className="font-display text-2xl md:text-3xl text-[#FFF8F0] italic mb-6">
             &ldquo;Creemos que la mejor gastronomía no solo alimenta: conecta, emociona y permanece.
             Por eso cuidamos cada detalle, para que cada visita se sienta familiar.&rdquo;
           </blockquote>
-          <cite className="text-zinc-500">— Simmer Down, 12 años de historia</cite>
+          <cite className="text-[#6B6560] font-handwritten text-xl">— Simmer Down, 12 años de historia</cite>
         </div>
       </section>
 
       {/* Values */}
       <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
               Lo Que Creemos
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black text-white">
+            </p>
+            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
               Nuestros Valores
             </h2>
           </div>
@@ -200,10 +201,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
+                className="text-center"
               >
-                <value.icon className="w-8 h-8 text-orange-400 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">{value.title}</h3>
-                <p className="text-zinc-500 text-sm">{value.description}</p>
+                <div className="w-16 h-16 bg-[#FF6B35]/10 flex items-center justify-center mx-auto mb-6">
+                  <value.icon className="w-8 h-8 text-[#FF6B35]" />
+                </div>
+                <h3 className="font-display text-xl text-[#FFF8F0] mb-3">{value.title}</h3>
+                <p className="text-[#B8B0A8]">{value.description}</p>
               </motion.div>
             ))}
           </div>
@@ -211,13 +215,13 @@ export default function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="py-24 bg-zinc-900/50 border-y border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
               El Equipo
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black text-white">
+            </p>
+            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
               Conoce a la Familia
             </h2>
           </div>
@@ -232,16 +236,16 @@ export default function AboutPage() {
                 viewport={{ once: true }}
                 className="group"
               >
-                <div className="aspect-[3/4] overflow-hidden mb-4">
+                <div className="aspect-[3/4] overflow-hidden mb-6">
                   <img
                     src={member.image}
                     alt={member.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-1">{member.name}</h3>
-                <p className="text-orange-400 text-sm font-medium mb-2">{member.role}</p>
-                <p className="text-zinc-500 text-sm">{member.bio}</p>
+                <h3 className="font-display text-xl text-[#FFF8F0] mb-1">{member.name}</h3>
+                <p className="text-[#FF6B35] text-sm font-medium mb-3">{member.role}</p>
+                <p className="text-[#B8B0A8]">{member.bio}</p>
               </motion.div>
             ))}
           </div>
@@ -250,21 +254,21 @@ export default function AboutPage() {
 
       {/* Timeline */}
       <section className="py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
               Nuestro Camino
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black text-white">
+            </p>
+            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
               Hitos
             </h2>
           </div>
 
           <div className="relative">
             {/* Line */}
-            <div className="absolute left-3 top-3 bottom-3 w-px bg-zinc-800" />
+            <div className="absolute left-3 top-3 bottom-3 w-px bg-[#3D3936]" />
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {milestones.map((milestone, i) => (
                 <motion.div
                   key={i}
@@ -274,12 +278,12 @@ export default function AboutPage() {
                   viewport={{ once: true }}
                   className="flex items-start gap-6"
                 >
-                  <div className="w-6 h-6 bg-orange-500 flex items-center justify-center flex-shrink-0 relative z-10">
+                  <div className="w-6 h-6 bg-[#FF6B35] flex items-center justify-center flex-shrink-0 relative z-10">
                     <Flame className="w-3 h-3 text-white" />
                   </div>
                   <div className="pt-0.5">
-                    <span className="text-orange-400 text-sm font-semibold">{milestone.year}</span>
-                    <p className="text-white">{milestone.event}</p>
+                    <span className="font-handwritten text-xl text-[#FF6B35]">{milestone.year}</span>
+                    <p className="text-[#FFF8F0] text-lg">{milestone.event}</p>
                   </div>
                 </motion.div>
               ))}
@@ -289,29 +293,36 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-orange-500">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Sé Parte de Nuestra Historia
-          </h2>
-          <p className="text-xl text-white/90 mb-10">
-            Visítanos hoy y experimenta la diferencia Simmer Down.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/menu"
-              className="flex items-center gap-2 bg-black hover:bg-zinc-900 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
-            >
-              Ordenar Ahora
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/locations"
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
-            >
-              Encontrar Ubicación
-            </Link>
-          </div>
+      <section className="py-24 bg-[#FF6B35]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <Flame className="w-12 h-12 text-white mx-auto mb-6" />
+            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
+              Sé Parte de Nuestra Historia
+            </h2>
+            <p className="text-xl text-white/90 mb-10">
+              Visítanos hoy y experimenta la diferencia Simmer Down.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link
+                href="/menu"
+                className="flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
+              >
+                Ordenar Ahora
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/locations"
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
+              >
+                Encontrar Ubicación
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>

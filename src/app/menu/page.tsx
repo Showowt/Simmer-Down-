@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Check, Heart, Sparkles, Star } from 'lucide-react'
+import { Plus, Check } from 'lucide-react'
 import { MenuItem } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
 import { useCartStore } from '@/store/cart'
 import { useToastStore } from '@/components/Toast'
-import { useAnimaStore } from '@/store/anima'
 
 const categories = [
   { id: 'all', name: 'Todos' },
@@ -172,7 +171,7 @@ const tagIcons: Record<string, { icon: string; label: string }> = {
   spicy: { icon: '🌶️', label: 'Spicy' },
 }
 
-function MenuItemCard({ item, isFavorite, onToggleFavorite }: { item: ExtendedMenuItem; isFavorite: boolean; onToggleFavorite: (name: string) => void }) {
+function MenuItemCard({ item }: { item: ExtendedMenuItem }) {
   const addItem = useCartStore((state) => state.addItem)
   const addToast = useToastStore((state) => state.addToast)
   const [added, setAdded] = useState(false)
@@ -219,30 +218,6 @@ function MenuItemCard({ item, isFavorite, onToggleFavorite }: { item: ExtendedMe
             ))}
           </div>
         )}
-
-        {/* Favorite badge */}
-        {isFavorite && (
-          <div className="absolute top-3 right-3 bg-red-500/90 text-white px-2 py-1 text-xs flex items-center gap-1">
-            <Heart className="w-3 h-3 fill-current" />
-            Favorito
-          </div>
-        )}
-
-        {/* Favorite toggle button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleFavorite(item.name)
-          }}
-          className={`absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center transition-all ${
-            isFavorite
-              ? 'bg-red-500 text-white'
-              : 'bg-black/50 text-white/70 hover:text-red-400 hover:bg-black/70'
-          }`}
-          aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-        >
-          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-        </button>
       </div>
 
       {/* Content */}
@@ -295,18 +270,6 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [loading, setLoading] = useState(true)
 
-  // ANIMA integration
-  const { memory, addFavoriteItem, removeFavoriteItem, getTimeGreeting, customerName } = useAnimaStore()
-  const favoriteItems = memory.favoriteItems
-
-  const handleToggleFavorite = (itemName: string) => {
-    if (favoriteItems.includes(itemName)) {
-      removeFavoriteItem(itemName)
-    } else {
-      addFavoriteItem(itemName)
-    }
-  }
-
   useEffect(() => {
     async function fetchMenu() {
       try {
@@ -334,52 +297,19 @@ export default function MenuPage() {
     return activeCategory === 'all' || item.category === activeCategory
   })
 
-  // Get favorites that exist in current menu
-  const favoriteMenuItems = items.filter((item) => favoriteItems.includes(item.name))
-
   return (
     <div className="min-h-screen bg-zinc-950 pt-20">
-      {/* Header with Personalization */}
+      {/* Header */}
       <section className="py-16 border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6">
-          <p className="text-orange-400 font-medium mb-2">{getTimeGreeting()}</p>
           <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-            {customerName ? `${customerName}, ` : ''}Menú
+            Menú
           </h1>
           <p className="text-lg text-zinc-400">
             Pizzas artesanales, acompañamientos frescos y bebidas de la casa.
           </p>
         </div>
       </section>
-
-      {/* Favorites Section - Only show if user has favorites */}
-      {favoriteMenuItems.length > 0 && activeCategory === 'all' && (
-        <section className="py-8 border-b border-zinc-800 bg-zinc-900/30">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Heart className="w-5 h-5 text-red-400 fill-red-400" />
-              <h2 className="text-xl font-semibold text-white">Tus Favoritos</h2>
-              <span className="text-zinc-500 text-sm">({favoriteMenuItems.length})</span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {favoriteMenuItems.slice(0, 4).map((item, i) => (
-                <motion.div
-                  key={`fav-${item.id}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <MenuItemCard
-                    item={item}
-                    isFavorite={true}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Filters */}
       <section className="sticky top-20 z-30 bg-zinc-950 border-b border-zinc-800">
@@ -429,11 +359,7 @@ export default function MenuPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  <MenuItemCard
-                    item={item}
-                    isFavorite={favoriteItems.includes(item.name)}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
+                  <MenuItemCard item={item} />
                 </motion.div>
               ))}
             </motion.div>

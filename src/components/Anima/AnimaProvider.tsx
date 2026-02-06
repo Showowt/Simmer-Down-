@@ -15,7 +15,7 @@ const EnhancedConsoleEasterEgg = dynamic(
   { ssr: false }
 )
 
-export default function AnimaProvider({ children }: { children: React.ReactNode }) {
+export default function AnimaProvider() {
   const incrementVisit = useAnimaStore((state) => state.incrementVisit)
 
   useEffect(() => {
@@ -25,7 +25,6 @@ export default function AnimaProvider({ children }: { children: React.ReactNode 
 
   return (
     <>
-      {children}
       <AnimaChat />
       <KonamiPizzaRain />
       <EnhancedConsoleEasterEgg />
