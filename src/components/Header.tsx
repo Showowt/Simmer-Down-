@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ShoppingBag, Flame } from 'lucide-react'
+import { Menu, X, ShoppingBag, Flame, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
+import { useAuth } from '@/hooks/useAuth'
 
 const navLinks = [
   { href: '/menu', label: 'Menú' },
@@ -23,6 +24,7 @@ export default function Header() {
   const items = useCartStore((state) => state.items)
   const getSubtotal = useCartStore((state) => state.getSubtotal)
   const itemCount = useCartStore((state) => state.getItemCount())
+  const { user, profile, loading: authLoading } = useAuth()
 
   useEffect(() => {
     setMounted(true)
@@ -70,7 +72,36 @@ export default function Header() {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {/* Account / Login */}
+              {mounted && !authLoading && (
+                user ? (
+                  <Link
+                    href="/account"
+                    className="hidden sm:flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
+                    aria-label="Mi cuenta"
+                  >
+                    <div className="w-8 h-8 bg-[#FF6B35] flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">
+                        {profile?.full_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="hidden md:inline text-sm">
+                      {profile?.full_name?.split(' ')[0] || 'Cuenta'}
+                    </span>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    className="hidden sm:flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
+                    aria-label="Iniciar sesión"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="hidden md:inline text-sm">Ingresar</span>
+                  </Link>
+                )
+              )}
+
               {/* Cart */}
               <Link
                 href="/cart"
@@ -147,6 +178,27 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+
+                {/* Mobile Account Link */}
+                {mounted && !authLoading && (
+                  user ? (
+                    <Link
+                      href="/account"
+                      onClick={() => setIsOpen(false)}
+                      className="block py-4 text-xl font-medium text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors"
+                    >
+                      Mi Cuenta
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setIsOpen(false)}
+                      className="block py-4 text-xl font-medium text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors"
+                    >
+                      Iniciar Sesión
+                    </Link>
+                  )
+                )}
               </div>
 
               <div className="mt-8 pt-8 border-t border-[#3D3936]">

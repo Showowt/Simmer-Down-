@@ -203,14 +203,14 @@ export default function SimmerLoversPage() {
 
             <div className="flex flex-wrap justify-center gap-4">
               <Link
-                href="/login"
+                href="/auth/signup"
                 className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold text-lg transition-all min-h-[56px]"
               >
                 Únete Gratis
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                href="/login"
+                href="/auth/login"
                 className="flex items-center gap-2 bg-[#252320] hover:bg-[#3D3936] border border-[#3D3936] text-[#FFF8F0] px-8 py-4 font-semibold text-lg transition-all min-h-[56px]"
               >
                 Iniciar Sesión
@@ -423,7 +423,7 @@ export default function SimmerLoversPage() {
               ¡Eso ya es la mitad del camino a una bebida gratis!
             </p>
             <Link
-              href="/login"
+              href="/auth/signup"
               className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 font-bold text-xl transition-all min-h-[56px]"
             >
               Únete Gratis — Obtén 50 Puntos
