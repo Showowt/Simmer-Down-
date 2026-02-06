@@ -281,14 +281,26 @@ export default function MenuPage() {
         const { data, error } = await supabase
           .from('menu_items')
           .select('*')
+          .eq('available', true)
           .order('category', { ascending: true })
 
         if (error) throw error
-        if (data && data.length > 0) {
-          setItems(data)
+        // Only use DB data if we have items with valid data
+        if (data && data.length > 0 && data[0].name) {
+          // Merge with demo images if DB items lack images
+          const itemsWithImages = data.map((item: ExtendedMenuItem) => {
+            if (!item.image_url) {
+              const demoItem = demoItems.find(d => d.category === item.category)
+              return { ...item, image_url: demoItem?.image_url || null }
+            }
+            return item
+          })
+          setItems(itemsWithImages)
         }
+        // If no data or error, keep using demoItems (initial state)
       } catch (error) {
         console.log('Using demo menu items')
+        // Keep demoItems as fallback
       } finally {
         setLoading(false)
       }
