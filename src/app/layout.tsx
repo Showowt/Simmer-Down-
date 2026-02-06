@@ -4,7 +4,7 @@ import './globals.css'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ToastContainer from '@/components/Toast'
-import ConsoleEasterEgg from '@/components/ConsoleEasterEgg'
+import AnimaProvider from '@/components/Anima/AnimaProvider'
 import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({
@@ -86,12 +86,13 @@ export default function RootLayout({
         >
           Saltar al contenido principal
         </a>
-        <Header />
-        <main id="main-content">{children}</main>
-        <Footer />
-        <ToastContainer />
-        <ConsoleEasterEgg />
-        <Analytics />
+        <AnimaProvider>
+          <Header />
+          <main id="main-content">{children}</main>
+          <Footer />
+          <ToastContainer />
+          <Analytics />
+        </AnimaProvider>
 
         {/* LocalBusiness + Restaurant Schema */}
         <script

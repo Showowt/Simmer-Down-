@@ -15,9 +15,22 @@ import {
   Flame,
   Pizza,
   Percent,
-  Calendar
+  Calendar,
+  MapPin,
+  Clock,
+  Trophy,
+  Target
 } from 'lucide-react'
 import Link from 'next/link'
+import { useAnimaStore } from '@/store/anima'
+
+// Tier configuration matching anima store
+const tierConfig: Record<string, { color: string; gradient: string; icon: string; next: string | null; pointsToNext: number }> = {
+  bronze: { color: 'from-amber-700 to-amber-800', gradient: 'from-amber-600/20 to-transparent', icon: '🥉', next: 'silver', pointsToNext: 500 },
+  silver: { color: 'from-zinc-400 to-zinc-500', gradient: 'from-zinc-400/20 to-transparent', icon: '🥈', next: 'gold', pointsToNext: 1500 },
+  gold: { color: 'from-yellow-400 to-amber-500', gradient: 'from-yellow-400/20 to-transparent', icon: '🥇', next: 'platinum', pointsToNext: 5000 },
+  platinum: { color: 'from-purple-400 to-indigo-500', gradient: 'from-purple-400/20 to-transparent', icon: '💎', next: null, pointsToNext: 0 },
+}
 
 const tiers = [
   {
@@ -97,14 +110,154 @@ const perks = [
   },
 ]
 
+// Tu Historia Con Nosotros - Personalized Loyalty Story
+function LoyaltyStory() {
+  const {
+    customerName,
+    loyaltyTier,
+    loyaltyPoints,
+    visitCount,
+    memory,
+    getTimeGreeting
+  } = useAnimaStore()
+
+  const config = tierConfig[loyaltyTier] || tierConfig.bronze
+  const progress = config.next
+    ? Math.min((loyaltyPoints / config.pointsToNext) * 100, 100)
+    : 100
+  const pointsNeeded = config.next ? config.pointsToNext - loyaltyPoints : 0
+
+  // Calculate member since
+  const memberSince = memory.firstVisit
+    ? new Date(memory.firstVisit).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+    : 'Hoy'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-zinc-900/80 border border-zinc-800 p-8 mb-8"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <p className="text-zinc-500 text-sm mb-1">{getTimeGreeting()}</p>
+          <h3 className="text-2xl font-bold text-white">
+            {customerName ? `${customerName}, ` : ''}Tu Historia Con Nosotros
+          </h3>
+        </div>
+        <div className={`px-4 py-2 bg-gradient-to-r ${config.color} text-white font-bold flex items-center gap-2`}>
+          <span className="text-lg">{config.icon}</span>
+          <span className="capitalize">{loyaltyTier}</span>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-zinc-800/50 p-4 text-center">
+          <Trophy className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{loyaltyPoints.toLocaleString()}</p>
+          <p className="text-xs text-zinc-500">Puntos</p>
+        </div>
+        <div className="bg-zinc-800/50 p-4 text-center">
+          <Pizza className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{memory.totalOrders}</p>
+          <p className="text-xs text-zinc-500">Pedidos</p>
+        </div>
+        <div className="bg-zinc-800/50 p-4 text-center">
+          <Clock className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{visitCount}</p>
+          <p className="text-xs text-zinc-500">Visitas</p>
+        </div>
+        <div className="bg-zinc-800/50 p-4 text-center">
+          <Calendar className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+          <p className="text-sm font-bold text-white">{memberSince}</p>
+          <p className="text-xs text-zinc-500">Miembro desde</p>
+        </div>
+      </div>
+
+      {/* Progress to Next Tier */}
+      {config.next && (
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-zinc-400">Progreso a {config.next}</span>
+            <span className="text-sm text-orange-400 font-medium">{pointsNeeded} pts restantes</span>
+          </div>
+          <div className="h-3 bg-zinc-800 overflow-hidden">
+            <motion.div
+              className={`h-full bg-gradient-to-r ${config.color}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Favorites & Preferences */}
+      {(memory.favoriteItems.length > 0 || memory.preferredLocation) && (
+        <div className="border-t border-zinc-800 pt-6">
+          <p className="text-sm text-zinc-500 mb-3">Tu perfil Simmer Down</p>
+          <div className="flex flex-wrap gap-2">
+            {memory.preferredLocation && (
+              <span className="bg-zinc-800 text-zinc-300 px-3 py-1 text-sm flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-orange-400" />
+                {memory.preferredLocation}
+              </span>
+            )}
+            {memory.favoriteItems.slice(0, 3).map((item) => (
+              <span key={item} className="bg-zinc-800 text-zinc-300 px-3 py-1 text-sm flex items-center gap-1">
+                <Heart className="w-3 h-3 text-red-400" />
+                {item}
+              </span>
+            ))}
+            {memory.dietaryPreferences.map((pref) => (
+              <span key={pref} className="bg-green-900/30 text-green-400 px-3 py-1 text-sm">
+                {pref === 'vegetarian' ? '🌱' : pref === 'vegan' ? '🌿' : '🌾'} {pref}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Milestones */}
+      {memory.milestones.length > 0 && (
+        <div className="border-t border-zinc-800 pt-6 mt-6">
+          <p className="text-sm text-zinc-500 mb-3">Tus logros</p>
+          <div className="flex flex-wrap gap-2">
+            {memory.milestones.map((milestone) => (
+              <span key={milestone} className="bg-orange-500/10 text-orange-400 px-3 py-1 text-sm flex items-center gap-1">
+                <Award className="w-3 h-3" />
+                {milestone}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
 export default function SimmerLoversPage() {
+  const { customerName, loyaltyTier, loyaltyPoints } = useAnimaStore()
+  const isReturningMember = loyaltyPoints > 0
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-24">
+      {/* Tu Historia Con Nosotros - For returning members */}
+      {isReturningMember && (
+        <section className="py-8 md:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <LoyaltyStory />
+          </div>
+        </section>
+      )}
+
       {/* Hero */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
+      <section className={`${isReturningMember ? 'py-8 md:py-12' : 'py-16 md:py-24'} relative overflow-hidden`}>
         <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 blur-[150px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-500/10 blur-[100px]" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -112,35 +265,47 @@ export default function SimmerLoversPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-full px-4 py-2 mb-6">
+            <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 px-4 py-2 mb-6">
               <Heart className="w-4 h-4 text-orange-400 fill-orange-400" />
-              <span className="text-orange-400 font-medium">50,000+ Members Strong</span>
+              <span className="text-orange-400 font-medium">50,000+ Miembros</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6">
-              Join the
-              <span className="text-gradient block">SimmerLovers</span>
+              {isReturningMember ? (
+                <>
+                  Bienvenido de nuevo,
+                  <span className="text-gradient block">{customerName || 'SimmerLover'}</span>
+                </>
+              ) : (
+                <>
+                  Únete a los
+                  <span className="text-gradient block">SimmerLovers</span>
+                </>
+              )}
             </h1>
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
-              Our loyalty program that rewards you for what you already love doing —
-              eating amazing pizza. Earn points, unlock rewards, get exclusive perks.
+              {isReturningMember
+                ? 'Tu lealtad no pasa desapercibida. Cada visita es parte de nuestra historia juntos.'
+                : 'Nuestro programa de lealtad que te premia por lo que ya amas hacer — disfrutar pizza increíble. Gana puntos, desbloquea recompensas, obtén beneficios exclusivos.'}
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/login"
-                className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8 py-4 rounded-full font-bold text-lg transition-all hover:shadow-lg hover:shadow-orange-500/25"
-              >
-                Join Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/login"
-                className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all"
-              >
-                Sign In
-              </Link>
-            </div>
+            {!isReturningMember && (
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 font-bold text-lg transition-all hover:shadow-lg hover:shadow-orange-500/25 min-h-[56px]"
+                >
+                  Únete Gratis
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white px-8 py-4 font-semibold text-lg transition-all min-h-[56px]"
+                >
+                  Iniciar Sesión
+                </Link>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>

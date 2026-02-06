@@ -1,8 +1,61 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { MapPin, Clock, Phone, Navigation, Star, Wifi, Car, Accessibility } from 'lucide-react'
+import { MapPin, Clock, Phone, Navigation, Star, Wifi, Car, Heart, Sparkles, Music, Waves, Mountain, Coffee } from 'lucide-react'
 import Link from 'next/link'
+import { useAnimaStore } from '@/store/anima'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for LocationPulse
+const LocationPulse = dynamic(
+  () => import('@/components/Anima/LiveKitchen').then((mod) => ({ default: mod.LocationPulse })),
+  { ssr: false }
+)
+
+// Location Personalities - The soul of each location
+const locationPersonalities: Record<string, {
+  vibe: string
+  description: string
+  icon: React.ElementType
+  color: string
+  signature: string
+}> = {
+  'Santa Ana': {
+    vibe: 'Nostalgia y Tradición',
+    description: 'El original. Donde los recuerdos se forjan y las tradiciones comienzan.',
+    icon: Coffee,
+    color: 'from-amber-500 to-orange-600',
+    signature: 'Atardecer en la terraza con vista a la Catedral'
+  },
+  'Coatepeque': {
+    vibe: 'Contemplativo y Sereno',
+    description: 'Una experiencia frente a una maravilla natural. Aquí el tiempo se detiene.',
+    icon: Mountain,
+    color: 'from-blue-500 to-cyan-600',
+    signature: 'Pizza con vista al lago al atardecer'
+  },
+  'San Benito': {
+    vibe: 'Urbano y Cosmopolita',
+    description: 'El punto de encuentro de la ciudad. Vibrante, moderno, inolvidable.',
+    icon: Music,
+    color: 'from-purple-500 to-pink-600',
+    signature: 'Noches largas con música en vivo'
+  },
+  'Simmer Garden': {
+    vibe: 'Natural y Acogedor',
+    description: 'En la Ruta de las Flores, donde la naturaleza abraza cada momento.',
+    icon: Mountain,
+    color: 'from-green-500 to-emerald-600',
+    signature: 'Brunch dominical en el jardín'
+  },
+  'Surf City': {
+    vibe: 'Libre y Aventurero',
+    description: 'Frente al mar, con la energía del surf y la libertad de la costa.',
+    icon: Waves,
+    color: 'from-cyan-500 to-blue-600',
+    signature: 'Sunset sessions con vista al Pacífico'
+  },
+}
 
 const locations = [
   {
@@ -109,9 +162,16 @@ const amenityIcons: Record<string, React.ElementType> = {
 }
 
 export default function LocationsPage() {
+  const { memory, setPreferredLocation, getTimeGreeting } = useAnimaStore()
+  const preferredLocation = memory.preferredLocation
+
+  const handleSetPreferred = (locationName: string) => {
+    setPreferredLocation(locationName)
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-24">
-      {/* Hero */}
+      {/* Hero with Personalization */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -120,15 +180,27 @@ export default function LocationsPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Encuéntranos
+              {getTimeGreeting()}
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Nuestras Ubicaciones
+              {preferredLocation ? (
+                <>
+                  Tu Lugar Favorito:
+                  <span className="text-gradient block">{preferredLocation}</span>
+                </>
+              ) : (
+                'Nuestras Ubicaciones'
+              )}
             </h1>
             <p className="text-xl text-zinc-400">
               5 destinos únicos en El Salvador. Cada ubicación tiene su propia personalidad,
               pero todas comparten la misma alma Simmer Down.
             </p>
+
+            {/* Location Pulse - Live Activity */}
+            <div className="mt-8 flex justify-center">
+              <LocationPulse />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -183,7 +255,35 @@ export default function LocationsPage() {
 
                 {/* Details */}
                 <div className={`${i % 2 === 1 ? 'lg:order-1' : ''}`}>
-                  <span className="text-orange-400 text-sm font-medium">{location.tagline}</span>
+                  {/* Location Personality */}
+                  {locationPersonalities[location.name] && (
+                    <div className={`mb-6 p-4 bg-gradient-to-r ${locationPersonalities[location.name].color} bg-opacity-10 border-l-4 border-current`}
+                         style={{ borderColor: 'rgb(249 115 22)' }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        {(() => {
+                          const PersonalityIcon = locationPersonalities[location.name].icon
+                          return <PersonalityIcon className="w-5 h-5 text-orange-400" />
+                        })()}
+                        <span className="text-orange-400 font-semibold text-sm uppercase tracking-wide">
+                          {locationPersonalities[location.name].vibe}
+                        </span>
+                      </div>
+                      <p className="text-zinc-300 text-sm">{locationPersonalities[location.name].description}</p>
+                      <p className="text-zinc-500 text-xs mt-2 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        {locationPersonalities[location.name].signature}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-orange-400 text-sm font-medium">{location.tagline}</span>
+                    {preferredLocation === location.name && (
+                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 flex items-center gap-1">
+                        <Heart className="w-3 h-3 fill-current" /> Tu favorito
+                      </span>
+                    )}
+                  </div>
                   <h2 className="text-3xl md:text-4xl font-black text-white mt-2 mb-6">
                     {location.name}
                   </h2>
@@ -246,6 +346,17 @@ export default function LocationsPage() {
                       <Phone className="w-5 h-5" />
                       Llamar
                     </a>
+                    <button
+                      onClick={() => handleSetPreferred(location.name)}
+                      className={`flex items-center gap-2 px-6 py-3 font-semibold transition-colors min-h-[56px] ${
+                        preferredLocation === location.name
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800'
+                      }`}
+                    >
+                      <Heart className={`w-5 h-5 ${preferredLocation === location.name ? 'fill-current' : ''}`} />
+                      {preferredLocation === location.name ? 'Favorito' : 'Guardar'}
+                    </button>
                   </div>
                 </div>
               </motion.div>

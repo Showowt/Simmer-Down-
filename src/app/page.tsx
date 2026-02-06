@@ -2,15 +2,28 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, MapPin, Clock, Star } from 'lucide-react'
+import { ArrowRight, MapPin, Clock, Star, Sparkles } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import { useAnimaStore } from '@/store/anima'
 
-// Dynamic import for fire particles (client-side only, non-essential)
+// Dynamic imports for client-side only components
 const FireParticles = dynamic(() => import('@/components/FireParticles'), {
   ssr: false,
 })
 
+const LiveKitchenPulse = dynamic(
+  () => import('@/components/Anima/LiveKitchen').then((mod) => ({ default: mod.LiveKitchenPulse })),
+  { ssr: false }
+)
+
+const LocationPulse = dynamic(
+  () => import('@/components/Anima/LiveKitchen').then((mod) => ({ default: mod.LocationPulse })),
+  { ssr: false }
+)
+
 export default function Home() {
+  const { customerName, getPersonalizedGreeting } = useAnimaStore()
+
   return (
     <div className="min-h-screen">
       {/* Hero - Clear Value Prop */}
@@ -27,6 +40,9 @@ export default function Home() {
 
         {/* Fire Particles - Signature Experience */}
         <FireParticles />
+
+        {/* ANIMA Live Kitchen Pulse - Real-time activity */}
+        <LiveKitchenPulse />
 
         {/* Content */}
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">

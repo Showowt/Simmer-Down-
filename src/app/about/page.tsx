@@ -13,6 +13,7 @@ import {
   Quote
 } from 'lucide-react'
 import Link from 'next/link'
+import { useAnimaStore } from '@/store/anima'
 
 const values = [
   {
@@ -67,6 +68,8 @@ const milestones = [
 ]
 
 export default function AboutPage() {
+  const { getTimeGreeting, visitCount } = useAnimaStore()
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-24">
       {/* Hero */}
@@ -87,7 +90,7 @@ export default function AboutPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Nuestra Historia
+              {visitCount > 1 ? `${getTimeGreeting()} · ` : ''}Nuestra Historia
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
               Restaurante y Destino Gastro-Musical
