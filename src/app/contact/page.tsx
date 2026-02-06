@@ -9,14 +9,9 @@ import {
   Clock,
   Send,
   MessageSquare,
-  Building,
-  Users,
-  Briefcase,
   ChevronDown,
-  Check
 } from 'lucide-react'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
+import Link from 'next/link'
 
 const contactReasons = [
   'Consulta General',
@@ -70,7 +65,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24">
+    <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,13 +74,13 @@ export default function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
               Contáctanos
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold text-[#FFF8F0] mb-6">
               Queremos Escucharte
             </h1>
-            <p className="text-xl text-zinc-400">
+            <p className="text-xl text-[#B8B0A8]">
               Preguntas, comentarios o simplemente para saludar.
               Estamos aquí para ayudarte.
             </p>
@@ -104,70 +99,70 @@ export default function ContactPage() {
               viewport={{ once: true }}
               className="lg:col-span-1 space-y-6"
             >
-              <div className="bg-zinc-900 p-6">
-                <h3 className="text-lg font-semibold text-white mb-6">Información de Contacto</h3>
+              <div className="bg-[#252320] border border-[#3D3936] p-6">
+                <h3 className="text-lg font-semibold text-[#FFF8F0] mb-6">Información de Contacto</h3>
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-zinc-500 text-sm">Teléfonos</p>
-                      <a href="tel:+50324455999" className="text-white font-medium hover:text-orange-400 transition-colors block">
+                      <p className="text-[#6B6560] text-sm">Teléfonos</p>
+                      <a href="tel:+50324455999" className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block">
                         +503 2445-5999 (Santa Ana)
                       </a>
-                      <a href="tel:+50374877792" className="text-white font-medium hover:text-orange-400 transition-colors block">
+                      <a href="tel:+50374877792" className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block">
                         +503 7487-7792 (San Benito)
                       </a>
-                      <p className="text-zinc-500 text-sm mt-1">WhatsApp disponible</p>
+                      <p className="text-[#6B6560] text-sm mt-1">WhatsApp disponible</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-zinc-500 text-sm">Email</p>
-                      <a href="mailto:info@simmerdown.sv" className="text-white font-medium hover:text-orange-400 transition-colors">
+                      <p className="text-[#6B6560] text-sm">Email</p>
+                      <a href="mailto:info@simmerdown.sv" className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors">
                         info@simmerdown.sv
                       </a>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-zinc-500 text-sm">Ubicaciones</p>
-                      <p className="text-white font-medium">5 sucursales en El Salvador</p>
-                      <p className="text-zinc-500 text-sm">Santa Ana · Coatepeque · San Benito · Juayúa · Surf City</p>
+                      <p className="text-[#6B6560] text-sm">Ubicaciones</p>
+                      <p className="text-[#FFF8F0] font-medium">5 sucursales en El Salvador</p>
+                      <p className="text-[#6B6560] text-sm">Santa Ana · Coatepeque · San Benito · Juayúa · Surf City</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-zinc-500 text-sm">Horarios</p>
-                      <p className="text-white font-medium">11:00 AM - 10:00 PM</p>
-                      <p className="text-zinc-500 text-sm">Varían por ubicación</p>
+                      <p className="text-[#6B6560] text-sm">Horarios</p>
+                      <p className="text-[#FFF8F0] font-medium">11:00 AM - 10:00 PM</p>
+                      <p className="text-[#6B6560] text-sm">Varían por ubicación</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Quick Links */}
-              <div className="bg-zinc-900 border border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-white mb-4">Enlaces Rápidos</h3>
+              <div className="bg-[#252320] border border-[#3D3936] p-6">
+                <h3 className="text-lg font-bold text-[#FFF8F0] mb-4">Enlaces Rápidos</h3>
                 <div className="space-y-3">
-                  <a href="/events" className="flex items-center gap-3 text-zinc-400 hover:text-orange-400 transition-colors">
-                    <Users className="w-5 h-5" />
-                    Eventos Privados
-                  </a>
-                  <a href="/careers" className="flex items-center gap-3 text-zinc-400 hover:text-orange-400 transition-colors">
-                    <Briefcase className="w-5 h-5" />
-                    Carreras
-                  </a>
-                  <a href="/press" className="flex items-center gap-3 text-zinc-400 hover:text-orange-400 transition-colors">
-                    <Building className="w-5 h-5" />
-                    Prensa y Medios
-                  </a>
+                  <Link href="/locations" className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors">
+                    <MapPin className="w-5 h-5" />
+                    Todas las Ubicaciones
+                  </Link>
+                  <Link href="/menu" className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors">
+                    <Clock className="w-5 h-5" />
+                    Ver Menú
+                  </Link>
+                  <Link href="/simmerlovers" className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors">
+                    <Mail className="w-5 h-5" />
+                    SimmerLovers
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -180,45 +175,47 @@ export default function ContactPage() {
               viewport={{ once: true }}
               className="lg:col-span-2"
             >
-              <div className="bg-zinc-900 border border-zinc-800 p-8">
+              <div className="bg-[#252320] border border-[#3D3936] p-8">
                 {submitted ? (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-green-500/10 flex items-center justify-center mx-auto mb-6">
-                      <MessageSquare className="w-8 h-8 text-green-400" />
+                    <div className="w-16 h-16 bg-[#4CAF50]/10 flex items-center justify-center mx-auto mb-6">
+                      <MessageSquare className="w-8 h-8 text-[#4CAF50]" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Mensaje Enviado</h3>
-                    <p className="text-zinc-400">
+                    <h3 className="text-2xl font-bold text-[#FFF8F0] mb-2">Mensaje Enviado</h3>
+                    <p className="text-[#B8B0A8]">
                       Gracias por contactarnos. Te responderemos dentro de 24 horas.
                     </p>
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-xl font-bold text-white mb-6">Envíanos un Mensaje</h3>
+                    <h3 className="text-xl font-bold text-[#FFF8F0] mb-6">Envíanos un Mensaje</h3>
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                          <label htmlFor="contact-name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                             Nombre *
                           </label>
                           <input
+                            id="contact-name"
                             type="text"
                             required
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
                             placeholder="Tu nombre"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                          <label htmlFor="contact-email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                             Correo Electrónico *
                           </label>
                           <input
+                            id="contact-email"
                             type="email"
                             required
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
                             placeholder="tu@email.com"
                           />
                         </div>
@@ -226,26 +223,28 @@ export default function ContactPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                          <label htmlFor="contact-phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                             Teléfono (opcional)
                           </label>
                           <input
+                            id="contact-phone"
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition"
+                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
                             placeholder="+503 XXXX-XXXX"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                          <label htmlFor="contact-reason" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                             Motivo *
                           </label>
                           <select
+                            id="contact-reason"
                             required
                             value={formData.reason}
                             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:border-orange-500 transition appearance-none"
+                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition appearance-none min-h-[48px]"
                           >
                             <option value="">Selecciona un motivo</option>
                             {contactReasons.map((reason) => (
@@ -258,22 +257,23 @@ export default function ContactPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">
+                        <label htmlFor="contact-message" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                           Mensaje *
                         </label>
                         <textarea
+                          id="contact-message"
                           required
                           rows={5}
                           value={formData.message}
                           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder:text-zinc-500 focus:outline-none focus:border-orange-500 transition resize-none"
+                          className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition resize-none"
                           placeholder="¿Cómo podemos ayudarte?"
                         />
                       </div>
 
                       <button
                         type="submit"
-                        className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-4 font-semibold transition-colors min-h-[56px]"
+                        className="w-full flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors min-h-[56px]"
                       >
                         <Send className="w-5 h-5" />
                         Enviar Mensaje
@@ -288,13 +288,13 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-24 bg-zinc-900/50 border-t border-zinc-800">
+      <section className="py-24 bg-[#252320] border-t border-[#3D3936]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-orange-400 font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
               FAQ
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-white">
+            <h2 className="text-3xl md:text-4xl font-black text-[#FFF8F0]">
               Preguntas Frecuentes
             </h2>
           </div>
@@ -307,22 +307,23 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-zinc-900 border border-zinc-800 overflow-hidden"
+                className="bg-[#2D2A26] border border-[#3D3936] overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-6 text-left min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-inset"
+                  className="w-full flex items-center justify-between p-6 text-left min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-inset"
+                  aria-expanded={openFaq === i}
                 >
-                  <span className="font-semibold text-white">{faq.question}</span>
+                  <span className="font-semibold text-[#FFF8F0]">{faq.question}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-zinc-400 transition-transform ${
+                    className={`w-5 h-5 text-[#6B6560] transition-transform ${
                       openFaq === i ? 'rotate-180' : ''
                     }`}
                   />
                 </button>
                 {openFaq === i && (
                   <div className="px-6 pb-6">
-                    <p className="text-zinc-400">{faq.answer}</p>
+                    <p className="text-[#B8B0A8]">{faq.answer}</p>
                   </div>
                 )}
               </motion.div>

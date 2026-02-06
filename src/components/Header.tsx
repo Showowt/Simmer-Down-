@@ -74,7 +74,7 @@ export default function Header() {
               {/* Cart */}
               <Link
                 href="/cart"
-                className="relative flex items-center gap-2 p-2 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors"
+                className="relative flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
                 aria-label={`Carrito${mounted && itemCount > 0 ? `, ${itemCount} productos, $${getSubtotal().toFixed(2)}` : ''}`}
               >
                 <ShoppingBag className="w-5 h-5" />
@@ -101,7 +101,7 @@ export default function Header() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden p-2 text-[#FFF8F0] hover:text-[#FF6B35] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35]"
+                className="lg:hidden p-2.5 -m-1 text-[#FFF8F0] hover:text-[#FF6B35] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-expanded={isOpen}
               >
