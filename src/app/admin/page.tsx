@@ -50,40 +50,47 @@ export default function AdminDashboard() {
     return new Date(o.created_at).toDateString() === today
   })
 
-  const todayRevenue = todayOrders.reduce((sum, o) => sum + (o.total || 0), 0)
+  // Handle both total and total_amount for schema compatibility
+  const getOrderTotal = (order: Order) => order.total || (order as unknown as { total_amount?: number }).total_amount || 0
+
+  const todayRevenue = todayOrders.reduce((sum, o) => sum + getOrderTotal(o), 0)
   const pendingOrders = orders.filter((o) => o.status === 'pending' || o.status === 'in_progress')
-  const avgOrderValue = orders.length > 0 ? orders.reduce((sum, o) => sum + (o.total || 0), 0) / orders.length : 0
+  const avgOrderValue = orders.length > 0 ? orders.reduce((sum, o) => sum + getOrderTotal(o), 0) / orders.length : 0
 
   const stats = [
     {
-      label: "Today's Revenue",
+      label: 'Ingresos Hoy',
       value: `$${todayRevenue.toFixed(2)}`,
       icon: DollarSign,
-      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-[#4CAF50]/10',
+      iconColor: 'text-[#4CAF50]',
       trend: '+12%',
       trendUp: true,
     },
     {
-      label: "Today's Orders",
+      label: 'Pedidos Hoy',
       value: todayOrders.length,
       icon: ShoppingBag,
-      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-[#FF6B35]/10',
+      iconColor: 'text-[#FF6B35]',
       trend: '+5%',
       trendUp: true,
     },
     {
-      label: 'Pending Orders',
+      label: 'Pedidos Pendientes',
       value: pendingOrders.length,
       icon: Clock,
-      color: 'from-orange-500 to-amber-500',
-      trend: pendingOrders.length > 0 ? 'Active' : 'None',
+      bgColor: 'bg-[#FFB800]/10',
+      iconColor: 'text-[#FFB800]',
+      trend: pendingOrders.length > 0 ? 'Activos' : 'Ninguno',
       trendUp: null,
     },
     {
-      label: 'Avg Order Value',
+      label: 'Ticket Promedio',
       value: `$${avgOrderValue.toFixed(2)}`,
       icon: TrendingUp,
-      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-[#FF6B35]/10',
+      iconColor: 'text-[#FF6B35]',
       trend: '+8%',
       trendUp: true,
     },
@@ -93,27 +100,45 @@ export default function AdminDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-      case 'in_progress': return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-      case 'ready': return 'bg-green-500/10 text-green-400 border-green-500/20'
-      case 'delivered': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-      case 'cancelled': return 'bg-red-500/10 text-red-400 border-red-500/20'
-      default: return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+      case 'pending': return 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20'
+      case 'in_progress': return 'bg-[#FF6B35]/10 text-[#FF6B35] border-[#FF6B35]/20'
+      case 'ready': return 'bg-[#4CAF50]/10 text-[#4CAF50] border-[#4CAF50]/20'
+      case 'delivered': case 'completed': return 'bg-[#6B6560]/10 text-[#6B6560] border-[#6B6560]/20'
+      case 'cancelled': return 'bg-[#C73E1D]/10 text-[#C73E1D] border-[#C73E1D]/20'
+      default: return 'bg-[#6B6560]/10 text-[#6B6560] border-[#6B6560]/20'
     }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pendiente'
+      case 'in_progress': return 'En Preparación'
+      case 'ready': return 'Listo'
+      case 'delivered': return 'Entregado'
+      case 'completed': return 'Completado'
+      case 'cancelled': return 'Cancelado'
+      default: return status
+    }
+  }
+
+  // Handle both is_delivery and order_type for schema compatibility
+  const isDeliveryOrder = (order: Order) => {
+    if ('order_type' in order) return (order as unknown as { order_type?: string }).order_type === 'delivery'
+    return order.is_delivery
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-zinc-500">Welcome back! Here&apos;s what&apos;s happening today.</p>
+          <h1 className="text-2xl font-bold text-[#FFF8F0]">Panel de Control</h1>
+          <p className="text-[#6B6560]">Bienvenido. Aquí está lo que sucede hoy.</p>
         </div>
         <Link
           href="/admin/orders"
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition"
+          className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-4 py-2 font-medium transition"
         >
-          View All Orders
+          Ver Todos los Pedidos
         </Link>
       </div>
 
@@ -122,24 +147,24 @@ export default function AdminDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <div key={stat.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <div key={stat.label} className="bg-[#252320] border border-[#3D3936] p-6">
               <div className="flex items-start justify-between">
-                <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className={`w-12 h-12 ${stat.bgColor} flex items-center justify-center`}>
+                  <Icon className={`w-6 h-6 ${stat.iconColor}`} />
                 </div>
                 {stat.trendUp !== null && (
-                  <span className={`flex items-center text-sm ${stat.trendUp ? 'text-green-400' : 'text-red-400'}`}>
+                  <span className={`flex items-center text-sm ${stat.trendUp ? 'text-[#4CAF50]' : 'text-[#C73E1D]'}`}>
                     {stat.trendUp ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                     {stat.trend}
                   </span>
                 )}
                 {stat.trendUp === null && (
-                  <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded">{stat.trend}</span>
+                  <span className="text-xs text-[#6B6560] bg-[#3D3936] px-2 py-1">{stat.trend}</span>
                 )}
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-sm text-zinc-500">{stat.label}</p>
+                <p className="text-2xl font-bold text-[#FFF8F0]">{stat.value}</p>
+                <p className="text-sm text-[#6B6560]">{stat.label}</p>
               </div>
             </div>
           )
@@ -147,65 +172,65 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl">
-        <div className="p-6 border-b border-zinc-800 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
-          <span className="text-sm text-zinc-500">{orders.length} total orders</span>
+      <div className="bg-[#252320] border border-[#3D3936]">
+        <div className="p-6 border-b border-[#3D3936] flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[#FFF8F0]">Pedidos Recientes</h2>
+          <span className="text-sm text-[#6B6560]">{orders.length} pedidos totales</span>
         </div>
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto" />
+            <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent mx-auto" />
           </div>
         ) : recentOrders.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8 text-zinc-600" />
+            <div className="w-16 h-16 bg-[#3D3936] flex items-center justify-center mx-auto mb-4">
+              <ShoppingBag className="w-8 h-8 text-[#6B6560]" />
             </div>
-            <p className="text-zinc-400 font-medium">No orders yet</p>
-            <p className="text-sm text-zinc-600 mt-1">Orders will appear here once customers start ordering</p>
+            <p className="text-[#B8B0A8] font-medium">No hay pedidos aún</p>
+            <p className="text-sm text-[#6B6560] mt-1">Los pedidos aparecerán aquí cuando los clientes ordenen</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-left text-sm text-zinc-500 border-b border-zinc-800">
-                  <th className="px-6 py-4 font-medium">Order</th>
-                  <th className="px-6 py-4 font-medium">Customer</th>
-                  <th className="px-6 py-4 font-medium">Type</th>
+                <tr className="text-left text-sm text-[#6B6560] border-b border-[#3D3936]">
+                  <th className="px-6 py-4 font-medium">Pedido</th>
+                  <th className="px-6 py-4 font-medium">Cliente</th>
+                  <th className="px-6 py-4 font-medium">Tipo</th>
                   <th className="px-6 py-4 font-medium">Total</th>
-                  <th className="px-6 py-4 font-medium">Status</th>
-                  <th className="px-6 py-4 font-medium">Time</th>
+                  <th className="px-6 py-4 font-medium">Estado</th>
+                  <th className="px-6 py-4 font-medium">Hora</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50 transition">
+                  <tr key={order.id} className="border-b border-[#3D3936] last:border-0 hover:bg-[#3D3936]/50 transition">
                     <td className="px-6 py-4">
-                      <span className="font-mono text-sm text-zinc-300">
+                      <span className="font-mono text-sm text-[#B8B0A8]">
                         #{order.order_number || order.id.slice(0, 8)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-medium text-white">{order.customer_name}</p>
-                        <p className="text-sm text-zinc-500">{order.customer_phone}</p>
+                        <p className="font-medium text-[#FFF8F0]">{order.customer_name}</p>
+                        <p className="text-sm text-[#6B6560]">{order.customer_phone}</p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm ${order.is_delivery ? 'text-blue-400' : 'text-green-400'}`}>
-                        {order.is_delivery ? 'Delivery' : 'Pickup'}
+                      <span className={`text-sm ${isDeliveryOrder(order) ? 'text-[#FF6B35]' : 'text-[#4CAF50]'}`}>
+                        {isDeliveryOrder(order) ? 'Delivery' : 'Recoger'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-medium text-white">
-                      ${(order.total || 0).toFixed(2)}
+                    <td className="px-6 py-4 font-medium text-[#FFF8F0]">
+                      ${getOrderTotal(order).toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium capitalize border ${getStatusColor(order.status)}`}>
-                        {order.status}
+                      <span className={`inline-flex px-3 py-1 text-xs font-medium capitalize border ${getStatusColor(order.status)}`}>
+                        {getStatusLabel(order.status)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-500">
+                    <td className="px-6 py-4 text-sm text-[#6B6560]">
                       {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
                   </tr>

@@ -261,6 +261,8 @@ export default function ContactPage() {
                           <input
                             id="contact-phone"
                             type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                             className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
@@ -271,20 +273,23 @@ export default function ContactPage() {
                           <label htmlFor="contact-reason" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                             Motivo *
                           </label>
-                          <select
-                            id="contact-reason"
-                            required
-                            value={formData.reason}
-                            onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition appearance-none min-h-[48px]"
-                          >
-                            <option value="">Selecciona un motivo</option>
-                            {contactReasons.map((reason) => (
-                              <option key={reason} value={reason}>
-                                {reason}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative">
+                            <select
+                              id="contact-reason"
+                              required
+                              value={formData.reason}
+                              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                              className="w-full px-4 pr-10 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition appearance-none min-h-[48px] cursor-pointer"
+                            >
+                              <option value="">Selecciona un motivo</option>
+                              {contactReasons.map((reason) => (
+                                <option key={reason} value={reason}>
+                                  {reason}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
+                          </div>
                         </div>
                       </div>
 

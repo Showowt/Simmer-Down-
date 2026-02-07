@@ -64,20 +64,32 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError
 
-      // If user was created successfully, create their profile
+      // If user was created successfully, create their customer profile
       if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
+        // Try customers table first (production schema)
+        const { error: customerError } = await supabase
+          .from('customers')
           .insert({
-            id: data.user.id,
-            full_name: formData.name,
-            phone: formData.phone,
-            loyalty_points: 50, // Welcome bonus!
-            loyalty_tier: 'starter',
+            auth_user_id: data.user.id,
+            email: formData.email,
+            first_name: formData.name.split(' ')[0],
+            last_name: formData.name.split(' ').slice(1).join(' ') || null,
+            phone: formData.phone || null,
+            loyalty_points_balance: 50, // Welcome bonus!
+            loyalty_tier: 'bronze',
           })
 
-        if (profileError && !profileError.message.includes('duplicate')) {
-          console.error('Profile creation error:', profileError)
+        // Fallback to profiles table if customers doesn't exist
+        if (customerError && customerError.message.includes('does not exist')) {
+          await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              full_name: formData.name,
+              phone: formData.phone,
+              loyalty_points: 50,
+              loyalty_tier: 'bronze',
+            })
         }
       }
 
@@ -199,6 +211,8 @@ export default function SignupPage() {
                 <input
                   id="phone"
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"

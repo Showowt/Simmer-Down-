@@ -50,12 +50,12 @@ export default function ToastContainer() {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
-            className={`flex items-center gap-3 px-4 py-3 shadow-lg ${
+            className={`flex items-center gap-3 px-4 py-3 ${
               toast.type === 'success'
-                ? 'bg-zinc-900 border border-green-500/30'
+                ? 'bg-[#252320] border border-[#4CAF50]/30'
                 : toast.type === 'error'
-                ? 'bg-zinc-900 border border-red-500/30'
-                : 'bg-zinc-900 border border-zinc-700'
+                ? 'bg-[#252320] border border-[#C73E1D]/30'
+                : 'bg-[#252320] border border-[#FF6B35]/30'
             }`}
             role="alert"
             aria-live="polite"
@@ -63,10 +63,10 @@ export default function ToastContainer() {
             <div
               className={`w-8 h-8 flex items-center justify-center ${
                 toast.type === 'success'
-                  ? 'bg-green-500/20 text-green-500'
+                  ? 'bg-[#4CAF50]/20 text-[#4CAF50]'
                   : toast.type === 'error'
-                  ? 'bg-red-500/20 text-red-500'
-                  : 'bg-orange-500/20 text-orange-500'
+                  ? 'bg-[#C73E1D]/20 text-[#C73E1D]'
+                  : 'bg-[#FF6B35]/20 text-[#FF6B35]'
               }`}
             >
               {toast.type === 'success' ? (
@@ -77,10 +77,10 @@ export default function ToastContainer() {
                 <ShoppingBag className="w-4 h-4" />
               )}
             </div>
-            <span className="text-white text-sm font-medium">{toast.message}</span>
+            <span className="text-[#FFF8F0] text-sm font-medium">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 text-zinc-500 hover:text-white transition-colors"
+              className="ml-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
               aria-label="Dismiss"
             >
               <X className="w-4 h-4" />
