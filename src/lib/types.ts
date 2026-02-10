@@ -73,3 +73,31 @@ export interface Customer {
   updated_at: string
   metadata?: Record<string, unknown>
 }
+
+export interface Event {
+  id: string
+  title: string
+  description: string | null
+  date: string
+  time: string
+  location: string | null
+  image_url: string | null
+  category: string
+  price: string | null
+  featured: boolean
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ContactSubmission {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  reason: string
+  message: string
+  status: 'new' | 'read' | 'responded' | 'archived'
+  notes: string | null
+  created_at: string
+}

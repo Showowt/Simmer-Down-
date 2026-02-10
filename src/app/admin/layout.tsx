@@ -12,7 +12,11 @@ import {
   Menu,
   X,
   ChevronRight,
-  Flame
+  Flame,
+  Calendar,
+  MessageSquare,
+  MapPin,
+  CreditCard
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -20,6 +24,9 @@ const navItems = [
   { href: '/admin', label: 'Panel', icon: LayoutDashboard },
   { href: '/admin/orders', label: 'Pedidos', icon: ShoppingBag },
   { href: '/admin/menu', label: 'Menú', icon: UtensilsCrossed },
+  { href: '/admin/events', label: 'Eventos', icon: Calendar },
+  { href: '/admin/inquiries', label: 'Consultas', icon: MessageSquare },
+  { href: '/admin/locations', label: 'Ubicaciones', icon: MapPin },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

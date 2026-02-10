@@ -1,53 +1,73 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, MapPin, Users, Music, Utensils, PartyPopper, ArrowRight, Star, Flame } from 'lucide-react'
+import { Calendar, Clock, MapPin, Users, Music, Utensils, PartyPopper, ArrowRight, Star } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { Event } from '@/lib/types'
 
-const upcomingEvents = [
+// Fallback events if database is empty
+const fallbackEvents: Event[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Jazz & Pizza Night',
     description: 'Disfruta de jazz en vivo mientras saboreas nuestras pizzas signature. Artistas locales, cócteles artesanales y vibras increíbles.',
     date: 'Cada Viernes',
     time: '7:00 PM - 11:00 PM',
     location: 'San Benito',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
+    image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800',
     category: 'Música',
+    price: null,
     featured: true,
+    active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
-    id: 2,
+    id: '2',
     title: 'Taller de Pizza Artesanal',
     description: 'Aprende el arte de hacer pizza de nuestro chef principal. Experiencia práctica con masa, salsa y técnicas de horno.',
     date: 'Feb 15, 2025',
     time: '2:00 PM - 5:00 PM',
     location: 'Santa Ana',
-    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
+    image_url: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
     category: 'Taller',
     price: '$45',
+    featured: false,
+    active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
-    id: 3,
+    id: '3',
     title: 'Maridaje Vino & Pizza',
     description: 'Una noche curada de vinos italianos perfectamente maridados con nuestras pizzas artesanales. Cupos limitados.',
     date: 'Feb 22, 2025',
     time: '6:30 PM - 9:30 PM',
     location: 'Coatepeque',
-    image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800',
+    image_url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800',
     category: 'Degustación',
     price: '$65',
+    featured: false,
+    active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
   {
-    id: 4,
+    id: '4',
     title: 'Pizza Party para Niños',
     description: '¡Deja que los pequeños creen sus propias mini pizzas! Incluye elaboración de pizza, juegos y premios. Edades 5-12.',
     date: 'Cada Sábado',
     time: '11:00 AM - 1:00 PM',
     location: 'Todas las Ubicaciones',
-    image: 'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=800',
+    image_url: 'https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=800',
     category: 'Familia',
     price: '$25',
+    featured: false,
+    active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   },
 ]
 
@@ -70,6 +90,38 @@ const privateEventTypes = [
 ]
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>(fallbackEvents)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('active', true)
+          .order('featured', { ascending: false })
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+        if (data && data.length > 0) {
+          setEvents(data)
+        }
+      } catch (err) {
+        // Use fallback events
+        console.log('Using fallback events')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
+
+  const featuredEvents = events.filter(e => e.featured)
+  const upcomingEvents = events.filter(e => !e.featured)
+
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
@@ -95,8 +147,8 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Featured Event */}
-      {upcomingEvents.filter(e => e.featured).map((event) => (
+      {/* Featured Events */}
+      {featuredEvents.map((event) => (
         <section key={event.id} className="pb-16">
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
@@ -107,7 +159,7 @@ export default function EventsPage() {
             >
               <div className="absolute inset-0 bg-[#1F1D1A]/80 z-10" />
               <img
-                src={event.image}
+                src={event.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800'}
                 alt={event.title}
                 className="w-full h-[500px] object-cover"
               />
@@ -132,10 +184,12 @@ export default function EventsPage() {
                       <Clock className="w-5 h-5 text-[#FF6B35]" />
                       {event.time}
                     </div>
-                    <div className="flex items-center gap-2 text-[#B8B0A8]">
-                      <MapPin className="w-5 h-5 text-[#FF6B35]" />
-                      {event.location}
-                    </div>
+                    {event.location && (
+                      <div className="flex items-center gap-2 text-[#B8B0A8]">
+                        <MapPin className="w-5 h-5 text-[#FF6B35]" />
+                        {event.location}
+                      </div>
+                    )}
                   </div>
                   <Link
                     href="/contact"
@@ -152,71 +206,75 @@ export default function EventsPage() {
       ))}
 
       {/* Upcoming Events */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="font-display text-3xl text-[#FFF8F0] mb-12">Próximos Eventos</h2>
+      {upcomingEvents.length > 0 && (
+        <section className="py-16">
+          <div className="max-w-6xl mx-auto px-6">
+            <h2 className="font-display text-3xl text-[#FFF8F0] mb-12">Próximos Eventos</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {upcomingEvents.filter(e => !e.featured).map((event, i) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group bg-[#252320] border border-[#3D3936] overflow-hidden hover:border-[#FF6B35]/50 transition-all"
-              >
-                <div className="aspect-video overflow-hidden relative">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-[#2D2A26]/80 text-[#FFF8F0] text-xs font-semibold px-3 py-1">
-                      {event.category}
-                    </span>
-                  </div>
-                  {event.price && (
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-[#FF6B35] text-white text-sm font-bold px-3 py-1">
-                        {event.price}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {upcomingEvents.map((event, i) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group bg-[#252320] border border-[#3D3936] overflow-hidden hover:border-[#FF6B35]/50 transition-all"
+                >
+                  <div className="aspect-video overflow-hidden relative">
+                    <img
+                      src={event.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800'}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-[#2D2A26]/80 text-[#FFF8F0] text-xs font-semibold px-3 py-1">
+                        {event.category}
                       </span>
                     </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <h3 className="font-display text-xl text-[#FFF8F0] mb-2">{event.title}</h3>
-                  <p className="text-[#B8B0A8] text-sm mb-4 line-clamp-2">{event.description}</p>
-
-                  <div className="space-y-2 mb-6">
-                    <div className="flex items-center gap-2 text-[#6B6560] text-sm">
-                      <Calendar className="w-4 h-4 text-[#FF6B35]" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6B6560] text-sm">
-                      <Clock className="w-4 h-4 text-[#FF6B35]" />
-                      {event.time}
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6B6560] text-sm">
-                      <MapPin className="w-4 h-4 text-[#FF6B35]" />
-                      {event.location}
-                    </div>
+                    {event.price && (
+                      <div className="absolute top-4 right-4">
+                        <span className="bg-[#FF6B35] text-white text-sm font-bold px-3 py-1">
+                          {event.price}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <Link
-                    href="/contact"
-                    className="block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition-colors min-h-[48px]"
-                  >
-                    Reservar
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="p-6">
+                    <h3 className="font-display text-xl text-[#FFF8F0] mb-2">{event.title}</h3>
+                    <p className="text-[#B8B0A8] text-sm mb-4 line-clamp-2">{event.description}</p>
+
+                    <div className="space-y-2 mb-6">
+                      <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                        <Calendar className="w-4 h-4 text-[#FF6B35]" />
+                        {event.date}
+                      </div>
+                      <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                        <Clock className="w-4 h-4 text-[#FF6B35]" />
+                        {event.time}
+                      </div>
+                      {event.location && (
+                        <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                          <MapPin className="w-4 h-4 text-[#FF6B35]" />
+                          {event.location}
+                        </div>
+                      )}
+                    </div>
+
+                    <Link
+                      href="/contact"
+                      className="block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition-colors min-h-[48px]"
+                    >
+                      Reservar
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Private Events */}
       <section className="py-24 bg-[#252320] border-t border-[#3D3936]">

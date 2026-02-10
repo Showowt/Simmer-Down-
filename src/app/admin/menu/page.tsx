@@ -4,14 +4,22 @@ import { useEffect, useState } from 'react'
 import { Plus, Edit2, Trash2, X, Save, ImageIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { MenuItem } from '@/lib/types'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 const categories = ['pizza', 'sides', 'drinks', 'desserts'] as const
+
+const categoryLabels: Record<string, string> = {
+  pizza: 'Pizzas',
+  sides: 'Acompañamientos',
+  drinks: 'Bebidas',
+  desserts: 'Postres',
+}
 
 const emptyItem: Partial<MenuItem> = {
   name: '',
   description: '',
   price: 0,
-  image_url: '',
+  image_url: null,
   category: 'pizza',
   available: true,
 }
@@ -21,6 +29,7 @@ export default function AdminMenuPage() {
   const [loading, setLoading] = useState(true)
   const [editingItem, setEditingItem] = useState<Partial<MenuItem> | null>(null)
   const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetchMenu()
@@ -47,6 +56,7 @@ export default function AdminMenuPage() {
   const saveItem = async () => {
     if (!editingItem?.name || !editingItem?.price) return
 
+    setSaving(true)
     try {
       const supabase = createClient()
 
@@ -73,11 +83,13 @@ export default function AdminMenuPage() {
       setIsNew(false)
     } catch (err) {
       console.error('Failed to save')
+    } finally {
+      setSaving(false)
     }
   }
 
   const deleteItem = async (id: string) => {
-    if (!confirm('Delete this item?')) return
+    if (!confirm('¿Eliminar este item?')) return
 
     try {
       const supabase = createClient()
@@ -113,34 +125,37 @@ export default function AdminMenuPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Menu Management</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-[#FFF8F0]">Menú</h1>
+          <p className="text-[#6B6560]">Administra los items del menú</p>
+        </div>
         <button
           onClick={() => {
             setEditingItem(emptyItem)
             setIsNew(true)
           }}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition"
+          className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-4 py-2 font-medium flex items-center gap-2 transition"
         >
           <Plus className="w-5 h-5" />
-          Add Item
+          Nuevo Item
         </button>
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto" />
+        <div className="bg-[#252320] border border-[#3D3936] p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent mx-auto" />
         </div>
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <p className="text-gray-500 mb-4">No menu items yet</p>
+        <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
+          <p className="text-[#B8B0A8] mb-4">No hay items en el menú aún</p>
           <button
             onClick={() => {
               setEditingItem(emptyItem)
               setIsNew(true)
             }}
-            className="text-orange-500 hover:underline"
+            className="text-[#FF6B35] hover:underline"
           >
-            Add your first item
+            Agregar tu primer item
           </button>
         </div>
       ) : (
@@ -151,11 +166,11 @@ export default function AdminMenuPage() {
 
             return (
               <div key={category}>
-                <h2 className="text-lg font-semibold text-gray-900 capitalize mb-4">
-                  {category}
+                <h2 className="text-lg font-semibold text-[#FFF8F0] mb-4">
+                  {categoryLabels[category]}
                 </h2>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <div className="divide-y">
+                <div className="bg-[#252320] border border-[#3D3936] overflow-hidden">
+                  <div className="divide-y divide-[#3D3936]">
                     {categoryItems.map((item) => (
                       <div
                         key={item.id}
@@ -163,7 +178,7 @@ export default function AdminMenuPage() {
                           !item.available ? 'opacity-50' : ''
                         }`}
                       >
-                        <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                        <div className="w-16 h-16 bg-[#1F1D1A] flex-shrink-0 overflow-hidden">
                           {item.image_url ? (
                             <img
                               src={item.image_url}
@@ -172,25 +187,25 @@ export default function AdminMenuPage() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-6 h-6 text-gray-400" />
+                              <ImageIcon className="w-6 h-6 text-[#3D3936]" />
                             </div>
                           )}
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900">{item.name}</h3>
-                          <p className="text-sm text-gray-500 truncate">{item.description}</p>
+                          <h3 className="font-medium text-[#FFF8F0]">{item.name}</h3>
+                          <p className="text-sm text-[#6B6560] truncate">{item.description}</p>
                         </div>
 
                         <div className="text-right">
-                          <p className="font-bold text-orange-500">${item.price.toFixed(2)}</p>
+                          <p className="font-bold text-white">${item.price.toFixed(2)}</p>
                           <button
                             onClick={() => toggleAvailability(item)}
-                            className={`text-xs ${
-                              item.available ? 'text-green-600' : 'text-red-600'
+                            className={`text-xs font-medium ${
+                              item.available ? 'text-[#4CAF50]' : 'text-red-400'
                             }`}
                           >
-                            {item.available ? 'Available' : 'Sold Out'}
+                            {item.available ? 'Disponible' : 'Agotado'}
                           </button>
                         </div>
 
@@ -200,15 +215,15 @@ export default function AdminMenuPage() {
                               setEditingItem(item)
                               setIsNew(false)
                             }}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition"
+                            className="p-2 hover:bg-[#3D3936] transition"
                           >
-                            <Edit2 className="w-4 h-4 text-gray-500" />
+                            <Edit2 className="w-4 h-4 text-[#6B6560]" />
                           </button>
                           <button
                             onClick={() => deleteItem(item.id)}
-                            className="p-2 hover:bg-red-50 rounded-lg transition"
+                            className="p-2 hover:bg-red-500/10 transition"
                           >
-                            <Trash2 className="w-4 h-4 text-red-500" />
+                            <Trash2 className="w-4 h-4 text-red-400" />
                           </button>
                         </div>
                       </div>
@@ -223,54 +238,54 @@ export default function AdminMenuPage() {
 
       {/* Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg">
-            <div className="p-6 border-b flex items-center justify-between">
-              <h2 className="text-lg font-semibold">
-                {isNew ? 'Add Menu Item' : 'Edit Menu Item'}
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#252320] border border-[#3D3936] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-[#3D3936] flex items-center justify-between sticky top-0 bg-[#252320]">
+              <h2 className="text-lg font-semibold text-[#FFF8F0]">
+                {isNew ? 'Nuevo Item' : 'Editar Item'}
               </h2>
               <button
                 onClick={() => {
                   setEditingItem(null)
                   setIsNew(false)
                 }}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-[#3D3936]"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-[#6B6560]" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
+                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                  Nombre *
                 </label>
                 <input
                   type="text"
                   value={editingItem.name || ''}
                   onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  placeholder="Item name"
+                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                  placeholder="Margherita DOP"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                  Descripción
                 </label>
                 <textarea
                   value={editingItem.description || ''}
                   onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 resize-none"
+                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none resize-none"
                   rows={2}
-                  placeholder="Item description"
+                  placeholder="Tomate San Marzano, mozzarella di bufala..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Price *
+                  <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                    Precio *
                   </label>
                   <input
                     type="number"
@@ -279,14 +294,14 @@ export default function AdminMenuPage() {
                     onChange={(e) =>
                       setEditingItem({ ...editingItem, price: parseFloat(e.target.value) || 0 })
                     }
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
-                    placeholder="0.00"
+                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                    placeholder="16.99"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category
+                  <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                    Categoría
                   </label>
                   <select
                     value={editingItem.category || 'pizza'}
@@ -296,11 +311,11 @@ export default function AdminMenuPage() {
                         category: e.target.value as MenuItem['category'],
                       })
                     }
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
                   >
                     {categories.map((cat) => (
-                      <option key={cat} value={cat} className="capitalize">
-                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      <option key={cat} value={cat}>
+                        {categoryLabels[cat]}
                       </option>
                     ))}
                   </select>
@@ -308,15 +323,13 @@ export default function AdminMenuPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
+                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                  Imagen
                 </label>
-                <input
-                  type="url"
-                  value={editingItem.image_url || ''}
-                  onChange={(e) => setEditingItem({ ...editingItem, image_url: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500"
-                  placeholder="https://..."
+                <ImageUpload
+                  value={editingItem.image_url || null}
+                  onChange={(url) => setEditingItem({ ...editingItem, image_url: url })}
+                  folder="menu"
                 />
               </div>
 
@@ -326,30 +339,35 @@ export default function AdminMenuPage() {
                   id="available"
                   checked={editingItem.available ?? true}
                   onChange={(e) => setEditingItem({ ...editingItem, available: e.target.checked })}
-                  className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
+                  className="w-4 h-4 accent-[#FF6B35]"
                 />
-                <label htmlFor="available" className="text-sm text-gray-700">
-                  Available for ordering
+                <label htmlFor="available" className="text-sm text-[#B8B0A8]">
+                  Disponible para ordenar
                 </label>
               </div>
             </div>
 
-            <div className="p-6 border-t flex justify-end gap-3">
+            <div className="p-6 border-t border-[#3D3936] flex justify-end gap-3 sticky bottom-0 bg-[#252320]">
               <button
                 onClick={() => {
                   setEditingItem(null)
                   setIsNew(false)
                 }}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                className="px-4 py-2 text-[#B8B0A8] hover:bg-[#3D3936] transition"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={saveItem}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition"
+                disabled={saving || !editingItem.name || !editingItem.price}
+                className="bg-[#FF6B35] hover:bg-[#E55A2B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 font-medium flex items-center gap-2 transition"
               >
-                <Save className="w-4 h-4" />
-                Save
+                {saving ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Guardar
               </button>
             </div>
           </div>
