@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, Plus_Jakarta_Sans, Caveat } from 'next/font/google'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
 import { Analytics } from '@vercel/analytics/react'
@@ -95,9 +93,7 @@ export default function RootLayout({
         >
           Saltar al contenido principal
         </a>
-        <Header />
-        <main id="main-content">{children}</main>
-        <Footer />
+        {children}
         <ToastContainer />
         <ClientProviders />
         <Analytics />
