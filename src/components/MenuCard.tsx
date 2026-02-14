@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Check, Flame } from 'lucide-react'
+import { Plus, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MenuItem } from '@/lib/types'
 import { useCartStore } from '@/store/cart'

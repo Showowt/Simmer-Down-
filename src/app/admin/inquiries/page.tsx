@@ -1,147 +1,189 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Mail, Phone, Clock, MessageSquare, X, Archive, CheckCircle, Eye, Trash2, RefreshCw } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { ContactSubmission } from '@/lib/types'
+import { useEffect, useState } from "react";
+import {
+  Mail,
+  Phone,
+  MessageSquare,
+  X,
+  Archive,
+  CheckCircle,
+  Eye,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { ContactSubmission } from "@/lib/types";
 
 const statusOptions = [
-  { value: 'new', label: 'Nuevo', color: 'bg-[#FF6B35]/10 text-[#FF6B35] border-[#FF6B35]/20' },
-  { value: 'read', label: 'Leído', color: 'bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20' },
-  { value: 'responded', label: 'Respondido', color: 'bg-[#4CAF50]/10 text-[#4CAF50] border-[#4CAF50]/20' },
-  { value: 'archived', label: 'Archivado', color: 'bg-[#6B6560]/10 text-[#6B6560] border-[#6B6560]/20' },
-]
+  {
+    value: "new",
+    label: "Nuevo",
+    color: "bg-[#FF6B35]/10 text-[#FF6B35] border-[#FF6B35]/20",
+  },
+  {
+    value: "read",
+    label: "Leído",
+    color: "bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20",
+  },
+  {
+    value: "responded",
+    label: "Respondido",
+    color: "bg-[#4CAF50]/10 text-[#4CAF50] border-[#4CAF50]/20",
+  },
+  {
+    value: "archived",
+    label: "Archivado",
+    color: "bg-[#6B6560]/10 text-[#6B6560] border-[#6B6560]/20",
+  },
+];
 
 const reasonLabels: Record<string, string> = {
-  general: 'Consulta General',
-  order: 'Problema con Pedido',
-  catering: 'Catering/Eventos',
-  feedback: 'Comentarios',
-  partnership: 'Asociación',
-  other: 'Otro',
-}
+  general: "Consulta General",
+  order: "Problema con Pedido",
+  catering: "Catering/Eventos",
+  feedback: "Comentarios",
+  partnership: "Asociación",
+  other: "Otro",
+};
 
 export default function AdminInquiriesPage() {
-  const [submissions, setSubmissions] = useState<ContactSubmission[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmission | null>(null)
-  const [filter, setFilter] = useState('all')
-  const [notes, setNotes] = useState('')
+  const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<ContactSubmission | null>(null);
+  const [filter, setFilter] = useState("all");
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
-    fetchSubmissions()
+    fetchSubmissions();
 
     // Real-time subscription
-    const supabase = createClient()
+    const supabase = createClient();
     const channel = supabase
-      .channel('inquiries')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_submissions' }, () => {
-        fetchSubmissions()
-      })
-      .subscribe()
+      .channel("inquiries")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "contact_submissions" },
+        () => {
+          fetchSubmissions();
+        },
+      )
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const fetchSubmissions = async () => {
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { data, error } = await supabase
-        .from('contact_submissions')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from("contact_submissions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (error) throw error
-      setSubmissions(data || [])
+      if (error) throw error;
+      setSubmissions(data || []);
     } catch (err) {
-      console.log('Contact submissions table may not exist')
+      console.log("Contact submissions table may not exist");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const updateStatus = async (id: string, status: ContactSubmission['status']) => {
+  const updateStatus = async (
+    id: string,
+    status: ContactSubmission["status"],
+  ) => {
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { error } = await supabase
-        .from('contact_submissions')
+        .from("contact_submissions")
         .update({ status })
-        .eq('id', id)
+        .eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      setSubmissions(submissions.map((s) => (s.id === id ? { ...s, status } : s)))
+      setSubmissions(
+        submissions.map((s) => (s.id === id ? { ...s, status } : s)),
+      );
       if (selectedSubmission?.id === id) {
-        setSelectedSubmission({ ...selectedSubmission, status })
+        setSelectedSubmission({ ...selectedSubmission, status });
       }
     } catch (err) {
-      console.error('Failed to update status')
+      console.error("Failed to update status");
     }
-  }
+  };
 
   const saveNotes = async () => {
-    if (!selectedSubmission) return
+    if (!selectedSubmission) return;
 
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { error } = await supabase
-        .from('contact_submissions')
+        .from("contact_submissions")
         .update({ notes })
-        .eq('id', selectedSubmission.id)
+        .eq("id", selectedSubmission.id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      setSubmissions(submissions.map((s) =>
-        s.id === selectedSubmission.id ? { ...s, notes } : s
-      ))
-      setSelectedSubmission({ ...selectedSubmission, notes })
+      setSubmissions(
+        submissions.map((s) =>
+          s.id === selectedSubmission.id ? { ...s, notes } : s,
+        ),
+      );
+      setSelectedSubmission({ ...selectedSubmission, notes });
     } catch (err) {
-      console.error('Failed to save notes')
+      console.error("Failed to save notes");
     }
-  }
+  };
 
   const deleteSubmission = async (id: string) => {
-    if (!confirm('¿Eliminar esta consulta permanentemente?')) return
+    if (!confirm("¿Eliminar esta consulta permanentemente?")) return;
 
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { error } = await supabase
-        .from('contact_submissions')
+        .from("contact_submissions")
         .delete()
-        .eq('id', id)
+        .eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      setSubmissions(submissions.filter((s) => s.id !== id))
+      setSubmissions(submissions.filter((s) => s.id !== id));
       if (selectedSubmission?.id === id) {
-        setSelectedSubmission(null)
+        setSelectedSubmission(null);
       }
     } catch (err) {
-      console.error('Failed to delete')
+      console.error("Failed to delete");
     }
-  }
+  };
 
   const openSubmission = (submission: ContactSubmission) => {
-    setSelectedSubmission(submission)
-    setNotes(submission.notes || '')
+    setSelectedSubmission(submission);
+    setNotes(submission.notes || "");
 
     // Mark as read if new
-    if (submission.status === 'new') {
-      updateStatus(submission.id, 'read')
+    if (submission.status === "new") {
+      updateStatus(submission.id, "read");
     }
-  }
+  };
 
-  const filteredSubmissions = filter === 'all'
-    ? submissions
-    : submissions.filter((s) => s.status === filter)
+  const filteredSubmissions =
+    filter === "all"
+      ? submissions
+      : submissions.filter((s) => s.status === filter);
 
-  const newCount = submissions.filter((s) => s.status === 'new').length
+  const newCount = submissions.filter((s) => s.status === "new").length;
 
   const getStatusStyle = (status: string) => {
-    return statusOptions.find((s) => s.value === status)?.color || statusOptions[0].color
-  }
+    return (
+      statusOptions.find((s) => s.value === status)?.color ||
+      statusOptions[0].color
+    );
+  };
 
   return (
     <div>
@@ -155,7 +197,9 @@ export default function AdminInquiriesPage() {
               </span>
             )}
           </h1>
-          <p className="text-[#6B6560]">Gestiona las consultas del formulario de contacto</p>
+          <p className="text-[#6B6560]">
+            Gestiona las consultas del formulario de contacto
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <select
@@ -166,7 +210,8 @@ export default function AdminInquiriesPage() {
             <option value="all">Todas ({submissions.length})</option>
             {statusOptions.map((status) => (
               <option key={status.value} value={status.value}>
-                {status.label} ({submissions.filter((s) => s.status === status.value).length})
+                {status.label} (
+                {submissions.filter((s) => s.status === status.value).length})
               </option>
             ))}
           </select>
@@ -187,7 +232,10 @@ export default function AdminInquiriesPage() {
         <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
           <Mail className="w-12 h-12 text-[#6B6560] mx-auto mb-4" />
           <p className="text-[#B8B0A8]">No hay consultas aún</p>
-          <p className="text-sm text-[#6B6560] mt-1">Las consultas aparecerán aquí cuando alguien use el formulario de contacto</p>
+          <p className="text-sm text-[#6B6560] mt-1">
+            Las consultas aparecerán aquí cuando alguien use el formulario de
+            contacto
+          </p>
         </div>
       ) : (
         <div className="bg-[#252320] border border-[#3D3936] overflow-hidden">
@@ -207,16 +255,20 @@ export default function AdminInquiriesPage() {
                   <tr
                     key={submission.id}
                     className={`border-b border-[#3D3936] hover:bg-[#3D3936]/50 transition cursor-pointer ${
-                      submission.status === 'new' ? 'bg-[#FF6B35]/5' : ''
+                      submission.status === "new" ? "bg-[#FF6B35]/5" : ""
                     }`}
                     onClick={() => openSubmission(submission)}
                   >
                     <td className="px-6 py-4">
                       <div>
-                        <p className={`font-medium ${submission.status === 'new' ? 'text-[#FFF8F0]' : 'text-[#B8B0A8]'}`}>
+                        <p
+                          className={`font-medium ${submission.status === "new" ? "text-[#FFF8F0]" : "text-[#B8B0A8]"}`}
+                        >
                           {submission.name}
                         </p>
-                        <p className="text-sm text-[#6B6560]">{submission.email}</p>
+                        <p className="text-sm text-[#6B6560]">
+                          {submission.email}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -225,20 +277,32 @@ export default function AdminInquiriesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-3 py-1 text-xs font-medium border ${getStatusStyle(submission.status)}`}>
-                        {statusOptions.find((s) => s.value === submission.status)?.label}
+                      <span
+                        className={`inline-flex px-3 py-1 text-xs font-medium border ${getStatusStyle(submission.status)}`}
+                      >
+                        {
+                          statusOptions.find(
+                            (s) => s.value === submission.status,
+                          )?.label
+                        }
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-[#6B6560]">
-                      {new Date(submission.created_at).toLocaleDateString('es', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {new Date(submission.created_at).toLocaleDateString(
+                        "es",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="flex items-center gap-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           onClick={() => openSubmission(submission)}
                           className="p-2 hover:bg-[#3D3936] transition"
@@ -267,9 +331,11 @@ export default function AdminInquiriesPage() {
           <div className="bg-[#252320] border border-[#3D3936] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-[#3D3936] flex items-center justify-between sticky top-0 bg-[#252320]">
               <div>
-                <h2 className="text-lg font-semibold text-[#FFF8F0]">Detalle de Consulta</h2>
+                <h2 className="text-lg font-semibold text-[#FFF8F0]">
+                  Detalle de Consulta
+                </h2>
                 <p className="text-sm text-[#6B6560]">
-                  {new Date(selectedSubmission.created_at).toLocaleString('es')}
+                  {new Date(selectedSubmission.created_at).toLocaleString("es")}
                 </p>
               </div>
               <button
@@ -288,22 +354,31 @@ export default function AdminInquiriesPage() {
                     <span className="text-xl">👤</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-[#FFF8F0]">{selectedSubmission.name}</p>
+                    <p className="font-semibold text-[#FFF8F0]">
+                      {selectedSubmission.name}
+                    </p>
                     <p className="text-sm text-[#6B6560]">
-                      {reasonLabels[selectedSubmission.reason] || selectedSubmission.reason}
+                      {reasonLabels[selectedSubmission.reason] ||
+                        selectedSubmission.reason}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-[#B8B0A8]">
                   <Mail className="w-4 h-4 text-[#6B6560]" />
-                  <a href={`mailto:${selectedSubmission.email}`} className="hover:text-[#FF6B35]">
+                  <a
+                    href={`mailto:${selectedSubmission.email}`}
+                    className="hover:text-[#FF6B35]"
+                  >
                     {selectedSubmission.email}
                   </a>
                 </div>
                 {selectedSubmission.phone && (
                   <div className="flex items-center gap-2 text-[#B8B0A8]">
                     <Phone className="w-4 h-4 text-[#6B6560]" />
-                    <a href={`tel:${selectedSubmission.phone}`} className="hover:text-[#FF6B35]">
+                    <a
+                      href={`tel:${selectedSubmission.phone}`}
+                      className="hover:text-[#FF6B35]"
+                    >
                       {selectedSubmission.phone}
                     </a>
                   </div>
@@ -317,7 +392,9 @@ export default function AdminInquiriesPage() {
                   Mensaje
                 </h3>
                 <div className="bg-[#1F1D1A] p-4">
-                  <p className="text-[#B8B0A8] whitespace-pre-wrap">{selectedSubmission.message}</p>
+                  <p className="text-[#B8B0A8] whitespace-pre-wrap">
+                    {selectedSubmission.message}
+                  </p>
                 </div>
               </div>
 
@@ -338,20 +415,31 @@ export default function AdminInquiriesPage() {
 
               {/* Status Actions */}
               <div>
-                <h3 className="text-sm font-medium text-[#6B6560] mb-3">Actualizar estado</h3>
+                <h3 className="text-sm font-medium text-[#6B6560] mb-3">
+                  Actualizar estado
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {statusOptions.map((status) => (
                     <button
                       key={status.value}
-                      onClick={() => updateStatus(selectedSubmission.id, status.value as ContactSubmission['status'])}
+                      onClick={() =>
+                        updateStatus(
+                          selectedSubmission.id,
+                          status.value as ContactSubmission["status"],
+                        )
+                      }
                       className={`px-4 py-2 text-sm font-medium transition ${
                         selectedSubmission.status === status.value
-                          ? 'bg-[#FF6B35] text-white'
-                          : 'bg-[#3D3936] text-[#B8B0A8] hover:bg-[#4A4744]'
+                          ? "bg-[#FF6B35] text-white"
+                          : "bg-[#3D3936] text-[#B8B0A8] hover:bg-[#4A4744]"
                       }`}
                     >
-                      {status.value === 'responded' && <CheckCircle className="w-4 h-4 inline mr-1" />}
-                      {status.value === 'archived' && <Archive className="w-4 h-4 inline mr-1" />}
+                      {status.value === "responded" && (
+                        <CheckCircle className="w-4 h-4 inline mr-1" />
+                      )}
+                      {status.value === "archived" && (
+                        <Archive className="w-4 h-4 inline mr-1" />
+                      )}
                       {status.label}
                     </button>
                   ))}
@@ -361,7 +449,7 @@ export default function AdminInquiriesPage() {
               {/* Quick Actions */}
               <div className="flex gap-3 pt-4 border-t border-[#3D3936]">
                 <a
-                  href={`mailto:${selectedSubmission.email}?subject=Re: ${reasonLabels[selectedSubmission.reason] || 'Consulta'} - Simmer Down`}
+                  href={`mailto:${selectedSubmission.email}?subject=Re: ${reasonLabels[selectedSubmission.reason] || "Consulta"} - Simmer Down`}
                   className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 font-medium text-center transition"
                 >
                   Responder por Email
@@ -380,5 +468,5 @@ export default function AdminInquiriesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -13,7 +13,6 @@ import {
   Clock,
   ShoppingBag,
   LogOut,
-  Settings,
   Crown,
   Star,
   Edit2,
@@ -67,11 +66,7 @@ export default function AccountPage() {
   const [editForm, setEditForm] = useState({ full_name: '', phone: '', address: '' })
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
-    loadUserData()
-  }, [])
-
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     const supabase = createClient()
 
     // Get current user
@@ -113,7 +108,11 @@ export default function AccountPage() {
     }
 
     setLoading(false)
-  }
+  }, [router])
+
+  useEffect(() => {
+    loadUserData()
+  }, [loadUserData])
 
   const handleSaveProfile = async () => {
     if (!user) return

@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ShoppingBag, X } from 'lucide-react'
 import { create } from 'zustand'
