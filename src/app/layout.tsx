@@ -4,6 +4,7 @@ import './globals.css'
 import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
 import { Analytics } from '@vercel/analytics/react'
+import { FilmGrain } from '@/components/cinema/FilmGrain'
 
 // ANIMA Typography System
 const playfair = Playfair_Display({
@@ -94,6 +95,7 @@ export default function RootLayout({
           Saltar al contenido principal
         </a>
         {children}
+        <FilmGrain />
         <ToastContainer />
         <ClientProviders />
         <Analytics />

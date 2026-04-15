@@ -447,9 +447,17 @@ export default function AdminOrdersPage() {
                       className="border-b border-[#3D3936] hover:bg-[#3D3936]/50 transition"
                     >
                       <td className="px-6 py-4">
-                        <span className="font-mono text-sm text-[#B8B0A8]">
-                          #{order.order_number || order.id.slice(0, 8)}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-sm text-[#B8B0A8]">
+                            #{order.order_number || order.id.slice(0, 8)}
+                          </span>
+                          {order.source_provider &&
+                            order.source_provider !== "website" && (
+                              <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 bg-[#3D3936] text-[#C9A84C] w-fit">
+                                {order.source_provider.replace("_", " ")}
+                              </span>
+                            )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div>
@@ -469,7 +477,41 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-medium text-white">
-                        ${(order.total || 0).toFixed(2)}
+                        <div className="flex flex-col gap-1">
+                          <span>
+                            ${(order.total_amount ?? order.total ?? 0).toFixed(2)}
+                          </span>
+                          {order.payment_status && (
+                            <span
+                              className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 w-fit ${
+                                order.payment_status === "paid"
+                                  ? "bg-[#4CAF50]/15 text-[#4CAF50]"
+                                  : order.payment_status === "failed" ||
+                                      order.payment_status === "voided"
+                                    ? "bg-[#C73E1D]/15 text-[#C73E1D]"
+                                    : order.payment_status ===
+                                          "processing_3ds" ||
+                                        order.payment_status ===
+                                          "awaiting_payment"
+                                      ? "bg-[#C9A84C]/15 text-[#C9A84C]"
+                                      : "bg-[#3D3936] text-[#B8B0A8]"
+                              }`}
+                            >
+                              {order.payment_status === "paid"
+                                ? "Pagado"
+                                : order.payment_status === "failed"
+                                  ? "Fallido"
+                                  : order.payment_status === "voided"
+                                    ? "Anulado"
+                                    : order.payment_status === "refunded"
+                                      ? "Reembolsado"
+                                      : order.payment_status ===
+                                          "processing_3ds"
+                                        ? "3DS"
+                                        : "Pendiente"}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <select
@@ -701,6 +743,66 @@ export default function AdminOrdersPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Payment */}
+              {(selectedOrder.payment_status ||
+                selectedOrder.card_last4 ||
+                selectedOrder.source_provider) && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium text-[#6B6560]">Pago</h3>
+                  <div className="bg-[#1F1D1A] border border-[#3D3936] p-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#6B6560]">Estado</span>
+                      <span className="text-[#FFF8F0]">
+                        {selectedOrder.payment_status ?? "—"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#6B6560]">Método</span>
+                      <span className="text-[#FFF8F0]">
+                        {selectedOrder.payment_method ?? "—"}
+                      </span>
+                    </div>
+                    {selectedOrder.source_provider && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B6560]">Origen</span>
+                        <span className="text-[#FFF8F0] capitalize">
+                          {selectedOrder.source_provider.replace("_", " ")}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.card_brand && selectedOrder.card_last4 && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B6560]">Tarjeta</span>
+                        <span className="text-[#FFF8F0]">
+                          {selectedOrder.card_brand} ···· {selectedOrder.card_last4}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.authorization_code && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B6560]">Autorización</span>
+                        <span className="text-[#FFF8F0] font-mono text-xs">
+                          {selectedOrder.authorization_code}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.processor_transaction_id && (
+                      <div className="flex justify-between">
+                        <span className="text-[#6B6560]">Tx ID</span>
+                        <span className="text-[#FFF8F0] font-mono text-[10px] break-all">
+                          {selectedOrder.processor_transaction_id}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.payment_error_message && (
+                      <div className="mt-2 p-2 bg-[#C73E1D]/10 border border-[#C73E1D]/30 text-[#FFF8F0] text-xs">
+                        {selectedOrder.payment_error_message}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Notes */}
               {selectedOrder.notes && (

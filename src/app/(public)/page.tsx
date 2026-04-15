@@ -19,7 +19,7 @@ const locations = [
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     phone: '+503 2445-5999',
     hours: 'Dom-Jue 11am-9pm | Vie-Sáb 11am-10pm',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
+    image: '/images/locations/santa-ana-cover.jpg',
     isOpen: true,
   },
   {
@@ -49,7 +49,7 @@ const locations = [
     address: 'Calle Principal, Centro Histórico',
     phone: '+503 7890-1234',
     hours: 'Vie-Dom 11am-8pm',
-    image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=800&q=80',
+    image: '/images/locations/simmer-garden-hero.jpg',
     isOpen: false,
   },
   {
@@ -67,26 +67,26 @@ const locations = [
 // Signature pizzas with proper images
 const signaturePizzas = [
   {
-    name: 'The Salvadoreño',
-    description: 'Chorizo artesanal salvadoreño, queso fresco, jalapeños encurtidos, cilantro fresco',
-    price: '$18.99',
-    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80',
+    name: 'La Memoravel',
+    description: 'Fajitas de res y pollo, cebolla marinada, elotito amarillo, cubierta en salsa BBQ, con un toque de ajonjolí',
+    price: '$17.99',
+    image: '/images/menu/pizza-memoravel.jpg',
     badge: 'Signature',
     tags: ['spicy'],
   },
   {
-    name: 'Truffle Mushroom',
-    description: 'Mix de hongos silvestres, aceite de trufa negra, queso fontina, arúgula baby',
-    price: '$22.99',
-    image: 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=600&q=80',
+    name: 'La Maradona',
+    description: '¡El tributo a una leyenda! Chorizo argentino nivel D10S, pimientos verdes, cebolla y nuestro especial chimichurri',
+    price: '$14.99',
+    image: '/images/menu/pizza-maradona.jpg',
     badge: 'Chef Choice',
-    tags: ['vegetarian'],
+    tags: ['spicy'],
   },
   {
-    name: 'Margherita DOP',
-    description: 'Tomate San Marzano DOP, mozzarella di bufala, albahaca fresca, aceite de oliva',
-    price: '$16.99',
-    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80',
+    name: 'Margherita',
+    description: 'Tomates cherrys marinados y albahaca fresca. La clásica italiana.',
+    price: '$14.99',
+    image: '/images/menu/pizzas-hero.jpg',
     badge: 'Clásica',
     tags: ['vegetarian'],
   },
@@ -400,8 +400,8 @@ export default function Home() {
         {/* Background with warm overlay */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1920&q=80"
-            alt="Pizza artesanal saliendo del horno de leña"
+            src="/images/heroes/homepage-pizzas.jpg"
+            alt="Trío de pizzas artesanales Simmer Down — La Maradona, Margherita, Prosciutto"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-[#2D2A26]/80" />
@@ -655,8 +655,8 @@ export default function Home() {
               className="relative"
             >
               <img
-                src="https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=800&q=80"
-                alt="Chef preparando pizza artesanal en horno de leña"
+                src="/images/menu/terramar-maitre.jpg"
+                alt="Terramar al Maître — camarones jumbo y lomito de res con mantequilla maître"
                 className="w-full aspect-square object-cover"
               />
               <div className="absolute inset-0 border border-[#FF6B35]/20" />

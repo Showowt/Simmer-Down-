@@ -382,6 +382,72 @@ function OrderTracker() {
               </div>
             </div>
 
+            {/* Payment Details */}
+            {(order.payment_status || order.card_last4) && (
+              <div className="bg-[#252320] border border-[#3D3936] p-6">
+                <h2 className="font-semibold text-[#FFF8F0] mb-4">Pago</h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#6B6560]">Estado</span>
+                    <span
+                      className={`font-medium ${
+                        order.payment_status === "paid"
+                          ? "text-[#4CAF50]"
+                          : order.payment_status === "failed" ||
+                              order.payment_status === "voided"
+                            ? "text-[#C73E1D]"
+                            : "text-[#C9A84C]"
+                      }`}
+                    >
+                      {order.payment_status === "paid"
+                        ? "Pagado"
+                        : order.payment_status === "failed"
+                          ? "Fallido"
+                          : order.payment_status === "voided"
+                            ? "Anulado"
+                            : order.payment_status === "refunded"
+                              ? "Reembolsado"
+                              : order.payment_status === "processing_3ds"
+                                ? "Autenticando"
+                                : "Pendiente"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6B6560]">Método</span>
+                    <span className="text-[#FFF8F0] capitalize">
+                      {order.payment_method === "card"
+                        ? "Tarjeta"
+                        : order.payment_method === "cash"
+                          ? "Efectivo"
+                          : order.payment_method || "—"}
+                    </span>
+                  </div>
+                  {order.card_brand && order.card_last4 && (
+                    <div className="flex justify-between">
+                      <span className="text-[#6B6560]">Tarjeta</span>
+                      <span className="text-[#FFF8F0]">
+                        {order.card_brand} ···· {order.card_last4}
+                      </span>
+                    </div>
+                  )}
+                  {order.authorization_code && (
+                    <div className="flex justify-between">
+                      <span className="text-[#6B6560]">Autorización</span>
+                      <span className="text-[#FFF8F0] font-mono text-xs">
+                        {order.authorization_code}
+                      </span>
+                    </div>
+                  )}
+                  {order.payment_error_message &&
+                    order.payment_status === "failed" && (
+                      <div className="p-3 bg-[#C73E1D]/10 border border-[#C73E1D]/30 text-[#FFF8F0] text-xs">
+                        {order.payment_error_message}
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex flex-col gap-3">
               <div className="flex gap-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -16,10 +16,18 @@ import {
   CreditCard,
   AlertCircle,
   ChevronDown,
+  Wallet,
 } from "lucide-react";
+import Link from "next/link";
+
 import { useCartStore } from "@/store/cart";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
+import {
+  CardForm,
+  validateCardForm,
+  type CardFormValue,
+} from "@/components/checkout/CardForm";
+import { ThreeDSModal } from "@/components/checkout/ThreeDSModal";
 
 interface Location {
   id: string;
@@ -32,7 +40,6 @@ interface Location {
   delivery_fee: number;
 }
 
-// Fallback locations if database not configured
 const fallbackLocations: Location[] = [
   {
     id: "santa-ana",
@@ -74,7 +81,19 @@ const fallbackLocations: Location[] = [
     delivery_enabled: true,
     delivery_fee: 5.99,
   },
+  {
+    id: "simmer-garden",
+    name: "Simmer Garden",
+    slug: "simmer-garden",
+    address_line1: "Kilómetro 91.5, San José La Majada",
+    city: "Juayúa, Sonsonate",
+    is_accepting_orders: true,
+    delivery_enabled: true,
+    delivery_fee: 4.99,
+  },
 ];
+
+type PaymentMethod = "card" | "cash";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -83,6 +102,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [locations, setLocations] = useState<Location[]>(fallbackLocations);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -93,11 +113,22 @@ export default function CheckoutPage() {
     city: "",
     notes: "",
   });
+  const [card, setCard] = useState<CardFormValue>({
+    pan: "",
+    cvv: "",
+    exp: "",
+    holder: "",
+  });
+  const [cardErrors, setCardErrors] = useState<
+    Partial<Record<keyof CardFormValue, string>>
+  >({});
+  const [threeDsData, setThreeDsData] = useState<{
+    orderId: string;
+    redirectData: string;
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
-
-    // Fetch locations from database
     async function fetchLocations() {
       try {
         const supabase = createClient();
@@ -115,17 +146,40 @@ export default function CheckoutPage() {
           setLocations(data);
           setSelectedLocation(data[0].id);
         } else {
-          // Use fallback and set first as selected
           setSelectedLocation(fallbackLocations[0].id);
         }
-      } catch (err) {
-        console.log("Using fallback locations");
+      } catch {
         setSelectedLocation(fallbackLocations[0].id);
       }
     }
-
     fetchLocations();
   }, []);
+
+  const handle3DsResult = useCallback(
+    async (res: {
+      type: "paid" | "failed" | "timeout" | "closed";
+      orderId: string;
+      message?: string;
+    }) => {
+      setThreeDsData(null);
+      if (res.type === "paid") {
+        clearCart();
+        router.push(`/orders?id=${res.orderId}&paid=1`);
+        return;
+      }
+      if (res.type === "failed") {
+        setError(res.message || "El pago no pudo completarse. Intenta de nuevo.");
+      } else if (res.type === "timeout") {
+        setError(
+          "La autenticación tomó demasiado tiempo. Revisa tu pedido y vuelve a intentar.",
+        );
+      } else {
+        setError("Pago cancelado.");
+      }
+      setLoading(false);
+    },
+    [router, clearCart],
+  );
 
   if (!mounted) {
     return (
@@ -140,7 +194,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !threeDsData) {
     router.push("/cart");
     return null;
   }
@@ -153,6 +207,71 @@ export default function CheckoutPage() {
       : 0;
   const total = subtotal + deliveryFee;
 
+  const createOrder = async () => {
+    const response = await fetch("/api/orders/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locationId: selectedLocation,
+        orderType,
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        customerEmail: formData.email || null,
+        deliveryAddress: orderType === "delivery" ? formData.address : null,
+        deliveryCity: orderType === "delivery" ? formData.city : null,
+        notes: formData.notes || null,
+        items: items.map((i) => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+          price: i.price,
+          description: i.description || undefined,
+        })),
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok || !body?.success || !body?.order) {
+      const msg =
+        Array.isArray(body?.errors) && body.errors.length > 0
+          ? body.errors.map((e: { message: string }) => e.message).join(". ")
+          : body?.message || "Error al crear el pedido";
+      throw new Error(msg);
+    }
+    return body.order as {
+      id: string;
+      orderNumber: string;
+      total: number;
+      subtotal: number;
+      deliveryFee: number;
+    };
+  };
+
+  const initiatePayment = async (orderId: string) => {
+    const response = await fetch("/api/payments/initiate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        card,
+        billing: {
+          line1: orderType === "delivery" ? formData.address : currentLocation?.address_line1 || "—",
+          city: orderType === "delivery" ? formData.city : currentLocation?.city || "San Salvador",
+          postalCode: "01101",
+          countryCode: "SV",
+          email: formData.email || null,
+          phone: formData.phone,
+        },
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok || !body?.success) {
+      throw new Error(
+        body?.message || "No se pudo iniciar el pago con tarjeta.",
+      );
+    }
+    return body as { spiToken: string; redirectData: string; orderId: string };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -164,64 +283,35 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (paymentMethod === "card") {
+      const validationErrors = validateCardForm(card);
+      if (validationErrors) {
+        setCardErrors(validationErrors);
+        setError("Revisa los datos de la tarjeta.");
+        setLoading(false);
+        return;
+      }
+      setCardErrors({});
+    }
+
     try {
-      // Call server-side order creation API
-      // Server validates input, fetches real prices from DB, calculates totals
-      const response = await fetch("/api/orders/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locationId: selectedLocation,
-          orderType: orderType,
-          customerName: formData.name,
-          customerPhone: formData.phone,
-          customerEmail: formData.email || null,
-          deliveryAddress: orderType === "delivery" ? formData.address : null,
-          deliveryCity: orderType === "delivery" ? formData.city : null,
-          notes: formData.notes || null,
-          items: items.map((item) => ({
-            id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            description: item.description || undefined,
-          })),
-        }),
-      });
+      const order = await createOrder();
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        // Handle validation errors
-        if (result.errors && Array.isArray(result.errors)) {
-          const errorMessages = result.errors
-            .map((e: { field: string; message: string }) => e.message)
-            .join(". ");
-          throw new Error(
-            errorMessages || result.message || "Error de validación",
-          );
-        }
-        throw new Error(result.message || "Error al procesar pedido");
+      if (paymentMethod === "cash") {
+        clearCart();
+        router.push(`/orders?id=${order.id}&number=${order.orderNumber}`);
+        return;
       }
 
-      if (!result.success || !result.order) {
-        throw new Error(result.message || "Error al crear el pedido");
-      }
-
-      // Only clear cart on successful order
-      clearCart();
-      router.push(
-        `/orders?id=${result.order.id}&number=${result.order.orderNumber}`,
-      );
+      const { redirectData, orderId } = await initiatePayment(order.id);
+      setThreeDsData({ orderId, redirectData });
     } catch (err) {
-      console.error("Error al procesar pedido:", err);
-      // Don't clear cart on error - keep items for retry
-      const errorMessage =
+      console.error("checkout submit error", err);
+      setError(
         err instanceof Error
           ? err.message
-          : "Hubo un problema al procesar tu pedido";
-      setError(errorMessage);
-    } finally {
+          : "Hubo un problema al procesar tu pedido",
+      );
       setLoading(false);
     }
   };
@@ -229,7 +319,6 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -248,7 +337,6 @@ export default function CheckoutPage() {
           <p className="text-[#6B6560]">Completa tu orden</p>
         </motion.div>
 
-        {/* Error Message */}
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -261,7 +349,7 @@ export default function CheckoutPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Order Type */}
+          {/* Order type */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -299,7 +387,7 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
-          {/* Location Selection */}
+          {/* Location */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -324,17 +412,9 @@ export default function CheckoutPage() {
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
             </div>
-            {currentLocation &&
-              orderType === "delivery" &&
-              !currentLocation.delivery_enabled && (
-                <p className="mt-2 text-sm text-[#FF6B35]">
-                  Esta ubicación no ofrece delivery. Por favor selecciona
-                  Recoger.
-                </p>
-              )}
           </motion.div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -346,10 +426,7 @@ export default function CheckoutPage() {
             </h2>
             <div className="space-y-4">
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-[#B8B0A8] mb-2"
-                >
+                <label htmlFor="name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                   Nombre *
                 </label>
                 <div className="relative">
@@ -358,21 +435,16 @@ export default function CheckoutPage() {
                     id="name"
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
                     placeholder="Tu nombre"
                   />
                 </div>
               </div>
-
               <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-[#B8B0A8] mb-2"
-                >
+                <label htmlFor="phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
                   Teléfono *
                 </label>
                 <div className="relative">
@@ -384,31 +456,25 @@ export default function CheckoutPage() {
                     autoComplete="tel"
                     required
                     value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
                     placeholder="+503 XXXX-XXXX"
                   />
                 </div>
               </div>
-
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-[#B8B0A8] mb-2"
-                >
-                  Correo (opcional)
+                <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                  Correo {paymentMethod === "card" ? "*" : "(opcional)"}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
                   <input
                     id="email"
                     type="email"
+                    autoComplete="email"
+                    required={paymentMethod === "card"}
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
                     placeholder="tu@email.com"
                   />
@@ -417,7 +483,7 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
-          {/* Delivery Address */}
+          {/* Delivery address */}
           {orderType === "delivery" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -429,43 +495,33 @@ export default function CheckoutPage() {
               </h2>
               <div className="space-y-4">
                 <div className="relative">
-                  <label htmlFor="address" className="sr-only">
-                    Dirección
-                  </label>
                   <MapPin className="absolute left-4 top-4 w-5 h-5 text-[#6B6560]" />
                   <textarea
                     id="address"
                     required
+                    autoComplete="street-address"
                     value={formData.address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
                     rows={2}
                     placeholder="Calle, número, colonia, referencias"
                   />
                 </div>
-                <div className="relative">
-                  <label htmlFor="city" className="sr-only">
-                    Ciudad
-                  </label>
-                  <input
-                    id="city"
-                    type="text"
-                    required
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData({ ...formData, city: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
-                    placeholder="Ciudad"
-                  />
-                </div>
+                <input
+                  id="city"
+                  type="text"
+                  required
+                  autoComplete="address-level2"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
+                  placeholder="Ciudad"
+                />
               </div>
             </motion.div>
           )}
 
-          {/* Special Instructions */}
+          {/* Notes */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -476,16 +532,11 @@ export default function CheckoutPage() {
               Instrucciones Especiales
             </h2>
             <div className="relative">
-              <label htmlFor="notes" className="sr-only">
-                Notas adicionales
-              </label>
               <FileText className="absolute left-4 top-4 w-5 h-5 text-[#6B6560]" />
               <textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
-                  setFormData({ ...formData, notes: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
                 rows={2}
                 placeholder="¿Alguna solicitud especial? (alergias, servilletas extra, etc.)"
@@ -493,7 +544,56 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
-          {/* Order Summary */}
+          {/* Payment method */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="bg-[#252320] border border-[#3D3936] p-6"
+          >
+            <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
+              Método de Pago
+            </h2>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("card")}
+                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
+                  paymentMethod === "card"
+                    ? "border-[#FF6B35] bg-[#FF6B35]/10 text-[#FF6B35]"
+                    : "border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560]"
+                }`}
+              >
+                <CreditCard className="w-5 h-5" />
+                <span className="font-medium">Tarjeta</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("cash")}
+                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
+                  paymentMethod === "cash"
+                    ? "border-[#FF6B35] bg-[#FF6B35]/10 text-[#FF6B35]"
+                    : "border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560]"
+                }`}
+              >
+                <Wallet className="w-5 h-5" />
+                <span className="font-medium">
+                  Pago en {orderType === "delivery" ? "Entrega" : "Local"}
+                </span>
+              </button>
+            </div>
+
+            {paymentMethod === "card" && (
+              <CardForm
+                value={card}
+                onChange={setCard}
+                disabled={loading}
+                errors={cardErrors}
+              />
+            )}
+          </motion.div>
+
+          {/* Summary */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -533,27 +633,7 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
-          {/* Payment Notice */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-[#252320]/50 border border-[#3D3936] p-4 flex items-center gap-4"
-          >
-            <div className="w-10 h-10 bg-[#FF6B35]/10 flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-5 h-5 text-[#FF6B35]" />
-            </div>
-            <div>
-              <p className="text-[#FFF8F0] text-sm font-medium">
-                Pago en {orderType === "delivery" ? "Entrega" : "Recogida"}
-              </p>
-              <p className="text-[#6B6560] text-xs">
-                El pago se realizará cuando recibas tu pedido
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Submit Button */}
+          {/* Submit */}
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -570,12 +650,23 @@ export default function CheckoutPage() {
             ) : (
               <>
                 <Lock className="w-5 h-5" />
-                Confirmar Pedido • ${total.toFixed(2)}
+                {paymentMethod === "card"
+                  ? `Pagar $${total.toFixed(2)}`
+                  : `Confirmar Pedido · $${total.toFixed(2)}`}
               </>
             )}
           </motion.button>
         </form>
       </div>
+
+      {threeDsData && (
+        <ThreeDSModal
+          orderId={threeDsData.orderId}
+          redirectData={threeDsData.redirectData}
+          onResult={handle3DsResult}
+          onClose={() => setThreeDsData(null)}
+        />
+      )}
     </div>
   );
 }

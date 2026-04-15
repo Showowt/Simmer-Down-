@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# Session state (may contain tokens/credentials)
+.claude/
+
+# Supabase CLI cache
+/supabase/.temp/

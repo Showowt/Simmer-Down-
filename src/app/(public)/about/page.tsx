@@ -84,8 +84,8 @@ export default function AboutPage() {
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=1920"
-            alt="Pizza making"
+            src="/images/heroes/homepage-pizzas.jpg"
+            alt="Pizzas artesanales Simmer Down"
             fill
             className="object-cover opacity-20"
             priority
@@ -155,32 +155,32 @@ export default function AboutPage() {
             >
               <div className="relative h-48">
                 <Image
-                  src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400"
-                  alt="Wood-fired pizza with fresh toppings"
+                  src="/images/menu/pizza-maradona.jpg"
+                  alt="Pizza La Maradona — chorizo argentino y chimichurri"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48 mt-8">
                 <Image
-                  src="https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=400"
-                  alt="Traditional pizza oven"
+                  src="/images/locations/santa-ana-cover.jpg"
+                  alt="Simmer Down frente a la Catedral de Santa Ana"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48">
                 <Image
-                  src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400"
-                  alt="Fresh pizza ingredients"
+                  src="/images/menu/molcajete-coulotte.jpg"
+                  alt="Molcajete Coulotte — corte de res con tuétano"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48 mt-8">
                 <Image
-                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400"
-                  alt="Restaurant interior"
+                  src="/images/locations/santa-ana-interior.jpg"
+                  alt="Interior del restaurante Simmer Down Santa Ana"
                   fill
                   className="object-cover"
                 />

@@ -43,8 +43,7 @@ const locations: Array<{
       weekend: "Vie-Sab: 11:00 AM - 10:00 PM",
     },
     features: ["Vista a la Catedral", "Musica en Vivo", "Terraza"],
-    image:
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+    image: "/images/locations/santa-ana-cover.jpg",
     iconType: "coffee",
     isOpen: true,
     rating: 4.9,
@@ -112,8 +111,7 @@ const locations: Array<{
       weekend: "Cerrado Lun-Jue",
     },
     features: ["Jardin", "Cafe de Altura", "Montana"],
-    image:
-      "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80",
+    image: "/images/locations/simmer-garden-hero.jpg",
     iconType: "coffee",
     isOpen: false,
     rating: 4.9,

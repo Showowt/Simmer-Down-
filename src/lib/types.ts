@@ -7,20 +7,7 @@ export interface MenuItem {
   price: number;
   price_grand?: number; // For pizzas with two sizes
   image_url: string | null;
-  category:
-    | "entradas"
-    | "ensaladas"
-    | "pastas"
-    | "pizzas"
-    | "platos-fuertes"
-    | "menu-infantil"
-    | "bebidas"
-    | "postres"
-    | "cervezas"
-    | "pizza"
-    | "sides"
-    | "drinks"
-    | "desserts";
+  category: string; // Flexible to support all category types
   subcategory?: string | null;
   tags?: string[];
   available: boolean;
@@ -32,33 +19,139 @@ export interface CartItem extends MenuItem {
   quantity: number;
 }
 
+/**
+ * Production schema: payment state lives in the `payments` table.
+ * Orders carry only: order_source, external_order_id, external_payload.
+ */
+export type PaymentMethod =
+  | "card"
+  | "cash"
+  | "transfer"
+  | "other"
+  | "powertranz"
+  | "uber_eats"
+  | "doordash"
+  | "pedidos_ya"
+  | "hugo";
+
+export type PaymentStatusDb =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed"
+  | "refunded"
+  | "partially_refunded"
+  | "cancelled";
+
+/** UI-friendly payment status (collapsed from the DB enum). */
+export type PaymentStatusUi =
+  | "pending"
+  | "processing_3ds"
+  | "paid"
+  | "failed"
+  | "refunded"
+  | "voided";
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "out_for_delivery"
+  | "completed"
+  | "cancelled"
+  | "refunded"
+  // Legacy values — retained so existing admin UI type-checks.
+  // Live DB uses the canonical enum above; these will evaluate to false
+  // against real order.status values.
+  | "in_progress"
+  | "delivered";
+
+export type OrderType = "dine_in" | "pickup" | "takeout" | "delivery";
+
+export type OrderSourceProvider =
+  | "website"
+  | "whatsapp"
+  | "admin"
+  | "phone"
+  | "uber_eats"
+  | "doordash"
+  | "pedidos_ya"
+  | "hugo";
+
+export interface Payment {
+  id: string;
+  order_id: string;
+  amount: number;
+  currency?: string | null;
+  payment_method: PaymentMethod;
+  status: PaymentStatusDb;
+  card_brand?: string | null;
+  card_last_four?: string | null;
+  authorization_code?: string | null;
+  powertranz_transaction_id?: string | null;
+  paid_at?: string | null;
+  failed_at?: string | null;
+  refunded_at?: string | null;
+  failure_reason?: string | null;
+  error_code?: string | null;
+  initiated_at?: string | null;
+  created_at: string;
+}
+
 export interface Order {
   id: string;
   order_number?: string;
-  customer_id?: string;
-  location_id?: string;
+  customer_id?: string | null;
+  location_id?: string | null;
   customer_name: string;
   customer_phone: string;
   customer_email?: string | null;
-  delivery_address?: string | null;
-  is_delivery: boolean;
-  order_type?: "delivery" | "pickup";
-  items?: CartItem[];
-  items_json?: CartItem[] | null;
-  items_description?: string | null;
+  delivery_address_line1?: string | null;
+  delivery_address_line2?: string | null;
+  delivery_city?: string | null;
+  delivery_instructions?: string | null;
+  order_type?: OrderType;
+  status: OrderStatus;
   subtotal: number;
-  delivery_fee: number;
-  discount?: number;
-  total: number;
-  payment_method?: string;
-  payment_status?: "pending" | "paid" | "refunded";
-  status: "pending" | "in_progress" | "ready" | "delivered" | "cancelled";
-  notes?: string | null;
-  pickup_scheduled_at?: string | null;
+  tax_amount?: number | null;
+  delivery_fee?: number | null;
+  discount_amount?: number | null;
+  tip_amount?: number | null;
+  total_amount: number;
+  customer_notes?: string | null;
+  internal_notes?: string | null;
+  order_source?: OrderSourceProvider | string | null;
+  external_order_id?: string | null;
+  external_payload?: unknown;
+  placed_at?: string | null;
+  confirmed_at?: string | null;
   estimated_ready_at?: string | null;
-  delivered_at?: string | null;
+  ready_at?: string | null;
+  completed_at?: string | null;
+  cancelled_at?: string | null;
   created_at: string;
-  updated_at?: string;
+  updated_at?: string | null;
+  // Optional joined payment row (populated by queries that select payments(*)).
+  payments?: Payment[] | Payment | null;
+  // ─── Legacy compatibility (old schema; still referenced by existing UI) ───
+  // These fields do not exist in the production DB but the UI falls back
+  // to them safely. New code should prefer the canonical fields above.
+  is_delivery?: boolean;
+  delivery_address?: string | null;
+  total?: number;
+  notes?: string | null;
+  items?: CartItem[];
+  items_json?: CartItem[] | unknown;
+  items_description?: string | null;
+  payment_status?: PaymentStatusUi | string;
+  payment_method?: string;
+  card_brand?: string | null;
+  card_last4?: string | null;
+  authorization_code?: string | null;
+  payment_error_message?: string | null;
+  source_provider?: OrderSourceProvider | string | null;
+  processor_transaction_id?: string | null;
 }
 
 export interface Profile {
