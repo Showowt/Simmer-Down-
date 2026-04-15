@@ -29,7 +29,7 @@ const locations = [
     address: 'Calle Principal al Lago #119',
     phone: '+503 6831-6907',
     hours: 'Dom-Jue 11am-8pm | Vie-Sáb 11am-9pm',
-    image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80',
+    image: '/images/locations/coatepeque-cover.jpg',
     isOpen: true,
   },
   {
@@ -39,7 +39,7 @@ const locations = [
     address: 'Boulevard del Hipódromo, San Benito',
     phone: '+503 2263-7890',
     hours: 'Lun-Dom 11am-11pm',
-    image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80',
+    image: '/images/locations/san-benito-cover.jpg',
     isOpen: true,
   },
   {
@@ -59,7 +59,7 @@ const locations = [
     address: 'Boulevard Costa del Sol',
     phone: '+503 7654-3210',
     hours: 'Lun-Dom 10am-10pm',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80',
+    image: '/images/locations/surf-city-exterior.jpg',
     isOpen: true,
   },
 ]

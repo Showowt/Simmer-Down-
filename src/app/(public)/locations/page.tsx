@@ -65,8 +65,7 @@ const locations: Array<{
       weekend: "Vie-Sab: 11:00 AM - 9:00 PM",
     },
     features: ["Vista al Lago", "Atardeceres", "Zona Privada"],
-    image:
-      "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80",
+    image: "/images/locations/coatepeque-cover.jpg",
     iconType: "mountain",
     isOpen: true,
     rating: 4.9,
@@ -88,8 +87,7 @@ const locations: Array<{
       weekend: "Viernes y Sabados hasta medianoche",
     },
     features: ["Zona Rosa", "Jazz Nights", "Valet Parking"],
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+    image: "/images/locations/san-benito-cover.jpg",
     iconType: "music",
     isOpen: true,
     rating: 4.8,
@@ -133,8 +131,7 @@ const locations: Array<{
       weekend: "Happy Hour 4-7 PM",
     },
     features: ["Vista al Mar", "Surf Vibes", "Cocteles"],
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+    image: "/images/locations/surf-city-exterior.jpg",
     iconType: "waves",
     isOpen: true,
     rating: 4.8,
