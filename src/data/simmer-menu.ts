@@ -21,6 +21,7 @@ export interface MenuItem {
   category: string
   tags?: string[]
   bestSeller?: boolean
+  image?: string // Local /images/menu path, optional
   locations: LocationId[] // Which locations have this item
   locationPrices?: Partial<Record<LocationId, number>> // Location-specific pricing
 }
@@ -105,6 +106,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🌶️ spicy', '🔥 signature'],
     bestSeller: true,
+    image: '/images/menu/molcajete-coulotte.jpg',
     locations: ALL
   },
   {
@@ -139,6 +141,7 @@ export const MENU: MenuItem[] = [
     price: 6.99,
     category: 'entradas',
     tags: ['🌱 veg'],
+    image: '/images/menu/entradas-cheese-balls.jpg',
     locations: ALL
   },
   {
@@ -231,6 +234,7 @@ export const MENU: MenuItem[] = [
     category: 'pastas',
     tags: ['🦐 seafood'],
     bestSeller: true,
+    image: '/images/menu/pasta-fettuccine-mar-tierra.jpg',
     locations: ALL
   },
   {
@@ -247,6 +251,7 @@ export const MENU: MenuItem[] = [
     description: 'Penne pasta with crispy bacon, fresh broccoli, grilled chicken, creamy alfredo sauce, mozzarella gratin. Served with garlic toast',
     price: 7.99,
     category: 'pastas',
+    image: '/images/menu/pasta-penne-brocoli-tocino.jpg',
     locations: ALL
   },
 
@@ -281,6 +286,7 @@ export const MENU: MenuItem[] = [
     category: 'pizzas',
     tags: ['🔥 signature'],
     bestSeller: true,
+    image: '/images/menu/pizza-maradona.jpg',
     locations: ALL
   },
   {
@@ -412,6 +418,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 6.25,
     category: 'pizzas-especiales',
     bestSeller: true,
+    image: '/images/menu/pizza-memoravel.jpg',
     locations: ALL
   },
   {
@@ -475,6 +482,7 @@ export const MENU: MenuItem[] = [
     category: 'platos-fuertes',
     tags: ['🦐 seafood', '🔥 signature'],
     bestSeller: true,
+    image: '/images/menu/terramar-maitre.jpg',
     locations: ALL,
     locationPrices: { 'lago-coatepeque': 22.50 }
   },
@@ -486,6 +494,7 @@ export const MENU: MenuItem[] = [
     category: 'platos-fuertes',
     tags: ['🔥 signature', '⭐ #1'],
     bestSeller: true,
+    image: '/images/menu/medallon-lomito-maitre.jpg',
     locations: ALL,
     locationPrices: { 'lago-coatepeque': 19.99 }
   },
@@ -538,6 +547,7 @@ export const MENU: MenuItem[] = [
     description: 'Refreshing frozen drinks: Coconut, Pineapple, Strawberry, Mint, Passion Fruit, Watermelon, or "Positive Vibration" mix',
     price: 3.75,
     category: 'bebidas-frias',
+    image: '/images/menu/frozen-positive.jpg',
     locations: ALL
   },
   {
@@ -772,6 +782,7 @@ export const MENU: MenuItem[] = [
     price: 1.50,
     category: 'cervezas',
     bestSeller: true,
+    image: '/images/menu/michelada.jpg',
     locations: ALL
   },
   {
@@ -803,6 +814,7 @@ export const MENU: MenuItem[] = [
     category: 'postres',
     tags: ['🌱 veg'],
     bestSeller: true,
+    image: '/images/menu/brownie-helado.jpg',
     locations: ALL
   },
   {
@@ -819,6 +831,7 @@ export const MENU: MenuItem[] = [
     name: 'Panna Cotta',
     description: 'Italian cream dessert with your choice: Red Fruits, Passion Fruit, or Strawberry - TOP #1 DESSERT',
     price: 3.99,
+    image: '/images/menu/panna-cotta.jpg',
     category: 'postres',
     tags: ['🌱 veg', '⭐ #1'],
     bestSeller: true,

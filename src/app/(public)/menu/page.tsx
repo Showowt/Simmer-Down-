@@ -251,11 +251,24 @@ function MenuItemCard({
 
   return (
     <div className="group">
-      {/* Image placeholder with category icon */}
+      {/* Image or category-icon fallback */}
       <div className="aspect-square bg-[#252320] overflow-hidden mb-4 relative flex items-center justify-center">
-        <span className="text-6xl opacity-30">
-          {categories.find((c) => c.id === item.category)?.icon || "🍽️"}
-        </span>
+        {item.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+        ) : (
+          <span className="text-6xl opacity-30">
+            {categories.find((c) => c.id === item.category)?.icon || "🍽️"}
+          </span>
+        )}
+        {item.image && (
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent pointer-events-none" />
+        )}
 
         {/* Tags overlay */}
         {item.tags && item.tags.length > 0 && (
