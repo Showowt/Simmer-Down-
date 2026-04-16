@@ -109,14 +109,73 @@ function createClient() {
 }
 
 // ─────────────────────────────────────────────
+// SSR fallback data (visible until live data hydrates)
+// Matches the seeded DB so what you see here is what you see after hydration.
+// ─────────────────────────────────────────────
+const FALLBACK_TIERS: TierConfig[] = [
+  {
+    tier: "bronze",
+    display_name: "Bronze",
+    display_name_es: "Bronce",
+    min_lifetime_points: 0,
+    points_multiplier: 1.0,
+    perks: [],
+    perks_es: ["1 punto por cada $1", "Recompensa de cumpleaños", "Ofertas exclusivas"],
+    color_hex: "#8B6F3A",
+  },
+  {
+    tier: "silver",
+    display_name: "Silver",
+    display_name_es: "Plata",
+    min_lifetime_points: 500,
+    points_multiplier: 1.25,
+    perks: [],
+    perks_es: ["1.25x puntos", "Delivery gratis", "Acceso anticipado al menú"],
+    color_hex: "#B8B0A8",
+  },
+  {
+    tier: "gold",
+    display_name: "Gold",
+    display_name_es: "Oro",
+    min_lifetime_points: 1500,
+    points_multiplier: 1.5,
+    perks: [],
+    perks_es: ["1.5x puntos", "Pickup prioritario", "Toppings premium gratis", "Invitación mensual a degustación"],
+    color_hex: "#C9A84C",
+  },
+  {
+    tier: "platinum",
+    display_name: "Platinum",
+    display_name_es: "Platino",
+    min_lifetime_points: 5000,
+    points_multiplier: 2.0,
+    perks: [],
+    perks_es: ["2x puntos", "Eventos VIP", "Merch exclusivo", "Reservas prioritarias", "Pizza de cumpleaños cortesía"],
+    color_hex: "#E5E4E2",
+  },
+];
+
+const FALLBACK_REWARDS: LoyaltyReward[] = [
+  { id: "fb-1", name: "Free Drink", name_es: "Bebida Gratis", description: null, description_es: "Cualquier bebida del menú", points_required: 100, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/frozen-positive.jpg", display_order: 1 },
+  { id: "fb-2", name: "Free Side", name_es: "Acompañamiento Gratis", description: null, description_es: "Pan de ajo, papas o aros de cebolla", points_required: 250, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/entradas-cheese-balls.jpg", display_order: 2 },
+  { id: "fb-3", name: "Free Dessert", name_es: "Postre Gratis", description: null, description_es: "Brownie, panna cotta o tiramisú", points_required: 300, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/brownie-helado.jpg", display_order: 3 },
+  { id: "fb-4", name: "10% Off", name_es: "10% de Descuento", description: null, description_es: "10% de descuento en tu próximo pedido", points_required: 400, reward_type: "percent_discount", discount_percent: 10, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/pizzas-hero.jpg", display_order: 4 },
+  { id: "fb-5", name: "Free Personal Pizza", name_es: "Pizza Personal Gratis", description: null, description_es: "Pizza personal de cualquier sabor del menú regular", points_required: 500, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/pizza-maradona.jpg", display_order: 5 },
+  { id: "fb-6", name: "$15 Off", name_es: "$15 de Descuento", description: null, description_es: "$15 de descuento en pedidos de $40+", points_required: 750, reward_type: "fixed_discount", discount_percent: null, discount_amount: 15, min_tier_required: "silver", is_active: true, image_url: "/images/menu/terramar-maitre.jpg", display_order: 6 },
+  { id: "fb-7", name: "Free Large Pizza", name_es: "Pizza Grande Gratis", description: null, description_es: "Pizza grande de cualquier sabor signature", points_required: 1000, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "silver", is_active: true, image_url: "/images/menu/pizza-memoravel.jpg", display_order: 7 },
+  { id: "fb-8", name: "Pizza Party", name_es: "Pizza Party (4 Pizzas Grandes)", description: null, description_es: "Cuatro pizzas grandes + 4 bebidas", points_required: 2000, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "gold", is_active: true, image_url: "/images/heroes/homepage-pizzas.jpg", display_order: 8 },
+];
+
+// ─────────────────────────────────────────────
 // Main page
 // ─────────────────────────────────────────────
 export default function SimmerLoversPage() {
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [tierConfigs, setTierConfigs] = useState<TierConfig[]>([]);
-  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [tierConfigs, setTierConfigs] = useState<TierConfig[]>(FALLBACK_TIERS);
+  const [rewards, setRewards] = useState<LoyaltyReward[]>(FALLBACK_REWARDS);
   const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Render guest view on SSR. Replaced with live data post-hydration.
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
