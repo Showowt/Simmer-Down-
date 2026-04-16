@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: 'Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80',
+        url: 'https://simmerdownsv.com/og/home.jpg',
         width: 1200,
         height: 630,
         alt: 'Simmer Down - Restaurante y Destino Gastro-Musical en El Salvador',
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Simmer Down | Restaurante y Destino Gastro-Musical',
     description: '12 años creando memorias. 5 ubicaciones en El Salvador.',
-    images: ['https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80'],
+    images: ['https://simmerdownsv.com/og/home.jpg'],
   },
   robots: {
     index: true,
@@ -84,7 +84,6 @@ export default function RootLayout({
     <html lang="es" className="dark">
       <head>
         <meta name="theme-color" content="#2D2A26" />
-        <link rel="preconnect" href="https://images.unsplash.com" />
       </head>
       <body className={`${playfair.variable} ${jakarta.variable} ${caveat.variable} font-body bg-[#2D2A26] text-[#FFF8F0] antialiased`}>
         {/* Skip Link for Accessibility */}
@@ -108,7 +107,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Restaurant',
               name: 'Simmer Down',
-              image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&h=630&fit=crop&q=80',
+              image: 'https://simmerdownsv.com/og/home.jpg',
               '@id': 'https://simmer-down.vercel.app',
               url: 'https://simmer-down.vercel.app',
               telephone: '+503-2445-5999',
