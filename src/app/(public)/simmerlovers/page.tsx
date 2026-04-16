@@ -2,465 +2,261 @@
 
 import { motion } from "framer-motion";
 import {
-  Heart,
-  Star,
   Gift,
   Zap,
   Award,
   Users,
   ArrowRight,
-  Check,
   Sparkles,
   Crown,
   Flame,
-  Pizza,
   Percent,
   Calendar,
   TrendingUp,
   Clock,
   CheckCircle,
-  XCircle,
   Loader2,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useToastStore } from "@/components/Toast";
 
-// Types
-interface LoyaltyData {
+// ─────────────────────────────────────────────
+// Real production schema types
+// ─────────────────────────────────────────────
+type Tier = "bronze" | "silver" | "gold" | "platinum";
+
+interface Customer {
   id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  loyalty_points: number;
-  loyalty_tier: "starter" | "flame" | "inferno";
+  auth_user_id: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  birthday: string | null;
+  loyalty_tier: Tier;
+  loyalty_points_balance: number;
+  lifetime_points_earned: number;
   total_orders: number;
   total_spent: number;
-  birthday: string | null;
+  first_order_at: string | null;
   created_at: string;
 }
 
-interface PointsTransaction {
+interface TierConfig {
+  tier: Tier;
+  display_name: string;
+  display_name_es: string | null;
+  min_lifetime_points: number;
+  points_multiplier: number;
+  perks: string[];
+  perks_es: string[] | null;
+  color_hex: string;
+}
+
+interface LoyaltyReward {
   id: string;
+  name: string;
+  name_es: string | null;
+  description: string | null;
+  description_es: string | null;
+  points_required: number;
+  reward_type: string;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  min_tier_required: Tier;
+  is_active: boolean;
+  image_url: string | null;
+  display_order: number;
+}
+
+interface LoyaltyTransaction {
+  id: string;
+  transaction_type: string;
   points: number;
-  type: "earned" | "redeemed" | "bonus";
-  description: string;
+  balance_after: number;
+  description: string | null;
   created_at: string;
 }
 
-interface Reward {
-  id: string;
-  points: number;
-  reward: string;
-  icon: string;
-  description: string;
-  available: boolean;
-}
+const TIER_ORDER: Tier[] = ["bronze", "silver", "gold", "platinum"];
 
-// Constants
-const tiers = [
-  {
-    name: "Starter",
-    key: "starter",
-    minPoints: 0,
-    maxPoints: 499,
-    multiplier: 1,
-    color: "bg-[#6B6560]",
-    textColor: "text-[#6B6560]",
-    benefits: [
-      "1 punto por cada $1 gastado",
-      "Recompensa de cumpleaños",
-      "Ofertas exclusivas para miembros",
-    ],
-  },
-  {
-    name: "Flame",
-    key: "flame",
-    minPoints: 500,
-    maxPoints: 1499,
-    multiplier: 1.5,
-    color: "bg-[#FF6B35]",
-    textColor: "text-[#FF6B35]",
-    benefits: [
-      "1.5 puntos por cada $1 gastado",
-      "Delivery gratis",
-      "Acceso anticipado al menú",
-      "Puntos dobles en cumpleaños",
-    ],
-  },
-  {
-    name: "Inferno",
-    key: "inferno",
-    minPoints: 1500,
-    maxPoints: Infinity,
-    multiplier: 2,
-    color: "bg-[#E55A2B]",
-    textColor: "text-[#E55A2B]",
-    benefits: [
-      "2 puntos por cada $1 gastado",
-      "Toppings premium gratis",
-      "Acceso a eventos VIP",
-      "Merch exclusivo",
-      "Reservaciones prioritarias",
-    ],
-  },
+// Icons per tier
+const tierIcon: Record<Tier, React.ComponentType<{ className?: string }>> = {
+  bronze: Flame,
+  silver: Sparkles,
+  gold: Award,
+  platinum: Crown,
+};
+
+const perkIcons = [
+  { icon: Gift, title: "Recompensas de Cumpleaños" },
+  { icon: Zap, title: "Ofertas Flash Exclusivas" },
+  { icon: Sparkles, title: "Acceso Anticipado al Menú" },
+  { icon: Users, title: "Invitaciones a Eventos VIP" },
+  { icon: Percent, title: "Descuentos de Miembro" },
+  { icon: Calendar, title: "Pickup Prioritario" },
 ];
 
-const rewards: Reward[] = [
-  {
-    id: "1",
-    points: 100,
-    reward: "Bebida Gratis",
-    icon: "🥤",
-    description: "Cualquier bebida del menú",
-    available: true,
-  },
-  {
-    id: "2",
-    points: 250,
-    reward: "Acompañamiento Gratis",
-    icon: "🍟",
-    description: "Papas, aros de cebolla o pan de ajo",
-    available: true,
-  },
-  {
-    id: "3",
-    points: 500,
-    reward: "Pizza Mediana Gratis",
-    icon: "🍕",
-    description: "Pizza mediana de cualquier sabor",
-    available: true,
-  },
-  {
-    id: "4",
-    points: 750,
-    reward: "$15 de Descuento",
-    icon: "💰",
-    description: "Descuento en tu próxima compra",
-    available: true,
-  },
-  {
-    id: "5",
-    points: 1000,
-    reward: "Pizza Grande Gratis",
-    icon: "🍕",
-    description: "Pizza grande de cualquier sabor",
-    available: true,
-  },
-  {
-    id: "6",
-    points: 1500,
-    reward: "Pizza Party (4 Pizzas)",
-    icon: "🎉",
-    description: "4 pizzas grandes + bebidas",
-    available: true,
-  },
-];
-
-const perks = [
-  {
-    icon: Gift,
-    title: "Recompensas de Cumpleaños",
-    description:
-      "Pizza gratis durante tu mes de cumpleaños, ¡más puntos dobles toda la semana!",
-  },
-  {
-    icon: Zap,
-    title: "Ofertas Flash",
-    description:
-      "Ventas flash exclusivas para miembros y recompensas sorpresa.",
-  },
-  {
-    icon: Star,
-    title: "Acceso Anticipado",
-    description:
-      "Sé el primero en probar nuevos items del menú antes que nadie.",
-  },
-  {
-    icon: Users,
-    title: "Eventos VIP",
-    description:
-      "Invitaciones a eventos exclusivos de degustación y pizza parties.",
-  },
-  {
-    icon: Percent,
-    title: "Descuentos de Miembro",
-    description:
-      "Precios especiales en items selectos todos los días de la semana.",
-  },
-  {
-    icon: Calendar,
-    title: "Salta la Fila",
-    description: "Pickup prioritario y reservaciones en todas las ubicaciones.",
-  },
-];
-
-// Create Supabase client
-const createClient = () => {
+function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
-};
+}
 
-// Loyalty Dashboard Component (for logged-in users)
-function LoyaltyDashboard({
-  loyaltyData,
-  transactions,
-}: {
-  loyaltyData: LoyaltyData;
-  transactions: PointsTransaction[];
-}) {
-  const [redeeming, setRedeeming] = useState<string | null>(null);
-  const addToast = useToastStore((state) => state.addToast);
-  const supabase = createClient();
+// ─────────────────────────────────────────────
+// Main page
+// ─────────────────────────────────────────────
+export default function SimmerLoversPage() {
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [tierConfigs, setTierConfigs] = useState<TierConfig[]>([]);
+  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const currentTier =
-    tiers.find((t) => t.key === loyaltyData.loyalty_tier) || tiers[0];
-  const nextTier = tiers.find((t) => t.minPoints > loyaltyData.loyalty_points);
+  useEffect(() => {
+    const supabase = createClient();
 
-  const progressToNextTier = nextTier
-    ? ((loyaltyData.loyalty_points - currentTier.minPoints) /
-        (nextTier.minPoints - currentTier.minPoints)) *
-      100
-    : 100;
+    (async () => {
+      // Everyone gets tier config + rewards (public RLS).
+      const [tiersRes, rewardsRes] = await Promise.all([
+        supabase
+          .from("loyalty_tier_config")
+          .select("*")
+          .order("min_lifetime_points", { ascending: true }),
+        supabase
+          .from("loyalty_rewards")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
 
-  const pointsToNextTier = nextTier
-    ? nextTier.minPoints - loyaltyData.loyalty_points
-    : 0;
+      if (tiersRes.data) setTierConfigs(tiersRes.data as TierConfig[]);
+      if (rewardsRes.data) setRewards(rewardsRes.data as LoyaltyReward[]);
 
-  const handleRedeem = async (reward: Reward) => {
-    if (loyaltyData.loyalty_points < reward.points) {
-      addToast(
-        `Necesitas ${reward.points - loyaltyData.loyalty_points} puntos más`,
-        "error",
-      );
-      return;
-    }
+      // If logged in, load customer + transaction history.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: customerRow } = await supabase
+          .from("customers")
+          .select("*")
+          .eq("auth_user_id", user.id)
+          .maybeSingle();
 
-    setRedeeming(reward.id);
+        if (customerRow) {
+          setCustomer(customerRow as Customer);
+          const { data: txs } = await supabase
+            .from("loyalty_transactions")
+            .select("*")
+            .eq("customer_id", customerRow.id)
+            .order("created_at", { ascending: false })
+            .limit(25);
+          if (txs) setTransactions(txs as LoyaltyTransaction[]);
+        }
+      }
 
-    try {
-      // Deduct points
-      const { error } = await supabase
-        .from("customers")
-        .update({
-          loyalty_points: loyaltyData.loyalty_points - reward.points,
-        })
-        .eq("id", loyaltyData.id);
+      setLoading(false);
+    })();
+  }, []);
 
-      if (error) throw error;
-
-      // Log the transaction (if points_transactions table exists)
-      await supabase
-        .from("points_transactions")
-        .insert({
-          customer_id: loyaltyData.id,
-          points: -reward.points,
-          type: "redeemed",
-          description: `Canjeado: ${reward.reward}`,
-        })
-        .select()
-        .maybeSingle();
-
-      addToast(
-        `¡${reward.reward} canjeado! Muestra este código en tu próxima visita`,
-        "success",
-      );
-
-      // Refresh page to update points
-      window.location.reload();
-    } catch (err) {
-      console.error("Redeem error:", err);
-      addToast("Error al canjear. Intenta de nuevo.", "error");
-    } finally {
-      setRedeeming(null);
-    }
-  };
+  if (loading) {
+    return <LoyaltyLoading />;
+  }
 
   return (
-    <section className="py-12 bg-[#1F1D1A]">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Main Stats Card */}
+    <div className="min-h-screen bg-[#2D2A26]">
+      <Hero signedIn={!!customer} />
+
+      {customer ? (
+        <MemberDashboard
+          customer={customer}
+          tierConfigs={tierConfigs}
+          rewards={rewards}
+          transactions={transactions}
+          onUpdate={(next, tx) => {
+            setCustomer(next);
+            if (tx) setTransactions([tx, ...transactions]);
+          }}
+        />
+      ) : (
+        <GuestView tierConfigs={tierConfigs} rewards={rewards} />
+      )}
+
+      <PerksSection />
+      <CallToAction signedIn={!!customer} />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────────
+function Hero({ signedIn }: { signedIn: boolean }) {
+  return (
+    <section className="relative pt-32 pb-16 md:pb-24 overflow-hidden">
+      <div className="absolute inset-0">
+        <Image
+          src="/images/heroes/homepage-pizzas.jpg"
+          alt="Simmer Lovers"
+          fill
+          className="object-cover opacity-20"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2D2A26]/70 via-[#2D2A26]/90 to-[#2D2A26]" />
+      </div>
+
+      <div className="relative max-w-5xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#252320] border border-[#FF6B35]/30 p-8 mb-8"
+          className="inline-flex items-center gap-2 bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-[#FF6B35] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-4 h-4 ${currentTier.color}`} />
-              <span className="font-handwritten text-2xl text-[#FF6B35]">
-                Tu Cuenta SimmerLovers
-              </span>
-            </div>
-            <div
-              className={`px-3 py-1 ${currentTier.color} text-white text-sm font-bold`}
-            >
-              {currentTier.name}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            <div>
-              <p className="text-[#6B6560] text-sm mb-1">Nombre</p>
-              <p className="text-[#FFF8F0] text-xl font-display">
-                {loyaltyData.first_name} {loyaltyData.last_name}
-              </p>
-            </div>
-            <div>
-              <p className="text-[#6B6560] text-sm mb-1">Puntos Disponibles</p>
-              <p className="text-[#FF6B35] text-3xl font-bold">
-                {loyaltyData.loyalty_points.toLocaleString()}
-              </p>
-            </div>
-            <div>
-              <p className="text-[#6B6560] text-sm mb-1">Total de Pedidos</p>
-              <p className="text-[#FFF8F0] text-xl font-display">
-                {loyaltyData.total_orders}
-              </p>
-            </div>
-            <div>
-              <p className="text-[#6B6560] text-sm mb-1">Total Gastado</p>
-              <p className="text-[#FFF8F0] text-xl font-display">
-                ${loyaltyData.total_spent?.toFixed(2) || "0.00"}
-              </p>
-            </div>
-          </div>
-
-          {/* Progress to Next Tier */}
-          {nextTier && (
-            <div className="border-t border-[#3D3936] pt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[#6B6560] text-sm">
-                  Progreso a {nextTier.name}
-                </span>
-                <span className="text-[#FF6B35] text-sm font-bold">
-                  {pointsToNextTier} puntos para subir
-                </span>
-              </div>
-              <div className="h-3 bg-[#3D3936] overflow-hidden">
-                <motion.div
-                  className={`h-full ${nextTier.color}`}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(progressToNextTier, 100)}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
-              </div>
-              <div className="flex justify-between mt-2 text-xs text-[#6B6560]">
-                <span>
-                  {currentTier.name} ({currentTier.minPoints} pts)
-                </span>
-                <span>
-                  {nextTier.name} ({nextTier.minPoints} pts)
-                </span>
-              </div>
-            </div>
-          )}
+          <Flame className="w-4 h-4" />
+          Programa de Lealtad
         </motion.div>
 
-        {/* Rewards Grid */}
-        <motion.div
+        <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-[#252320] border border-[#3D3936] p-8 mb-8"
+          className="font-display text-5xl md:text-7xl text-[#FFF8F0] mb-6 leading-tight"
         >
-          <h3 className="font-display text-2xl text-[#FFF8F0] mb-6 flex items-center gap-2">
-            <Gift className="w-6 h-6 text-[#FF6B35]" />
-            Canjea Tus Puntos
-          </h3>
+          Simmer <span className="text-[#FF6B35]">Lovers</span>
+        </motion.h1>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {rewards.map((reward) => {
-              const canRedeem = loyaltyData.loyalty_points >= reward.points;
-              const isRedeeming = redeeming === reward.id;
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-xl md:text-2xl text-[#B8B0A8] max-w-2xl mx-auto mb-8"
+        >
+          Puntos por cada pedido. Recompensas que se sienten. Una tribu que come bien.
+        </motion.p>
 
-              return (
-                <button
-                  key={reward.id}
-                  onClick={() => handleRedeem(reward)}
-                  disabled={!canRedeem || isRedeeming}
-                  className={`p-4 text-center transition-all ${
-                    canRedeem
-                      ? "bg-[#2D2A26] border border-[#FF6B35]/50 hover:border-[#FF6B35] hover:bg-[#3D3936] cursor-pointer"
-                      : "bg-[#2D2A26] border border-[#3D3936] opacity-50 cursor-not-allowed"
-                  }`}
-                >
-                  <span className="text-3xl mb-2 block">{reward.icon}</span>
-                  <p className="text-[#FFF8F0] font-semibold text-sm mb-1">
-                    {reward.reward}
-                  </p>
-                  <p
-                    className={`text-sm font-bold ${canRedeem ? "text-[#FF6B35]" : "text-[#6B6560]"}`}
-                  >
-                    {reward.points} pts
-                  </p>
-                  {isRedeeming && (
-                    <Loader2 className="w-4 h-4 text-[#FF6B35] animate-spin mx-auto mt-2" />
-                  )}
-                  {canRedeem && !isRedeeming && (
-                    <span className="text-xs text-[#4CAF50] mt-2 block">
-                      Disponible
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Points History */}
-        {transactions.length > 0 && (
+        {!signedIn && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-[#252320] border border-[#3D3936] p-8"
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <h3 className="font-display text-2xl text-[#FFF8F0] mb-6 flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-[#FF6B35]" />
-              Historial de Puntos
-            </h3>
-
-            <div className="space-y-3">
-              {transactions.slice(0, 10).map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between py-3 border-b border-[#3D3936] last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    {tx.type === "earned" && (
-                      <CheckCircle className="w-5 h-5 text-[#4CAF50]" />
-                    )}
-                    {tx.type === "redeemed" && (
-                      <Gift className="w-5 h-5 text-[#FF6B35]" />
-                    )}
-                    {tx.type === "bonus" && (
-                      <Sparkles className="w-5 h-5 text-[#FFD700]" />
-                    )}
-                    <div>
-                      <p className="text-[#FFF8F0]">{tx.description}</p>
-                      <p className="text-xs text-[#6B6560]">
-                        {new Date(tx.created_at).toLocaleDateString("es-ES", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`font-bold ${tx.points > 0 ? "text-[#4CAF50]" : "text-[#FF6B35]"}`}
-                  >
-                    {tx.points > 0 ? "+" : ""}
-                    {tx.points} pts
-                  </span>
-                </div>
-              ))}
-            </div>
+            <Link
+              href="/auth/signup?loyalty=1"
+              className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold flex items-center gap-2 transition min-h-[56px]"
+            >
+              Unirme gratis
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/auth/login"
+              className="text-[#FFF8F0] hover:text-[#FF6B35] transition px-4 py-3"
+            >
+              Ya soy miembro · Ingresar
+            </Link>
           </motion.div>
         )}
       </div>
@@ -468,421 +264,679 @@ function LoyaltyDashboard({
   );
 }
 
-// Guest View (not logged in)
-function GuestView() {
+// ─────────────────────────────────────────────
+// Guest view: show tiers + rewards, drive signup
+// ─────────────────────────────────────────────
+function GuestView({
+  tierConfigs,
+  rewards,
+}: {
+  tierConfigs: TierConfig[];
+  rewards: LoyaltyReward[];
+}) {
   return (
     <>
-      {/* Hero */}
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-oven-warmth opacity-50" />
-        <div className="max-w-6xl mx-auto px-6 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-3xl mx-auto"
-          >
-            <div className="inline-flex items-center gap-2 bg-[#FF6B35]/10 border border-[#FF6B35]/20 px-4 py-2 mb-6">
-              <Heart className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-              <span className="text-[#FF6B35] font-medium">
-                Programa de Lealtad Exclusivo
-              </span>
-            </div>
-
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Únete a la familia
-            </p>
-            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-[#FFF8F0] mb-6">
-              SimmerLovers
-            </h1>
-            <p className="text-xl text-[#B8B0A8] mb-10 max-w-2xl mx-auto">
-              Nuestro programa de lealtad que te recompensa por lo que ya amas
-              hacer — disfrutar pizza increíble. Gana puntos, desbloquea
-              recompensas, obtén beneficios exclusivos.
-            </p>
-
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/auth/signup"
-                className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold text-lg transition-all min-h-[56px]"
-              >
-                Únete Gratis — Obtén 50 Puntos
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/auth/login"
-                className="flex items-center gap-2 bg-[#252320] hover:bg-[#3D3936] border border-[#3D3936] text-[#FFF8F0] px-8 py-4 font-semibold text-lg transition-all min-h-[56px]"
-              >
-                Ya Soy Miembro
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Cómo Funciona
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Gana. Canjea. Disfruta.
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                icon: Users,
-                title: "Regístrate Gratis",
-                description:
-                  "Crea tu cuenta en segundos y obtén 50 puntos de bienvenida.",
-              },
-              {
-                step: "02",
-                icon: Pizza,
-                title: "Gana Puntos",
-                description:
-                  "Obtén 1 punto por cada $1 gastado. Más a medida que subes de nivel.",
-              },
-              {
-                step: "03",
-                icon: Gift,
-                title: "Canjea Recompensas",
-                description:
-                  "Convierte puntos en pizza gratis, bebidas, acompañamientos y más.",
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15 }}
-                viewport={{ once: true }}
-                className="relative"
-              >
-                <div className="bg-[#2D2A26] border border-[#3D3936] p-8 h-full">
-                  <span className="text-6xl font-display text-[#3D3936]">
-                    {item.step}
-                  </span>
-                  <div className="w-14 h-14 bg-[#FF6B35]/10 flex items-center justify-center my-6">
-                    <item.icon className="w-7 h-7 text-[#FF6B35]" />
-                  </div>
-                  <h3 className="font-display text-xl text-[#FFF8F0] mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-[#6B6560]">{item.description}</p>
-                </div>
-
-                {i < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-[#3D3936]">
-                    <ArrowRight className="w-8 h-8" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Tiers */}
-      <section className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Niveles de Miembro
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-4">
-              Sube de Nivel
+      <section className="py-16 md:py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+              Cómo funciona
             </h2>
             <p className="text-[#B8B0A8] max-w-2xl mx-auto">
-              Entre más ordenes, más alto subes. Cada nivel desbloquea mejores
-              recompensas y multiplicadores de puntos.
+              Gana puntos en cada pedido. Sube de tier con tu historial. Canjea
+              por platos, descuentos y experiencias reales.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {tiers.map((tier, i) => (
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            {[
+              { n: "1", title: "Unite", desc: "Creá tu cuenta en 30 segundos. Gratis, para siempre." },
+              { n: "2", title: "Pedí", desc: "Ganás 1+ puntos por cada USD que gastás (multiplicador por tier)." },
+              { n: "3", title: "Canjeá", desc: "Bebidas gratis, pizzas, pizza-parties y eventos VIP." },
+            ].map((step, i) => (
               <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.15 }}
-                viewport={{ once: true }}
-                className={`relative overflow-hidden ${i === 2 ? "ring-2 ring-[#FF6B35]" : ""}`}
-              >
-                {i === 2 && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="bg-[#FF6B35] text-white text-xs font-bold px-3 py-1 flex items-center gap-1">
-                      <Crown className="w-3 h-3" />
-                      Mejor Valor
-                    </span>
-                  </div>
-                )}
-
-                <div className={`h-2 ${tier.color}`} />
-
-                <div className="bg-[#252320] border border-[#3D3936] border-t-0 p-8">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Flame
-                      className={`w-6 h-6 ${i === 0 ? "text-[#6B6560]" : "text-[#FF6B35]"}`}
-                    />
-                    <h3 className="font-display text-2xl text-[#FFF8F0]">
-                      {tier.name}
-                    </h3>
-                  </div>
-                  <p className="text-[#6B6560] mb-2">
-                    {tier.minPoints} -{" "}
-                    {tier.maxPoints === Infinity ? "∞" : tier.maxPoints} puntos
-                  </p>
-                  <p className="text-[#FF6B35] text-sm font-bold mb-6">
-                    {tier.multiplier}x puntos por compra
-                  </p>
-
-                  <ul className="space-y-3">
-                    {tier.benefits.map((benefit) => (
-                      <li
-                        key={benefit}
-                        className="flex items-center gap-3 text-[#B8B0A8]"
-                      >
-                        <Check className="w-5 h-5 text-[#FF6B35] flex-shrink-0" />
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Rewards Preview */}
-      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Menú de Recompensas
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Canjea Tus Puntos
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {rewards.map((reward, i) => (
-              <motion.div
-                key={reward.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.05 }}
-                viewport={{ once: true }}
-                className="bg-[#2D2A26] border border-[#3D3936] p-6 text-center hover:border-[#FF6B35]/50 transition-colors"
-              >
-                <span className="text-4xl mb-4 block">{reward.icon}</span>
-                <p className="text-[#FFF8F0] font-semibold mb-1">
-                  {reward.reward}
-                </p>
-                <p className="text-[#FF6B35] text-sm font-bold">
-                  {reward.points} pts
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Perks Grid */}
-      <section className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Beneficios de Miembro
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Más Allá de los Puntos
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {perks.map((perk, i) => (
-              <motion.div
-                key={perk.title}
+                key={step.n}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-[#252320] border border-[#3D3936] p-6 hover:border-[#FF6B35]/30 transition-colors"
+                className="bg-[#252320] border border-[#3D3936] p-8"
               >
-                <div className="w-12 h-12 bg-[#FF6B35]/10 flex items-center justify-center mb-4">
-                  <perk.icon className="w-6 h-6 text-[#FF6B35]" />
-                </div>
-                <h3 className="font-display text-lg text-[#FFF8F0] mb-2">
-                  {perk.title}
-                </h3>
-                <p className="text-[#6B6560] text-sm">{perk.description}</p>
+                <div className="text-[#FF6B35] font-display text-5xl mb-4">{step.n}</div>
+                <h3 className="text-[#FFF8F0] text-xl font-semibold mb-2">{step.title}</h3>
+                <p className="text-[#B8B0A8]">{step.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-[#FF6B35]">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Sparkles className="w-12 h-12 text-white mx-auto mb-6" />
-            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
-              ¿Listo para Comenzar a Ganar?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Únete a SimmerLovers hoy y obtén 50 puntos de bono solo por
-              registrarte. ¡Eso ya es la mitad del camino a una bebida gratis!
-            </p>
-            <Link
-              href="/auth/signup"
-              className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 font-bold text-xl transition-all min-h-[56px]"
-            >
-              Únete Gratis — Obtén 50 Puntos
-              <ArrowRight className="w-6 h-6" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+      <TierLadder tierConfigs={tierConfigs} />
+
+      <RewardsGrid rewards={rewards} currentPoints={0} canRedeem={false} />
     </>
   );
 }
 
-// Main Page Component
-export default function SimmerLoversPage() {
-  const [loading, setLoading] = useState(true);
-  const [loyaltyData, setLoyaltyData] = useState<LoyaltyData | null>(null);
-  const [transactions, setTransactions] = useState<PointsTransaction[]>([]);
+// ─────────────────────────────────────────────
+// Member dashboard (logged in)
+// ─────────────────────────────────────────────
+function MemberDashboard({
+  customer,
+  tierConfigs,
+  rewards,
+  transactions,
+  onUpdate,
+}: {
+  customer: Customer;
+  tierConfigs: TierConfig[];
+  rewards: LoyaltyReward[];
+  transactions: LoyaltyTransaction[];
+  onUpdate: (customer: Customer, newTx: LoyaltyTransaction | null) => void;
+}) {
+  const [redeeming, setRedeeming] = useState<string | null>(null);
+  const addToast = useToastStore((s) => s.addToast);
+  const supabase = createClient();
 
-  useEffect(() => {
-    async function fetchLoyaltyData() {
-      const supabase = createClient();
+  const currentTier =
+    tierConfigs.find((t) => t.tier === customer.loyalty_tier) ??
+    tierConfigs[0];
+  const nextTier = tierConfigs.find(
+    (t) => t.min_lifetime_points > customer.lifetime_points_earned,
+  );
+  const progress = nextTier
+    ? Math.min(
+        100,
+        ((customer.lifetime_points_earned - currentTier.min_lifetime_points) /
+          (nextTier.min_lifetime_points - currentTier.min_lifetime_points)) *
+          100,
+      )
+    : 100;
+  const pointsToNext = nextTier
+    ? nextTier.min_lifetime_points - customer.lifetime_points_earned
+    : 0;
 
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const canRedeemTier = (minTier: Tier) =>
+    TIER_ORDER.indexOf(customer.loyalty_tier) >= TIER_ORDER.indexOf(minTier);
 
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // Fetch customer loyalty data
-      const { data: customer } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (customer) {
-        setLoyaltyData(customer as LoyaltyData);
-
-        // Try to fetch points transactions (may not exist)
-        const { data: txs } = await supabase
-          .from("points_transactions")
-          .select("*")
-          .eq("customer_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(20);
-
-        if (txs) {
-          setTransactions(txs as PointsTransaction[]);
-        }
-      }
-
-      setLoading(false);
+  const handleRedeem = async (reward: LoyaltyReward) => {
+    if (customer.loyalty_points_balance < reward.points_required) {
+      addToast(
+        `Necesitas ${reward.points_required - customer.loyalty_points_balance} puntos más`,
+        "error",
+      );
+      return;
+    }
+    if (!canRedeemTier(reward.min_tier_required)) {
+      addToast(
+        `Esta recompensa requiere tier ${reward.min_tier_required}`,
+        "error",
+      );
+      return;
     }
 
-    fetchLoyaltyData();
-  }, []);
+    setRedeeming(reward.id);
+    try {
+      const newBalance =
+        customer.loyalty_points_balance - reward.points_required;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#2D2A26] pt-24 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-[#FF6B35] animate-spin mx-auto mb-4" />
-          <p className="text-[#FFF8F0]">Cargando tu cuenta...</p>
-        </div>
-      </div>
-    );
-  }
+      // Deduct points on customers row
+      const { error: custErr } = await supabase
+        .from("customers")
+        .update({ loyalty_points_balance: newBalance })
+        .eq("id", customer.id);
+      if (custErr) throw custErr;
+
+      // Log redemption transaction
+      const { data: tx, error: txErr } = await supabase
+        .from("loyalty_transactions")
+        .insert({
+          customer_id: customer.id,
+          transaction_type: "redeem",
+          points: -reward.points_required,
+          balance_after: newBalance,
+          reward_id: reward.id,
+          description: reward.name_es || reward.name,
+        })
+        .select()
+        .single();
+      if (txErr) throw txErr;
+
+      onUpdate(
+        { ...customer, loyalty_points_balance: newBalance },
+        tx as LoyaltyTransaction,
+      );
+      addToast(
+        `¡Canjeaste ${reward.name_es || reward.name}! Muestra este recibo en tu próxima visita.`,
+        "success",
+      );
+    } catch (err) {
+      console.error("Redeem failed:", err);
+      addToast("No se pudo canjear. Intenta de nuevo.", "error");
+    } finally {
+      setRedeeming(null);
+    }
+  };
+
+  const TierIcon = tierIcon[customer.loyalty_tier];
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-24">
-      {loyaltyData ? (
-        <>
-          {/* Logged in user header */}
-          <section className="py-12 relative overflow-hidden">
-            <div className="absolute inset-0 bg-oven-warmth opacity-30" />
-            <div className="max-w-6xl mx-auto px-6 relative text-center">
-              <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">
-                Bienvenido de vuelta
-              </p>
-              <h1 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-                {loyaltyData.first_name}
-              </h1>
-            </div>
-          </section>
-
-          <LoyaltyDashboard
-            loyaltyData={loyaltyData}
-            transactions={transactions}
+    <section className="py-12 md:py-16 px-6 -mt-8 relative z-10">
+      <div className="max-w-6xl mx-auto">
+        {/* Member card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-[#1F1D1A] via-[#252320] to-[#1F1D1A] border border-[#FF6B35]/30 p-8 md:p-12 mb-12 relative overflow-hidden"
+        >
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              background: `radial-gradient(circle at 80% 20%, ${currentTier.color_hex} 0%, transparent 60%)`,
+            }}
           />
-
-          {/* Tiers section for reference */}
-          <section className="py-16 bg-[#252320] border-t border-[#3D3936]">
-            <div className="max-w-6xl mx-auto px-6">
-              <h2 className="font-display text-2xl text-[#FFF8F0] mb-8 text-center">
-                Niveles de Miembro
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {tiers.map((tier, i) => {
-                  const isCurrentTier = tier.key === loyaltyData.loyalty_tier;
-                  return (
-                    <div
-                      key={tier.name}
-                      className={`p-6 border ${isCurrentTier ? "border-[#FF6B35] bg-[#FF6B35]/10" : "border-[#3D3936] bg-[#2D2A26]"}`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className={`w-3 h-3 ${tier.color}`} />
-                        <span className="text-[#FFF8F0] font-bold">
-                          {tier.name}
-                        </span>
-                        {isCurrentTier && (
-                          <span className="text-xs text-[#FF6B35] ml-auto">
-                            Tu Nivel
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[#6B6560] text-sm mb-2">
-                        {tier.minPoints} -{" "}
-                        {tier.maxPoints === Infinity ? "∞" : tier.maxPoints} pts
-                      </p>
-                      <p className={`text-sm font-bold ${tier.textColor}`}>
-                        {tier.multiplier}x puntos
-                      </p>
-                    </div>
-                  );
-                })}
+          <div className="relative grid md:grid-cols-[auto_1fr_auto] gap-8 items-center">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-16 h-16 flex items-center justify-center"
+                style={{
+                  backgroundColor: `${currentTier.color_hex}22`,
+                  color: currentTier.color_hex,
+                }}
+              >
+                <TierIcon className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
+                  Tier
+                </p>
+                <p
+                  className="font-display text-2xl capitalize"
+                  style={{ color: currentTier.color_hex }}
+                >
+                  {currentTier.display_name_es || currentTier.display_name}
+                </p>
+                <p className="text-xs text-[#6B6560] mt-1">
+                  {currentTier.points_multiplier}× puntos
+                </p>
               </div>
             </div>
-          </section>
-        </>
-      ) : (
-        <GuestView />
-      )}
+
+            <div>
+              <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
+                Hola, {customer.first_name || "Simmer Lover"}
+              </p>
+              <p className="font-display text-5xl md:text-6xl text-[#FFF8F0] mb-1">
+                {customer.loyalty_points_balance.toLocaleString("es-SV")}
+              </p>
+              <p className="text-[#B8B0A8] text-sm">puntos disponibles</p>
+              {nextTier && (
+                <div className="mt-4 max-w-md">
+                  <div className="flex justify-between text-xs text-[#6B6560] mb-1.5">
+                    <span>Próximo tier: <span className="text-[#FFF8F0] capitalize">{nextTier.display_name_es || nextTier.display_name}</span></span>
+                    <span>{pointsToNext.toLocaleString("es-SV")} puntos</span>
+                  </div>
+                  <div className="h-1.5 bg-[#3D3936] overflow-hidden">
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${progress}%`,
+                        backgroundColor: currentTier.color_hex,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-1 gap-3 text-sm">
+              <Stat label="Pedidos" value={customer.total_orders} />
+              <Stat
+                label="Gastado"
+                value={`$${Number(customer.total_spent ?? 0).toFixed(2)}`}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        <RewardsGrid
+          rewards={rewards}
+          currentPoints={customer.loyalty_points_balance}
+          canRedeem={true}
+          onRedeem={handleRedeem}
+          redeemingId={redeeming}
+          canRedeemTier={canRedeemTier}
+        />
+
+        {transactions.length > 0 && <TransactionHistory transactions={transactions} />}
+      </div>
+    </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="bg-[#2D2A26]/50 px-4 py-3">
+      <p className="text-[10px] uppercase tracking-wider text-[#6B6560] mb-0.5">
+        {label}
+      </p>
+      <p className="text-[#FFF8F0] text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Tier ladder
+// ─────────────────────────────────────────────
+function TierLadder({ tierConfigs }: { tierConfigs: TierConfig[] }) {
+  return (
+    <section className="py-16 md:py-20 px-6 border-t border-[#3D3936]">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+            4 Tiers. Cada uno con su fuego.
+          </h2>
+          <p className="text-[#B8B0A8] max-w-2xl mx-auto">
+            Subís de tier por puntos acumulados de por vida. Una vez que llegás,
+            no bajás.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {tierConfigs.map((tier, i) => {
+            const Icon = tierIcon[tier.tier];
+            return (
+              <motion.div
+                key={tier.tier}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                viewport={{ once: true }}
+                className="bg-[#252320] border border-[#3D3936] p-6 flex flex-col"
+                style={{ borderTop: `3px solid ${tier.color_hex}` }}
+              >
+                <div
+                  className="w-12 h-12 flex items-center justify-center mb-4"
+                  style={{
+                    backgroundColor: `${tier.color_hex}22`,
+                    color: tier.color_hex,
+                  }}
+                >
+                  <Icon className="w-6 h-6" />
+                </div>
+
+                <h3
+                  className="font-display text-2xl capitalize mb-1"
+                  style={{ color: tier.color_hex }}
+                >
+                  {tier.display_name_es || tier.display_name}
+                </h3>
+                <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-4">
+                  {tier.min_lifetime_points === 0
+                    ? "Al unirte"
+                    : `Desde ${tier.min_lifetime_points.toLocaleString("es-SV")} puntos`}
+                </p>
+
+                <div className="text-[#FF6B35] font-semibold text-sm mb-4">
+                  {tier.points_multiplier}× puntos en cada pedido
+                </div>
+
+                <ul className="space-y-2 text-sm text-[#B8B0A8] flex-1">
+                  {(tier.perks_es || tier.perks).map((perk, j) => (
+                    <li key={j} className="flex items-start gap-2">
+                      <CheckCircle
+                        className="w-4 h-4 mt-0.5 flex-shrink-0"
+                        style={{ color: tier.color_hex }}
+                      />
+                      {perk}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Rewards grid — works for guest AND member
+// ─────────────────────────────────────────────
+function RewardsGrid({
+  rewards,
+  currentPoints,
+  canRedeem,
+  onRedeem,
+  redeemingId,
+  canRedeemTier,
+}: {
+  rewards: LoyaltyReward[];
+  currentPoints: number;
+  canRedeem: boolean;
+  onRedeem?: (reward: LoyaltyReward) => void;
+  redeemingId?: string | null;
+  canRedeemTier?: (tier: Tier) => boolean;
+}) {
+  return (
+    <section className="py-12 md:py-16 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-2">
+              Recompensas
+            </h2>
+            <p className="text-[#B8B0A8]">
+              {canRedeem
+                ? "Canjeá ahora o ahorrá para las grandes."
+                : "Todo esto te espera cuando te unís."}
+            </p>
+          </div>
+          {canRedeem && (
+            <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/30 px-4 py-2 text-sm">
+              <span className="text-[#6B6560]">Balance:</span>{" "}
+              <span className="text-[#FF6B35] font-bold">
+                {currentPoints.toLocaleString("es-SV")} pts
+              </span>
+            </div>
+          )}
+        </div>
+
+        {rewards.length === 0 ? (
+          <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
+            <p className="text-[#B8B0A8]">Pronto agregamos más recompensas.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rewards.map((reward, i) => {
+              const affordable = canRedeem && currentPoints >= reward.points_required;
+              const tierLocked =
+                canRedeem && canRedeemTier && !canRedeemTier(reward.min_tier_required);
+              const isRedeeming = redeemingId === reward.id;
+
+              return (
+                <motion.div
+                  key={reward.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  viewport={{ once: true }}
+                  className={`bg-[#252320] border overflow-hidden transition-all ${
+                    affordable && !tierLocked
+                      ? "border-[#FF6B35]/40 hover:border-[#FF6B35]"
+                      : "border-[#3D3936]"
+                  }`}
+                >
+                  <div className="relative aspect-[16/10] bg-[#1F1D1A] overflow-hidden">
+                    {reward.image_url ? (
+                      <Image
+                        src={reward.image_url}
+                        alt={reward.name_es || reward.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className={`object-cover transition-opacity ${
+                          tierLocked ? "opacity-40" : "opacity-100"
+                        }`}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Gift className="w-12 h-12 text-[#3D3936]" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-[#2D2A26]/90 backdrop-blur-sm px-3 py-1 text-sm font-bold text-[#FF6B35]">
+                      {reward.points_required.toLocaleString("es-SV")} pts
+                    </div>
+                    {tierLocked && (
+                      <div className="absolute top-3 right-3 bg-[#2D2A26]/90 backdrop-blur-sm p-1.5">
+                        <Lock className="w-3.5 h-3.5 text-[#C9A84C]" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <h3 className="font-display text-xl text-[#FFF8F0] mb-1">
+                      {reward.name_es || reward.name}
+                    </h3>
+                    <p className="text-sm text-[#B8B0A8] mb-4 line-clamp-2 min-h-[2.5rem]">
+                      {reward.description_es || reward.description || "\u00a0"}
+                    </p>
+
+                    {reward.min_tier_required !== "bronze" && (
+                      <p className="text-xs text-[#C9A84C] mb-3 capitalize">
+                        Tier {reward.min_tier_required}+
+                      </p>
+                    )}
+
+                    {canRedeem ? (
+                      <button
+                        onClick={() => onRedeem?.(reward)}
+                        disabled={!affordable || tierLocked || isRedeeming}
+                        className={`w-full py-3 font-semibold transition min-h-[48px] flex items-center justify-center gap-2 ${
+                          affordable && !tierLocked
+                            ? "bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
+                            : "bg-[#3D3936] text-[#6B6560] cursor-not-allowed"
+                        }`}
+                      >
+                        {isRedeeming ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : tierLocked ? (
+                          "Tier requerido"
+                        ) : affordable ? (
+                          "Canjear"
+                        ) : (
+                          `Faltan ${(reward.points_required - currentPoints).toLocaleString("es-SV")} pts`
+                        )}
+                      </button>
+                    ) : (
+                      <Link
+                        href="/auth/signup?loyalty=1"
+                        className="w-full block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition min-h-[48px]"
+                      >
+                        Unirme para canjear
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Transaction history (member only)
+// ─────────────────────────────────────────────
+function TransactionHistory({
+  transactions,
+}: {
+  transactions: LoyaltyTransaction[];
+}) {
+  const label = (type: string) => {
+    switch (type) {
+      case "earn":
+      case "earned":
+        return { text: "Ganado", color: "text-[#4CAF50]" };
+      case "redeem":
+      case "redeemed":
+        return { text: "Canjeado", color: "text-[#FF6B35]" };
+      case "bonus":
+      case "birthday_bonus":
+      case "tier_bonus":
+      case "referral_bonus":
+        return { text: "Bono", color: "text-[#C9A84C]" };
+      case "adjustment":
+      case "adjusted":
+        return { text: "Ajuste", color: "text-[#B8B0A8]" };
+      case "expired":
+      case "expiration":
+        return { text: "Expirado", color: "text-[#6B6560]" };
+      default:
+        return { text: type, color: "text-[#B8B0A8]" };
+    }
+  };
+
+  return (
+    <section className="mt-12">
+      <h2 className="font-display text-2xl text-[#FFF8F0] mb-6 flex items-center gap-3">
+        <TrendingUp className="w-6 h-6 text-[#FF6B35]" />
+        Historial de puntos
+      </h2>
+      <div className="bg-[#252320] border border-[#3D3936] overflow-hidden">
+        <div className="divide-y divide-[#3D3936]">
+          {transactions.map((tx) => {
+            const l = label(tx.transaction_type);
+            const positive = tx.points >= 0;
+            return (
+              <div
+                key={tx.id}
+                className="p-4 md:p-5 flex items-center justify-between gap-4"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Clock className="w-4 h-4 text-[#6B6560] flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span
+                        className={`text-xs uppercase tracking-wider ${l.color}`}
+                      >
+                        {l.text}
+                      </span>
+                      <span className="text-xs text-[#6B6560]">
+                        {new Date(tx.created_at).toLocaleDateString("es-SV", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-[#FFF8F0] text-sm truncate">
+                      {tx.description || "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p
+                    className={`font-mono font-semibold ${
+                      positive ? "text-[#4CAF50]" : "text-[#FF6B35]"
+                    }`}
+                  >
+                    {positive ? "+" : ""}
+                    {tx.points.toLocaleString("es-SV")}
+                  </p>
+                  <p className="text-xs text-[#6B6560]">
+                    saldo {tx.balance_after.toLocaleString("es-SV")}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Perks strip
+// ─────────────────────────────────────────────
+function PerksSection() {
+  return (
+    <section className="py-16 md:py-20 px-6 border-t border-[#3D3936] bg-[#252320]">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+            Beneficios que sí se sienten
+          </h2>
+          <p className="text-[#B8B0A8] max-w-2xl mx-auto">
+            No es un cupón perdido en un email. Es acceso, servicio y noches que
+            no se repiten.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {perkIcons.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <motion.div
+                key={p.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="bg-[#2D2A26] border border-[#3D3936] p-5 md:p-6 flex items-start gap-4"
+              >
+                <div className="w-10 h-10 bg-[#FF6B35]/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-[#FF6B35]" />
+                </div>
+                <h3 className="text-[#FFF8F0] font-semibold text-sm md:text-base pt-1">
+                  {p.title}
+                </h3>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Bottom CTA
+// ─────────────────────────────────────────────
+function CallToAction({ signedIn }: { signedIn: boolean }) {
+  return (
+    <section className="py-20 md:py-28 px-6 bg-gradient-to-br from-[#FF6B35] to-[#E55A2B]">
+      <div className="max-w-3xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <Flame className="w-12 h-12 text-white mx-auto mb-6" />
+          <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
+            {signedIn
+              ? "Tu próxima noche ya está pagando puntos"
+              : "La pizza también premia la lealtad"}
+          </h2>
+          <p className="text-white/90 text-xl mb-10">
+            {signedIn
+              ? "Pedí, canjeá, volvé. Repetí."
+              : "30 segundos para crear tu cuenta. El resto de tu vida para canjear."}
+          </p>
+          <Link
+            href={signedIn ? "/menu" : "/auth/signup?loyalty=1"}
+            className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
+          >
+            {signedIn ? "Ir al menú" : "Unirme gratis"}
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Loading skeleton
+// ─────────────────────────────────────────────
+function LoyaltyLoading() {
+  return (
+    <div className="min-h-screen bg-[#2D2A26] pt-32 px-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="animate-pulse space-y-8">
+          <div className="h-16 bg-[#252320] w-1/2 mx-auto" />
+          <div className="h-6 bg-[#252320] w-2/3 mx-auto" />
+          <div className="h-40 bg-[#252320] mt-12" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-64 bg-[#252320]" />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
