@@ -114,7 +114,8 @@ function firstCategoryTag(tags?: string[] | null): string {
 // ─────────────────────────────────────────────
 export function EventsList() {
   const [events, setEvents] = useState<DbEvent[]>(fallbackEvents);
-  const [loading, setLoading] = useState(true);
+  // Render the fallback on SSR so the page isn't blank on first paint.
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
