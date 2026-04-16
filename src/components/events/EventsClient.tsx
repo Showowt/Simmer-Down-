@@ -6,82 +6,114 @@ import { Calendar, Clock, MapPin, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { Event } from "@/lib/types";
 
-// Fallback events if database is empty
-const fallbackEvents: Event[] = [
+// ─────────────────────────────────────────────
+// Real events schema (matches prod DB)
+// ─────────────────────────────────────────────
+interface DbEvent {
+  id: string;
+  title: string;
+  title_es?: string | null;
+  slug?: string | null;
+  description?: string | null;
+  description_es?: string | null;
+  location_id?: string | null;
+  custom_venue?: string | null;
+  starts_at: string;
+  ends_at?: string | null;
+  recurrence?: string | null;
+  image_url?: string | null;
+  thumbnail_url?: string | null;
+  is_featured?: boolean;
+  is_published?: boolean;
+  tags?: string[] | null;
+  rsvp_enabled?: boolean;
+}
+
+// Fallback events (used only if the DB query returns zero rows).
+const fallbackEvents: DbEvent[] = [
   {
-    id: "1",
-    title: "Jazz & Pizza Night",
+    id: "fallback-simmermania",
+    title: "Simmer Manía — Programación Mensual",
     description:
-      "Disfruta de jazz en vivo mientras saboreas nuestras pizzas signature. Artistas locales, cocteles artesanales y vibras increibles.",
-    date: "Cada Viernes",
-    time: "7:00 PM - 11:00 PM",
-    location: "San Benito",
-    image_url:
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800",
-    category: "Musica",
-    price: null,
-    featured: true,
-    active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Taller de Pizza Artesanal",
-    description:
-      "Aprende el arte de hacer pizza de nuestro chef principal. Experiencia practica con masa, salsa y tecnicas de horno.",
-    date: "Feb 15, 2025",
-    time: "2:00 PM - 5:00 PM",
-    location: "Santa Ana",
-    image_url:
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-    category: "Taller",
-    price: "$45",
-    featured: false,
-    active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Maridaje Vino & Pizza",
-    description:
-      "Una noche curada de vinos italianos perfectamente maridados con nuestras pizzas artesanales. Cupos limitados.",
-    date: "Feb 22, 2025",
-    time: "6:30 PM - 9:30 PM",
-    location: "Coatepeque",
-    image_url:
-      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800",
-    category: "Degustacion",
-    price: "$65",
-    featured: false,
-    active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    title: "Pizza Party para Ninos",
-    description:
-      "Deja que los pequenos creen sus propias mini pizzas. Incluye elaboracion de pizza, juegos y premios. Edades 5-12.",
-    date: "Cada Sabado",
-    time: "11:00 AM - 1:00 PM",
-    location: "Todas las Ubicaciones",
-    image_url:
-      "https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=800",
-    category: "Familia",
-    price: "$25",
-    featured: false,
-    active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+      "Nuestra programación estelar mensual en Simmer Down San Benito: bandas en vivo, DJs, open mics, cine, rock, salsa, indie fest y más.",
+    custom_venue: "Simmer Down San Benito",
+    starts_at: new Date().toISOString(),
+    image_url: "/images/events/simmermania-marzo.jpg",
+    is_featured: true,
+    is_published: true,
+    tags: ["music", "live", "monthly"],
   },
 ];
 
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+function formatEventDate(iso: string, recurrence?: string | null): string {
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  if (recurrence === "monthly") {
+    return "Cada mes · Simmer Down San Benito";
+  }
+  if (recurrence === "weekly") {
+    return date.toLocaleDateString("es-SV", {
+      weekday: "long",
+    });
+  }
+  return date.toLocaleDateString("es-SV", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatEventTime(iso: string): string {
+  const date = new Date(iso);
+  if (isNaN(date.getTime())) return "";
+  return date
+    .toLocaleTimeString("es-SV", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .replace(" ", "");
+}
+
+function deriveCoverPrice(tags?: string[] | null): string | null {
+  if (!tags) return null;
+  for (const t of tags) {
+    if (t.startsWith("cover-")) return `$${t.slice("cover-".length)}`;
+    if (t.startsWith("preventa-")) return `Preventa $${t.slice("preventa-".length)}`;
+  }
+  return null;
+}
+
+function firstCategoryTag(tags?: string[] | null): string {
+  if (!tags || tags.length === 0) return "Evento";
+  const priority = ["music", "salsa", "rock", "poetry", "comedy", "openmic", "tribute", "signature"];
+  const display: Record<string, string> = {
+    music: "Música",
+    salsa: "Salsa",
+    rock: "Rock",
+    poetry: "Poesía",
+    comedy: "Comedia",
+    openmic: "Open Mic",
+    tribute: "Tributo",
+    signature: "Signature",
+    live: "En vivo",
+    monthly: "Mensual",
+  };
+  for (const p of priority) {
+    if (tags.includes(p)) return display[p] || p;
+  }
+  return display[tags[0]] || tags[0];
+}
+
+// ─────────────────────────────────────────────
+// EventsList — main component
+// ─────────────────────────────────────────────
 export function EventsList() {
-  const [events, setEvents] = useState<Event[]>(fallbackEvents);
+  const [events, setEvents] = useState<DbEvent[]>(fallbackEvents);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -91,17 +123,16 @@ export function EventsList() {
         const { data, error } = await supabase
           .from("events")
           .select("*")
-          .eq("active", true)
-          .order("featured", { ascending: false })
-          .order("created_at", { ascending: false });
+          .eq("is_published", true)
+          .order("is_featured", { ascending: false })
+          .order("starts_at", { ascending: true });
 
         if (error) throw error;
         if (data && data.length > 0) {
-          setEvents(data);
+          setEvents(data as DbEvent[]);
         }
-      } catch (err) {
-        // Use fallback events
-        console.log("Using fallback events");
+      } catch {
+        /* keep fallback */
       } finally {
         setLoading(false);
       }
@@ -110,8 +141,8 @@ export function EventsList() {
     fetchEvents();
   }, []);
 
-  const featuredEvents = events.filter((e) => e.featured);
-  const upcomingEvents = events.filter((e) => !e.featured);
+  const featured = events.filter((e) => e.is_featured);
+  const upcoming = events.filter((e) => !e.is_featured);
 
   if (loading) {
     return (
@@ -132,133 +163,145 @@ export function EventsList() {
 
   return (
     <>
-      {/* Featured Events */}
-      {featuredEvents.map((event) => (
+      {/* Featured Events — full-width posters */}
+      {featured.map((event) => (
         <section key={event.id} className="pb-16">
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="relative overflow-hidden"
+              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-8 items-center bg-[#1F1D1A] border border-[#3D3936] overflow-hidden"
             >
-              <div className="absolute inset-0 bg-[#1F1D1A]/80 z-10" />
-              <div className="relative w-full h-[500px]">
-                <Image
-                  src={
-                    event.image_url ||
-                    "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800"
-                  }
-                  alt={event.title}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative aspect-[3/4] lg:aspect-auto lg:h-[640px] overflow-hidden">
+                {event.image_url ? (
+                  <Image
+                    src={event.image_url}
+                    alt={event.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 45vw"
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-[#252320]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/20 via-transparent to-transparent" />
               </div>
-              <div className="absolute inset-0 z-20 flex items-center">
-                <div className="max-w-2xl p-8 md:p-16">
-                  <span className="inline-flex items-center gap-2 bg-[#FF6B35] text-white text-sm font-bold px-4 py-2 mb-6">
-                    <Star className="w-4 h-4" />
-                    Evento Destacado
-                  </span>
-                  <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-4">
-                    {event.title}
-                  </h2>
-                  <p className="text-lg text-[#B8B0A8] mb-6">
-                    {event.description}
-                  </p>
-                  <div className="flex flex-wrap gap-4 mb-8">
-                    <div className="flex items-center gap-2 text-[#B8B0A8]">
-                      <Calendar className="w-5 h-5 text-[#FF6B35]" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center gap-2 text-[#B8B0A8]">
-                      <Clock className="w-5 h-5 text-[#FF6B35]" />
-                      {event.time}
-                    </div>
-                    {event.location && (
-                      <div className="flex items-center gap-2 text-[#B8B0A8]">
-                        <MapPin className="w-5 h-5 text-[#FF6B35]" />
-                        {event.location}
-                      </div>
-                    )}
+
+              <div className="p-8 md:p-12">
+                <span className="inline-flex items-center gap-2 bg-[#FF6B35] text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 mb-6">
+                  <Star className="w-3.5 h-3.5" />
+                  Evento Destacado
+                </span>
+                <h2 className="font-display text-3xl md:text-5xl text-[#FFF8F0] mb-4 leading-tight">
+                  {event.title}
+                </h2>
+                <p className="text-lg text-[#B8B0A8] mb-6">
+                  {event.description_es || event.description}
+                </p>
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 text-[#B8B0A8]">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[#FF6B35]" />
+                    <span className="capitalize">{formatEventDate(event.starts_at, event.recurrence)}</span>
                   </div>
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                  >
-                    Reservar Tu Lugar
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#FF6B35]" />
+                    {formatEventTime(event.starts_at)}
+                  </div>
+                  {event.custom_venue && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-[#FF6B35]" />
+                      {event.custom_venue}
+                    </div>
+                  )}
+                  {deriveCoverPrice(event.tags) && (
+                    <div className="flex items-center gap-2 text-[#C9A84C] font-semibold">
+                      {deriveCoverPrice(event.tags)}
+                    </div>
+                  )}
                 </div>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                >
+                  Reservar Tu Lugar
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
               </div>
             </motion.div>
           </div>
         </section>
       ))}
 
-      {/* Upcoming Events */}
-      {upcomingEvents.length > 0 && (
+      {/* Upcoming / non-featured — poster grid */}
+      {upcoming.length > 0 && (
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-12">
-              Proximos Eventos
+              Próximos Eventos
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {upcomingEvents.map((event, i) => (
+              {upcoming.map((event, i) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.08 }}
                   viewport={{ once: true }}
                   className="group bg-[#252320] border border-[#3D3936] overflow-hidden hover:border-[#FF6B35]/50 transition-all"
                 >
-                  <div className="aspect-video overflow-hidden relative">
-                    <Image
-                      src={
-                        event.image_url ||
-                        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800"
-                      }
-                      alt={event.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-[#2D2A26]/80 text-[#FFF8F0] text-xs font-semibold px-3 py-1">
-                        {event.category}
+                  <div className="relative aspect-[3/4] overflow-hidden">
+                    {event.image_url ? (
+                      <Image
+                        src={event.image_url}
+                        alt={event.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-[#1F1D1A]" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/70 via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-[#2D2A26]/80 backdrop-blur-sm text-[#FFF8F0] text-xs font-semibold px-3 py-1">
+                        {firstCategoryTag(event.tags)}
                       </span>
                     </div>
-                    {event.price && (
-                      <div className="absolute top-4 right-4">
+                    {deriveCoverPrice(event.tags) && (
+                      <div className="absolute top-3 right-3">
                         <span className="bg-[#FF6B35] text-white text-sm font-bold px-3 py-1">
-                          {event.price}
+                          {deriveCoverPrice(event.tags)}
                         </span>
                       </div>
                     )}
                   </div>
 
                   <div className="p-6">
-                    <h3 className="font-display text-xl text-[#FFF8F0] mb-2">
+                    <h3 className="font-display text-xl text-[#FFF8F0] mb-2 line-clamp-2">
                       {event.title}
                     </h3>
                     <p className="text-[#B8B0A8] text-sm mb-4 line-clamp-2">
-                      {event.description}
+                      {event.description_es || event.description}
                     </p>
 
-                    <div className="space-y-2 mb-6">
-                      <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                    <div className="space-y-2 mb-6 text-sm">
+                      <div className="flex items-center gap-2 text-[#6B6560]">
                         <Calendar className="w-4 h-4 text-[#FF6B35]" />
-                        {event.date}
+                        <span className="capitalize">
+                          {formatEventDate(event.starts_at, event.recurrence)}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                      <div className="flex items-center gap-2 text-[#6B6560]">
                         <Clock className="w-4 h-4 text-[#FF6B35]" />
-                        {event.time}
+                        {formatEventTime(event.starts_at)}
                       </div>
-                      {event.location && (
-                        <div className="flex items-center gap-2 text-[#6B6560] text-sm">
+                      {event.custom_venue && (
+                        <div className="flex items-center gap-2 text-[#6B6560]">
                           <MapPin className="w-4 h-4 text-[#FF6B35]" />
-                          {event.location}
+                          {event.custom_venue}
                         </div>
                       )}
                     </div>
@@ -307,8 +350,8 @@ export function PrivateEventsSection({
               Tu Evento Con Nosotros
             </h2>
             <p className="text-lg text-[#B8B0A8] mb-8">
-              Buscas el lugar perfecto para tu proxima celebracion? Ofrecemos
-              espacios para eventos privados, menus personalizados y servicio de
+              ¿Buscas el lugar perfecto para tu próxima celebración? Ofrecemos
+              espacios para eventos privados, menús personalizados y servicio de
               catering para hacer tu evento inolvidable.
             </p>
 
@@ -332,7 +375,7 @@ export function PrivateEventsSection({
               href="/contact"
               className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
             >
-              Solicitar Informacion
+              Solicitar Información
               <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
@@ -346,32 +389,32 @@ export function PrivateEventsSection({
             <div className="grid grid-cols-2 gap-4">
               <div className="relative h-48">
                 <Image
-                  src="https://images.unsplash.com/photo-1529543544277-750e7ea18e27?w=400"
-                  alt="Evento privado"
+                  src="/images/events/musicos-poetas-locos-abril.jpg"
+                  alt="Noche de música y poesía en Simmer Down"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48 mt-8">
                 <Image
-                  src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400"
-                  alt="Celebracion"
+                  src="/images/events/zoe-siddhartha-bandalos.jpg"
+                  alt="Tributos a rock alternativo"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48">
                 <Image
-                  src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400"
-                  alt="Evento corporativo"
+                  src="/images/events/salzon-mayo.jpg"
+                  alt="Salsa en vivo con Salzón"
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="relative h-48 mt-8">
                 <Image
-                  src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=400"
-                  alt="Fiesta"
+                  src="/images/events/open-mic-abril.jpg"
+                  alt="Open mic en Simmer Down"
                   fill
                   className="object-cover"
                 />
