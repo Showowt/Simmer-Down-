@@ -27,51 +27,64 @@ export default function AdminLocationsPage() {
     fetchLocations()
   }, [])
 
+  // Production schema: locations has address_line1/2, city, operating_hours JSONB,
+  // is_active + is_accepting_orders + delivery_enabled, image_exterior_url, etc.
+  // We store per-day hours as { weekday: "11am-9pm", saturday: "...", sunday: "..." }
+  // inside operating_hours JSONB for admin ergonomics.
+  interface DBLocationRow {
+    id: string
+    name: string
+    slug?: string | null
+    address_line1?: string | null
+    address_line2?: string | null
+    city?: string | null
+    phone?: string | null
+    operating_hours?: Record<string, string> | null
+    is_active?: boolean
+    is_accepting_orders?: boolean
+    delivery_enabled?: boolean
+    image_exterior_url?: string | null
+    latitude?: number | null
+    longitude?: number | null
+    created_at?: string
+  }
+
   const fetchLocations = async () => {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('locations')
-        .select('*')
+        .select(
+          'id, name, slug, address_line1, address_line2, city, phone, operating_hours, is_active, is_accepting_orders, delivery_enabled, image_exterior_url, latitude, longitude, created_at'
+        )
         .order('name', { ascending: true })
 
       if (error) throw error
 
-      // Map database fields to our Location type
-      interface DBLocation {
-        id: string
-        name: string
-        address: string
-        phone?: string
-        hours_weekday?: string
-        hours_weekend?: string
-        hours_saturday?: string
-        hours_sunday?: string
-        delivery_available: boolean
-        is_open?: boolean
-        lat?: number
-        lng?: number
-        created_at: string
-      }
-
-      const mapped = ((data || []) as DBLocation[]).map((loc): Location => ({
-        id: loc.id,
-        name: loc.name,
-        address: loc.address,
-        phone: loc.phone,
-        hours_weekday: loc.hours_weekday,
-        hours_saturday: loc.hours_weekend || loc.hours_saturday,
-        hours_sunday: loc.hours_weekend || loc.hours_sunday,
-        delivery_available: loc.delivery_available,
-        status: loc.is_open ? 'active' : 'inactive',
-        lat: loc.lat,
-        lng: loc.lng,
-        created_at: loc.created_at,
-      }))
+      const mapped = ((data || []) as DBLocationRow[]).map((loc): Location => {
+        const hrs = loc.operating_hours || {}
+        const addressLine = [loc.address_line1, loc.address_line2, loc.city]
+          .filter(Boolean)
+          .join(', ')
+        return {
+          id: loc.id,
+          name: loc.name,
+          address: addressLine,
+          phone: loc.phone || undefined,
+          hours_weekday: (hrs.weekday as string) || '',
+          hours_saturday: (hrs.saturday as string) || '',
+          hours_sunday: (hrs.sunday as string) || '',
+          delivery_available: loc.delivery_enabled ?? true,
+          status: loc.is_active ? 'active' : 'inactive',
+          lat: loc.latitude ?? undefined,
+          lng: loc.longitude ?? undefined,
+          created_at: loc.created_at || '',
+        }
+      })
 
       setLocations(mapped)
     } catch (err) {
-      console.log('Locations table may not exist')
+      console.error('Failed to load locations:', err)
     } finally {
       setLoading(false)
     }
@@ -84,15 +97,30 @@ export default function AdminLocationsPage() {
     try {
       const supabase = createClient()
 
-      // Map to database fields
+      // Split "Street, City" back into line1/city if present.
+      const [addressLine, ...rest] = (editingLocation.address || '').split(',')
+      const city = rest.join(',').trim() || null
+
+      const operating_hours: Record<string, string> = {}
+      if (editingLocation.hours_weekday) operating_hours.weekday = editingLocation.hours_weekday
+      if (editingLocation.hours_saturday) operating_hours.saturday = editingLocation.hours_saturday
+      if (editingLocation.hours_sunday) operating_hours.sunday = editingLocation.hours_sunday
+
       const dbData = {
         name: editingLocation.name,
-        address: editingLocation.address,
-        phone: editingLocation.phone,
-        hours_weekday: editingLocation.hours_weekday,
-        hours_weekend: editingLocation.hours_saturday, // Use weekend for both
-        is_open: editingLocation.status === 'active',
-        delivery_available: editingLocation.delivery_available,
+        slug:
+          (editingLocation.name || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .slice(0, 60) || 'location',
+        address_line1: addressLine?.trim() || '',
+        city,
+        phone: editingLocation.phone || null,
+        operating_hours,
+        is_active: editingLocation.status === 'active',
+        is_accepting_orders: editingLocation.status === 'active',
+        delivery_enabled: !!editingLocation.delivery_available,
       }
 
       if (isNew) {
@@ -103,10 +131,23 @@ export default function AdminLocationsPage() {
           .single()
 
         if (error) throw error
-        setLocations([...locations, {
-          ...data,
-          status: data.is_open ? 'active' : 'inactive',
-        } as Location])
+        if (data) {
+          setLocations([
+            ...locations,
+            {
+              id: (data as DBLocationRow).id,
+              name: (data as DBLocationRow).name,
+              address: editingLocation.address || '',
+              phone: editingLocation.phone,
+              hours_weekday: editingLocation.hours_weekday,
+              hours_saturday: editingLocation.hours_saturday,
+              hours_sunday: editingLocation.hours_sunday,
+              delivery_available: !!editingLocation.delivery_available,
+              status: (editingLocation.status as 'active' | 'inactive') || 'active',
+              created_at: (data as DBLocationRow).created_at || '',
+            },
+          ])
+        }
       } else {
         const { error } = await supabase
           .from('locations')
@@ -114,17 +155,21 @@ export default function AdminLocationsPage() {
           .eq('id', editingLocation.id)
 
         if (error) throw error
-        setLocations(locations.map((l) =>
-          l.id === editingLocation.id
-            ? { ...l, ...editingLocation } as Location
-            : l
-        ))
+        setLocations(
+          locations.map((l) =>
+            l.id === editingLocation.id ? ({ ...l, ...editingLocation } as Location) : l
+          )
+        )
       }
 
       setEditingLocation(null)
       setIsNew(false)
     } catch (err) {
       console.error('Failed to save location:', err)
+      alert(
+        'Error al guardar: ' +
+          (err instanceof Error ? err.message : 'unknown')
+      )
     } finally {
       setSaving(false)
     }

@@ -1,4 +1,17 @@
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Nuestra Historia",
+  description:
+    "12 años de historia. Desde Santa Ana hasta la costa. Cocina de horno de leña, fuego lento, recetas que respetan el ingrediente. Simmer Down es parte de la memoria de El Salvador.",
+  openGraph: {
+    title: "Simmer Down · Nuestra Historia",
+    description:
+      "Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.",
+    images: ["/og/about.jpg"],
+  },
+};
 import {
   Heart,
   Flame,
@@ -47,22 +60,22 @@ const values = [
 
 const team = [
   {
-    name: "Chef Marco Rivera",
-    role: "Chef Ejecutivo y Cofundador",
-    image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=400",
-    bio: "Entrenado en Napoles, Marco trae tecnica italiana autentica con alma salvadorena.",
+    name: "Fuego y Tradición",
+    role: "Nuestra Cocina",
+    image: "/images/menu/pizzas-hero.jpg",
+    bio: "Horno de leña, recetas que respetan el ingrediente. Pizzas artesanales con alma italiana y sabor salvadoreño.",
   },
   {
-    name: "Isabella Mendez",
-    role: "Cofundadora y CEO",
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400",
-    bio: "Una veterana de la hospitalidad que sono con traer pizza de clase mundial a El Salvador.",
+    name: "Hospitalidad Salvadoreña",
+    role: "Nuestra Gente",
+    image: "/images/locations/santa-ana-interior.jpg",
+    bio: "12 años abriendo puertas. Cada ubicación cuenta su propia historia y recibe con los brazos abiertos.",
   },
   {
-    name: "Carlos Hernandez",
-    role: "Director de Operaciones",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-    bio: "Asegura que cada ubicacion entregue la misma experiencia excepcional Simmer Down.",
+    name: "Vibras Únicas",
+    role: "Nuestras Noches",
+    image: "/images/events/simmermania-marzo.jpg",
+    bio: "Simmer Manía. Bandas en vivo, cine, poesía, salsa. El escenario donde la ciudad se encuentra.",
   },
 ];
 

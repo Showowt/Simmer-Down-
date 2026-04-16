@@ -56,28 +56,54 @@ export default function AdminSettingsPage() {
     fetchSettings();
   }, []);
 
+  // Production schema: settings is a (key text, value jsonb, description text)
+  // table — one row per setting. We hydrate the defaultSettings shape from
+  // whatever keys are present, and upsert one row per key on save.
+  const SETTING_KEYS: Array<keyof RestaurantSettings> = [
+    "name",
+    "tagline",
+    "logo_url",
+    "phone",
+    "email",
+    "min_order_amount",
+    "delivery_fee",
+    "free_delivery_threshold",
+    "tax_rate",
+    "currency",
+    "timezone",
+    "social_facebook",
+    "social_instagram",
+    "social_twitter",
+    "social_whatsapp",
+    "notifications_email",
+    "notifications_sms",
+    "notifications_push",
+    "online_ordering_enabled",
+    "delivery_enabled",
+    "pickup_enabled",
+  ];
+
   const fetchSettings = async () => {
     try {
       const supabase = createClient();
       const { data, error: fetchError } = await supabase
         .from("settings")
-        .select("*")
-        .single();
+        .select("key, value");
 
-      if (fetchError) {
-        if (fetchError.code === "PGRST116") {
-          // No settings found, use defaults
-          console.log("No settings found, using defaults");
-        } else {
-          throw fetchError;
+      if (fetchError) throw fetchError;
+
+      if (data && data.length > 0) {
+        const hydrated = { ...defaultSettings };
+        for (const row of data as Array<{ key: string; value: unknown }>) {
+          if (SETTING_KEYS.includes(row.key as keyof RestaurantSettings)) {
+            // JSONB value: strings/bools/numbers come back already typed.
+            (hydrated as Record<string, unknown>)[row.key] = row.value;
+          }
         }
-      }
-
-      if (data) {
-        setSettings({ ...defaultSettings, ...data });
+        setSettings(hydrated);
       }
     } catch (err) {
-      console.log("Settings table may not exist:", err);
+      console.log("Could not load settings:", err);
     } finally {
       setLoading(false);
     }
@@ -91,35 +117,29 @@ export default function AdminSettingsPage() {
     try {
       const supabase = createClient();
 
-      const payload = {
-        ...settings,
+      // Build one upsert row per setting key. value is JSONB, so numbers,
+      // booleans, and strings serialize correctly.
+      const settingsMap = settings as unknown as Record<string, unknown>;
+      const rows = SETTING_KEYS.map((key) => ({
+        key,
+        value: settingsMap[key] ?? null,
         updated_at: new Date().toISOString(),
-      };
+      }));
 
-      if (settings.id) {
-        const { error: updateError } = await supabase
-          .from("settings")
-          .update(payload)
-          .eq("id", settings.id);
+      const { error: upsertError } = await supabase
+        .from("settings")
+        .upsert(rows, { onConflict: "key" });
 
-        if (updateError) throw updateError;
-      } else {
-        const { data, error: insertError } = await supabase
-          .from("settings")
-          .insert([payload])
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-        if (data) setSettings(data);
-      }
+      if (upsertError) throw upsertError;
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error("Failed to save settings:", err);
       setError(
-        "Error al guardar. Verifica que la tabla settings existe en la base de datos.",
+        err instanceof Error
+          ? `Error al guardar: ${err.message}`
+          : "Error al guardar configuración.",
       );
     } finally {
       setSaving(false);
