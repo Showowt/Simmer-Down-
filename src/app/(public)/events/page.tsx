@@ -1,18 +1,8 @@
+"use client";
+
 import { Music, PartyPopper, Users, Utensils, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Eventos & Experiencias",
-  description:
-    "Simmer Manía — programación mensual de música en vivo, tributos, open mics, poesía y salsa en Simmer Down San Benito. Bandas, DJs, cantautores, cines y más.",
-  openGraph: {
-    title: "Simmer Down · Eventos",
-    description:
-      "Música en vivo, open mics, salsa, tributos, poesía y más. Consulta la programación del mes.",
-    images: ["/og/events.jpg"],
-  },
-};
+import { useI18n, translations } from "@/lib/i18n";
 import {
   EventsList,
   PrivateEventsSection,
@@ -20,28 +10,27 @@ import {
   AnimatedCTA,
 } from "@/components/events/EventsClient";
 
-const privateEventTypes = [
-  {
-    title: "Fiestas de Cumpleanos",
-    description:
-      "Haz tu cumpleanos inolvidable con menus personalizados y decoraciones.",
-    icon: <PartyPopper className="w-6 h-6 text-[#FF6B35]" />,
-  },
-  {
-    title: "Eventos Corporativos",
-    description:
-      "Team building, entretenimiento de clientes o celebraciones de oficina.",
-    icon: <Users className="w-6 h-6 text-[#FF6B35]" />,
-  },
-  {
-    title: "Cenas Privadas",
-    description:
-      "Uso exclusivo de nuestros salones privados para reuniones intimas.",
-    icon: <Utensils className="w-6 h-6 text-[#FF6B35]" />,
-  },
-];
-
 export default function EventsPage() {
+  const { t, locale } = useI18n();
+
+  const privateEventTypes = [
+    {
+      title: t(translations.events.birthdayParties),
+      description: t(translations.events.birthdayDesc),
+      icon: <PartyPopper className="w-6 h-6 text-[#FF6B35]" />,
+    },
+    {
+      title: t(translations.events.corporateEvents),
+      description: t(translations.events.corporateDesc),
+      icon: <Users className="w-6 h-6 text-[#FF6B35]" />,
+    },
+    {
+      title: t(translations.events.privateDinners),
+      description: t(translations.events.privateDinnersDesc),
+      icon: <Utensils className="w-6 h-6 text-[#FF6B35]" />,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
@@ -50,14 +39,13 @@ export default function EventsPage() {
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Experiencias Unicas
+              {t(translations.events.uniqueExperiences)}
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
-              Eventos y Experiencias
+              {t(translations.events.eventsTitle)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
-              Desde musica en vivo hasta talleres de pizza, siempre hay algo
-              emocionante sucediendo en Simmer Down.
+              {t(translations.events.eventsDesc)}
             </p>
           </AnimatedHero>
         </div>
@@ -75,16 +63,16 @@ export default function EventsPage() {
           <AnimatedCTA>
             <Music className="w-12 h-12 text-white mx-auto mb-6" />
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
-              No Te Pierdas Nada
+              {t(translations.events.dontMiss)}
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Suscribete para recibir notificaciones de proximos eventos.
+              {t(translations.events.subscribeEvents)}
             </p>
             <Link
               href="/simmerlovers"
               className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition-all min-h-[56px]"
             >
-              Unete a SimmerLovers
+              {t(translations.events.joinSimmerLovers)}
               <ArrowRight className="w-6 h-6" />
             </Link>
           </AnimatedCTA>

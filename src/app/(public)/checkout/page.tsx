@@ -17,10 +17,16 @@ import {
   AlertCircle,
   ChevronDown,
   Wallet,
+  Tag,
+  Clock,
+  Check,
+  X,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
 import { useCartStore } from "@/store/cart";
+import { useI18n, translations } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import {
   CardForm,
@@ -38,6 +44,15 @@ interface Location {
   is_accepting_orders: boolean;
   delivery_enabled: boolean;
   delivery_fee: number;
+  estimated_prep_time_minutes: number | null;
+}
+
+interface AppliedPromo {
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  discount_amount: number;
+  description: string | null;
 }
 
 const fallbackLocations: Location[] = [
@@ -50,6 +65,7 @@ const fallbackLocations: Location[] = [
     is_accepting_orders: true,
     delivery_enabled: true,
     delivery_fee: 3.99,
+    estimated_prep_time_minutes: 20,
   },
   {
     id: "coatepeque",
@@ -60,6 +76,7 @@ const fallbackLocations: Location[] = [
     is_accepting_orders: true,
     delivery_enabled: true,
     delivery_fee: 4.99,
+    estimated_prep_time_minutes: 25,
   },
   {
     id: "san-benito",
@@ -70,6 +87,7 @@ const fallbackLocations: Location[] = [
     is_accepting_orders: true,
     delivery_enabled: true,
     delivery_fee: 2.99,
+    estimated_prep_time_minutes: 20,
   },
   {
     id: "surf-city",
@@ -80,6 +98,7 @@ const fallbackLocations: Location[] = [
     is_accepting_orders: true,
     delivery_enabled: true,
     delivery_fee: 5.99,
+    estimated_prep_time_minutes: 25,
   },
   {
     id: "simmer-garden",
@@ -90,6 +109,7 @@ const fallbackLocations: Location[] = [
     is_accepting_orders: true,
     delivery_enabled: true,
     delivery_fee: 4.99,
+    estimated_prep_time_minutes: 25,
   },
 ];
 
@@ -98,6 +118,7 @@ type PaymentMethod = "card" | "cash";
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getSubtotal, clearCart } = useCartStore();
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -127,6 +148,13 @@ export default function CheckoutPage() {
     redirectData: string;
   } | null>(null);
 
+  // Promo code state
+  const [promoExpanded, setPromoExpanded] = useState(false);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo | null>(null);
+
   useEffect(() => {
     setMounted(true);
     async function fetchLocations() {
@@ -135,7 +163,7 @@ export default function CheckoutPage() {
         const { data, error } = await supabase
           .from("locations")
           .select(
-            "id, name, slug, address_line1, city, is_accepting_orders, delivery_enabled, delivery_fee",
+            "id, name, slug, address_line1, city, is_accepting_orders, delivery_enabled, delivery_fee, estimated_prep_time_minutes",
           )
           .eq("is_active", true)
           .eq("is_accepting_orders", true)
@@ -205,7 +233,83 @@ export default function CheckoutPage() {
     orderType === "delivery" && currentLocation?.delivery_enabled
       ? currentLocation.delivery_fee || 3.99
       : 0;
-  const total = subtotal + deliveryFee;
+  const discountAmount = appliedPromo?.discount_amount ?? 0;
+  const total = Math.max(0, subtotal + deliveryFee - discountAmount);
+
+  // Delivery/prep time estimate
+  const prepTime = currentLocation?.estimated_prep_time_minutes ?? 20;
+  const deliveryBuffer = 15;
+
+  const applyPromoCode = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+
+    setPromoLoading(true);
+    setPromoError("");
+
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("promo_codes")
+        .select("id, code, discount_type, discount_value, min_order_amount, is_active, expires_at, description")
+        .eq("code", code)
+        .eq("is_active", true)
+        .single();
+
+      if (error || !data) {
+        setPromoError("Codigo no valido o expirado");
+        setPromoLoading(false);
+        return;
+      }
+
+      // Check expiration
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        setPromoError("Codigo no valido o expirado");
+        setPromoLoading(false);
+        return;
+      }
+
+      // Check minimum order amount
+      if (data.min_order_amount && subtotal < data.min_order_amount) {
+        setPromoError(`Pedido minimo de $${data.min_order_amount.toFixed(2)} para este codigo`);
+        setPromoLoading(false);
+        return;
+      }
+
+      // Calculate discount
+      let calculatedDiscount = 0;
+      const discountValue = data.discount_value ?? 0;
+
+      if (data.discount_type === "percent") {
+        calculatedDiscount = (subtotal * discountValue) / 100;
+      } else {
+        // fixed
+        calculatedDiscount = discountValue;
+      }
+
+      // Never discount more than subtotal
+      calculatedDiscount = Math.min(calculatedDiscount, subtotal);
+
+      setAppliedPromo({
+        code: data.code,
+        discount_type: data.discount_type,
+        discount_value: discountValue,
+        discount_amount: calculatedDiscount,
+        description: data.description,
+      });
+      setPromoError("");
+    } catch {
+      setPromoError("Error al validar el codigo. Intenta de nuevo.");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const removePromoCode = () => {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError("");
+  };
 
   const createOrder = async () => {
     const response = await fetch("/api/orders/create", {
@@ -220,6 +324,7 @@ export default function CheckoutPage() {
         deliveryAddress: orderType === "delivery" ? formData.address : null,
         deliveryCity: orderType === "delivery" ? formData.city : null,
         notes: formData.notes || null,
+        promoCode: appliedPromo?.code || null,
         items: items.map((i) => ({
           id: i.id,
           name: i.name,
@@ -278,7 +383,7 @@ export default function CheckoutPage() {
     setError("");
 
     if (!selectedLocation) {
-      setError("Por favor selecciona una ubicación");
+      setError(t(translations.checkout.selectLocation));
       setLoading(false);
       return;
     }
@@ -287,7 +392,7 @@ export default function CheckoutPage() {
       const validationErrors = validateCardForm(card);
       if (validationErrors) {
         setCardErrors(validationErrors);
-        setError("Revisa los datos de la tarjeta.");
+        setError(t(translations.checkout.checkCardData));
         setLoading(false);
         return;
       }
@@ -329,12 +434,12 @@ export default function CheckoutPage() {
             className="inline-flex items-center gap-2 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
-            Volver al Carrito
+            {t(translations.checkout.backToCart)}
           </Link>
           <h1 className="font-display text-3xl text-[#FFF8F0]">
-            Finalizar Pedido
+            {t(translations.checkout.title)}
           </h1>
-          <p className="text-[#6B6560]">Completa tu orden</p>
+          <p className="text-[#6B6560]">{t(translations.checkout.completeOrder)}</p>
         </motion.div>
 
         {error && (
@@ -357,7 +462,7 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Tipo de Pedido
+              {t(translations.checkout.orderType)}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -370,7 +475,7 @@ export default function CheckoutPage() {
                 }`}
               >
                 <Truck className="w-5 h-5" />
-                <span className="font-medium">Delivery</span>
+                <span className="font-medium">{t(translations.checkout.deliveryType)}</span>
               </button>
               <button
                 type="button"
@@ -382,7 +487,7 @@ export default function CheckoutPage() {
                 }`}
               >
                 <Store className="w-5 h-5" />
-                <span className="font-medium">Recoger</span>
+                <span className="font-medium">{t(translations.checkout.pickup)}</span>
               </button>
             </div>
           </motion.div>
@@ -395,7 +500,7 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Ubicación
+              {t(translations.checkout.location)}
             </h2>
             <div className="relative">
               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
@@ -412,6 +517,28 @@ export default function CheckoutPage() {
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
             </div>
+
+            {/* Delivery/Prep Time Estimate */}
+            {selectedLocation && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-[#B8B0A8] bg-[#1F1D1A] border border-[#3D3936] px-4 py-3">
+                <Clock className="w-4 h-4 text-[#FF6B35] flex-shrink-0" />
+                {orderType === "delivery" ? (
+                  <span>
+                    {t(translations.checkout.estimatedDelivery)}{" "}
+                    <span className="text-[#FFF8F0] font-medium">
+                      {prepTime}-{prepTime + deliveryBuffer} {t(translations.checkout.min)}
+                    </span>
+                  </span>
+                ) : (
+                  <span>
+                    {t(translations.checkout.estimatedPrep)}{" "}
+                    <span className="text-[#FFF8F0] font-medium">
+                      {prepTime}-{prepTime + 10} {t(translations.checkout.min)}
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
           </motion.div>
 
           {/* Contact */}
@@ -422,12 +549,12 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Información de Contacto
+              {t(translations.checkout.contactInfo)}
             </h2>
             <div className="space-y-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Nombre *
+                  {t(translations.checkout.name)} *
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -439,13 +566,13 @@ export default function CheckoutPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
-                    placeholder="Tu nombre"
+                    placeholder={t(translations.checkout.yourName)}
                   />
                 </div>
               </div>
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Teléfono *
+                  {t(translations.checkout.phone)} *
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -464,7 +591,7 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Correo {paymentMethod === "card" ? "*" : "(opcional)"}
+                  {t(translations.checkout.email)} {paymentMethod === "card" ? "*" : `(${t(translations.checkout.emailOptional)})`}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -491,7 +618,7 @@ export default function CheckoutPage() {
               className="bg-[#252320] border border-[#3D3936] p-6"
             >
               <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-                Dirección de Envío
+                {t(translations.checkout.deliveryAddress)}
               </h2>
               <div className="space-y-4">
                 <div className="relative">
@@ -504,7 +631,7 @@ export default function CheckoutPage() {
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
                     rows={2}
-                    placeholder="Calle, número, colonia, referencias"
+                    placeholder={t(translations.checkout.addressPlaceholder)}
                   />
                 </div>
                 <input
@@ -515,7 +642,7 @@ export default function CheckoutPage() {
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
-                  placeholder="Ciudad"
+                  placeholder={t(translations.checkout.city)}
                 />
               </div>
             </motion.div>
@@ -529,7 +656,7 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Instrucciones Especiales
+              {t(translations.checkout.specialInstructions)}
             </h2>
             <div className="relative">
               <FileText className="absolute left-4 top-4 w-5 h-5 text-[#6B6560]" />
@@ -539,7 +666,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition resize-none"
                 rows={2}
-                placeholder="¿Alguna solicitud especial? (alergias, servilletas extra, etc.)"
+                placeholder={t(translations.checkout.instructionsPlaceholder)}
               />
             </div>
           </motion.div>
@@ -552,7 +679,7 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Método de Pago
+              {t(translations.checkout.paymentMethod)}
             </h2>
             <div className="grid grid-cols-2 gap-4 mb-6">
               <button
@@ -565,7 +692,7 @@ export default function CheckoutPage() {
                 }`}
               >
                 <CreditCard className="w-5 h-5" />
-                <span className="font-medium">Tarjeta</span>
+                <span className="font-medium">{t(translations.checkout.card)}</span>
               </button>
               <button
                 type="button"
@@ -578,7 +705,7 @@ export default function CheckoutPage() {
               >
                 <Wallet className="w-5 h-5" />
                 <span className="font-medium">
-                  Pago en {orderType === "delivery" ? "Entrega" : "Local"}
+                  {orderType === "delivery" ? t(translations.checkout.payOnDelivery) : t(translations.checkout.payAtStore)}
                 </span>
               </button>
             </div>
@@ -601,7 +728,7 @@ export default function CheckoutPage() {
             className="bg-[#252320] border border-[#3D3936] p-6"
           >
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
-              Resumen del Pedido
+              {t(translations.cart.orderSummary)}
             </h2>
             <div className="space-y-3">
               {items.map((item) => (
@@ -616,21 +743,116 @@ export default function CheckoutPage() {
               ))}
               <div className="border-t border-[#3D3936] pt-3 mt-3 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#6B6560]">Subtotal</span>
+                  <span className="text-[#6B6560]">{t(translations.cart.subtotal)}</span>
                   <span className="text-[#FFF8F0]">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#6B6560]">Envío</span>
+                  <span className="text-[#6B6560]">{t(translations.cart.delivery)}</span>
                   <span className="text-[#FFF8F0]">
-                    {deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : "Gratis"}
+                    {deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : t(translations.checkout.free)}
                   </span>
                 </div>
+                {appliedPromo && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-400">
+                      {t(translations.checkout.discount)} ({appliedPromo.code})
+                    </span>
+                    <span className="text-green-400">
+                      -${discountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-lg pt-2 border-t border-[#3D3936]">
-                  <span className="text-[#FFF8F0]">Total</span>
+                  <span className="text-[#FFF8F0]">{t(translations.cart.total)}</span>
                   <span className="text-white">${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
+          </motion.div>
+
+          {/* Promo Code */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="bg-[#252320] border border-[#3D3936] p-6"
+          >
+            {!appliedPromo ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setPromoExpanded(!promoExpanded)}
+                  className="flex items-center gap-2 text-sm text-[#B8B0A8] hover:text-[#FF6B35] transition-colors w-full"
+                >
+                  <Tag className="w-4 h-4" />
+                  <span>{t(translations.checkout.promoCode)}</span>
+                  <ChevronDown
+                    className={`w-4 h-4 ml-auto transition-transform ${
+                      promoExpanded ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {promoExpanded && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            applyPromoCode();
+                          }
+                        }}
+                        placeholder={t(translations.checkout.enterCode)}
+                        className="flex-1 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition text-sm uppercase"
+                        disabled={promoLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={applyPromoCode}
+                        disabled={promoLoading || !promoInput.trim()}
+                        className="px-5 py-3 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] text-white text-sm font-medium transition-colors flex items-center gap-2 disabled:cursor-not-allowed min-w-[100px] justify-center"
+                      >
+                        {promoLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          t(translations.checkout.apply)
+                        )}
+                      </button>
+                    </div>
+                    {promoError && (
+                      <p className="text-sm text-[#C73E1D] flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        {promoError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-green-400 font-medium">
+                    {t(translations.checkout.codeApplied)} — {appliedPromo.code}
+                    {appliedPromo.discount_type === "percent"
+                      ? ` (-${appliedPromo.discount_value}%)`
+                      : ` (-$${appliedPromo.discount_amount.toFixed(2)})`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removePromoCode}
+                  className="text-[#6B6560] hover:text-[#C73E1D] transition-colors p-1"
+                  aria-label={t(translations.checkout.removeCode)}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </motion.div>
 
           {/* Submit */}
@@ -645,14 +867,14 @@ export default function CheckoutPage() {
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin" />
-                Procesando...
+                {t(translations.checkout.processing)}
               </>
             ) : (
               <>
                 <Lock className="w-5 h-5" />
                 {paymentMethod === "card"
-                  ? `Pagar $${total.toFixed(2)}`
-                  : `Confirmar Pedido · $${total.toFixed(2)}`}
+                  ? `${t(translations.checkout.pay)} $${total.toFixed(2)}`
+                  : `${t(translations.checkout.confirmOrder)} · $${total.toFixed(2)}`}
               </>
             )}
           </motion.button>

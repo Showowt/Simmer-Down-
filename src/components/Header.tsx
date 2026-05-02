@@ -7,14 +7,8 @@ import { Menu, X, ShoppingBag, Flame, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCartStore } from '@/store/cart'
 import { useAuth } from '@/hooks/useAuth'
-
-const navLinks = [
-  { href: '/menu', label: 'Menú' },
-  { href: '/locations', label: 'Ubicaciones' },
-  { href: '/about', label: 'Nosotros' },
-  { href: '/events', label: 'Eventos' },
-  { href: '/simmerlovers', label: 'SimmerLovers' },
-]
+import { useI18n, translations } from '@/lib/i18n'
+import LanguageToggle from '@/components/LanguageToggle'
 
 export default function Header() {
   const pathname = usePathname()
@@ -25,6 +19,16 @@ export default function Header() {
   const getSubtotal = useCartStore((state) => state.getSubtotal)
   const itemCount = useCartStore((state) => state.getItemCount())
   const { user, profile, loading: authLoading } = useAuth()
+  const { t } = useI18n()
+
+  const navLinks = [
+    { href: '/menu', label: t(translations.nav.menu) },
+    { href: '/locations', label: t(translations.nav.locations) },
+    { href: '/reservations', label: t(translations.nav.reservations) },
+    { href: '/about', label: t(translations.nav.about) },
+    { href: '/events', label: t(translations.nav.events) },
+    { href: '/simmerlovers', label: 'SimmerLovers' },
+  ]
 
   useEffect(() => {
     setMounted(true)
@@ -76,13 +80,16 @@ export default function Header() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
+              {/* Language Toggle - Desktop */}
+              <LanguageToggle />
+
               {/* Account / Login */}
               {mounted && !authLoading && (
                 user ? (
                   <Link
                     href="/account"
                     className="hidden sm:flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
-                    aria-label="Mi cuenta"
+                    aria-label={t(translations.nav.myAccount)}
                   >
                     <div className="w-8 h-8 bg-[#FF6B35] flex items-center justify-center">
                       <span className="text-white text-sm font-bold">
@@ -90,17 +97,17 @@ export default function Header() {
                       </span>
                     </div>
                     <span className="hidden md:inline text-sm">
-                      {profile?.full_name?.split(' ')[0] || 'Cuenta'}
+                      {profile?.full_name?.split(' ')[0] || t(translations.nav.account)}
                     </span>
                   </Link>
                 ) : (
                   <Link
                     href="/auth/login"
                     className="hidden sm:flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
-                    aria-label="Iniciar sesión"
+                    aria-label={t(translations.auth.loginBtn)}
                   >
                     <User className="w-5 h-5" />
-                    <span className="hidden md:inline text-sm">Ingresar</span>
+                    <span className="hidden md:inline text-sm">{t(translations.nav.login)}</span>
                   </Link>
                 )
               )}
@@ -109,7 +116,7 @@ export default function Header() {
               <Link
                 href="/cart"
                 className="relative flex items-center gap-2 p-3 -m-1 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
-                aria-label={`Carrito${mounted && itemCount > 0 ? `, ${itemCount} productos, $${getSubtotal().toFixed(2)}` : ''}`}
+                aria-label={`${t(translations.nav.cart)}${mounted && itemCount > 0 ? `, ${itemCount} ${itemCount === 1 ? t(translations.cart.product) : t(translations.cart.products)}, $${getSubtotal().toFixed(2)}` : ''}`}
               >
                 <ShoppingBag className="w-5 h-5" />
                 {mounted && itemCount > 0 && (
@@ -129,14 +136,14 @@ export default function Header() {
                 href="/menu"
                 className="hidden lg:flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-5 py-2.5 text-sm font-semibold transition-all hover:translate-y-[-1px] min-h-[44px]"
               >
-                Ordenar
+                {t(translations.nav.order)}
               </Link>
 
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="lg:hidden p-2.5 -m-1 text-[#FFF8F0] hover:text-[#FF6B35] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] min-w-[44px] min-h-[44px] flex items-center justify-center"
-                aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+                aria-label={isOpen ? t(translations.nav.closeMenu) : t(translations.nav.openMenu)}
                 aria-expanded={isOpen}
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -166,6 +173,11 @@ export default function Header() {
               transition={{ type: 'tween', duration: 0.3 }}
               className="absolute top-0 right-0 bottom-0 w-80 bg-[#2D2A26] border-l border-[#3D3936] p-8 pt-24"
             >
+              {/* Language Toggle - Mobile */}
+              <div className="mb-4">
+                <LanguageToggle />
+              </div>
+
               <div className="space-y-2">
                 {navLinks.map((link) => (
                   <Link
@@ -190,7 +202,7 @@ export default function Header() {
                       onClick={() => setIsOpen(false)}
                       className="block py-4 text-xl font-medium text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors"
                     >
-                      Mi Cuenta
+                      {t(translations.nav.myAccount)}
                     </Link>
                   ) : (
                     <Link
@@ -198,7 +210,7 @@ export default function Header() {
                       onClick={() => setIsOpen(false)}
                       className="block py-4 text-xl font-medium text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors"
                     >
-                      Iniciar Sesión
+                      {t(translations.auth.loginBtn)}
                     </Link>
                   )
                 )}
@@ -210,7 +222,7 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 text-center text-lg font-semibold transition-colors min-h-[56px]"
                 >
-                  Ordenar Ahora
+                  {t(translations.nav.orderNow)}
                 </Link>
 
                 {mounted && itemCount > 0 && (
@@ -221,7 +233,7 @@ export default function Header() {
                   >
                     <span className="flex items-center gap-2">
                       <ShoppingBag className="w-5 h-5" />
-                      {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
+                      {itemCount} {itemCount === 1 ? t(translations.cart.product) : t(translations.cart.products)}
                     </span>
                     <span className="font-semibold">${getSubtotal().toFixed(2)}</span>
                   </Link>

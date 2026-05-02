@@ -116,7 +116,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
             }`}
             aria-label={
               memory.preferredLocation === location.id
-                ? "Tu ubicacion favorita"
+                ? "Tu ubicación favorita"
                 : "Marcar como favorita"
             }
           >
@@ -192,7 +192,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
             href="/menu"
             className="inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition-all min-h-[56px]"
           >
-            Ordenar Aqui
+            Ordenar Aquí
           </Link>
           <a
             href={location.mapUrl}
@@ -201,7 +201,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
             className="inline-flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#3D3936] text-[#FFF8F0] px-6 py-4 font-semibold border border-[#3D3936] transition-all min-h-[56px]"
           >
             <Navigation className="w-5 h-5" />
-            Como Llegar
+            Cómo Llegar
           </a>
           <a
             href={`tel:${location.phone.replace(/\s/g, "")}`}

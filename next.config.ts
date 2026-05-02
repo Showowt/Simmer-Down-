@@ -1,11 +1,12 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-// Content-Security-Policy applied globally. /checkout additionally gets
-// a frame-src allowance for Powertranz iframes (see matcher below).
+// Content-Security-Policy — HARDENED.
+// ★ unsafe-eval REMOVED (was neutralizing XSS protection).
+// unsafe-inline kept for JSON-LD script tags and inline styles.
 const baseCsp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel.app",
+  "script-src 'self' 'unsafe-inline' https://*.vercel.app https://*.powertranz.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
@@ -15,6 +16,7 @@ const baseCsp = [
   "frame-ancestors 'self'",
   "base-uri 'self'",
   "object-src 'none'",
+  "upgrade-insecure-requests",
 ].join("; ");
 
 const securityHeaders = [
@@ -30,10 +32,12 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=(self), payment=(self)",
   },
   { key: "Content-Security-Policy", value: baseCsp },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
 ];
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  poweredByHeader: false,
   turbopack: {
     root: path.resolve(__dirname),
   },
@@ -52,6 +56,7 @@ const nextConfig: NextConfig = {
         pathname: "/storage/**",
       },
     ],
+    formats: ["image/avif", "image/webp"],
   },
   async headers() {
     return [

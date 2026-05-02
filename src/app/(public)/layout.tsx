@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: "%s | Simmer Down",
   },
   description:
-    "5 ubicaciones. 12 años creando memorias. Pizza artesanal de horno de leña, pastas, cortes y experiencias gastro-musicales en Santa Ana, San Benito, Lago de Coatepeque, Surf City y Simmer Garden.",
+    "5 ubicaciones. 14 años creando memorias. Pizza artesanal de horno de leña, pastas, cortes y experiencias gastro-musicales en Santa Ana, San Benito, Lago de Coatepeque, Surf City y Simmer Garden.",
   openGraph: {
     type: "website",
     locale: "es_SV",

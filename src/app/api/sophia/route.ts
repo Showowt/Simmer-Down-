@@ -46,8 +46,10 @@ const GREETINGS = {
     "🌿 ¡Bienvenido al jardín! Soy Sophia de Simmer Garden La Majada. ¡Escapa de la ciudad!",
   "lago-coatepeque":
     "🌊 ¡Hola! Bienvenido a Simmer Down Lago de Coatepeque. Soy Sophia, ¿listo para probar nuestros mariscos frescos?",
+  "surf-city":
+    "🏄 ¡Hola! Bienvenido a Simmer Down Surf City. Soy Sophia, ¿listo para pizza frente al mar?",
   default:
-    "🔥 ¡Hola! Soy Sophia, tu guía en Simmer Down. Tenemos 4 ubicaciones increíbles. ¿En cuál te encuentras?",
+    "🔥 ¡Hola! Soy Sophia, tu guía en Simmer Down. Tenemos 5 ubicaciones increíbles. ¿En cuál te encuentras?",
 };
 
 // Semantic food understanding

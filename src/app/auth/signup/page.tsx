@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail, Lock, User, Phone, AlertCircle, Flame, Eye, EyeOff, Check, Gift } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useI18n, translations } from '@/lib/i18n'
 import Link from 'next/link'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { t } = useI18n()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -23,9 +25,9 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false)
 
   const passwordRequirements = [
-    { met: formData.password.length >= 8, text: 'Mínimo 8 caracteres' },
-    { met: /[A-Z]/.test(formData.password), text: 'Una letra mayúscula' },
-    { met: /[0-9]/.test(formData.password), text: 'Un número' },
+    { met: formData.password.length >= 8, text: t(translations.auth.passwordReqs.minChars) },
+    { met: /[A-Z]/.test(formData.password), text: t(translations.auth.passwordReqs.uppercase) },
+    { met: /[0-9]/.test(formData.password), text: t(translations.auth.passwordReqs.number) },
   ]
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -34,7 +36,7 @@ export default function SignupPage() {
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden')
+      setError(t(translations.auth.passwordsNoMatch))
       return
     }
 
@@ -97,7 +99,7 @@ export default function SignupPage() {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear cuenta'
       if (errorMessage.includes('already registered')) {
-        setError('Este correo ya está registrado. ¿Quieres iniciar sesión?')
+        setError(t(translations.auth.alreadyRegistered))
       } else {
         setError(errorMessage)
       }
@@ -118,22 +120,22 @@ export default function SignupPage() {
             <div className="w-20 h-20 bg-[#4CAF50]/10 flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-[#4CAF50]" />
             </div>
-            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-4">¡Cuenta Creada!</h1>
+            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-4">{t(translations.auth.accountCreated)}</h1>
             <p className="text-[#B8B0A8] mb-6">
-              Hemos enviado un correo de confirmación a <strong className="text-[#FFF8F0]">{formData.email}</strong>.
-              Por favor revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.
+              {t(translations.auth.checkEmail)} <strong className="text-[#FFF8F0]">{formData.email}</strong>.
+              {' '}{t(translations.auth.checkInbox)}
             </p>
             <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/20 p-4 mb-6">
               <div className="flex items-center justify-center gap-2 text-[#FF6B35] font-medium">
                 <Gift className="w-5 h-5" />
-                ¡50 puntos de bienvenida agregados!
+                {t(translations.auth.welcomePoints)}
               </div>
             </div>
             <Link
               href="/auth/login"
               className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
             >
-              Ir a Iniciar Sesión
+              {t(translations.auth.goToLogin)}
             </Link>
           </div>
         </motion.div>
@@ -153,8 +155,8 @@ export default function SignupPage() {
             <Flame className="w-8 h-8 text-[#FF6B35]" />
             Simmer Down
           </Link>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">Únete a SimmerLovers</h1>
-          <p className="text-[#6B6560] mt-2">Crea tu cuenta y obtén 50 puntos de bienvenida</p>
+          <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.joinSimmerLovers)}</h1>
+          <p className="text-[#6B6560] mt-2">{t(translations.auth.signupSubtitle)}</p>
         </div>
 
         <form onSubmit={handleSignup} className="bg-[#252320] border border-[#3D3936] p-8">
@@ -168,7 +170,7 @@ export default function SignupPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Nombre Completo *
+                {t(translations.auth.fullName)} *
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -186,7 +188,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Correo Electrónico *
+                {t(translations.auth.emailLabel)} *
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -204,7 +206,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Teléfono (opcional)
+                {t(translations.auth.phoneOptional)}
               </label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -223,7 +225,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Contraseña *
+                {t(translations.auth.password)} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -240,7 +242,7 @@ export default function SignupPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#B8B0A8] transition-colors"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? t(translations.auth.hidePassword) : t(translations.auth.showPassword)}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -261,7 +263,7 @@ export default function SignupPage() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Confirmar Contraseña *
+                {t(translations.auth.confirmPassword)} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -276,7 +278,7 @@ export default function SignupPage() {
                 />
               </div>
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="mt-1 text-xs text-[#C73E1D]">Las contraseñas no coinciden</p>
+                <p className="mt-1 text-xs text-[#C73E1D]">{t(translations.auth.passwordsNoMatch)}</p>
               )}
             </div>
           </div>
@@ -289,25 +291,25 @@ export default function SignupPage() {
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin" />
-                Creando cuenta...
+                {t(translations.auth.creating)}
               </>
             ) : (
-              'Crear Cuenta'
+              t(translations.auth.createAccount)
             )}
           </button>
 
           <p className="text-xs text-[#6B6560] mt-4 text-center">
-            Al crear una cuenta, aceptas nuestros{' '}
-            <Link href="/terms" className="text-[#FF6B35] hover:underline">Términos</Link>
-            {' '}y{' '}
-            <Link href="/privacy" className="text-[#FF6B35] hover:underline">Política de Privacidad</Link>
+            {t(translations.auth.byCreating)}{' '}
+            <Link href="/terms" className="text-[#FF6B35] hover:underline">{t(translations.footer.terms)}</Link>
+            {' '}{t(translations.auth.and)}{' '}
+            <Link href="/privacy" className="text-[#FF6B35] hover:underline">{t(translations.footer.privacy)}</Link>
           </p>
         </form>
 
         <p className="text-center text-[#6B6560] mt-6">
-          ¿Ya tienes cuenta?{' '}
+          {t(translations.auth.alreadyHaveAccount)}{' '}
           <Link href="/auth/login" className="text-[#FF6B35] hover:underline font-medium">
-            Iniciar Sesión
+            {t(translations.auth.loginBtn)}
           </Link>
         </p>
       </motion.div>

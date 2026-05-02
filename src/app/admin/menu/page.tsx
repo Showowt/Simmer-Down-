@@ -76,7 +76,7 @@ export default function AdminMenuPage() {
       if (error) throw error;
       setItems(data || []);
     } catch (err) {
-      console.log("Demo mode");
+      // Fallback: no menu data
     } finally {
       setLoading(false);
     }

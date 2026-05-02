@@ -17,47 +17,55 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-
-const contactReasons = [
-  "Consulta General",
-  "Comentarios",
-  "Eventos Privados",
-  "Catering",
-  "Alianzas",
-  "Carreras",
-  "Prensa/Medios",
-  "Otro",
-];
-
-const faqs = [
-  {
-    question: "¿Ofrecen delivery?",
-    answer:
-      "Sí, hacemos entregas dentro de un radio de 5km de cada ubicación. El delivery es gratis para pedidos mayores a $25. Puedes ordenar por nuestra web o llamarnos directamente.",
-  },
-  {
-    question: "¿Puedo hacer una reservación?",
-    answer:
-      "Por supuesto. Puedes llamar a cualquiera de nuestras ubicaciones o usar nuestro sistema de reservas en línea. Para grupos de 8 o más, te recomendamos llamar con anticipación.",
-  },
-  {
-    question: "¿Tienen opciones para restricciones alimentarias?",
-    answer:
-      "Sí, ofrecemos masa sin gluten y podemos modificar muchas pizzas para hacerlas vegetarianas o veganas. Por favor, infórmanos sobre cualquier alergia al ordenar.",
-  },
-  {
-    question: "¿Cómo funciona SimmerLovers?",
-    answer:
-      "SimmerLovers es nuestro programa de lealtad gratuito. Gana 1 punto por cada $1 gastado y canjea tus puntos por comida gratis y beneficios exclusivos. Regístrate en línea o en tienda.",
-  },
-  {
-    question: "¿Organizan eventos privados?",
-    answer:
-      "Sí, tenemos espacios privados en todas nuestras ubicaciones perfectos para cumpleaños, eventos corporativos y celebraciones. Contáctanos para disponibilidad y menús personalizados.",
-  },
-];
+import { useI18n, translations } from "@/lib/i18n";
 
 export default function ContactPage() {
+  const { t, locale } = useI18n();
+
+  const contactReasons = [
+    t(translations.contact.reasons.general),
+    t(translations.contact.reasons.feedback),
+    t(translations.contact.reasons.privateEvents),
+    t(translations.contact.reasons.catering),
+    t(translations.contact.reasons.partnerships),
+    t(translations.contact.reasons.careers),
+    t(translations.contact.reasons.press),
+    t(translations.contact.reasons.other),
+  ];
+
+  const faqs = [
+    {
+      question: locale === 'es' ? '¿Ofrecen delivery?' : 'Do you offer delivery?',
+      answer: locale === 'es'
+        ? 'Sí, hacemos entregas dentro de un radio de 5km de cada ubicación. El delivery es gratis para pedidos mayores a $25. Puedes ordenar por nuestra web o llamarnos directamente.'
+        : 'Yes, we deliver within a 5km radius of each location. Delivery is free for orders over $25. You can order through our website or call us directly.',
+    },
+    {
+      question: locale === 'es' ? '¿Puedo hacer una reservación?' : 'Can I make a reservation?',
+      answer: locale === 'es'
+        ? 'Por supuesto. Puedes llamar a cualquiera de nuestras ubicaciones o usar nuestro sistema de reservas en línea. Para grupos de 8 o más, te recomendamos llamar con anticipación.'
+        : 'Of course. You can call any of our locations or use our online reservation system. For groups of 8 or more, we recommend calling in advance.',
+    },
+    {
+      question: locale === 'es' ? '¿Tienen opciones para restricciones alimentarias?' : 'Do you have options for dietary restrictions?',
+      answer: locale === 'es'
+        ? 'Sí, ofrecemos masa sin gluten y podemos modificar muchas pizzas para hacerlas vegetarianas o veganas. Por favor, infórmanos sobre cualquier alergia al ordenar.'
+        : 'Yes, we offer gluten-free dough and can modify many pizzas to make them vegetarian or vegan. Please let us know about any allergies when ordering.',
+    },
+    {
+      question: locale === 'es' ? '¿Cómo funciona SimmerLovers?' : 'How does SimmerLovers work?',
+      answer: locale === 'es'
+        ? 'SimmerLovers es nuestro programa de lealtad gratuito. Gana 1 punto por cada $1 gastado y canjea tus puntos por comida gratis y beneficios exclusivos. Regístrate en línea o en tienda.'
+        : 'SimmerLovers is our free loyalty program. Earn 1 point for every $1 spent and redeem your points for free food and exclusive perks. Sign up online or in-store.',
+    },
+    {
+      question: locale === 'es' ? '¿Organizan eventos privados?' : 'Do you host private events?',
+      answer: locale === 'es'
+        ? 'Sí, tenemos espacios privados en todas nuestras ubicaciones perfectos para cumpleaños, eventos corporativos y celebraciones. Contáctanos para disponibilidad y menús personalizados.'
+        : 'Yes, we have private spaces at all our locations perfect for birthdays, corporate events and celebrations. Contact us for availability and custom menus.',
+    },
+  ];
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -93,7 +101,7 @@ export default function ContactPage() {
 
       if (dbError) {
         // If table doesn't exist, still show success (graceful degradation)
-        console.log("Contact submission:", formData);
+        console.warn("[Contact] DB insert failed:", dbError.message);
       }
 
       setSubmitted(true);
@@ -117,14 +125,13 @@ export default function ContactPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
-              Contáctanos
+              {t(translations.contact.title)}
             </span>
             <h1 className="text-4xl md:text-6xl font-bold text-[#FFF8F0] mb-6">
-              Queremos Escucharte
+              {t(translations.contact.heading)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
-              Preguntas, comentarios o simplemente para saludar. Estamos aquí
-              para ayudarte.
+              {t(translations.contact.subtitle)}
             </p>
           </motion.div>
         </div>
@@ -143,14 +150,14 @@ export default function ContactPage() {
             >
               <div className="bg-[#252320] border border-[#3D3936] p-6">
                 <h3 className="text-lg font-semibold text-[#FFF8F0] mb-6">
-                  Información de Contacto
+                  {t(translations.contact.contactInfo)}
                 </h3>
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">Teléfonos</p>
+                      <p className="text-[#6B6560] text-sm">{t(translations.contact.phones)}</p>
                       <a
                         href="tel:+50324455999"
                         className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
@@ -164,7 +171,7 @@ export default function ContactPage() {
                         +503 7487-7792 (San Benito)
                       </a>
                       <p className="text-[#6B6560] text-sm mt-1">
-                        WhatsApp disponible
+                        {t(translations.contact.whatsappAvailable)}
                       </p>
                     </div>
                   </div>
@@ -172,7 +179,7 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <Mail className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">Email</p>
+                      <p className="text-[#6B6560] text-sm">{t(translations.contact.emailLabel)}</p>
                       <a
                         href="mailto:info@simmerdown.sv"
                         className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors"
@@ -185,9 +192,9 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">Ubicaciones</p>
+                      <p className="text-[#6B6560] text-sm">{t(translations.contact.locationsLabel)}</p>
                       <p className="text-[#FFF8F0] font-medium">
-                        5 sucursales en El Salvador
+                        5 {t(translations.contact.branches)}
                       </p>
                       <p className="text-[#6B6560] text-sm">
                         Santa Ana · Coatepeque · San Benito · Juayúa · Surf City
@@ -198,12 +205,12 @@ export default function ContactPage() {
                   <div className="flex items-start gap-3">
                     <Clock className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">Horarios</p>
+                      <p className="text-[#6B6560] text-sm">{t(translations.contact.hours)}</p>
                       <p className="text-[#FFF8F0] font-medium">
                         11:00 AM - 10:00 PM
                       </p>
                       <p className="text-[#6B6560] text-sm">
-                        Varían por ubicación
+                        {t(translations.contact.varyByLocation)}
                       </p>
                     </div>
                   </div>
@@ -213,7 +220,7 @@ export default function ContactPage() {
               {/* Quick Links */}
               <div className="bg-[#252320] border border-[#3D3936] p-6">
                 <h3 className="text-lg font-bold text-[#FFF8F0] mb-4">
-                  Enlaces Rapidos
+                  {t(translations.contact.quickLinks)}
                 </h3>
                 <div className="space-y-3">
                   <Link
@@ -221,14 +228,14 @@ export default function ContactPage() {
                     className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors"
                   >
                     <MapPin className="w-5 h-5" />
-                    Todas las Ubicaciones
+                    {t(translations.contact.allLocations)}
                   </Link>
                   <Link
                     href="/menu"
                     className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors"
                   >
                     <Clock className="w-5 h-5" />
-                    Ver Menu
+                    {t(translations.contact.viewMenu)}
                   </Link>
                   <Link
                     href="/simmerlovers"
@@ -243,7 +250,7 @@ export default function ContactPage() {
               {/* Social Media */}
               <div className="bg-[#252320] border border-[#3D3936] p-6">
                 <h3 className="text-lg font-bold text-[#FFF8F0] mb-4">
-                  Redes Sociales
+                  {t(translations.contact.socialMedia)}
                 </h3>
                 <div className="flex gap-3">
                   <a
@@ -275,7 +282,7 @@ export default function ContactPage() {
                   </a>
                 </div>
                 <p className="text-[#6B6560] text-sm mt-3">
-                  @simmerdownsv en todas las plataformas
+                  @simmerdownsv {t(translations.contact.allPlatforms)}
                 </p>
               </div>
             </motion.div>
@@ -295,17 +302,16 @@ export default function ContactPage() {
                       <MessageSquare className="w-8 h-8 text-[#4CAF50]" />
                     </div>
                     <h3 className="text-2xl font-bold text-[#FFF8F0] mb-2">
-                      Mensaje Enviado
+                      {t(translations.contact.messageSent)}
                     </h3>
                     <p className="text-[#B8B0A8]">
-                      Gracias por contactarnos. Te responderemos dentro de 24
-                      horas.
+                      {t(translations.contact.thankYou)}
                     </p>
                   </div>
                 ) : (
                   <>
                     <h3 className="text-xl font-bold text-[#FFF8F0] mb-6">
-                      Envíanos un Mensaje
+                      {t(translations.contact.sendMessage)}
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -314,7 +320,7 @@ export default function ContactPage() {
                             htmlFor="contact-name"
                             className="block text-sm font-medium text-[#B8B0A8] mb-2"
                           >
-                            Nombre *
+                            {t(translations.booking.name)} *
                           </label>
                           <input
                             id="contact-name"
@@ -325,7 +331,7 @@ export default function ContactPage() {
                               setFormData({ ...formData, name: e.target.value })
                             }
                             className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
-                            placeholder="Tu nombre"
+                            placeholder={t(translations.contact.namePlaceholder)}
                           />
                         </div>
                         <div>
@@ -333,7 +339,7 @@ export default function ContactPage() {
                             htmlFor="contact-email"
                             className="block text-sm font-medium text-[#B8B0A8] mb-2"
                           >
-                            Correo Electrónico *
+                            {t(translations.contact.emailLabel)} *
                           </label>
                           <input
                             id="contact-email"
@@ -347,7 +353,7 @@ export default function ContactPage() {
                               })
                             }
                             className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
-                            placeholder="tu@email.com"
+                            placeholder={t(translations.contact.emailPlaceholder)}
                           />
                         </div>
                       </div>
@@ -358,7 +364,7 @@ export default function ContactPage() {
                             htmlFor="contact-phone"
                             className="block text-sm font-medium text-[#B8B0A8] mb-2"
                           >
-                            Teléfono (opcional)
+                            {t(translations.contact.phoneOptional)}
                           </label>
                           <input
                             id="contact-phone"
@@ -373,7 +379,7 @@ export default function ContactPage() {
                               })
                             }
                             className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
-                            placeholder="+503 XXXX-XXXX"
+                            placeholder={t(translations.contact.phonePlaceholder)}
                           />
                         </div>
                         <div>
@@ -381,7 +387,7 @@ export default function ContactPage() {
                             htmlFor="contact-reason"
                             className="block text-sm font-medium text-[#B8B0A8] mb-2"
                           >
-                            Motivo *
+                            {t(translations.contact.reason)} *
                           </label>
                           <div className="relative">
                             <select
@@ -396,7 +402,7 @@ export default function ContactPage() {
                               }
                               className="w-full px-4 pr-10 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition appearance-none min-h-[48px] cursor-pointer"
                             >
-                              <option value="">Selecciona un motivo</option>
+                              <option value="">{t(translations.contact.selectReason)}</option>
                               {contactReasons.map((reason) => (
                                 <option key={reason} value={reason}>
                                   {reason}
@@ -413,7 +419,7 @@ export default function ContactPage() {
                           htmlFor="contact-message"
                           className="block text-sm font-medium text-[#B8B0A8] mb-2"
                         >
-                          Mensaje *
+                          {t(translations.contact.message)} *
                         </label>
                         <textarea
                           id="contact-message"
@@ -427,7 +433,7 @@ export default function ContactPage() {
                             })
                           }
                           className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition resize-none"
-                          placeholder="¿Cómo podemos ayudarte?"
+                          placeholder={t(translations.contact.messagePlaceholder)}
                         />
                       </div>
 
@@ -439,12 +445,12 @@ export default function ContactPage() {
                         {loading ? (
                           <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin" />
-                            Enviando...
+                            {t(translations.contact.sending)}
                           </>
                         ) : (
                           <>
                             <Send className="w-5 h-5" />
-                            Enviar Mensaje
+                            {t(translations.contact.sendBtn)}
                           </>
                         )}
                       </button>
@@ -465,7 +471,7 @@ export default function ContactPage() {
               FAQ
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-[#FFF8F0]">
-              Preguntas Frecuentes
+              {t(translations.contact.faq)}
             </h2>
           </div>
 

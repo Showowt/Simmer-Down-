@@ -51,7 +51,7 @@ export default function MenuLoading() {
       {/* Centered Loading Indicator */}
       <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#252320] border border-[#3D3936] px-6 py-3 flex items-center gap-3">
         <Flame className="w-5 h-5 text-[#FF6B35] animate-pulse" />
-        <span className="text-[#B8B0A8] text-sm">Cargando menu...</span>
+        <span className="text-[#B8B0A8] text-sm">Cargando menú...</span>
       </div>
     </div>
   );

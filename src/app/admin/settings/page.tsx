@@ -3,663 +3,418 @@
 import { useEffect, useState } from "react";
 import {
   Save,
-  Building2,
-  Truck,
-  Bell,
-  Share2,
-  Loader2,
+  Settings,
   Check,
   AlertCircle,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { RestaurantSettings } from "@/lib/types";
-import ImageUpload from "@/components/admin/ImageUpload";
 
-const defaultSettings: RestaurantSettings = {
-  id: "",
-  name: "Simmer Down",
-  tagline: "Artisan Pizza",
-  logo_url: null,
-  phone: null,
-  email: null,
-  min_order_amount: 10,
-  delivery_fee: 3,
-  free_delivery_threshold: 35,
-  tax_rate: 0,
-  currency: "USD",
-  timezone: "America/El_Salvador",
-  social_facebook: null,
-  social_instagram: null,
-  social_twitter: null,
-  social_whatsapp: null,
-  notifications_email: true,
-  notifications_sms: false,
-  notifications_push: true,
-  online_ordering_enabled: true,
-  delivery_enabled: true,
-  pickup_enabled: true,
-  created_at: "",
-  updated_at: "",
-};
+interface SettingRow {
+  key: string;
+  value: unknown;
+  description: string | null;
+  updated_at: string | null;
+}
 
-type SettingsTab = "restaurant" | "delivery" | "notifications" | "social";
+type ValueType = "string" | "number" | "boolean" | "json";
+
+function detectValueType(value: unknown): ValueType {
+  if (typeof value === "boolean") return "boolean";
+  if (typeof value === "number") return "number";
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  ) {
+    return "json";
+  }
+  if (Array.isArray(value)) return "json";
+  return "string";
+}
+
+function formatValueForEdit(value: unknown, type: ValueType): string {
+  if (value === null || value === undefined) return "";
+  if (type === "json") {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+function parseEditedValue(raw: string, type: ValueType): unknown {
+  if (type === "boolean") return raw === "true";
+  if (type === "number") {
+    const n = Number(raw);
+    return isNaN(n) ? 0 : n;
+  }
+  if (type === "json") {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+
+interface EditableSettingState {
+  editValue: string;
+  type: ValueType;
+  saving: boolean;
+  saved: boolean;
+  error: string | null;
+}
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<RestaurantSettings>(defaultSettings);
+  const [settings, setSettings] = useState<SettingRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<SettingsTab>("restaurant");
+  const [editStates, setEditStates] = useState<
+    Record<string, EditableSettingState>
+  >({});
 
   useEffect(() => {
     fetchSettings();
   }, []);
 
-  // Production schema: settings is a (key text, value jsonb, description text)
-  // table — one row per setting. We hydrate the defaultSettings shape from
-  // whatever keys are present, and upsert one row per key on save.
-  const SETTING_KEYS: Array<keyof RestaurantSettings> = [
-    "name",
-    "tagline",
-    "logo_url",
-    "phone",
-    "email",
-    "min_order_amount",
-    "delivery_fee",
-    "free_delivery_threshold",
-    "tax_rate",
-    "currency",
-    "timezone",
-    "social_facebook",
-    "social_instagram",
-    "social_twitter",
-    "social_whatsapp",
-    "notifications_email",
-    "notifications_sms",
-    "notifications_push",
-    "online_ordering_enabled",
-    "delivery_enabled",
-    "pickup_enabled",
-  ];
-
   const fetchSettings = async () => {
     try {
       const supabase = createClient();
-      const { data, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from("settings")
-        .select("key, value");
+        .select("key, value, description, updated_at")
+        .order("key", { ascending: true });
 
-      if (fetchError) throw fetchError;
+      if (error) throw error;
 
-      if (data && data.length > 0) {
-        const hydrated = { ...defaultSettings };
-        for (const row of data as Array<{ key: string; value: unknown }>) {
-          if (SETTING_KEYS.includes(row.key as keyof RestaurantSettings)) {
-            // JSONB value: strings/bools/numbers come back already typed.
-            (hydrated as Record<string, unknown>)[row.key] = row.value;
-          }
-        }
-        setSettings(hydrated);
+      const rows = (data || []) as SettingRow[];
+      setSettings(rows);
+
+      const states: Record<string, EditableSettingState> = {};
+      for (const row of rows) {
+        const type = detectValueType(row.value);
+        states[row.key] = {
+          editValue: formatValueForEdit(row.value, type),
+          type,
+          saving: false,
+          saved: false,
+          error: null,
+        };
       }
+      setEditStates(states);
     } catch (err) {
-      console.log("Could not load settings:", err);
+      console.error("[AdminSettings] Error al cargar configuracion:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const saveSettings = async () => {
-    setSaving(true);
-    setError(null);
-    setSaved(false);
+  const updateEditState = (
+    key: string,
+    updates: Partial<EditableSettingState>
+  ) => {
+    setEditStates((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], ...updates },
+    }));
+  };
+
+  const saveSetting = async (row: SettingRow) => {
+    const state = editStates[row.key];
+    if (!state) return;
+
+    updateEditState(row.key, { saving: true, error: null, saved: false });
 
     try {
       const supabase = createClient();
+      const parsedValue = parseEditedValue(state.editValue, state.type);
 
-      // Build one upsert row per setting key. value is JSONB, so numbers,
-      // booleans, and strings serialize correctly.
-      const settingsMap = settings as unknown as Record<string, unknown>;
-      const rows = SETTING_KEYS.map((key) => ({
-        key,
-        value: settingsMap[key] ?? null,
-        updated_at: new Date().toISOString(),
-      }));
-
-      const { error: upsertError } = await supabase
+      const { error } = await supabase
         .from("settings")
-        .upsert(rows, { onConflict: "key" });
+        .update({
+          value: parsedValue,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("key", row.key);
 
-      if (upsertError) throw upsertError;
+      if (error) throw error;
 
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-      setError(
-        err instanceof Error
-          ? `Error al guardar: ${err.message}`
-          : "Error al guardar configuración.",
+      setSettings((prev) =>
+        prev.map((s) =>
+          s.key === row.key
+            ? { ...s, value: parsedValue, updated_at: new Date().toISOString() }
+            : s
+        )
       );
-    } finally {
-      setSaving(false);
+
+      updateEditState(row.key, { saving: false, saved: true });
+      setTimeout(
+        () => updateEditState(row.key, { saved: false }),
+        2500
+      );
+    } catch (err) {
+      console.error("[AdminSettings] Error al guardar:", err);
+      updateEditState(row.key, {
+        saving: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Error al guardar esta configuracion",
+      });
     }
   };
 
-  const updateSetting = <K extends keyof RestaurantSettings>(
-    key: K,
-    value: RestaurantSettings[K],
-  ) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+  const toggleBoolean = async (row: SettingRow) => {
+    const state = editStates[row.key];
+    if (!state || state.type !== "boolean") return;
+
+    const newVal = state.editValue !== "true";
+    updateEditState(row.key, {
+      editValue: String(newVal),
+      saving: true,
+      error: null,
+      saved: false,
+    });
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("settings")
+        .update({
+          value: newVal,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("key", row.key);
+
+      if (error) throw error;
+
+      setSettings((prev) =>
+        prev.map((s) =>
+          s.key === row.key
+            ? { ...s, value: newVal, updated_at: new Date().toISOString() }
+            : s
+        )
+      );
+
+      updateEditState(row.key, { saving: false, saved: true });
+      setTimeout(
+        () => updateEditState(row.key, { saved: false }),
+        2500
+      );
+    } catch (err) {
+      console.error("[AdminSettings] Error al guardar:", err);
+      updateEditState(row.key, {
+        editValue: String(!newVal),
+        saving: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Error al guardar",
+      });
+    }
   };
-
-  const tabs: { key: SettingsTab; label: string; icon: React.ElementType }[] = [
-    { key: "restaurant", label: "Restaurante", icon: Building2 },
-    { key: "delivery", label: "Delivery", icon: Truck },
-    { key: "notifications", label: "Notificaciones", icon: Bell },
-    { key: "social", label: "Redes Sociales", icon: Share2 },
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent" />
-      </div>
-    );
-  }
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">Configuracion</h1>
-          <p className="text-[#6B6560]">
-            Administra la configuracion del restaurante
-          </p>
-        </div>
-        <button
-          onClick={saveSettings}
-          disabled={saving}
-          className="bg-[#FF6B35] hover:bg-[#E55A2B] disabled:opacity-50 text-white px-6 py-2 font-medium flex items-center gap-2 transition"
-        >
-          {saving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : saved ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {saved ? "Guardado" : "Guardar Cambios"}
-        </button>
+      {/* Encabezado */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#FFF8F0]">Configuracion</h1>
+        <p className="text-[#6B6560]">
+          Ajustes generales del sistema
+        </p>
       </div>
 
-      {error && (
-        <div className="mb-6 bg-red-500/10 border border-red-500/20 p-4 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-red-400 font-medium">Error</p>
-            <p className="text-sm text-red-300">{error}</p>
-          </div>
+      {/* Cargando */}
+      {loading ? (
+        <div className="bg-[#252320] border border-[#3D3936] p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent mx-auto" />
+        </div>
+      ) : settings.length === 0 ? (
+        <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
+          <Settings className="w-12 h-12 text-[#6B6560] mx-auto mb-4" />
+          <p className="text-[#B8B0A8]">No hay configuraciones registradas</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {settings.map((row) => {
+            const state = editStates[row.key];
+            if (!state) return null;
+
+            return (
+              <div
+                key={row.key}
+                className="bg-[#252320] border border-[#3D3936] p-5"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    {/* Clave y descripcion */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <code className="text-[#FF6B35] text-sm font-mono bg-[#FF6B35]/10 px-2 py-0.5">
+                        {row.key}
+                      </code>
+                      <span className="text-xs text-[#6B6560] uppercase">
+                        {state.type === "json"
+                          ? "JSON"
+                          : state.type === "boolean"
+                          ? "Booleano"
+                          : state.type === "number"
+                          ? "Numero"
+                          : "Texto"}
+                      </span>
+                    </div>
+                    {row.description && (
+                      <p className="text-sm text-[#6B6560] mb-3">
+                        {row.description}
+                      </p>
+                    )}
+                    {row.updated_at && (
+                      <p className="text-xs text-[#6B6560]/60 mb-3">
+                        Ultima actualizacion:{" "}
+                        {new Date(row.updated_at).toLocaleString("es", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    )}
+
+                    {/* Campo de edicion segun tipo */}
+                    {state.type === "boolean" ? (
+                      <button
+                        onClick={() => toggleBoolean(row)}
+                        disabled={state.saving}
+                        className="flex items-center gap-3 group disabled:opacity-50"
+                      >
+                        {state.editValue === "true" ? (
+                          <ToggleRight className="w-10 h-6 text-[#4CAF50]" />
+                        ) : (
+                          <ToggleLeft className="w-10 h-6 text-[#6B6560]" />
+                        )}
+                        <span
+                          className={`text-sm font-medium ${
+                            state.editValue === "true"
+                              ? "text-[#4CAF50]"
+                              : "text-[#6B6560]"
+                          }`}
+                        >
+                          {state.editValue === "true"
+                            ? "Activado"
+                            : "Desactivado"}
+                        </span>
+                        {state.saving && (
+                          <div className="w-4 h-4 border-2 border-[#FF6B35] border-t-transparent animate-spin" />
+                        )}
+                        {state.saved && (
+                          <Check className="w-4 h-4 text-[#4CAF50]" />
+                        )}
+                      </button>
+                    ) : state.type === "number" ? (
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          step="any"
+                          value={state.editValue}
+                          onChange={(e) =>
+                            updateEditState(row.key, {
+                              editValue: e.target.value,
+                            })
+                          }
+                          className="w-full max-w-xs px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none font-mono"
+                        />
+                        <button
+                          onClick={() => saveSetting(row)}
+                          disabled={state.saving}
+                          className="bg-[#FF6B35] hover:bg-[#E55A2B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-3 font-medium flex items-center gap-2 transition flex-shrink-0"
+                        >
+                          {state.saving ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
+                          ) : state.saved ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <Save className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    ) : state.type === "json" ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={state.editValue}
+                          onChange={(e) =>
+                            updateEditState(row.key, {
+                              editValue: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none font-mono text-sm resize-y"
+                          rows={Math.min(
+                            Math.max(state.editValue.split("\n").length, 3),
+                            12
+                          )}
+                        />
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => saveSetting(row)}
+                            disabled={state.saving}
+                            className="bg-[#FF6B35] hover:bg-[#E55A2B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 font-medium flex items-center gap-2 transition text-sm"
+                          >
+                            {state.saving ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
+                            ) : state.saved ? (
+                              <Check className="w-4 h-4" />
+                            ) : (
+                              <Save className="w-4 h-4" />
+                            )}
+                            {state.saved ? "Guardado" : "Guardar"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* string */
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          value={state.editValue}
+                          onChange={(e) =>
+                            updateEditState(row.key, {
+                              editValue: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                        />
+                        <button
+                          onClick={() => saveSetting(row)}
+                          disabled={state.saving}
+                          className="bg-[#FF6B35] hover:bg-[#E55A2B] disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-3 font-medium flex items-center gap-2 transition flex-shrink-0"
+                        >
+                          {state.saving ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
+                          ) : state.saved ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <Save className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Error */}
+                    {state.error && (
+                      <div className="mt-2 flex items-center gap-2 text-red-400 text-sm">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                        {state.error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
-
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-[#252320] border border-[#3D3936] p-1">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition ${
-                activeTab === tab.key
-                  ? "bg-[#FF6B35] text-white"
-                  : "text-[#6B6560] hover:text-[#FFF8F0] hover:bg-[#3D3936]"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Tab Content */}
-      <div className="bg-[#252320] border border-[#3D3936] p-6">
-        {activeTab === "restaurant" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Nombre del Restaurante
-                </label>
-                <input
-                  type="text"
-                  value={settings.name}
-                  onChange={(e) => updateSetting("name", e.target.value)}
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Eslogan
-                </label>
-                <input
-                  type="text"
-                  value={settings.tagline || ""}
-                  onChange={(e) =>
-                    updateSetting("tagline", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="Artisan Pizza"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Logo
-              </label>
-              <ImageUpload
-                value={settings.logo_url}
-                onChange={(url) => updateSetting("logo_url", url)}
-                folder="branding"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Telefono
-                </label>
-                <input
-                  type="tel"
-                  value={settings.phone || ""}
-                  onChange={(e) =>
-                    updateSetting("phone", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="+503 2445-5999"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={settings.email || ""}
-                  onChange={(e) =>
-                    updateSetting("email", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="info@simmerdown.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Moneda
-                </label>
-                <select
-                  value={settings.currency}
-                  onChange={(e) => updateSetting("currency", e.target.value)}
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                >
-                  <option value="USD">USD ($)</option>
-                  <option value="SVC">Colon (C)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Zona horaria
-                </label>
-                <select
-                  value={settings.timezone}
-                  onChange={(e) => updateSetting("timezone", e.target.value)}
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                >
-                  <option value="America/El_Salvador">
-                    El Salvador (GMT-6)
-                  </option>
-                  <option value="America/Guatemala">Guatemala (GMT-6)</option>
-                  <option value="America/Bogota">Colombia (GMT-5)</option>
-                  <option value="America/New_York">New York (GMT-5)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="border-t border-[#3D3936] pt-6">
-              <h3 className="text-lg font-medium text-[#FFF8F0] mb-4">
-                Opciones de servicio
-              </h3>
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.online_ordering_enabled}
-                    onChange={(e) =>
-                      updateSetting("online_ordering_enabled", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                  <div>
-                    <span className="text-[#FFF8F0] font-medium">
-                      Ordenes en linea
-                    </span>
-                    <p className="text-xs text-[#6B6560]">
-                      Permite a clientes ordenar desde el sitio web
-                    </p>
-                  </div>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.delivery_enabled}
-                    onChange={(e) =>
-                      updateSetting("delivery_enabled", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                  <div>
-                    <span className="text-[#FFF8F0] font-medium">Delivery</span>
-                    <p className="text-xs text-[#6B6560]">
-                      Ofrece servicio de entrega a domicilio
-                    </p>
-                  </div>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.pickup_enabled}
-                    onChange={(e) =>
-                      updateSetting("pickup_enabled", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                  <div>
-                    <span className="text-[#FFF8F0] font-medium">
-                      Recoger en tienda
-                    </span>
-                    <p className="text-xs text-[#6B6560]">
-                      Permite a clientes recoger sus ordenes
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "delivery" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Orden minima ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.min_order_amount}
-                  onChange={(e) =>
-                    updateSetting(
-                      "min_order_amount",
-                      parseFloat(e.target.value) || 0,
-                    )
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                />
-                <p className="text-xs text-[#6B6560] mt-1">
-                  Monto minimo para realizar una orden
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Tarifa de delivery ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.delivery_fee}
-                  onChange={(e) =>
-                    updateSetting(
-                      "delivery_fee",
-                      parseFloat(e.target.value) || 0,
-                    )
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                />
-                <p className="text-xs text-[#6B6560] mt-1">
-                  Costo base de entrega
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  Delivery gratis desde ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.free_delivery_threshold || ""}
-                  onChange={(e) =>
-                    updateSetting(
-                      "free_delivery_threshold",
-                      parseFloat(e.target.value) || null,
-                    )
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="0 = nunca gratis"
-                />
-                <p className="text-xs text-[#6B6560] mt-1">
-                  Delivery gratis si la orden supera este monto
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Tasa de impuesto (%)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={settings.tax_rate}
-                onChange={(e) =>
-                  updateSetting("tax_rate", parseFloat(e.target.value) || 0)
-                }
-                className="w-full max-w-xs px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-              />
-              <p className="text-xs text-[#6B6560] mt-1">
-                IVA u otro impuesto aplicable (0 = sin impuesto)
-              </p>
-            </div>
-
-            <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/20 p-4">
-              <h4 className="text-[#FF6B35] font-medium mb-2 flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                Resumen de configuracion
-              </h4>
-              <ul className="text-sm text-[#B8B0A8] space-y-1">
-                <li>Orden minima: ${settings.min_order_amount.toFixed(2)}</li>
-                <li>Tarifa delivery: ${settings.delivery_fee.toFixed(2)}</li>
-                {settings.free_delivery_threshold && (
-                  <li>
-                    Delivery gratis en ordenes mayores a $
-                    {settings.free_delivery_threshold.toFixed(2)}
-                  </li>
-                )}
-                {settings.tax_rate > 0 && (
-                  <li>Impuesto: {settings.tax_rate}%</li>
-                )}
-              </ul>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "notifications" && (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium text-[#FFF8F0] mb-4">
-                Canales de notificacion
-              </h3>
-              <p className="text-sm text-[#6B6560] mb-6">
-                Selecciona como deseas recibir notificaciones de nuevas ordenes
-                y consultas
-              </p>
-
-              <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-[#1F1D1A] border border-[#3D3936] cursor-pointer hover:border-[#6B6560] transition">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#FF6B35]/10 flex items-center justify-center">
-                      <span className="text-lg">✉️</span>
-                    </div>
-                    <div>
-                      <span className="text-[#FFF8F0] font-medium block">
-                        Email
-                      </span>
-                      <span className="text-xs text-[#6B6560]">
-                        Recibe notificaciones por correo electronico
-                      </span>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifications_email}
-                    onChange={(e) =>
-                      updateSetting("notifications_email", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-4 bg-[#1F1D1A] border border-[#3D3936] cursor-pointer hover:border-[#6B6560] transition">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#4CAF50]/10 flex items-center justify-center">
-                      <span className="text-lg">📱</span>
-                    </div>
-                    <div>
-                      <span className="text-[#FFF8F0] font-medium block">
-                        SMS
-                      </span>
-                      <span className="text-xs text-[#6B6560]">
-                        Recibe notificaciones por mensaje de texto
-                      </span>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifications_sms}
-                    onChange={(e) =>
-                      updateSetting("notifications_sms", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-4 bg-[#1F1D1A] border border-[#3D3936] cursor-pointer hover:border-[#6B6560] transition">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#FFB800]/10 flex items-center justify-center">
-                      <span className="text-lg">🔔</span>
-                    </div>
-                    <div>
-                      <span className="text-[#FFF8F0] font-medium block">
-                        Push
-                      </span>
-                      <span className="text-xs text-[#6B6560]">
-                        Recibe notificaciones push en el navegador
-                      </span>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifications_push}
-                    onChange={(e) =>
-                      updateSetting("notifications_push", e.target.checked)
-                    }
-                    className="w-5 h-5 accent-[#FF6B35]"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "social" && (
-          <div className="space-y-6">
-            <p className="text-sm text-[#6B6560]">
-              Agrega los enlaces a tus redes sociales. Estos se mostraran en el
-              pie de pagina del sitio.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2 flex items-center gap-2">
-                  <span className="text-lg">📘</span> Facebook
-                </label>
-                <input
-                  type="url"
-                  value={settings.social_facebook || ""}
-                  onChange={(e) =>
-                    updateSetting("social_facebook", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="https://facebook.com/simmerdown"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2 flex items-center gap-2">
-                  <span className="text-lg">📸</span> Instagram
-                </label>
-                <input
-                  type="url"
-                  value={settings.social_instagram || ""}
-                  onChange={(e) =>
-                    updateSetting("social_instagram", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="https://instagram.com/simmerdown"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2 flex items-center gap-2">
-                  <span className="text-lg">🐦</span> Twitter / X
-                </label>
-                <input
-                  type="url"
-                  value={settings.social_twitter || ""}
-                  onChange={(e) =>
-                    updateSetting("social_twitter", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="https://twitter.com/simmerdown"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#B8B0A8] mb-2 flex items-center gap-2">
-                  <span className="text-lg">💬</span> WhatsApp
-                </label>
-                <input
-                  type="text"
-                  value={settings.social_whatsapp || ""}
-                  onChange={(e) =>
-                    updateSetting("social_whatsapp", e.target.value || null)
-                  }
-                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                  placeholder="+50312345678"
-                />
-                <p className="text-xs text-[#6B6560] mt-1">
-                  Numero de telefono con codigo de pais
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

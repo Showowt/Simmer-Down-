@@ -207,7 +207,7 @@ export function EnhancedConsoleEasterEgg() {
           console.log('%c2021: Simmer Garden en la Ruta de las Flores', 'color: #a1a1aa;')
           console.log('%c2023: Surf City frente al mar', 'color: #a1a1aa;')
           console.log('%c2024: ANIMA nace - el alma digital', 'color: #22c55e;')
-          return '12 años de historia'
+          return '14 años de historia'
         },
         team: () => {
           console.log('%c👨‍🍳 EL EQUIPO', 'color: #f97316; font-size: 16px; font-weight: bold;')

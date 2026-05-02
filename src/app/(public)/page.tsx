@@ -6,6 +6,7 @@ import { ArrowRight, MapPin, Clock, Star, ChefHat, Flame, Music, Users, Phone, S
 import dynamic from 'next/dynamic'
 import { useAnimaStore } from '@/store/anima'
 import { useEffect, useState } from 'react'
+import { useI18n, translations } from '@/lib/i18n'
 
 // Dynamic imports for client-only components
 const FireParticles = dynamic(() => import('@/components/FireParticles'), { ssr: false })
@@ -15,7 +16,7 @@ const locations = [
   {
     name: 'Santa Ana',
     vibe: 'El Origen',
-    description: 'Frente a la catedral, donde todo comenzó hace 12 años',
+    description: 'Frente a la catedral, donde todo comenzó hace 14 años',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     phone: '+503 2445-5999',
     hours: 'Dom-Jue 11am-9pm | Vie-Sáb 11am-10pm',
@@ -36,8 +37,8 @@ const locations = [
     name: 'San Benito',
     vibe: 'Urbano y Vibrante',
     description: 'El corazón cosmopolita de San Salvador',
-    address: 'Boulevard del Hipódromo, San Benito',
-    phone: '+503 2263-7890',
+    address: '#548, San Benito, San Salvador',
+    phone: '+503 7487-7792',
     hours: 'Lun-Dom 11am-11pm',
     image: '/images/locations/san-benito-cover.jpg',
     isOpen: true,
@@ -46,8 +47,8 @@ const locations = [
     name: 'Juayúa',
     vibe: 'Simmer Garden',
     description: 'Jardín secreto en la Ruta de las Flores',
-    address: 'Calle Principal, Centro Histórico',
-    phone: '+503 7890-1234',
+    address: 'Kilómetro 91.5, San José La Majada',
+    phone: '+503 6990-4674',
     hours: 'Vie-Dom 11am-8pm',
     image: '/images/locations/simmer-garden-hero.jpg',
     isOpen: false,
@@ -56,9 +57,9 @@ const locations = [
     name: 'Surf City',
     vibe: 'Frente al Mar',
     description: 'Atardecer, surf, pizza y libertad',
-    address: 'Boulevard Costa del Sol',
-    phone: '+503 7654-3210',
-    hours: 'Lun-Dom 10am-10pm',
+    address: 'Hotel Casa Santa Emilia, Conchalio 2, La Libertad',
+    phone: '+503 7576-4655',
+    hours: 'Mié-Dom 12pm-8pm',
     image: '/images/locations/surf-city-exterior.jpg',
     isOpen: true,
   },
@@ -86,7 +87,7 @@ const signaturePizzas = [
     name: 'Margherita',
     description: 'Tomates cherrys marinados y albahaca fresca. La clásica italiana.',
     price: '$14.99',
-    image: '/images/menu/pizzas-hero.jpg',
+    image: '/images/menu/product-06.jpg',
     badge: 'Clásica',
     tags: ['vegetarian'],
   },
@@ -94,10 +95,10 @@ const signaturePizzas = [
 
 // Live activity events for ticker
 const liveActivities = [
-  { location: 'Santa Ana', item: 'The Salvadoreño', time: 'hace 2 min', type: 'order' },
-  { location: 'San Benito', item: 'Truffle Mushroom', time: 'hace 5 min', type: 'order' },
-  { location: 'Coatepeque', item: 'Margherita DOP', time: 'hace 8 min', type: 'order' },
-  { location: 'Surf City', item: 'BBQ Chicken', time: 'hace 12 min', type: 'order' },
+  { location: 'Santa Ana', item: 'La Maradona', time: 'hace 2 min', type: 'order' },
+  { location: 'San Benito', item: 'Terramar al Maître', time: 'hace 5 min', type: 'order' },
+  { location: 'Coatepeque', item: 'Mariscada', time: 'hace 8 min', type: 'order' },
+  { location: 'Surf City', item: 'Aguachile de Camarón', time: 'hace 12 min', type: 'order' },
   { location: 'Santa Ana', item: 'María G.', time: 'hace 15 min', type: 'review' },
 ]
 
@@ -133,6 +134,7 @@ function LiveActivityTicker() {
 // Personalized Section Component with all variants
 function PersonalizedSection() {
   const { customerName, visitCount, memory, getTimeGreeting, loyaltyTier, loyaltyPoints, setIsOpen } = useAnimaStore()
+  const { t } = useI18n()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -158,19 +160,19 @@ function PersonalizedSection() {
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-3 h-3 bg-[#FF6B35] animate-pulse" />
-              <span className="text-[#FF6B35] font-handwritten text-2xl">Círculo Interno</span>
+              <span className="text-[#FF6B35] font-handwritten text-2xl">{t(translations.personalization.innerCircle)}</span>
             </div>
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
               {getTimeGreeting()}, {customerName}
             </h2>
             <p className="text-[#B8B0A8] mb-6">
-              {memory.totalOrders} pedidos y contando. Tu mesa favorita siempre está lista.
-              {loyaltyPoints > 100 && ` Tienes ${loyaltyPoints} puntos disponibles.`}
+              {memory.totalOrders} {t(translations.personalization.ordersAndCounting)}
+              {loyaltyPoints > 100 && ` ${loyaltyPoints} ${t(translations.personalization.pointsAvailable)}`}
             </p>
             <div className="flex flex-wrap gap-4">
               {memory.favoriteItems.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[#6B6560] text-sm">Tus favoritos:</span>
+                  <span className="text-[#6B6560] text-sm">{t(translations.personalization.yourFavorites)}</span>
                   {memory.favoriteItems.slice(0, 3).map((item) => (
                     <span key={item} className="bg-[#3D3936] text-[#FFF8F0] px-3 py-1 text-sm">
                       {item}
@@ -182,7 +184,7 @@ function PersonalizedSection() {
                 href="/menu"
                 className="ml-auto bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2"
               >
-                Pedir lo de siempre
+                {t(translations.personalization.orderUsual)}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -202,18 +204,18 @@ function PersonalizedSection() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-[#252320] border border-[#3D3936] p-8 text-center"
           >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">Te extrañamos</p>
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">{t(translations.personalization.weMessYou)}</p>
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-4">
-              ¡{customerName}, tanto tiempo!
+              ¡{customerName}, {t(translations.personalization.longTime)}
             </h2>
             <p className="text-[#B8B0A8] mb-6 max-w-lg mx-auto">
-              Ha pasado un tiempo desde tu última visita. Tenemos novedades en el menú que te van a encantar.
+              {t(translations.personalization.lapsedDesc)}
             </p>
             <Link
               href="/menu"
               className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold transition-colors"
             >
-              Ver qué hay de nuevo
+              {t(translations.personalization.seeWhatsNew)}
               <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
@@ -232,12 +234,12 @@ function PersonalizedSection() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">Tu Rincón</p>
+            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">{t(translations.personalization.yourCorner)}</p>
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
-              {getTimeGreeting()}. {customerName ? `${customerName}, qué bueno verte.` : 'Qué bueno verte de nuevo.'}
+              {getTimeGreeting()}. {customerName ? `${customerName}, ${t(translations.personalization.niceToSeeYou)}` : t(translations.personalization.niceAgain)}
             </h2>
             <p className="text-[#B8B0A8]">
-              Visita #{visitCount}. {memory.preferredLocation && `Tu ubicación favorita: ${memory.preferredLocation}.`}
+              {t(translations.personalization.visit)} #{visitCount}. {memory.preferredLocation && `${t(translations.personalization.favLocation)} ${memory.preferredLocation}.`}
             </p>
           </motion.div>
         </div>
@@ -259,17 +261,17 @@ function PersonalizedSection() {
               <Flame className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <p className="font-handwritten text-xl text-[#FF6B35] mb-1">Conoce a ANIMA</p>
-              <h3 className="font-display text-2xl text-[#FFF8F0] mb-2">Tu guía personal de Simmer Down</h3>
+              <p className="font-handwritten text-xl text-[#FF6B35] mb-1">{t(translations.personalization.meetAnima)}</p>
+              <h3 className="font-display text-2xl text-[#FFF8F0] mb-2">{t(translations.personalization.animaGuide)}</h3>
               <p className="text-[#B8B0A8]">
-                ANIMA te ayuda a descubrir el menú, recordar tus favoritos y encontrar tu próxima experiencia perfecta.
+                {t(translations.personalization.animaDesc)}
               </p>
             </div>
             <button
               onClick={() => setIsOpen(true)}
               className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
             >
-              Platiquemos
+              {t(translations.personalization.letsChat)}
               <Sparkles className="w-4 h-4" />
             </button>
           </motion.div>
@@ -284,6 +286,7 @@ function PersonalizedSection() {
 // Menu Discovery with ANIMA Interaction Buttons
 function MenuDiscoveryTeaser() {
   const { setIsOpen } = useAnimaStore()
+  const { t } = useI18n()
 
   const handleAnimaAction = (action: string) => {
     setIsOpen(true)
@@ -295,10 +298,10 @@ function MenuDiscoveryTeaser() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
           <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-            Desde el horno
+            {t(translations.home.fromOven)}
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight mb-6">
-            Nuestras Especialidades
+            {t(translations.home.specialties)}
           </h2>
 
           {/* ANIMA Interaction Buttons */}
@@ -308,21 +311,21 @@ function MenuDiscoveryTeaser() {
               className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
             >
               <Shuffle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">Sorpréndeme</span>
+              <span className="text-[#FFF8F0] font-medium">{t(translations.home.surpriseMe)}</span>
             </button>
             <Link
               href="/menu"
               className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
             >
               <ListChecks className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">Sé lo que quiero</span>
+              <span className="text-[#FFF8F0] font-medium">{t(translations.home.iKnow)}</span>
             </Link>
             <button
               onClick={() => handleAnimaAction('help')}
               className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
             >
               <HelpCircle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">Ayúdame a elegir</span>
+              <span className="text-[#FFF8F0] font-medium">{t(translations.home.helpChoose)}</span>
             </button>
           </div>
         </div>
@@ -373,7 +376,7 @@ function MenuDiscoveryTeaser() {
             href="/menu"
             className="group inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
           >
-            Ver Menú Completo
+            {t(translations.home.viewFullMenu)}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -383,6 +386,7 @@ function MenuDiscoveryTeaser() {
 }
 
 export default function Home() {
+  const { t } = useI18n()
   const [pizzaCounter, setPizzaCounter] = useState(47832)
 
   useEffect(() => {
@@ -422,7 +426,7 @@ export default function Home() {
           >
             <Flame className="w-5 h-5 text-[#FF6B35] animate-oven-pulse" />
             <span className="text-[#FFF8F0] font-medium">
-              <span className="text-[#FF6B35] font-bold">{pizzaCounter.toLocaleString()}</span> pizzas servidas
+              <span className="text-[#FF6B35] font-bold">{pizzaCounter.toLocaleString()}</span> {t(translations.home.pizzasServed)}
             </span>
             <span className="live-dot" />
           </motion.div>
@@ -444,7 +448,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-[#FFF8F0] mb-3 max-w-2xl mx-auto"
           >
-            Restaurante y Destino Gastro-Musical
+            {t(translations.home.tagline)}
           </motion.p>
 
           <motion.p
@@ -453,7 +457,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="font-handwritten text-2xl text-[#FF6B35] mb-4"
           >
-            12 Años de Historia. 5 Ubicaciones.
+            {t(translations.home.years)}
           </motion.p>
 
           <motion.p
@@ -462,7 +466,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-base text-[#B8B0A8] mb-10 max-w-xl mx-auto italic"
           >
-            Hay lugares que se visitan. Y hay lugares que se recuerdan.
+            {t(translations.home.subtitle)}
           </motion.p>
 
           {/* CTAs */}
@@ -476,7 +480,7 @@ export default function Home() {
               href="/menu"
               className="group inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
             >
-              Ordenar Ahora
+              {t(translations.nav.orderNow)}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
@@ -484,7 +488,7 @@ export default function Home() {
               className="inline-flex items-center justify-center gap-2 bg-[#252320]/80 hover:bg-[#3D3936] text-[#FFF8F0] px-8 py-4 text-lg font-semibold transition-all border border-[#3D3936] min-h-[56px]"
             >
               <MapPin className="w-5 h-5" />
-              Encontrar Ubicación
+              {t(translations.home.findLocation)}
             </Link>
           </motion.div>
 
@@ -497,15 +501,15 @@ export default function Home() {
           >
             <div className="flex items-center gap-2">
               <ChefHat className="w-4 h-4 text-[#FF6B35]" />
-              <span>Horno de Leña</span>
+              <span>{t(translations.home.woodFired)}</span>
             </div>
             <div className="flex items-center gap-2">
               <Music className="w-4 h-4 text-[#FF6B35]" />
-              <span>Música en Vivo</span>
+              <span>{t(translations.home.liveMusic)}</span>
             </div>
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-              <span>4.9 de 2,500+ Reseñas</span>
+              <span>4.9 {t(translations.home.reviews)}</span>
             </div>
           </motion.div>
         </div>
@@ -534,10 +538,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              5 destinos únicos
+              {t(translations.home.uniqueDestinations)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight">
-              Nuestras Ubicaciones
+              {t(translations.home.ourLocations)}
             </h2>
           </div>
 
@@ -565,11 +569,11 @@ export default function Home() {
                   {location.isOpen ? (
                     <span className="inline-flex items-center gap-2 bg-[#4CAF50]/90 text-white text-sm font-semibold px-3 py-1">
                       <span className="w-2 h-2 bg-white animate-pulse" />
-                      Abierto
+                      {t(translations.home.open)}
                     </span>
                   ) : (
                     <span className="bg-[#6B6560] text-white text-sm font-semibold px-3 py-1">
-                      Cerrado
+                      {t(translations.home.closed)}
                     </span>
                   )}
                 </div>
@@ -585,13 +589,13 @@ export default function Home() {
                       className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-3 text-center font-semibold transition-colors min-h-[48px] flex items-center justify-center gap-2"
                     >
                       <Phone className="w-4 h-4" />
-                      Llamar
+                      {t(translations.home.call)}
                     </a>
                     <Link
                       href="/menu"
                       className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 text-center font-semibold transition-colors min-h-[48px] flex items-center justify-center"
                     >
-                      Ordenar
+                      {t(translations.nav.order)}
                     </Link>
                   </div>
                 </div>
@@ -604,7 +608,7 @@ export default function Home() {
               href="/locations"
               className="inline-flex items-center gap-2 text-[#FF6B35] hover:text-[#FF8A5C] font-semibold transition-colors"
             >
-              Ver todas las ubicaciones
+              {t(translations.home.viewAll)}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -621,29 +625,27 @@ export default function Home() {
               viewport={{ once: true }}
             >
               <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-                Nuestra historia
+                {t(translations.home.ourStory)}
               </p>
               <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6 tracking-tight">
-                Más Que Un Restaurante
+                {t(translations.home.moreThanRestaurant)}
               </h2>
               <div className="space-y-4 text-[#B8B0A8] text-lg leading-relaxed">
                 <p>
-                  Nacimos en <strong className="text-[#FFF8F0]">Santa Ana</strong>, frente a su histórica catedral,
-                  como un punto de encuentro donde el tiempo baja la velocidad.
+                  {t(translations.home.story1)} <strong className="text-[#FFF8F0]">Santa Ana</strong>{t(translations.home.story1b)}
                 </p>
                 <p>
-                  Hoy somos 5 destinos únicos: desde el <strong className="text-[#FFF8F0]">Lago de Coatepeque</strong> hasta
-                  las olas de <strong className="text-[#FFF8F0]">Surf City</strong>. Cada ubicación cuenta su propia historia.
+                  {t(translations.home.story2)} <strong className="text-[#FFF8F0]">Lago de Coatepeque</strong> {t(translations.home.story2b)} <strong className="text-[#FFF8F0]">Surf City</strong>{t(translations.home.story2c)}
                 </p>
                 <p className="italic text-[#FFF8F0]">
-                  12 años creando memorias, una pizza a la vez.
+                  {t(translations.home.story3)}
                 </p>
               </div>
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 text-[#FF6B35] hover:text-[#FF8A5C] font-semibold mt-8 transition-colors"
               >
-                Conoce nuestra historia completa
+                {t(translations.home.fullStory)}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -669,21 +671,20 @@ export default function Home() {
       <section className="py-24 md:py-32 bg-[#252320]">
         <div className="max-w-6xl mx-auto px-6 text-center">
           <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-            Experiencias únicas
+            {t(translations.home.uniqueExperiences)}
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6 tracking-tight">
-            Más Que Solo Pizza
+            {t(translations.home.moreThanPizza)}
           </h2>
           <p className="text-[#B8B0A8] text-lg max-w-2xl mx-auto mb-12">
-            Música en vivo, talleres de pizza, maridajes de vino y eventos privados.
-            En Simmer Down, cada visita es una experiencia.
+            {t(translations.home.moreThanPizzaDesc)}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {[
-              { icon: Music, title: 'Jazz & Pizza Nights', desc: 'Cada viernes en San Benito' },
-              { icon: ChefHat, title: 'Talleres de Pizza', desc: 'Aprende con nuestros chefs' },
-              { icon: Users, title: 'Eventos Privados', desc: 'Tu celebración perfecta' },
+              { icon: Music, title: t(translations.home.jazzNights), desc: t(translations.home.jazzDesc) },
+              { icon: ChefHat, title: t(translations.home.pizzaWorkshops), desc: t(translations.home.workshopsDesc) },
+              { icon: Users, title: t(translations.home.privateEvents), desc: t(translations.home.privateEventsDesc) },
             ].map((item, i) => (
               <motion.div
                 key={item.title}
@@ -704,7 +705,7 @@ export default function Home() {
             href="/events"
             className="inline-flex items-center gap-2 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] px-8 py-4 font-semibold transition-all min-h-[56px]"
           >
-            Ver Todos los Eventos
+            {t(translations.home.viewAllEvents)}
             <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
@@ -719,23 +720,23 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <p className="font-handwritten text-2xl text-white/90 mb-4">
-              Únete a la familia
+              {t(translations.home.joinFamily)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6 tracking-tight">
               SimmerLovers
             </h2>
             <p className="text-xl text-white/90 mb-4">
-              Nuestro programa de lealtad que premia cada visita.
+              {t(translations.home.loyaltyProgram)}
             </p>
             <p className="text-lg text-white/70 mb-10">
-              Gana puntos, desbloquea recompensas, recibe ofertas exclusivas.
+              {t(translations.home.earnRewards)}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/simmerlovers"
                 className="group inline-flex items-center justify-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
               >
-                Únete Gratis
+                {t(translations.home.joinFree)}
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

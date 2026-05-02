@@ -17,6 +17,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { ptPayment, PowertranzError } from "@/lib/powertranz/client";
 import { stripCardFields } from "@/lib/powertranz/sanitize";
 import type { SaleResponse } from "@/lib/powertranz/types";
+import { sendWhatsApp } from "@/lib/twilio/client";
+import { formatPaymentConfirmWhatsApp } from "@/lib/notifications/order-notify";
 
 function hmacSign(payload: string): string {
   const secret = process.env.PAYMENT_CALLBACK_SECRET;
@@ -30,8 +32,11 @@ function buildBreakoutHtml(params: {
   message?: string;
   authorizationCode?: string | null;
 }): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-  const origin = appUrl ? new URL(appUrl).origin : "*";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    throw new Error("NEXT_PUBLIC_APP_URL is not set — cannot emit postMessage to wildcard origin.");
+  }
+  const origin = new URL(appUrl).origin;
   const sig = hmacSign(`${params.orderId}|${params.status}`);
   const safeMessage = (params.message || "").replace(/[<>&"']/g, "");
 
@@ -83,6 +88,54 @@ function extractCallback(form: FormData): {
     spiToken: typeof spiTokenRaw === "string" ? spiTokenRaw : null,
     response,
   };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WhatsApp Payment Notification (non-blocking)
+// ═══════════════════════════════════════════════════════════════
+
+async function sendPaymentNotification(
+  orderId: string,
+  cardBrand: string | null,
+  cardLastFour: string | null,
+  supabase: ReturnType<typeof createServiceClient>,
+): Promise<void> {
+  try {
+    const staffPhone =
+      process.env.STAFF_NOTIFICATION_WHATSAPP || "+50376804434";
+
+    // Fetch order details for the notification
+    const { data: order, error: orderErr } = await supabase
+      .from("orders")
+      .select("order_number, total_amount, customer_name")
+      .eq("id", orderId)
+      .single();
+
+    if (orderErr || !order) {
+      logger.warn("Payment notification: order not found", { orderId });
+      return;
+    }
+
+    const message = formatPaymentConfirmWhatsApp({
+      order_number: order.order_number,
+      total_amount: order.total_amount,
+      card_brand: cardBrand,
+      card_last_four: cardLastFour,
+    });
+
+    const result = await sendWhatsApp(staffPhone, message);
+    if (result.success) {
+      logger.info("Payment notification sent", {
+        orderId,
+        orderNumber: order.order_number,
+      });
+    }
+  } catch (err) {
+    logger.warn("sendPaymentNotification error", {
+      orderId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -245,6 +298,15 @@ export async function POST(request: NextRequest) {
       .from("orders")
       .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
       .eq("id", payment.order_id);
+
+    // Non-blocking payment confirmation notification
+    // Use CardBrand from processor response if available, fall back to stored value
+    sendPaymentNotification(
+      payment.order_id,
+      payResp.CardBrand ?? payment.card_brand,
+      payment.card_last_four,
+      supabase,
+    ).catch(() => {});
   }
 
   return new NextResponse(

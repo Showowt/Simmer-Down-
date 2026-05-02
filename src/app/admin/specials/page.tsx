@@ -82,7 +82,7 @@ export default function AdminSpecialsPage() {
       if (error) throw error;
       setSpecials(data || []);
     } catch (err) {
-      console.log("Specials table may not exist yet");
+      // Fallback: specials table may not exist yet
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ export default function AdminSpecialsPage() {
       if (error) throw error;
       setMenuItems(data || []);
     } catch (err) {
-      console.log("Menu items fetch error");
+      // Fallback: menu_items fetch failed
     }
   };
 

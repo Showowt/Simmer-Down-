@@ -35,6 +35,7 @@ export function ThreeDSModal({
   const resolvedRef = useRef(false);
 
   // postMessage listener — primary path.
+  // Server-confirms "paid" status via polling endpoint before trusting the message.
   useEffect(() => {
     function onMessage(ev: MessageEvent) {
       if (resolvedRef.current) return;
@@ -46,14 +47,27 @@ export function ThreeDSModal({
       if (!data || data.type !== "pt_result") return;
       if (data.orderId !== orderId) return;
 
-      resolvedRef.current = true;
       if (data.status === "paid") {
-        onResult({
-          type: "paid",
-          orderId,
-          authorizationCode: data.authorizationCode ?? null,
-        });
+        // Server-confirm: verify payment actually completed before trusting postMessage
+        fetch(`/api/payments/status?orderId=${orderId}`, { cache: "no-store" })
+          .then((res) => res.json())
+          .then((body) => {
+            if (resolvedRef.current) return;
+            if (body?.order?.paymentStatus === "paid") {
+              resolvedRef.current = true;
+              onResult({
+                type: "paid",
+                orderId,
+                authorizationCode: data.authorizationCode ?? null,
+              });
+            }
+            // If server says not paid yet, let the polling fallback handle it
+          })
+          .catch(() => {
+            // Network error — fall through to polling fallback
+          });
       } else {
+        resolvedRef.current = true;
         onResult({
           type: "failed",
           orderId,
@@ -85,7 +99,7 @@ export function ThreeDSModal({
             onResult({
               type: "paid",
               orderId,
-              authorizationCode: body.order.authorizationCode ?? null,
+              authorizationCode: null,
             });
           } else if (s === "failed" || s === "voided") {
             resolvedRef.current = true;

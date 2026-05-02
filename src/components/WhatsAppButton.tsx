@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
+import { useI18n, translations } from "@/lib/i18n";
 
 const WHATSAPP_NUMBER = "+50374877792"; // San Benito location
 const DEFAULT_MESSAGE = "Hola! Me gustaria hacer una consulta...";
@@ -16,6 +17,7 @@ export default function WhatsAppButton({
   message = DEFAULT_MESSAGE,
   showTooltip = true,
 }: WhatsAppButtonProps) {
+  const { t } = useI18n();
   const [isVisible, setIsVisible] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -78,15 +80,15 @@ export default function WhatsAppButton({
                 <button
                   onClick={handleDismiss}
                   className="absolute top-2 right-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
-                  aria-label="Cerrar"
+                  aria-label={t(translations.common.close)}
                 >
                   <X className="w-4 h-4" />
                 </button>
                 <p className="text-[#FFF8F0] text-sm font-medium mb-1">
-                  Necesitas ayuda?
+                  {t(translations.common.whatsappHelp)}
                 </p>
                 <p className="text-[#6B6560] text-xs">
-                  Chatea con nosotros por WhatsApp
+                  {t(translations.common.whatsappChat)}
                 </p>
               </motion.div>
             )}
@@ -96,7 +98,7 @@ export default function WhatsAppButton({
           <button
             onClick={handleClick}
             className="w-14 h-14 bg-[#25D366] hover:bg-[#20BD5A] text-white flex items-center justify-center transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D2A26]"
-            aria-label="Contactar por WhatsApp"
+            aria-label={t(translations.common.contactWhatsapp)}
           >
             <MessageCircle className="w-7 h-7" />
           </button>

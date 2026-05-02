@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail, Lock, AlertCircle, Flame, Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useI18n, translations } from '@/lib/i18n'
 import Link from 'next/link'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/account'
+  const { t } = useI18n()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +38,7 @@ function LoginForm() {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión'
       if (errorMessage.includes('Invalid login credentials')) {
-        setError('Correo o contraseña incorrectos')
+        setError(t(translations.auth.wrongCredentials))
       } else {
         setError(errorMessage)
       }
@@ -57,8 +59,8 @@ function LoginForm() {
             <Flame className="w-8 h-8 text-[#FF6B35]" />
             Simmer Down
           </Link>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">Bienvenido de Vuelta</h1>
-          <p className="text-[#6B6560] mt-2">Inicia sesión para acceder a tu cuenta</p>
+          <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.welcomeBack)}</h1>
+          <p className="text-[#6B6560] mt-2">{t(translations.auth.loginSubtitle)}</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-[#252320] border border-[#3D3936] p-8">
@@ -72,7 +74,7 @@ function LoginForm() {
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Correo Electrónico
+                {t(translations.auth.emailLabel)}
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -90,7 +92,7 @@ function LoginForm() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                Contraseña
+                {t(translations.auth.password)}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -107,7 +109,7 @@ function LoginForm() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#B8B0A8] transition-colors"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? t(translations.auth.hidePassword) : t(translations.auth.showPassword)}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -120,7 +122,7 @@ function LoginForm() {
               href="/auth/forgot-password"
               className="text-sm text-[#FF6B35] hover:underline"
             >
-              ¿Olvidaste tu contraseña?
+              {t(translations.auth.forgotPassword)}
             </Link>
           </div>
 
@@ -132,18 +134,18 @@ function LoginForm() {
             {loading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white animate-spin" />
-                Iniciando...
+                {t(translations.auth.loggingIn)}
               </>
             ) : (
-              'Iniciar Sesión'
+              t(translations.auth.loginBtn)
             )}
           </button>
         </form>
 
         <p className="text-center text-[#6B6560] mt-6">
-          ¿No tienes cuenta?{' '}
+          {t(translations.auth.noAccount)}{' '}
           <Link href="/auth/signup" className="text-[#FF6B35] hover:underline font-medium">
-            Regístrate gratis
+            {t(translations.auth.signupFree)}
           </Link>
         </p>
       </motion.div>

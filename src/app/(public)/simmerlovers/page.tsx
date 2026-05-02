@@ -957,7 +957,7 @@ function CallToAction({ signedIn }: { signedIn: boolean }) {
           <Flame className="w-12 h-12 text-white mx-auto mb-6" />
           <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
             {signedIn
-              ? "Tu próxima noche ya está pagando puntos"
+              ? "Tu próxima noche ya está generando puntos"
               : "La pizza también premia la lealtad"}
           </h2>
           <p className="text-white/90 text-xl mb-10">

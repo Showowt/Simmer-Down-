@@ -68,6 +68,11 @@ export const createOrderSchema = z
       .max(500, "Las notas son demasiado largas")
       .optional()
       .nullable(),
+    promoCode: z
+      .string()
+      .max(50, "Código de promoción demasiado largo")
+      .optional()
+      .nullable(),
     items: z
       .array(orderItemSchema)
       .min(1, "El pedido debe tener al menos un item"),

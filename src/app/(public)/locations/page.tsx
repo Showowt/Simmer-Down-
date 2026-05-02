@@ -1,18 +1,8 @@
+"use client";
+
 import { Flame } from "lucide-react";
 import Link from "next/link";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Nuestras Ubicaciones",
-  description:
-    "Santa Ana, San Benito, Lago de Coatepeque, Surf City y Simmer Garden (Juayúa). 5 destinos únicos. Una sola experiencia Simmer Down.",
-  openGraph: {
-    title: "Simmer Down · 5 Ubicaciones",
-    description:
-      "Cada ubicación cuenta su propia historia. Encuentra tu favorita.",
-    images: ["/og/locations.jpg"],
-  },
-};
+import { useI18n, translations } from "@/lib/i18n";
 import {
   LocationCard,
   AnimatedHero,
@@ -22,138 +12,204 @@ import {
 // Icon types are strings that map to Lucide icons in the client component
 type IconType = "coffee" | "mountain" | "music" | "waves";
 
-const locations: Array<{
-  id: string;
-  name: string;
-  vibe: string;
-  personality: string;
-  description: string;
-  address: string;
-  city: string;
-  phone: string;
-  hours: { weekday: string; weekend: string };
-  features: string[];
-  image: string;
-  iconType: IconType;
-  isOpen: boolean;
-  rating: number;
-  reviews: number;
-  mapUrl: string;
-}> = [
-  {
-    id: "santa-ana",
-    name: "Santa Ana",
-    vibe: "El Origen",
-    personality:
-      "Tradicion, historia y el encanto de una ciudad que respira cultura",
-    description:
-      "Frente a la historica catedral de Santa Ana, donde todo comenzo hace 12 anos. El lugar donde nacio la magia Simmer Down.",
-    address: "1ra Calle Pte y Callejuela Sur Catedral",
-    city: "Santa Ana, El Salvador",
-    phone: "+503 2445-5999",
-    hours: {
-      weekday: "Dom-Jue: 11:00 AM - 9:00 PM",
-      weekend: "Vie-Sab: 11:00 AM - 10:00 PM",
-    },
-    features: ["Vista a la Catedral", "Musica en Vivo", "Terraza"],
-    image: "/images/locations/santa-ana-cover.jpg",
-    iconType: "coffee",
-    isOpen: true,
-    rating: 4.9,
-    reviews: 2100,
-    mapUrl: "https://maps.google.com/?q=Santa+Ana+Cathedral+El+Salvador",
-  },
-  {
-    id: "coatepeque",
-    name: "Lago de Coatepeque",
-    vibe: "Vista al Lago",
-    personality: "Una experiencia frente a una maravilla natural del mundo",
-    description:
-      "Contempla el atardecer sobre el lago volcanico mientras disfrutas de nuestras especialidades. Una experiencia unica en El Salvador.",
-    address: "Calle Principal al Lago #119",
-    city: "Lago de Coatepeque, El Salvador",
-    phone: "+503 6831-6907",
-    hours: {
-      weekday: "Dom-Jue: 11:00 AM - 8:00 PM",
-      weekend: "Vie-Sab: 11:00 AM - 9:00 PM",
-    },
-    features: ["Vista al Lago", "Atardeceres", "Zona Privada"],
-    image: "/images/locations/coatepeque-cover.jpg",
-    iconType: "mountain",
-    isOpen: true,
-    rating: 4.9,
-    reviews: 1850,
-    mapUrl: "https://maps.google.com/?q=Lago+de+Coatepeque+El+Salvador",
-  },
-  {
-    id: "san-benito",
-    name: "San Benito",
-    vibe: "Urbano y Vibrante",
-    personality: "El punto urbano, vibrante y cosmopolita de San Salvador",
-    description:
-      "En el corazon de la Zona Rosa, ideal para encuentros, cenas de negocios y noches largas con buena musica.",
-    address: "Boulevard del Hipodromo, Colonia San Benito",
-    city: "San Salvador, El Salvador",
-    phone: "+503 7487-7792",
-    hours: {
-      weekday: "Lun-Dom: 11:00 AM - 11:00 PM",
-      weekend: "Viernes y Sabados hasta medianoche",
-    },
-    features: ["Zona Rosa", "Jazz Nights", "Valet Parking"],
-    image: "/images/locations/san-benito-cover.jpg",
-    iconType: "music",
-    isOpen: true,
-    rating: 4.8,
-    reviews: 1420,
-    mapUrl: "https://maps.google.com/?q=San+Benito+San+Salvador",
-  },
-  {
-    id: "juayua",
-    name: "Simmer Garden",
-    vibe: "Ruta de las Flores",
-    personality: "La Ruta de las Flores en su maxima expresion",
-    description:
-      "Rodeado de naturaleza y el encanto del pueblo magico de Juayua. Perfecto para escapadas de fin de semana.",
-    address: "Kilometro 91.5, San Jose La Majada",
-    city: "Juayua, Sonsonate, El Salvador",
-    phone: "+503 6990-4674",
-    hours: {
-      weekday: "Vie-Dom: 11:00 AM - 8:00 PM",
-      weekend: "Cerrado Lun-Jue",
-    },
-    features: ["Jardin", "Cafe de Altura", "Montana"],
-    image: "/images/locations/simmer-garden-hero.jpg",
-    iconType: "coffee",
-    isOpen: false,
-    rating: 4.9,
-    reviews: 980,
-    mapUrl: "https://maps.google.com/?q=Juayua+El+Salvador",
-  },
-  {
-    id: "surf-city",
-    name: "Surf City",
-    vibe: "Frente al Mar",
-    personality: "Atardecer, surf y libertad que solo la costa ofrece",
-    description:
-      "Nuestra ubicacion mas nueva, donde el oceano y la pizza se encuentran. El spot perfecto despues de surfear.",
-    address: "Hotel Casa Santa Emilia, Conchalio 2",
-    city: "La Libertad, El Salvador",
-    phone: "+503 7576-4655",
-    hours: {
-      weekday: "Mie-Dom: 12:00 PM - 8:00 PM",
-      weekend: "Happy Hour 4-7 PM",
-    },
-    features: ["Vista al Mar", "Surf Vibes", "Cocteles"],
-    image: "/images/locations/surf-city-exterior.jpg",
-    iconType: "waves",
-    isOpen: true,
-    rating: 4.8,
-    reviews: 760,
-    mapUrl: "https://maps.google.com/?q=El+Tunco+El+Salvador",
-  },
-];
-
 export default function LocationsPage() {
+  const { t, locale } = useI18n();
+
+  const locations: Array<{
+    id: string;
+    name: string;
+    vibe: string;
+    personality: string;
+    description: string;
+    address: string;
+    city: string;
+    phone: string;
+    hours: { weekday: string; weekend: string };
+    features: string[];
+    image: string;
+    iconType: IconType;
+    isOpen: boolean;
+    rating: number;
+    reviews: number;
+    mapUrl: string;
+  }> = [
+    {
+      id: "santa-ana",
+      name: "Santa Ana",
+      vibe: locale === "es" ? "El Origen" : "The Origin",
+      personality:
+        locale === "es"
+          ? "Tradición, historia y el encanto de una ciudad que respira cultura"
+          : "Tradition, history and the charm of a city that breathes culture",
+      description:
+        locale === "es"
+          ? "Frente a la histórica catedral de Santa Ana, donde todo comenzó hace 14 años. El lugar donde nació la magia Simmer Down."
+          : "Facing the historic Santa Ana cathedral, where it all began 14 years ago. The place where the Simmer Down magic was born.",
+      address: "1ra Calle Pte y Callejuela Sur Catedral",
+      city: "Santa Ana, El Salvador",
+      phone: "+503 2445-5999",
+      hours: {
+        weekday:
+          locale === "es"
+            ? "Dom-Jue: 11:00 AM - 9:00 PM"
+            : "Sun-Thu: 11:00 AM - 9:00 PM",
+        weekend:
+          locale === "es"
+            ? "Vie-Sab: 11:00 AM - 10:00 PM"
+            : "Fri-Sat: 11:00 AM - 10:00 PM",
+      },
+      features:
+        locale === "es"
+          ? ["Vista a la Catedral", "Música en Vivo", "Terraza"]
+          : ["Cathedral View", "Live Music", "Terrace"],
+      image: "/images/locations/santa-ana-cover.jpg",
+      iconType: "coffee",
+      isOpen: true,
+      rating: 4.9,
+      reviews: 2100,
+      mapUrl: "https://maps.google.com/?q=Santa+Ana+Cathedral+El+Salvador",
+    },
+    {
+      id: "coatepeque",
+      name: "Lago de Coatepeque",
+      vibe: locale === "es" ? "Vista al Lago" : "Lake View",
+      personality:
+        locale === "es"
+          ? "Una experiencia frente a una maravilla natural del mundo"
+          : "An experience facing one of the world's natural wonders",
+      description:
+        locale === "es"
+          ? "Contempla el atardecer sobre el lago volcanico mientras disfrutas de nuestras especialidades. Una experiencia única en El Salvador."
+          : "Watch the sunset over the volcanic lake while enjoying our specialties. A unique experience in El Salvador.",
+      address: "Calle Principal al Lago #119",
+      city: "Lago de Coatepeque, El Salvador",
+      phone: "+503 6831-6907",
+      hours: {
+        weekday:
+          locale === "es"
+            ? "Dom-Jue: 11:00 AM - 8:00 PM"
+            : "Sun-Thu: 11:00 AM - 8:00 PM",
+        weekend:
+          locale === "es"
+            ? "Vie-Sab: 11:00 AM - 9:00 PM"
+            : "Fri-Sat: 11:00 AM - 9:00 PM",
+      },
+      features:
+        locale === "es"
+          ? ["Vista al Lago", "Atardeceres", "Zona Privada"]
+          : ["Lake View", "Sunsets", "Private Area"],
+      image: "/images/locations/coatepeque-cover.jpg",
+      iconType: "mountain",
+      isOpen: true,
+      rating: 4.9,
+      reviews: 1850,
+      mapUrl: "https://maps.google.com/?q=Lago+de+Coatepeque+El+Salvador",
+    },
+    {
+      id: "san-benito",
+      name: "San Benito",
+      vibe: locale === "es" ? "Urbano y Vibrante" : "Urban & Vibrant",
+      personality:
+        locale === "es"
+          ? "El punto urbano, vibrante y cosmopolita de San Salvador"
+          : "The urban, vibrant and cosmopolitan spot in San Salvador",
+      description:
+        locale === "es"
+          ? "En el corazón de la Zona Rosa, ideal para encuentros, cenas de negocios y noches largas con buena música."
+          : "In the heart of the Zona Rosa, ideal for meetups, business dinners and long nights with great music.",
+      address: "Boulevard del Hipodromo, Colonia San Benito",
+      city: "San Salvador, El Salvador",
+      phone: "+503 7487-7792",
+      hours: {
+        weekday:
+          locale === "es"
+            ? "Lun-Dom: 11:00 AM - 11:00 PM"
+            : "Mon-Sun: 11:00 AM - 11:00 PM",
+        weekend:
+          locale === "es"
+            ? "Viernes y Sábados hasta medianoche"
+            : "Fridays and Saturdays until midnight",
+      },
+      features:
+        locale === "es"
+          ? ["Zona Rosa", "Jazz Nights", "Valet Parking"]
+          : ["Zona Rosa", "Jazz Nights", "Valet Parking"],
+      image: "/images/locations/san-benito-cover.jpg",
+      iconType: "music",
+      isOpen: true,
+      rating: 4.8,
+      reviews: 1420,
+      mapUrl: "https://maps.google.com/?q=San+Benito+San+Salvador",
+    },
+    {
+      id: "juayua",
+      name: "Simmer Garden",
+      vibe: locale === "es" ? "Ruta de las Flores" : "Flower Route",
+      personality:
+        locale === "es"
+          ? "La Ruta de las Flores en su máxima expresión"
+          : "The Flower Route at its finest",
+      description:
+        locale === "es"
+          ? "Rodeado de naturaleza y el encanto del pueblo magico de Juayua. Perfecto para escapadas de fin de semana."
+          : "Surrounded by nature and the charm of the magical town of Juayua. Perfect for weekend getaways.",
+      address: "Kilómetro 91.5, San José La Majada",
+      city: "Juayua, Sonsonate, El Salvador",
+      phone: "+503 6990-4674",
+      hours: {
+        weekday:
+          locale === "es"
+            ? "Vie-Dom: 11:00 AM - 8:00 PM"
+            : "Fri-Sun: 11:00 AM - 8:00 PM",
+        weekend:
+          locale === "es" ? "Cerrado Lun-Jue" : "Closed Mon-Thu",
+      },
+      features:
+        locale === "es"
+          ? ["Jardín", "Café de Altura", "Montaña"]
+          : ["Garden", "Altitude Coffee", "Mountain"],
+      image: "/images/locations/simmer-garden-hero.jpg",
+      iconType: "coffee",
+      isOpen: false,
+      rating: 4.9,
+      reviews: 980,
+      mapUrl: "https://maps.google.com/?q=Juayua+El+Salvador",
+    },
+    {
+      id: "surf-city",
+      name: "Surf City",
+      vibe: locale === "es" ? "Frente al Mar" : "Oceanfront",
+      personality:
+        locale === "es"
+          ? "Atardecer, surf y libertad que solo la costa ofrece"
+          : "Sunset, surf and freedom that only the coast offers",
+      description:
+        locale === "es"
+          ? "Nuestra ubicación mas nueva, donde el oceano y la pizza se encuentran. El spot perfecto despues de surfear."
+          : "Our newest location, where the ocean and pizza meet. The perfect spot after surfing.",
+      address: "Hotel Casa Santa Emilia, Conchalio 2",
+      city: "La Libertad, El Salvador",
+      phone: "+503 7576-4655",
+      hours: {
+        weekday:
+          locale === "es"
+            ? "Mie-Dom: 12:00 PM - 8:00 PM"
+            : "Wed-Sun: 12:00 PM - 8:00 PM",
+        weekend: "Happy Hour 4-7 PM",
+      },
+      features:
+        locale === "es"
+          ? ["Vista al Mar", "Surf Vibes", "Cocteles"]
+          : ["Ocean View", "Surf Vibes", "Cocktails"],
+      image: "/images/locations/surf-city-exterior.jpg",
+      iconType: "waves",
+      isOpen: true,
+      rating: 4.8,
+      reviews: 760,
+      mapUrl: "https://maps.google.com/?q=El+Tunco+El+Salvador",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
@@ -162,13 +218,13 @@ export default function LocationsPage() {
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              5 destinos unicos
+              {t(translations.locations.uniqueDestinations)}
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
-              Nuestras Ubicaciones
+              {t(translations.locations.ourLocations)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
-              Cada ubicacion cuenta su propia historia. Encuentra tu favorita.
+              {t(translations.locations.subtitle)}
             </p>
           </AnimatedHero>
         </div>
@@ -191,17 +247,16 @@ export default function LocationsPage() {
           <AnimatedCTA>
             <Flame className="w-12 h-12 text-white mx-auto mb-6" />
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
-              Te Esperamos
+              {t(translations.locations.weWaitForYou)}
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              12 anos de historia. 5 destinos unicos. Una sola experiencia
-              Simmer Down.
+              {t(translations.locations.ctaDesc)}
             </p>
             <Link
               href="/menu"
               className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition-all min-h-[56px]"
             >
-              Ver Menu
+              {t(translations.locations.viewMenu)}
             </Link>
           </AnimatedCTA>
         </div>

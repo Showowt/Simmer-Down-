@@ -1,7 +1,7 @@
 // SIMMER DOWN — Complete Multi-Location Menu System
 // All locations: Santa Ana, San Benito, La Majada (Garden), Lago de Coatepeque
 
-export type LocationId = 'santa-ana' | 'san-benito' | 'la-majada' | 'lago-coatepeque'
+export type LocationId = 'santa-ana' | 'san-benito' | 'la-majada' | 'lago-coatepeque' | 'surf-city'
 
 export interface Location {
   id: LocationId
@@ -35,33 +35,41 @@ export const LOCATIONS: Record<LocationId, Location> = {
     id: 'santa-ana',
     name: 'Simmer Down Santa Ana',
     brand: 'simmer-down',
-    tagline: 'The Original Fire',
-    whatsapp: '7890-1234',
-    features: ['Classic menu', 'Original location']
+    tagline: 'El Origen',
+    whatsapp: '2445-5999',
+    features: ['Classic menu', 'Original location', 'Cathedral view', 'Live music']
   },
   'san-benito': {
     id: 'san-benito',
     name: 'Simmer Down San Benito',
     brand: 'simmer-down',
-    tagline: 'Urban Heat',
-    whatsapp: '7890-5678',
-    features: ['Classic menu', 'San Salvador location']
+    tagline: 'Urbano y Vibrante',
+    whatsapp: '7487-7792',
+    features: ['Classic menu', 'Zona Rosa', 'Jazz nights', 'Valet parking']
   },
   'la-majada': {
     id: 'la-majada',
-    name: 'Simmer Garden La Majada',
+    name: 'Simmer Garden',
     brand: 'simmer-garden',
     tagline: '¡Escapa de la ciudad!',
     whatsapp: '6990-4674',
-    features: ['Garden atmosphere', 'Hamburguesa Casanova', 'Expanded coffee menu']
+    features: ['Garden atmosphere', 'Hamburguesa Casanova', 'Expanded coffee menu', 'Mountain views']
   },
   'lago-coatepeque': {
     id: 'lago-coatepeque',
     name: 'Simmer Down Lago de Coatepeque',
     brand: 'simmer-down',
-    tagline: 'Lakeside Flavors',
-    whatsapp: '7890-9012',
-    features: ['Lake view', 'Premium seafood', 'Ceviches', 'Weekend specials']
+    tagline: 'Vista al Lago',
+    whatsapp: '6831-6907',
+    features: ['Lake view', 'Premium seafood', 'Ceviches', 'Weekend specials', 'Sunsets']
+  },
+  'surf-city': {
+    id: 'surf-city',
+    name: 'Simmer Down Surf City',
+    brand: 'simmer-down',
+    tagline: 'Frente al Mar',
+    whatsapp: '7576-4655',
+    features: ['Oceanfront', 'Surf vibes', 'Seafood specials', 'Happy hour', 'Cocktails']
   }
 }
 
@@ -85,9 +93,10 @@ export const CATEGORIES = {
 }
 
 // All locations shorthand
-const ALL: LocationId[] = ['santa-ana', 'san-benito', 'la-majada', 'lago-coatepeque']
+const ALL: LocationId[] = ['santa-ana', 'san-benito', 'la-majada', 'lago-coatepeque', 'surf-city']
 const GARDEN_ONLY: LocationId[] = ['la-majada']
 const LAKE_ONLY: LocationId[] = ['lago-coatepeque']
+const LAKE_AND_SURF: LocationId[] = ['lago-coatepeque', 'surf-city']
 const GARDEN_AND_LAKE: LocationId[] = ['la-majada', 'lago-coatepeque']
 
 // ═══════════════════════════════════════════════════════════════
@@ -106,7 +115,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🌶️ spicy', '🔥 signature'],
     bestSeller: true,
-    image: '/images/menu/molcajete-coulotte.jpg',
+    image: '/images/menu/product-04.jpg',
     locations: ALL
   },
   {
@@ -152,7 +161,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     locations: ALL
   },
-  // Lake-only seafood starters
+  // Seafood starters (Lago + Surf City)
   {
     id: 'leche-de-tigre',
     name: 'Leche de Tigre',
@@ -161,7 +170,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🦐 seafood', '🌶️ spicy'],
     bestSeller: true,
-    locations: LAKE_ONLY
+    locations: LAKE_AND_SURF
   },
   {
     id: 'ceviche-tropical',
@@ -171,7 +180,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🦐 seafood'],
     bestSeller: true,
-    locations: LAKE_ONLY
+    locations: LAKE_AND_SURF
   },
   {
     id: 'aguachile-camaron',
@@ -180,7 +189,17 @@ export const MENU: MenuItem[] = [
     price: 11.99,
     category: 'entradas',
     tags: ['🦐 seafood', '🌶️ spicy'],
-    locations: LAKE_ONLY
+    image: '/images/menu/food-IMG20040.jpg',
+    locations: LAKE_AND_SURF
+  },
+  {
+    id: 'camarones-empanizados',
+    name: 'Camarones Empanizados',
+    description: 'Breaded shrimp with french fries, choice of sauce: Buffalo, Cilantro Parmesan, or Spicy Teriyaki',
+    price: 9.99,
+    category: 'entradas',
+    tags: ['🦐 seafood'],
+    locations: LAKE_AND_SURF
   },
 
   // ─────────────────────────────────────────────────────────────
@@ -224,6 +243,7 @@ export const MENU: MenuItem[] = [
     category: 'pastas',
     tags: ['🦐 seafood'],
     bestSeller: true,
+    image: '/images/menu/food-IMG20045.jpg',
     locations: ALL
   },
   {
@@ -335,6 +355,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 5.75,
     category: 'pizzas',
     tags: ['🌱 veg'],
+    image: '/images/menu/product-06.jpg',
     locations: ALL
   },
   {
@@ -359,7 +380,7 @@ export const MENU: MenuItem[] = [
   {
     id: 'pizza-loroka',
     name: 'Pizza La Loroka',
-    description: 'Crispy bacon and pepperoni - double the meat, double the flavor',
+    description: 'Loroco flower buds, crispy bacon, and pepperoni — a uniquely Salvadoran combination',
     price: 14.99,
     pricePersonal: 5.75,
     category: 'pizzas',
@@ -374,6 +395,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 5.75,
     category: 'pizzas',
     tags: ['🌱 veg'],
+    image: '/images/menu/product-05.jpg',
     locations: ALL
   },
 
@@ -398,6 +420,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 6.25,
     category: 'pizzas-especiales',
     tags: ['🔥 premium'],
+    image: '/images/menu/product-08.jpg',
     locations: ALL
   },
   {
@@ -513,19 +536,19 @@ export const MENU: MenuItem[] = [
     price: 11.99,
     category: 'platos-fuertes',
     bestSeller: true,
-    locations: GARDEN_AND_LAKE,
-    locationPrices: { 'lago-coatepeque': 12.50 }
+    locations: [...GARDEN_AND_LAKE, 'surf-city'],
+    locationPrices: { 'lago-coatepeque': 12.50, 'surf-city': 12.50 }
   },
   // Lake-only main dishes
   {
     id: 'pescado-parrilla',
     name: 'Pescado a la Parrilla',
-    description: 'Whole fresh fish grilled to perfection, house chimichurri, golden fries, pickled onion - lakeside specialty',
+    description: 'Whole fresh fish grilled to perfection, house chimichurri, golden fries, pickled onion - coastal specialty',
     price: 22.50,
     category: 'platos-fuertes',
     tags: ['🦐 seafood', '🔥 signature'],
     bestSeller: true,
-    locations: LAKE_ONLY
+    locations: LAKE_AND_SURF
   },
   {
     id: 'mariscada',
@@ -535,7 +558,8 @@ export const MENU: MenuItem[] = [
     category: 'mariscos',
     tags: ['🦐 seafood', '🔥 signature', '📅 weekend'],
     bestSeller: true,
-    locations: LAKE_ONLY
+    image: '/images/menu/food-IMG20042.jpg',
+    locations: LAKE_AND_SURF
   },
 
   // ─────────────────────────────────────────────────────────────
@@ -547,7 +571,7 @@ export const MENU: MenuItem[] = [
     description: 'Refreshing frozen drinks: Coconut, Pineapple, Strawberry, Mint, Passion Fruit, Watermelon, or "Positive Vibration" mix',
     price: 3.75,
     category: 'bebidas-frias',
-    image: '/images/menu/frozen-positive.jpg',
+    image: '/images/menu/product-07.jpg',
     locations: ALL
   },
   {
@@ -556,6 +580,7 @@ export const MENU: MenuItem[] = [
     description: 'Fresh lemonades: Passion Fruit, Strawberry, Mint, or Traditional',
     price: 3.25,
     category: 'bebidas-frias',
+    image: '/images/menu/product-02.jpg',
     locations: ALL
   },
   {
@@ -668,8 +693,8 @@ export const MENU: MenuItem[] = [
   // ─────────────────────────────────────────────────────────────
   {
     id: 'puente-quemado',
-    name: 'Puente Quemado',
-    description: 'Premium local Salvadoran craft beer',
+    name: 'Cerveza Artesanal Heroica',
+    description: 'Premium Salvadoran craft beer by Cervecería Santaneca Puente Quemado',
     price: 5.00,
     category: 'cervezas',
     tags: ['🍺 local', '🔥 craft'],
@@ -776,6 +801,15 @@ export const MENU: MenuItem[] = [
     locations: ALL
   },
   {
+    id: 'gallo',
+    name: 'Gallo',
+    description: 'Guatemalan Gallo lager',
+    price: 3.50,
+    category: 'cervezas',
+    tags: ['🍺 import'],
+    locations: ALL
+  },
+  {
     id: 'michelada-tradicional',
     name: 'Michelada Tradicional',
     description: 'Traditional michelada with lime, salt, and spices',
@@ -831,7 +865,7 @@ export const MENU: MenuItem[] = [
     name: 'Panna Cotta',
     description: 'Italian cream dessert with your choice: Red Fruits, Passion Fruit, or Strawberry - TOP #1 DESSERT',
     price: 3.99,
-    image: '/images/menu/panna-cotta.jpg',
+    image: '/images/menu/product-01.jpg',
     category: 'postres',
     tags: ['🌱 veg', '⭐ #1'],
     bestSeller: true,

@@ -39,32 +39,25 @@ import {
   enrichMenuItem,
   IntelligentMenuItem,
 } from "@/lib/menu-intelligence";
+import { useI18n, translations } from "@/lib/i18n";
 
-// Categories with icons
-const categories = [
-  { id: "all", name: "Todos", icon: "🍽️" },
-  { id: "entradas", name: "Entradas", icon: "🥟" },
-  { id: "ensaladas", name: "Ensaladas", icon: "🥗" },
-  { id: "pastas", name: "Pastas", icon: "🍝" },
-  { id: "pizzas", name: "Pizzas", icon: "🍕" },
-  { id: "pizzas-especiales", name: "Especiales", icon: "⭐" },
-  { id: "platos-fuertes", name: "Platos Fuertes", icon: "🥩" },
-  { id: "mariscos", name: "Mariscos", icon: "🦐" },
-  { id: "bebidas-frias", name: "Bebidas", icon: "🍹" },
-  { id: "bebidas-calientes", name: "Café", icon: "☕" },
-  { id: "postres", name: "Postres", icon: "🍰" },
-  { id: "cervezas", name: "Cervezas", icon: "🍺" },
-  { id: "menu-infantil", name: "Niños", icon: "👶" },
-];
-
-// Dietary filters
-const dietaryFilters = [
-  { id: "all", name: "Todos", icon: "🍽️" },
-  { id: "vegetarian", name: "Vegetariano", icon: "🌱" },
-  { id: "seafood", name: "Mariscos", icon: "🦐" },
-  { id: "spicy", name: "Picante", icon: "🌶️" },
-  { id: "bestseller", name: "Favoritos", icon: "⭐" },
-];
+// NOTE: categories and dietaryFilters arrays moved inside MenuPage for i18n access.
+// Static icon map kept at module level for MenuItemCard fallback.
+const categoryIcons: Record<string, string> = {
+  all: "🍽️",
+  entradas: "🥟",
+  ensaladas: "🥗",
+  pastas: "🍝",
+  pizzas: "🍕",
+  "pizzas-especiales": "⭐",
+  "platos-fuertes": "🥩",
+  mariscos: "🦐",
+  "bebidas-frias": "🍹",
+  "bebidas-calientes": "☕",
+  postres: "🍰",
+  cervezas: "🍺",
+  "menu-infantil": "👶",
+};
 
 // Allergen icons
 const allergenIcons: Record<string, { icon: string; label: string }> = {
@@ -104,6 +97,7 @@ function IngredientModal({
   onClose: () => void;
   locationId?: LocationId;
 }) {
+  const { t } = useI18n();
   const ingredients = getItemIngredients(item.id, "es");
   const allergenWarning = getAllergenWarning(item, "es");
 
@@ -133,7 +127,7 @@ function IngredientModal({
           <button
             onClick={onClose}
             className="p-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
-            aria-label="Cerrar"
+            aria-label={t(translations.menu.close)}
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,7 +140,7 @@ function IngredientModal({
         {ingredients && (
           <div className="mb-6">
             <h4 className="text-[#FF6B35] font-semibold mb-3 flex items-center gap-2">
-              <span>🍽️</span> Ingredientes
+              <span>🍽️</span> {t(translations.menu.ingredients)}
             </h4>
             <ul className="space-y-2">
               {ingredients.ingredients.map((ing, i) => (
@@ -164,7 +158,7 @@ function IngredientModal({
           <div className="bg-[#3D3936] p-4 mb-6">
             <div className="flex items-center gap-2 text-yellow-400 mb-2">
               <AlertTriangle className="w-5 h-5" />
-              <span className="font-semibold">Alérgenos</span>
+              <span className="font-semibold">{t(translations.menu.allergens)}</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {ingredients.allergens.map((allergen) => (
@@ -198,7 +192,7 @@ function IngredientModal({
         {item.bestSeller && (
           <div className="flex items-center gap-2 text-[#FF6B35] mb-4">
             <Flame className="w-5 h-5" />
-            <span className="font-semibold">Favorito de los clientes</span>
+            <span className="font-semibold">{t(translations.menu.customerFavorite)}</span>
           </div>
         )}
 
@@ -207,7 +201,7 @@ function IngredientModal({
           onClick={onClose}
           className="w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 font-semibold transition-colors min-h-[56px]"
         >
-          Cerrar
+          {t(translations.menu.close)}
         </button>
       </motion.div>
     </motion.div>
@@ -224,6 +218,7 @@ function MenuItemCard({
   locationId?: LocationId;
   onShowIngredients: (item: MenuItem) => void;
 }) {
+  const { t } = useI18n();
   const addItem = useCartStore((state) => state.addItem);
   const addToast = useToastStore((state) => state.addToast);
   const addFavoriteItem = useAnimaStore((state) => state.addFavoriteItem);
@@ -243,7 +238,7 @@ function MenuItemCard({
       available: true,
       created_at: new Date().toISOString(),
     });
-    addToast(`${item.name} agregado al carrito`, "success");
+    addToast(`${item.name} ${t(translations.menu.addedToCart)}`, "success");
     addFavoriteItem(item.name);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -263,7 +258,7 @@ function MenuItemCard({
           />
         ) : (
           <span className="text-6xl opacity-30">
-            {categories.find((c) => c.id === item.category)?.icon || "🍽️"}
+            {categoryIcons[item.category] || "🍽️"}
           </span>
         )}
         {item.image && (
@@ -315,7 +310,7 @@ function MenuItemCard({
             <h3 className="font-display text-lg text-[#FFF8F0]">{item.name}</h3>
             {item.pricePersonal && (
               <span className="text-xs text-[#6B6560] bg-[#3D3936] px-2 py-0.5">
-                Personal
+                {t(translations.menu.personal)}
               </span>
             )}
           </div>
@@ -348,17 +343,17 @@ function MenuItemCard({
             ? "bg-[#4CAF50] text-white"
             : "bg-[#3D3936] text-[#FFF8F0] hover:bg-[#FF6B35] active:scale-[0.98]"
         } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D2A26]`}
-        aria-label={`Agregar ${item.name} al carrito`}
+        aria-label={`${t(translations.menu.addToCart)} ${item.name}`}
       >
         {added ? (
           <>
             <Check className="w-4 h-4" />
-            Agregado
+            {t(translations.menu.added)}
           </>
         ) : (
           <>
             <Plus className="w-4 h-4" />
-            Agregar
+            {t(translations.menu.add)}
           </>
         )}
       </button>
@@ -367,6 +362,7 @@ function MenuItemCard({
 }
 
 export default function MenuPage() {
+  const { t } = useI18n();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeDietary, setActiveDietary] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -375,6 +371,32 @@ export default function MenuPage() {
   >(undefined);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const { setIsOpen } = useAnimaStore();
+
+  // Categories with icons (inside component for i18n access)
+  const categories = [
+    { id: "all", name: t(translations.menu.all), icon: "🍽️" },
+    { id: "entradas", name: t(translations.menu.starters), icon: "🥟" },
+    { id: "ensaladas", name: t(translations.menu.salads), icon: "🥗" },
+    { id: "pastas", name: t(translations.menu.pastas), icon: "🍝" },
+    { id: "pizzas", name: t(translations.menu.pizzas), icon: "🍕" },
+    { id: "pizzas-especiales", name: t(translations.menu.specials), icon: "⭐" },
+    { id: "platos-fuertes", name: t(translations.menu.mainCourse), icon: "🥩" },
+    { id: "mariscos", name: t(translations.menu.seafood), icon: "🦐" },
+    { id: "bebidas-frias", name: t(translations.menu.coldDrinks), icon: "🍹" },
+    { id: "bebidas-calientes", name: t(translations.menu.hotDrinks), icon: "☕" },
+    { id: "postres", name: t(translations.menu.desserts), icon: "🍰" },
+    { id: "cervezas", name: t(translations.menu.beers), icon: "🍺" },
+    { id: "menu-infantil", name: t(translations.menu.kids), icon: "👶" },
+  ];
+
+  // Dietary filters (inside component for i18n access)
+  const dietaryFilters = [
+    { id: "all", name: t(translations.menu.all), icon: "🍽️" },
+    { id: "vegetarian", name: t(translations.menu.vegetarian), icon: "🌱" },
+    { id: "seafood", name: t(translations.menu.seafood), icon: "🦐" },
+    { id: "spicy", name: t(translations.menu.spicy), icon: "🌶️" },
+    { id: "bestseller", name: t(translations.menu.favorites), icon: "⭐" },
+  ];
 
   // Filter menu items based on all criteria
   const filteredItems = useMemo(() => {
@@ -440,13 +462,13 @@ export default function MenuPage() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <p className="font-handwritten text-xl text-[#FF6B35] mb-2">
-                Desde el horno
+                {t(translations.menu.fromOven)}
               </p>
               <h1 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight mb-4">
-                Nuestro Menú
+                {t(translations.menu.ourMenu)}
               </h1>
               <p className="text-lg text-[#B8B0A8] max-w-xl">
-                Pizzas artesanales, mariscos frescos, pastas de la casa y más.
+                {t(translations.menu.menuDesc)}
                 {selectedLocation && (
                   <span className="block mt-1 text-[#FF6B35]">
                     📍 {LOCATIONS[selectedLocation].name}
@@ -465,9 +487,9 @@ export default function MenuPage() {
                     )
                   }
                   className="appearance-none bg-[#252320] border border-[#3D3936] text-[#FFF8F0] px-4 py-3 pr-10 min-h-[48px] focus:outline-none focus:border-[#FF6B35] cursor-pointer"
-                  aria-label="Seleccionar ubicación"
+                  aria-label={t(translations.menu.selectLocation)}
                 >
-                  <option value="">Todas las ubicaciones</option>
+                  <option value="">{t(translations.menu.allLocations)}</option>
                   {Object.values(LOCATIONS).map((loc) => (
                     <option key={loc.id} value={loc.id}>
                       {loc.name}
@@ -482,7 +504,7 @@ export default function MenuPage() {
               >
                 <Sparkles className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
                 <span className="text-[#FFF8F0] font-medium">
-                  Ayúdame a elegir
+                  {t(translations.menu.helpChoose)}
                 </span>
               </button>
             </div>
@@ -501,15 +523,15 @@ export default function MenuPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar pizzas, mariscos, carnes..."
+                placeholder={t(translations.menu.searchPlaceholder)}
                 className="w-full pl-12 pr-12 py-3 bg-[#252320] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
-                aria-label="Buscar en el menú"
+                aria-label={t(translations.menu.searchMenu)}
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors p-1"
-                  aria-label="Limpiar búsqueda"
+                  aria-label={t(translations.menu.clearSearch)}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -560,8 +582,8 @@ export default function MenuPage() {
         <div className="max-w-6xl mx-auto px-6">
           {/* Results count */}
           <p className="text-[#6B6560] mb-8">
-            {filteredItems.length} productos encontrados
-            {searchQuery && ` para "${searchQuery}"`}
+            {filteredItems.length} {t(translations.menu.productsFound)}
+            {searchQuery && ` ${t(translations.menu.for)} "${searchQuery}"`}
           </p>
 
           {/* Grouped by category */}
@@ -613,8 +635,8 @@ export default function MenuPage() {
               <Search className="w-12 h-12 text-[#3D3936] mx-auto mb-4" />
               <p className="text-[#B8B0A8] mb-2">
                 {searchQuery
-                  ? `No se encontraron resultados para "${searchQuery}"`
-                  : "No se encontraron productos con estos filtros"}
+                  ? `${t(translations.menu.noResults)} "${searchQuery}"`
+                  : t(translations.menu.noProductsFilter)}
               </p>
               <button
                 onClick={() => {
@@ -624,7 +646,7 @@ export default function MenuPage() {
                 }}
                 className="text-[#FF6B35] hover:underline font-medium"
               >
-                Limpiar filtros
+                {t(translations.menu.clearFilters)}
               </button>
             </div>
           )}
@@ -648,18 +670,17 @@ export default function MenuPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Flame className="w-6 h-6 text-[#FF6B35]" />
             <span className="font-handwritten text-xl text-[#FF6B35]">
-              ¿Necesitas ayuda?
+              {t(translations.menu.needHelp)}
             </span>
           </div>
           <p className="text-[#B8B0A8] mb-6">
-            Pregúntame sobre ingredientes, alérgenos, o déjame recomendarte
-            según tus gustos.
+            {t(translations.menu.askAbout)}
           </p>
           <button
             onClick={() => setIsOpen(true)}
             className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold transition-all min-h-[56px]"
           >
-            Hablar con Sophia
+            {t(translations.menu.talkToSophia)}
             <Sparkles className="w-5 h-5" />
           </button>
         </div>

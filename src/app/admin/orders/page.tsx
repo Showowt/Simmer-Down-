@@ -77,7 +77,7 @@ export default function AdminOrdersPage() {
       if (error) throw error;
       setOrders(data || []);
     } catch (err) {
-      console.log("Demo mode");
+      // Fallback: no orders data
     } finally {
       setLoading(false);
     }

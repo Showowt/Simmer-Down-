@@ -74,7 +74,7 @@ export default function NotFound() {
 
         {/* Fun suggestion */}
         <p className="text-[#6B6560] text-sm mt-12">
-          Tip: Ordena una pizza mientras estás aquí. Todo mejora con pizza.
+          Consejo: Ordena una pizza mientras estás aquí. Todo mejora con pizza.
         </p>
       </motion.div>
     </div>

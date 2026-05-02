@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createApiClient } from "@/lib/supabase/api";
+import { createServiceClient } from "@/lib/supabase/service";
 import {
   createOrderSchema,
   formatZodErrors,
@@ -20,6 +20,8 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
+import { sendWhatsApp } from "@/lib/twilio/client";
+import { formatOrderWhatsApp } from "@/lib/notifications/order-notify";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -64,7 +66,7 @@ interface OrderResponse {
  * Returns a map of item id -> price
  */
 async function fetchMenuPrices(
-  supabase: ReturnType<typeof createApiClient>,
+  supabase: ReturnType<typeof createServiceClient>,
   itemIds: string[],
 ): Promise<Map<string, DbMenuItem>> {
   const { data, error } = await supabase
@@ -89,7 +91,7 @@ async function fetchMenuPrices(
  * Fetch location details from database
  */
 async function fetchLocation(
-  supabase: ReturnType<typeof createApiClient>,
+  supabase: ReturnType<typeof createServiceClient>,
   locationId: string,
 ): Promise<DbLocation | null> {
   const { data, error } = await supabase
@@ -104,6 +106,82 @@ async function fetchLocation(
   }
 
   return data;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WhatsApp Notification Helper (non-blocking)
+// ═══════════════════════════════════════════════════════════════
+
+async function sendOrderNotification(
+  orderId: string,
+  orderNumber: string,
+  input: CreateOrderInput,
+  validatedItems: Array<{
+    menu_item_id: string | null;
+    item_name: string;
+    item_description: string | null;
+    unit_price: number;
+    quantity: number;
+    line_total: number;
+  }>,
+  locationName: string,
+  total: number,
+  subtotal: number,
+  deliveryFee: number,
+  discountAmount: number,
+  discountCode: string | null,
+): Promise<void> {
+  try {
+    const staffPhone =
+      process.env.STAFF_NOTIFICATION_WHATSAPP || "+50376804434";
+
+    const message = formatOrderWhatsApp(
+      {
+        order_number: orderNumber,
+        order_type: input.orderType,
+        customer_name: input.customerName,
+        customer_phone: input.customerPhone,
+        customer_notes: input.notes || null,
+        subtotal,
+        delivery_fee: deliveryFee,
+        discount_amount: discountAmount > 0 ? discountAmount : null,
+        discount_code: discountCode,
+        total_amount: total,
+        delivery_address_line1:
+          input.orderType === "delivery" ? input.deliveryAddress || null : null,
+        delivery_city:
+          input.orderType === "delivery" ? input.deliveryCity || null : null,
+      },
+      validatedItems.map((item) => ({
+        item_name: item.item_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        line_total: item.line_total,
+      })),
+      locationName,
+    );
+
+    // Send to primary staff contact
+    const result = await sendWhatsApp(staffPhone, message);
+    if (result.success) {
+      logger.info("Order notification sent", {
+        orderId,
+        orderNumber,
+        to: staffPhone,
+      });
+    }
+
+    // Send to secondary contact if configured
+    const secondaryPhone = process.env.STAFF_NOTIFICATION_WHATSAPP_2;
+    if (secondaryPhone) {
+      await sendWhatsApp(secondaryPhone, message);
+    }
+  } catch (err) {
+    logger.warn("sendOrderNotification error", {
+      orderId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -144,7 +222,7 @@ export async function POST(
     }
 
     const input: CreateOrderInput = parseResult.data;
-    const supabase = createApiClient();
+    const supabase = createServiceClient();
 
     // Fetch location from database
     const location = await fetchLocation(supabase, input.locationId);
@@ -203,13 +281,22 @@ export async function POST(
     for (const clientItem of input.items) {
       const dbItem = menuPrices.get(clientItem.id);
 
-      // If item found in DB, use DB price
-      // If not found (local menu), trust the client price but flag it
-      const isDbItem = !!dbItem;
-      const serverPrice = isDbItem ? dbItem.price : clientItem.price;
+      // Reject items not found in the database — never trust client prices.
+      if (!dbItem) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Item not found",
+            message: `"${clientItem.name}" no está disponible. Actualiza tu carrito e intenta de nuevo.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      const serverPrice = dbItem.price;
 
       // Check availability
-      if (isDbItem && !dbItem.available) {
+      if (!dbItem.available) {
         return NextResponse.json(
           {
             success: false,
@@ -224,7 +311,7 @@ export async function POST(
       subtotal += lineTotal;
 
       validatedItems.push({
-        menu_item_id: isDbItem ? clientItem.id : null,
+        menu_item_id: clientItem.id,
         item_name: clientItem.name,
         item_description: clientItem.description || null,
         unit_price: serverPrice,
@@ -236,10 +323,44 @@ export async function POST(
     // Calculate delivery fee (from DB, not client)
     const deliveryFee =
       input.orderType === "delivery" ? location.delivery_fee || 0 : 0;
-    const total = subtotal + deliveryFee;
+
+    // Validate promo code server-side if provided
+    let discountAmount = 0;
+    let discountCode: string | null = null;
+    let discountDescription: string | null = null;
+
+    if (input.promoCode) {
+      const { data: promo, error: promoError } = await supabase
+        .from("promo_codes")
+        .select("id, code, discount_type, discount_value, min_order_amount, is_active, expires_at, description")
+        .eq("code", input.promoCode.toUpperCase())
+        .eq("is_active", true)
+        .single();
+
+      if (promoError || !promo) {
+        logger.info("Invalid promo code attempted", { code: input.promoCode });
+      } else {
+        const isExpired = promo.expires_at && new Date(promo.expires_at) < new Date();
+        const belowMinimum = promo.min_order_amount && subtotal < promo.min_order_amount;
+
+        if (!isExpired && !belowMinimum) {
+          const discountValue = promo.discount_value ?? 0;
+          if (promo.discount_type === "percent") {
+            discountAmount = (subtotal * discountValue) / 100;
+          } else {
+            discountAmount = discountValue;
+          }
+          discountAmount = Math.min(discountAmount, subtotal);
+          discountCode = promo.code;
+          discountDescription = promo.description || `Descuento ${promo.discount_type === "percent" ? `${discountValue}%` : `$${discountValue.toFixed(2)}`}`;
+        }
+      }
+    }
+
+    const total = Math.max(0, subtotal + deliveryFee - discountAmount);
 
     // Prepare order data
-    const orderData = {
+    const orderData: Record<string, unknown> = {
       location_id: input.locationId,
       order_type: input.orderType,
       status: "pending",
@@ -252,6 +373,9 @@ export async function POST(
       customer_notes: input.notes || null,
       subtotal: subtotal,
       delivery_fee: deliveryFee,
+      discount_amount: discountAmount > 0 ? discountAmount : null,
+      discount_code: discountCode,
+      discount_description: discountDescription,
       total_amount: total,
       order_source: "website",
     };
@@ -292,6 +416,25 @@ export async function POST(
       });
       // Don't fail the order - it was created successfully
     }
+
+    // Send WhatsApp notification (non-blocking — don't fail the order if notification fails)
+    sendOrderNotification(
+      order.id,
+      order.order_number,
+      input,
+      validatedItems,
+      location.name,
+      total,
+      subtotal,
+      deliveryFee,
+      discountAmount,
+      discountCode,
+    ).catch((err) =>
+      logger.warn("WhatsApp notification failed", {
+        orderId: order.id,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
 
     const duration = Date.now() - startTime;
     logger.api.response(endpoint, 200, duration, { orderId: order.id });

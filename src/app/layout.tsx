@@ -3,6 +3,7 @@ import { Playfair_Display, Plus_Jakarta_Sans, Caveat } from 'next/font/google'
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
+import AppProviders from '@/components/AppProviders'
 import { Analytics } from '@vercel/analytics/react'
 import { FilmGrain } from '@/components/cinema/FilmGrain'
 
@@ -26,19 +27,19 @@ const caveat = Caveat({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://simmer-down.vercel.app'),
+  metadataBase: new URL('https://simmerdownsv.com'),
   title: {
     default: 'Simmer Down | Restaurante y Destino Gastro-Musical | El Salvador',
     template: '%s | Simmer Down'
   },
-  description: 'Restaurante y destino gastro-musical en El Salvador. 12 años, 5 ubicaciones. Pizzas artesanales, pastas, carnes y experiencias únicas en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City.',
+  description: 'Restaurante y destino gastro-musical en El Salvador. 14 años, 5 ubicaciones. Pizzas artesanales, pastas, carnes y experiencias únicas en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City.',
   keywords: ['Simmer Down', 'restaurante El Salvador', 'pizza artesanal', 'Santa Ana', 'Coatepeque', 'San Benito', 'Surf City', 'Juayúa', 'gastro-musical', 'wood-fired pizza'],
   authors: [{ name: 'Simmer Down' }],
   creator: 'Simmer Down',
   openGraph: {
     type: 'website',
     locale: 'es_SV',
-    url: 'https://simmer-down.vercel.app',
+    url: 'https://simmerdownsv.com',
     siteName: 'Simmer Down',
     title: 'Simmer Down | Restaurante y Destino Gastro-Musical',
     description: 'Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.',
@@ -54,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Simmer Down | Restaurante y Destino Gastro-Musical',
-    description: '12 años creando memorias. 5 ubicaciones en El Salvador.',
+    description: '14 años creando memorias. 5 ubicaciones en El Salvador.',
     images: ['https://simmerdownsv.com/og/home.jpg'],
   },
   robots: {
@@ -86,18 +87,19 @@ export default function RootLayout({
         <meta name="theme-color" content="#2D2A26" />
       </head>
       <body className={`${playfair.variable} ${jakarta.variable} ${caveat.variable} font-body bg-[#2D2A26] text-[#FFF8F0] antialiased`}>
-        {/* Skip Link for Accessibility */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 bg-[#FF6B35] text-white px-6 py-3 z-[9999] font-semibold focus:outline-none focus:ring-2 focus:ring-white"
-        >
-          Saltar al contenido principal
-        </a>
-        {children}
-        <FilmGrain />
-        <ToastContainer />
-        <ClientProviders />
-        <Analytics />
+        <AppProviders>
+          {/* Skip Link for Accessibility */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 bg-[#FF6B35] text-white px-6 py-3 z-[9999] font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            Saltar al contenido principal
+          </a>
+          {children}
+          <FilmGrain />
+          <ToastContainer />
+          <ClientProviders />
+          <Analytics />
 
         {/* LocalBusiness + Restaurant Schema */}
         <script
@@ -108,13 +110,13 @@ export default function RootLayout({
               '@type': 'Restaurant',
               name: 'Simmer Down',
               image: 'https://simmerdownsv.com/og/home.jpg',
-              '@id': 'https://simmer-down.vercel.app',
-              url: 'https://simmer-down.vercel.app',
+              '@id': 'https://simmerdownsv.com',
+              url: 'https://simmerdownsv.com',
               telephone: '+503-2445-5999',
               priceRange: '$$',
               servesCuisine: ['Pizza', 'Italian', 'International', 'Salvadoran'],
               acceptsReservations: 'True',
-              menu: 'https://simmer-down.vercel.app/menu',
+              menu: 'https://simmerdownsv.com/menu',
               address: {
                 '@type': 'PostalAddress',
                 streetAddress: '1ra Calle Pte y Callejuela Sur Catedral',
@@ -149,6 +151,7 @@ export default function RootLayout({
             })
           }}
         />
+        </AppProviders>
       </body>
     </html>
   )

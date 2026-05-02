@@ -54,7 +54,7 @@ export default function AdminDashboard() {
       if (error) throw error;
       setOrders(data || []);
     } catch (err) {
-      console.log("Demo mode - no orders");
+      // Fallback: no orders table or empty
     } finally {
       setLoading(false);
     }

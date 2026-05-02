@@ -1,17 +1,7 @@
-import Image from "next/image";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Nuestra Historia",
-  description:
-    "12 años de historia. Desde Santa Ana hasta la costa. Cocina de horno de leña, fuego lento, recetas que respetan el ingrediente. Simmer Down es parte de la memoria de El Salvador.",
-  openGraph: {
-    title: "Simmer Down · Nuestra Historia",
-    description:
-      "Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.",
-    images: ["/og/about.jpg"],
-  },
-};
+import Image from "next/image";
+import { useI18n, translations } from "@/lib/i18n";
 import {
   Heart,
   Flame,
@@ -31,66 +21,108 @@ import {
   AnimatedCTA,
 } from "@/components/about/AnimatedSection";
 
-const values = [
-  {
-    icon: <Heart className="w-8 h-8 text-[#FF6B35]" />,
-    title: "Hecho con Amor",
-    description:
-      "Cada pizza esta elaborada con pasion y cuidado, como si la hicieramos para nuestra propia familia.",
-  },
-  {
-    icon: <Leaf className="w-8 h-8 text-[#FF6B35]" />,
-    title: "Fresco y Local",
-    description:
-      "Obtenemos ingredientes de granjas y mercados locales, apoyando a nuestra comunidad salvadorena.",
-  },
-  {
-    icon: <Users className="w-8 h-8 text-[#FF6B35]" />,
-    title: "Comunidad Primero",
-    description:
-      "Mas que un restaurante, somos un punto de encuentro donde se crean memorias.",
-  },
-  {
-    icon: <Sparkles className="w-8 h-8 text-[#FF6B35]" />,
-    title: "Solo Buenas Vibras",
-    description:
-      "Creemos que la buena comida sabe mejor en un ambiente calido y acogedor.",
-  },
-];
-
-const team = [
-  {
-    name: "Fuego y Tradición",
-    role: "Nuestra Cocina",
-    image: "/images/menu/pizzas-hero.jpg",
-    bio: "Horno de leña, recetas que respetan el ingrediente. Pizzas artesanales con alma italiana y sabor salvadoreño.",
-  },
-  {
-    name: "Hospitalidad Salvadoreña",
-    role: "Nuestra Gente",
-    image: "/images/locations/santa-ana-interior.jpg",
-    bio: "12 años abriendo puertas. Cada ubicación cuenta su propia historia y recibe con los brazos abiertos.",
-  },
-  {
-    name: "Vibras Únicas",
-    role: "Nuestras Noches",
-    image: "/images/events/simmermania-marzo.jpg",
-    bio: "Simmer Manía. Bandas en vivo, cine, poesía, salsa. El escenario donde la ciudad se encuentra.",
-  },
-];
-
-const milestones = [
-  {
-    year: "2013",
-    event: "Simmer Down abre en Santa Ana, frente a la Catedral",
-  },
-  { year: "2016", event: "Segunda ubicacion en Lago de Coatepeque" },
-  { year: "2019", event: "Expansion a San Benito, San Salvador" },
-  { year: "2022", event: "Simmer Garden abre en Juayua, Ruta de las Flores" },
-  { year: "2024", event: "Surf City: nuestra quinta ubicacion frente al mar" },
-];
-
 export default function AboutPage() {
+  const { t, locale } = useI18n();
+
+  const values = [
+    {
+      icon: <Heart className="w-8 h-8 text-[#FF6B35]" />,
+      title: t(translations.about.madeWithLove),
+      description: t(translations.about.madeWithLoveDesc),
+    },
+    {
+      icon: <Leaf className="w-8 h-8 text-[#FF6B35]" />,
+      title: t(translations.about.freshLocal),
+      description: t(translations.about.freshLocalDesc),
+    },
+    {
+      icon: <Users className="w-8 h-8 text-[#FF6B35]" />,
+      title: t(translations.about.communityFirst),
+      description: t(translations.about.communityFirstDesc),
+    },
+    {
+      icon: <Sparkles className="w-8 h-8 text-[#FF6B35]" />,
+      title: t(translations.about.goodVibes),
+      description: t(translations.about.goodVibesDesc),
+    },
+  ];
+
+  const team = [
+    {
+      name:
+        locale === "es" ? "Fuego y Tradición" : "Fire & Tradition",
+      role:
+        locale === "es" ? "Nuestra Cocina" : "Our Kitchen",
+      image: "/images/menu/pizzas-hero.jpg",
+      bio:
+        locale === "es"
+          ? "Horno de leña, recetas que respetan el ingrediente. Pizzas artesanales con alma italiana y sabor salvadoreño."
+          : "Wood-fired oven, recipes that respect the ingredient. Artisan pizzas with Italian soul and Salvadoran flavor.",
+    },
+    {
+      name:
+        locale === "es"
+          ? "Hospitalidad Salvadoreña"
+          : "Salvadoran Hospitality",
+      role:
+        locale === "es" ? "Nuestra Gente" : "Our People",
+      image: "/images/locations/santa-ana-interior.jpg",
+      bio:
+        locale === "es"
+          ? "14 años abriendo puertas. Cada ubicación cuenta su propia historia y recibe con los brazos abiertos."
+          : "14 years opening doors. Each location tells its own story and welcomes with open arms.",
+    },
+    {
+      name:
+        locale === "es" ? "Vibras Únicas" : "Unique Vibes",
+      role:
+        locale === "es" ? "Nuestras Noches" : "Our Nights",
+      image: "/images/events/simmermania-marzo.jpg",
+      bio:
+        locale === "es"
+          ? "Simmer Manía. Bandas en vivo, cine, poesía, salsa. El escenario donde la ciudad se encuentra."
+          : "Simmer Mania. Live bands, cinema, poetry, salsa. The stage where the city comes together.",
+    },
+  ];
+
+  const milestones = [
+    {
+      year: "2013",
+      event:
+        locale === "es"
+          ? "Simmer Down abre en Santa Ana, frente a la Catedral"
+          : "Simmer Down opens in Santa Ana, facing the Cathedral",
+    },
+    {
+      year: "2016",
+      event:
+        locale === "es"
+          ? "Segunda ubicación en Lago de Coatepeque"
+          : "Second location at Lago de Coatepeque",
+    },
+    {
+      year: "2019",
+      event:
+        locale === "es"
+          ? "Expansion a San Benito, San Salvador"
+          : "Expansion to San Benito, San Salvador",
+    },
+    {
+      year: "2022",
+      event:
+        locale === "es"
+          ? "Simmer Garden abre en Juayua, Ruta de las Flores"
+          : "Simmer Garden opens in Juayua, Ruta de las Flores",
+    },
+    {
+      year: "2024",
+      event:
+        locale === "es"
+          ? "Surf City: nuestra quinta ubicación frente al mar"
+          : "Surf City: our fifth location by the sea",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-24">
       {/* Hero */}
@@ -110,14 +142,13 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedSection className="text-center max-w-3xl mx-auto">
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Nuestra Historia
+              {t(translations.about.ourStory)}
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
-              Restaurante y Destino Gastro-Musical
+              {t(translations.about.tagline)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
-              Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer
-              Down es parte de la memoria de El Salvador.
+              {t(translations.about.subtitle)}
             </p>
           </AnimatedSection>
         </div>
@@ -129,35 +160,44 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <AnimatedOnView direction="left">
               <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-                Desde 2013
+                {t(translations.about.since2013)}
               </p>
               <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6">
-                Nuestra Historia
+                {t(translations.about.ourStory)}
               </h2>
               <div className="space-y-4 text-[#B8B0A8] text-lg leading-relaxed">
                 <p>
-                  Nacimos en{" "}
-                  <strong className="text-[#FFF8F0]">Santa Ana</strong>, frente
-                  a su historica catedral, como un punto de encuentro donde el
-                  tiempo baja la velocidad, la conversacion fluye y la comida se
-                  disfruta sin prisa.
+                  {locale === "es" ? (
+                    <>
+                      Nacimos en{" "}
+                      <strong className="text-[#FFF8F0]">Santa Ana</strong>, frente
+                      a su histórica catedral, como un punto de encuentro donde el
+                      tiempo baja la velocidad, la conversación fluye y la comida se
+                      disfruta sin prisa.
+                    </>
+                  ) : (
+                    <>
+                      We were born in{" "}
+                      <strong className="text-[#FFF8F0]">Santa Ana</strong>, facing
+                      its historic cathedral, as a meeting point where time slows
+                      down, conversation flows and food is enjoyed without rush.
+                    </>
+                  )}
                 </p>
                 <p>
-                  Desde entonces, nos hemos convertido en un referente
-                  gastronomico que acompana viajes, celebraciones, reencuentros
-                  y primeras veces. Para muchos, Simmer Down es nostalgia. Para
-                  otros, es un descubrimiento.
+                  {locale === "es"
+                    ? "Desde entonces, nos hemos convertido en un referente gastronómico que acompaña viajes, celebraciones, reencuentros y primeras veces. Para muchos, Simmer Down es nostalgia. Para otros, es un descubrimiento."
+                    : "Since then, we have become a gastronomic landmark that accompanies trips, celebrations, reunions and first times. For many, Simmer Down is nostalgia. For others, it's a discovery."}
                 </p>
                 <p>
-                  Nuestra cocina se inspira en lo artesanal, en el fuego lento y
-                  en recetas que respetan el ingrediente y celebran el sabor.
-                  Pizzas artesanales, pastas, carnes, platos para compartir y
-                  opciones para todos los gustos.
+                  {locale === "es"
+                    ? "Nuestra cocina se inspira en lo artesanal, en el fuego lento y en recetas que respetan el ingrediente y celebran el sabor. Pizzas artesanales, pastas, carnes, platos para compartir y opciones para todos los gustos."
+                    : "Our kitchen is inspired by the artisanal, by slow fire and recipes that respect the ingredient and celebrate flavor. Artisan pizzas, pastas, meats, sharing plates and options for every taste."}
                 </p>
                 <p className="italic text-[#FFF8F0]">
-                  Pero Simmer Down no es solo lo que servimos en la mesa. Es el
-                  ambiente. Es la musica. Es la vista. Es la sensacion de estar
-                  exactamente donde debes estar.
+                  {locale === "es"
+                    ? "Pero Simmer Down no es solo lo que servimos en la mesa. Es el ambiente. Es la música. Es la vista. Es la sensacion de estar exactamente donde debes estar."
+                    : "But Simmer Down is not just what we serve at the table. It's the atmosphere. It's the music. It's the view. It's the feeling of being exactly where you should be."}
                 </p>
               </div>
             </AnimatedOnView>
@@ -208,12 +248,14 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <Quote className="w-12 h-12 text-[#FF6B35] mx-auto mb-6" />
           <blockquote className="font-display text-2xl md:text-3xl text-[#FFF8F0] italic mb-6">
-            &ldquo;Creemos que la mejor gastronomia no solo alimenta: conecta,
-            emociona y permanece. Por eso cuidamos cada detalle, para que cada
-            visita se sienta familiar.&rdquo;
+            {locale === "es"
+              ? "\u201CCreemos que la mejor gastronomia no solo alimenta: conecta, emociona y permanece. Por eso cuidamos cada detalle, para que cada visita se sienta familiar.\u201D"
+              : "\u201CWe believe the best gastronomy doesn\u2019t just nourish: it connects, moves and endures. That\u2019s why we care for every detail, so every visit feels like family.\u201D"}
           </blockquote>
           <cite className="text-[#6B6560] font-handwritten text-xl">
-            - Simmer Down, 12 anos de historia
+            {locale === "es"
+              ? "- Simmer Down, 14 años de historia"
+              : "- Simmer Down, 14 years of history"}
           </cite>
         </div>
       </section>
@@ -223,10 +265,10 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Lo Que Creemos
+              {t(translations.about.whatWeBelieve)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Nuestros Valores
+              {t(translations.about.ourValues)}
             </h2>
           </div>
 
@@ -249,10 +291,10 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              El Equipo
+              {t(translations.about.theTeam)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Conoce a la Familia
+              {t(translations.about.meetFamily)}
             </h2>
           </div>
 
@@ -276,10 +318,10 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              Nuestro Camino
+              {t(translations.about.ourPath)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              Hitos
+              {t(translations.about.milestones)}
             </h2>
           </div>
 
@@ -308,24 +350,24 @@ export default function AboutPage() {
           <AnimatedCTA>
             <Flame className="w-12 h-12 text-white mx-auto mb-6" />
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
-              Se Parte de Nuestra Historia
+              {t(translations.about.bePartOfStory)}
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Visitanos hoy y experimenta la diferencia Simmer Down.
+              {t(translations.about.visitToday)}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/menu"
                 className="flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
               >
-                Ordenar Ahora
+                {t(translations.nav.orderNow)}
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 href="/locations"
                 className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
               >
-                Encontrar Ubicacion
+                {t(translations.about.findLocation)}
               </Link>
             </div>
           </AnimatedCTA>

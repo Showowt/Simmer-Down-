@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
+import { orderStatusLabel } from "@/lib/order-status";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -246,8 +247,8 @@ function OrderTracker() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <p className="text-sm text-[#6B6560]">Estado</p>
-                  <p className="font-medium text-[#FFF8F0] capitalize">
-                    {order.status.replace("_", " ")}
+                  <p className="font-medium text-[#FFF8F0]">
+                    {orderStatusLabel(order.status)}
                   </p>
                 </div>
                 <div className="text-right">

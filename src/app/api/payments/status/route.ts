@@ -70,6 +70,9 @@ export async function GET(request: NextRequest) {
         ? "processing_3ds"
         : paymentStatus;
 
+  // Strip sensitive fields from unauthenticated response.
+  // authorizationCode, cardBrand, cardLast4 are only needed on the
+  // authenticated order page — the 3DS modal only needs paymentStatus.
   return NextResponse.json({
     success: true,
     order: {
@@ -77,10 +80,8 @@ export async function GET(request: NextRequest) {
       orderNumber: order.order_number,
       paymentStatus: externalStatus,
       status: order.status,
-      cardBrand: payment?.card_brand ?? null,
-      cardLast4: payment?.card_last_four ?? null,
-      authorizationCode: payment?.authorization_code ?? null,
-      errorMessage: payment?.failure_reason ?? null,
+      errorMessage:
+        externalStatus === "failed" ? (payment?.failure_reason ?? null) : null,
       total: Number(order.total_amount ?? 0),
     },
   });
