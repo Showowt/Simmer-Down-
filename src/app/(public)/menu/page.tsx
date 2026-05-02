@@ -208,16 +208,8 @@ function IngredientModal({
   );
 }
 
-// Menu Item Card with ingredients support
-function MenuItemCard({
-  item,
-  locationId,
-  onShowIngredients,
-}: {
-  item: MenuItem;
-  locationId?: LocationId;
-  onShowIngredients: (item: MenuItem) => void;
-}) {
+// Shared add-to-cart logic
+function useAddToCart(item: MenuItem, locationId?: LocationId) {
   const { t } = useI18n();
   const addItem = useCartStore((state) => state.addItem);
   const addToast = useToastStore((state) => state.addToast);
@@ -225,7 +217,6 @@ function MenuItemCard({
   const [added, setAdded] = useState(false);
 
   const price = getItemPrice(item, locationId);
-  const ingredients = getItemIngredients(item.id, "es");
 
   const handleAdd = () => {
     addItem({
@@ -233,7 +224,7 @@ function MenuItemCard({
       name: item.name,
       description: item.description,
       price: price,
-      image_url: null,
+      image_url: item.image || null,
       category: item.category,
       available: true,
       created_at: new Date().toISOString(),
@@ -244,26 +235,37 @@ function MenuItemCard({
     setTimeout(() => setAdded(false), 1500);
   };
 
+  return { price, added, handleAdd };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Visual Card — items WITH images (beautiful showcase)
+// ═══════════════════════════════════════════════════════════════
+function MenuImageCard({
+  item,
+  locationId,
+  onShowIngredients,
+}: {
+  item: MenuItem;
+  locationId?: LocationId;
+  onShowIngredients: (item: MenuItem) => void;
+}) {
+  const { t } = useI18n();
+  const { price, added, handleAdd } = useAddToCart(item, locationId);
+  const ingredients = getItemIngredients(item.id, "es");
+
   return (
     <div className="group">
-      {/* Image or category-icon fallback */}
-      <div className="aspect-square bg-[#252320] overflow-hidden mb-4 relative flex items-center justify-center">
-        {item.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.image}
-            alt={item.name}
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <span className="text-6xl opacity-30">
-            {categoryIcons[item.category] || "🍽️"}
-          </span>
-        )}
-        {item.image && (
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent pointer-events-none" />
-        )}
+      {/* Image */}
+      <div className="aspect-square bg-[#252320] overflow-hidden mb-4 relative">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={item.image!}
+          alt={item.name}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent pointer-events-none" />
 
         {/* Tags overlay */}
         {item.tags && item.tags.length > 0 && (
@@ -320,7 +322,7 @@ function MenuItemCard({
         </div>
       </div>
 
-      {/* Price - WCAG compliant white text */}
+      {/* Price */}
       <div className="mb-4">
         {item.pricePersonal ? (
           <div className="flex items-center gap-2 text-white font-bold">
@@ -335,7 +337,7 @@ function MenuItemCard({
         )}
       </div>
 
-      {/* Add Button - 56px minimum touch target */}
+      {/* Add Button */}
       <button
         onClick={handleAdd}
         className={`w-full min-h-[56px] py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
@@ -356,6 +358,100 @@ function MenuItemCard({
             {t(translations.menu.add)}
           </>
         )}
+      </button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// List Row — items WITHOUT images (clean, elegant list)
+// ═══════════════════════════════════════════════════════════════
+function MenuListItem({
+  item,
+  locationId,
+  onShowIngredients,
+}: {
+  item: MenuItem;
+  locationId?: LocationId;
+  onShowIngredients: (item: MenuItem) => void;
+}) {
+  const { t } = useI18n();
+  const { price, added, handleAdd } = useAddToCart(item, locationId);
+  const ingredients = getItemIngredients(item.id, "es");
+
+  return (
+    <div className="group flex items-center gap-4 py-4 border-b border-[#3D3936]/50 last:border-b-0 hover:bg-[#252320]/50 transition-colors px-3 -mx-3">
+      {/* Left: Name + Description */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-display text-base text-[#FFF8F0] group-hover:text-[#FF6B35] transition-colors">
+            {item.name}
+          </h3>
+          {item.bestSeller && (
+            <Flame className="w-3.5 h-3.5 text-[#FF6B35] flex-shrink-0" />
+          )}
+          {item.tags && item.tags.length > 0 && (
+            <span className="flex gap-1">
+              {item.tags.slice(0, 2).map((tag) => {
+                const tagInfo = tagIcons[tag];
+                return (
+                  <span
+                    key={tag}
+                    className="text-xs"
+                    title={tagInfo?.label || tag}
+                  >
+                    {tagInfo?.icon || tag.split(" ")[0]}
+                  </span>
+                );
+              })}
+            </span>
+          )}
+          {item.pricePersonal && (
+            <span className="text-[10px] text-[#6B6560] bg-[#3D3936] px-1.5 py-0.5 uppercase tracking-wider">
+              {t(translations.menu.personal)}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-[#6B6560] line-clamp-1 mt-0.5">
+          {item.description}
+        </p>
+      </div>
+
+      {/* Allergen info button */}
+      {ingredients && ingredients.allergens.length > 0 && (
+        <button
+          onClick={() => onShowIngredients(item)}
+          className="p-1.5 text-[#6B6560] hover:text-[#FF6B35] transition-colors flex-shrink-0"
+          aria-label="Ver ingredientes"
+        >
+          <Info className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Price */}
+      <div className="flex-shrink-0 text-right min-w-[70px]">
+        {item.pricePersonal ? (
+          <div className="text-sm">
+            <span className="text-white font-bold">${item.pricePersonal.toFixed(2)}</span>
+            <span className="text-[#6B6560] mx-1">/</span>
+            <span className="text-white font-bold">${price.toFixed(2)}</span>
+          </div>
+        ) : (
+          <span className="text-white font-bold">${price.toFixed(2)}</span>
+        )}
+      </div>
+
+      {/* Add Button */}
+      <button
+        onClick={handleAdd}
+        className={`flex-shrink-0 min-h-[44px] min-w-[44px] w-11 h-11 flex items-center justify-center transition-all ${
+          added
+            ? "bg-[#4CAF50] text-white"
+            : "bg-[#3D3936] text-[#FFF8F0] hover:bg-[#FF6B35] active:scale-95"
+        } focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35]`}
+        aria-label={`${t(translations.menu.addToCart)} ${item.name}`}
+      >
+        {added ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
       </button>
     </div>
   );
@@ -591,6 +687,10 @@ export default function MenuPage() {
             const category = CATEGORIES[categoryId as keyof typeof CATEGORIES];
             const categoryInfo = categories.find((c) => c.id === categoryId);
 
+            // Split items: those with images vs those without
+            const withImages = items.filter((item) => item.image);
+            const withoutImages = items.filter((item) => !item.image);
+
             return (
               <div key={categoryId} className="mb-16">
                 {activeCategory === "all" && (
@@ -605,26 +705,53 @@ export default function MenuPage() {
                   </div>
                 )}
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                >
-                  {items.map((item, i) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                    >
-                      <MenuItemCard
-                        item={item}
-                        locationId={selectedLocation}
-                        onShowIngredients={setSelectedItem}
-                      />
-                    </motion.div>
-                  ))}
-                </motion.div>
+                {/* Image Cards Grid */}
+                {withImages.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                  >
+                    {withImages.map((item, i) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                      >
+                        <MenuImageCard
+                          item={item}
+                          locationId={selectedLocation}
+                          onShowIngredients={setSelectedItem}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+
+                {/* List Items — no images */}
+                {withoutImages.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className={`bg-[#252320] border border-[#3D3936] p-4 sm:p-6 ${withImages.length > 0 ? "mt-8" : ""}`}
+                  >
+                    {withoutImages.map((item, i) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.02 }}
+                      >
+                        <MenuListItem
+                          item={item}
+                          locationId={selectedLocation}
+                          onShowIngredients={setSelectedItem}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
               </div>
             );
           })}
