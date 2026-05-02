@@ -3,11 +3,7 @@
 import Image from "next/image";
 import { useI18n, translations } from "@/lib/i18n";
 import {
-  Heart,
   Flame,
-  Leaf,
-  Users,
-  Sparkles,
   ArrowRight,
   Quote,
 } from "lucide-react";
@@ -15,75 +11,12 @@ import Link from "next/link";
 import {
   AnimatedSection,
   AnimatedOnView,
-  AnimatedValue,
-  AnimatedTeamMember,
   AnimatedMilestone,
   AnimatedCTA,
 } from "@/components/about/AnimatedSection";
 
 export default function AboutPage() {
   const { t, locale } = useI18n();
-
-  const values = [
-    {
-      icon: <Heart className="w-8 h-8 text-[#FF6B35]" />,
-      title: t(translations.about.madeWithLove),
-      description: t(translations.about.madeWithLoveDesc),
-    },
-    {
-      icon: <Leaf className="w-8 h-8 text-[#FF6B35]" />,
-      title: t(translations.about.freshLocal),
-      description: t(translations.about.freshLocalDesc),
-    },
-    {
-      icon: <Users className="w-8 h-8 text-[#FF6B35]" />,
-      title: t(translations.about.communityFirst),
-      description: t(translations.about.communityFirstDesc),
-    },
-    {
-      icon: <Sparkles className="w-8 h-8 text-[#FF6B35]" />,
-      title: t(translations.about.goodVibes),
-      description: t(translations.about.goodVibesDesc),
-    },
-  ];
-
-  const team = [
-    {
-      name:
-        locale === "es" ? "Fuego y Tradición" : "Fire & Tradition",
-      role:
-        locale === "es" ? "Nuestra Cocina" : "Our Kitchen",
-      image: "/images/menu/pizzas-hero.jpg",
-      bio:
-        locale === "es"
-          ? "Horno de leña, recetas que respetan el ingrediente. Pizzas artesanales con alma italiana y sabor salvadoreño."
-          : "Wood-fired oven, recipes that respect the ingredient. Artisan pizzas with Italian soul and Salvadoran flavor.",
-    },
-    {
-      name:
-        locale === "es"
-          ? "Hospitalidad Salvadoreña"
-          : "Salvadoran Hospitality",
-      role:
-        locale === "es" ? "Nuestra Gente" : "Our People",
-      image: "/images/locations/santa-ana-interior.jpg",
-      bio:
-        locale === "es"
-          ? "14 años abriendo puertas. Cada ubicación cuenta su propia historia y recibe con los brazos abiertos."
-          : "14 years opening doors. Each location tells its own story and welcomes with open arms.",
-    },
-    {
-      name:
-        locale === "es" ? "Vibras Únicas" : "Unique Vibes",
-      role:
-        locale === "es" ? "Nuestras Noches" : "Our Nights",
-      image: "/images/events/simmermania-marzo.jpg",
-      bio:
-        locale === "es"
-          ? "Simmer Manía. Bandas en vivo, cine, poesía, salsa. El escenario donde la ciudad se encuentra."
-          : "Simmer Mania. Live bands, cinema, poetry, salsa. The stage where the city comes together.",
-    },
-  ];
 
   const milestones = [
     {
@@ -136,12 +69,11 @@ export default function AboutPage() {
             priority
           />
           <div className="absolute inset-0 bg-[#2D2A26]/90" />
-          <div className="absolute inset-0 bg-oven-warmth" />
         </div>
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedSection className="text-center max-w-3xl mx-auto">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.about.ourStory)}
             </p>
             <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
@@ -155,11 +87,11 @@ export default function AboutPage() {
       </section>
 
       {/* Story */}
-      <section className="py-24">
+      <section className="py-28 md:py-32">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <AnimatedOnView direction="left">
-              <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+              <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
                 {t(translations.about.since2013)}
               </p>
               <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6">
@@ -244,7 +176,7 @@ export default function AboutPage() {
       </section>
 
       {/* Quote */}
-      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
+      <section className="py-28 md:py-32 bg-[#252320] border-y border-[#3D3936]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <Quote className="w-12 h-12 text-[#FF6B35] mx-auto mb-6" />
           <blockquote className="font-display text-2xl md:text-3xl text-[#FFF8F0] italic mb-6">
@@ -252,7 +184,7 @@ export default function AboutPage() {
               ? "\u201CCreemos que la mejor gastronomia no solo alimenta: conecta, emociona y permanece. Por eso cuidamos cada detalle, para que cada visita se sienta familiar.\u201D"
               : "\u201CWe believe the best gastronomy doesn\u2019t just nourish: it connects, moves and endures. That\u2019s why we care for every detail, so every visit feels like family.\u201D"}
           </blockquote>
-          <cite className="text-[#6B6560] font-handwritten text-xl">
+          <cite className="text-[#6B6560] font-display italic text-lg">
             {locale === "es"
               ? "- Simmer Down, 14 años de historia"
               : "- Simmer Down, 14 years of history"}
@@ -260,64 +192,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              {t(translations.about.whatWeBelieve)}
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              {t(translations.about.ourValues)}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            {values.map((value, i) => (
-              <AnimatedValue
-                key={value.title}
-                icon={value.icon}
-                title={value.title}
-                description={value.description}
-                index={i}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team */}
-      <section className="py-24 bg-[#252320] border-y border-[#3D3936]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              {t(translations.about.theTeam)}
-            </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
-              {t(translations.about.meetFamily)}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, i) => (
-              <AnimatedTeamMember
-                key={member.name}
-                name={member.name}
-                role={member.role}
-                bio={member.bio}
-                imageUrl={member.image}
-                index={i}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Timeline */}
-      <section className="py-24">
+      <section className="py-28 md:py-32">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.about.ourPath)}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0]">
@@ -345,27 +224,26 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-[#FF6B35]">
+      <section className="py-28 md:py-32 bg-[#252320] border-t border-[#3D3936]/30">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <AnimatedCTA>
-            <Flame className="w-12 h-12 text-white mx-auto mb-6" />
-            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
+            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
               {t(translations.about.bePartOfStory)}
             </h2>
-            <p className="text-xl text-white/90 mb-10">
+            <p className="text-xl text-[#B8B0A8] mb-10">
               {t(translations.about.visitToday)}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/menu"
-                className="flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
+                className="flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
               >
                 {t(translations.nav.orderNow)}
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
                 href="/locations"
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
+                className="flex items-center gap-2 border border-[#3D3936] hover:border-[#6B6560] text-[#FFF8F0] px-8 py-4 font-semibold transition-colors min-h-[56px]"
               >
                 {t(translations.about.findLocation)}
               </Link>

@@ -272,7 +272,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 bg-[#FF6B35]/10 border border-[#FF6B35]/30 text-[#FF6B35] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
+          className="inline-flex items-center gap-2 bg-[#252320] border border-[#3D3936] text-[#C9A84C] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
         >
           <Flame className="w-4 h-4" />
           Programa de Lealtad
@@ -947,27 +947,27 @@ function PerksSection() {
 // ─────────────────────────────────────────────
 function CallToAction({ signedIn }: { signedIn: boolean }) {
   return (
-    <section className="py-20 md:py-28 px-6 bg-gradient-to-br from-[#FF6B35] to-[#E55A2B]">
+    <section className="py-28 md:py-32 px-6 bg-[#252320] border-t border-[#3D3936]/30">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <Flame className="w-12 h-12 text-white mx-auto mb-6" />
-          <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
+          <Flame className="w-12 h-12 text-[#C9A84C] mx-auto mb-6" />
+          <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
             {signedIn
               ? "Tu próxima noche ya está generando puntos"
               : "La pizza también premia la lealtad"}
           </h2>
-          <p className="text-white/90 text-xl mb-10">
+          <p className="text-[#B8B0A8] text-xl mb-10">
             {signedIn
               ? "Pedí, canjeá, volvé. Repetí."
               : "30 segundos para crear tu cuenta. El resto de tu vida para canjear."}
           </p>
           <Link
             href={signedIn ? "/menu" : "/auth/signup?loyalty=1"}
-            className="inline-flex items-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
+            className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
           >
             {signedIn ? "Ir al menú" : "Unirme gratis"}
             <ArrowRight className="w-5 h-5" />

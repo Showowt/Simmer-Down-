@@ -2,744 +2,336 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, MapPin, Clock, Star, ChefHat, Flame, Music, Users, Phone, Sparkles, Shuffle, ListChecks, HelpCircle } from 'lucide-react'
-import dynamic from 'next/dynamic'
-import { useAnimaStore } from '@/store/anima'
-import { useEffect, useState } from 'react'
+import { ArrowRight } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
 
-// Dynamic imports for client-only components
-const FireParticles = dynamic(() => import('@/components/FireParticles'), { ssr: false })
-
-// Location data with personalities and proper images
+// Location data — minimal
 const locations = [
   {
     name: 'Santa Ana',
     vibe: 'El Origen',
-    description: 'Frente a la catedral, donde todo comenzó hace 14 años',
-    address: '1ra Calle Pte y Callejuela Sur Catedral',
-    phone: '+503 2445-5999',
-    hours: 'Dom-Jue 11am-9pm | Vie-Sáb 11am-10pm',
+    description: { es: 'Frente a la catedral, donde todo comenzo.', en: 'Facing the cathedral, where it all began.' },
     image: '/images/locations/santa-ana-cover.jpg',
-    isOpen: true,
   },
   {
-    name: 'Coatepeque',
+    name: 'Lago de Coatepeque',
     vibe: 'Vista al Lago',
-    description: 'Pizza con la mejor vista del volcán y el lago',
-    address: 'Calle Principal al Lago #119',
-    phone: '+503 6831-6907',
-    hours: 'Dom-Jue 11am-8pm | Vie-Sáb 11am-9pm',
+    description: { es: 'Pizza con la mejor vista del volcan.', en: 'Pizza with the best volcano view.' },
     image: '/images/locations/coatepeque-cover.jpg',
-    isOpen: true,
   },
   {
     name: 'San Benito',
-    vibe: 'Urbano y Vibrante',
-    description: 'El corazón cosmopolita de San Salvador',
-    address: '#548, San Benito, San Salvador',
-    phone: '+503 7487-7792',
-    hours: 'Lun-Dom 11am-11pm',
+    vibe: 'San Salvador',
+    description: { es: 'El corazon cosmopolita de la ciudad.', en: 'The cosmopolitan heart of the city.' },
     image: '/images/locations/san-benito-cover.jpg',
-    isOpen: true,
-  },
-  {
-    name: 'Juayúa',
-    vibe: 'Simmer Garden',
-    description: 'Jardín secreto en la Ruta de las Flores',
-    address: 'Kilómetro 91.5, San José La Majada',
-    phone: '+503 6990-4674',
-    hours: 'Vie-Dom 11am-8pm',
-    image: '/images/locations/simmer-garden-hero.jpg',
-    isOpen: false,
   },
   {
     name: 'Surf City',
     vibe: 'Frente al Mar',
-    description: 'Atardecer, surf, pizza y libertad',
-    address: 'Hotel Casa Santa Emilia, Conchalio 2, La Libertad',
-    phone: '+503 7576-4655',
-    hours: 'Mié-Dom 12pm-8pm',
+    description: { es: 'Atardecer, surf y libertad.', en: 'Sunsets, surf and freedom.' },
     image: '/images/locations/surf-city-exterior.jpg',
-    isOpen: true,
   },
 ]
 
-// Signature pizzas with proper images
-const signaturePizzas = [
+// Signature dishes — let the photography speak
+const signatureDishes = [
   {
     name: 'La Memoravel',
-    description: 'Fajitas de res y pollo, cebolla marinada, elotito amarillo, cubierta en salsa BBQ, con un toque de ajonjolí',
-    price: '$17.99',
+    description: { es: 'Fajitas de res y pollo, cebolla marinada, salsa BBQ, ajonjoli', en: 'Beef & chicken fajitas, marinated onion, BBQ sauce, sesame' },
     image: '/images/menu/pizza-memoravel.jpg',
-    badge: 'Signature',
-    tags: ['spicy'],
   },
   {
-    name: 'La Maradona',
-    description: '¡El tributo a una leyenda! Chorizo argentino nivel D10S, pimientos verdes, cebolla y nuestro especial chimichurri',
-    price: '$14.99',
-    image: '/images/menu/pizza-maradona.jpg',
-    badge: 'Chef Choice',
-    tags: ['spicy'],
+    name: 'Terramar al Maitre',
+    description: { es: 'Lomito con camarones jumbo, mantequilla maitre, vegetales de temporada', en: 'Tenderloin with jumbo shrimp, maitre butter, seasonal vegetables' },
+    image: '/images/menu/pro-IMG4591.jpg',
   },
   {
-    name: 'Margherita',
-    description: 'Tomates cherrys marinados y albahaca fresca. La clásica italiana.',
-    price: '$14.99',
-    image: '/images/menu/product-06.jpg',
-    badge: 'Clásica',
-    tags: ['vegetarian'],
+    name: 'Fettuccine Calamardina',
+    description: { es: 'Calamares, camarones jumbo, almejas, mejillones en salsa marinera', en: 'Calamari, jumbo shrimp, clams, mussels in marinara sauce' },
+    image: '/images/menu/food-IMG20045.jpg',
   },
 ]
 
-// Live activity events for ticker
-const liveActivities = [
-  { location: 'Santa Ana', item: 'La Maradona', time: 'hace 2 min', type: 'order' },
-  { location: 'San Benito', item: 'Terramar al Maître', time: 'hace 5 min', type: 'order' },
-  { location: 'Coatepeque', item: 'Mariscada', time: 'hace 8 min', type: 'order' },
-  { location: 'Surf City', item: 'Aguachile de Camarón', time: 'hace 12 min', type: 'order' },
-  { location: 'Santa Ana', item: 'María G.', time: 'hace 15 min', type: 'review' },
-]
-
-// Live Activity Ticker Component
-function LiveActivityTicker() {
-  return (
-    <div className="bg-[#252320] border-y border-[#3D3936] py-3 overflow-hidden">
-      <div className="flex animate-ticker">
-        {[...liveActivities, ...liveActivities].map((activity, i) => (
-          <div key={i} className="flex items-center gap-3 px-8 whitespace-nowrap">
-            <span className="live-dot" />
-            {activity.type === 'order' ? (
-              <>
-                <span className="text-[#FFF8F0] font-medium">{activity.location}</span>
-                <span className="text-[#B8B0A8]">ordenó</span>
-                <span className="text-[#FF6B35] font-semibold">{activity.item}</span>
-              </>
-            ) : (
-              <>
-                <span className="text-[#FFF8F0] font-medium">{activity.item}</span>
-                <span className="text-[#B8B0A8]">dejó reseña</span>
-                <span className="text-[#FF6B35]">★★★★★</span>
-              </>
-            )}
-            <span className="text-[#6B6560] text-sm">{activity.time}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+const fadeUp = {
+  initial: { opacity: 0, y: 30 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] },
 }
 
-// Personalized Section Component with all variants
-function PersonalizedSection() {
-  const { customerName, visitCount, memory, getTimeGreeting, loyaltyTier, loyaltyPoints, setIsOpen } = useAnimaStore()
-  const { t } = useI18n()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
-  const isVIP = visitCount > 10 || memory.totalOrders > 5 || loyaltyTier === 'gold' || loyaltyTier === 'platinum'
-  const isReturning = visitCount > 1 && visitCount <= 10
-  const isLapsed = memory.lastVisit && new Date().getTime() - new Date(memory.lastVisit).getTime() > 30 * 24 * 60 * 60 * 1000 // 30 days
-  const isAnonymous = visitCount <= 1 && !customerName
-
-  // VIP Experience - Círculo Interno
-  if (isVIP && customerName) {
-    return (
-      <section className="py-12 bg-[#1F1D1A]">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-[#252320] to-[#2D2A26] border border-[#FF6B35]/30 p-8"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-3 h-3 bg-[#FF6B35] animate-pulse" />
-              <span className="text-[#FF6B35] font-handwritten text-2xl">{t(translations.personalization.innerCircle)}</span>
-            </div>
-            <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
-              {getTimeGreeting()}, {customerName}
-            </h2>
-            <p className="text-[#B8B0A8] mb-6">
-              {memory.totalOrders} {t(translations.personalization.ordersAndCounting)}
-              {loyaltyPoints > 100 && ` ${loyaltyPoints} ${t(translations.personalization.pointsAvailable)}`}
-            </p>
-            <div className="flex flex-wrap gap-4">
-              {memory.favoriteItems.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[#6B6560] text-sm">{t(translations.personalization.yourFavorites)}</span>
-                  {memory.favoriteItems.slice(0, 3).map((item) => (
-                    <span key={item} className="bg-[#3D3936] text-[#FFF8F0] px-3 py-1 text-sm">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <Link
-                href="/menu"
-                className="ml-auto bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2"
-              >
-                {t(translations.personalization.orderUsual)}
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    )
-  }
-
-  // Lapsed Customer - Te Extrañamos
-  if (isLapsed && customerName) {
-    return (
-      <section className="py-12 bg-[#1F1D1A]">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#252320] border border-[#3D3936] p-8 text-center"
-          >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">{t(translations.personalization.weMessYou)}</p>
-            <h2 className="font-display text-3xl text-[#FFF8F0] mb-4">
-              ¡{customerName}, {t(translations.personalization.longTime)}
-            </h2>
-            <p className="text-[#B8B0A8] mb-6 max-w-lg mx-auto">
-              {t(translations.personalization.lapsedDesc)}
-            </p>
-            <Link
-              href="/menu"
-              className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold transition-colors"
-            >
-              {t(translations.personalization.seeWhatsNew)}
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-    )
-  }
-
-  // Returning Customer - Tu Rincón
-  if (isReturning) {
-    return (
-      <section className="py-12 bg-[#1F1D1A]">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-2">{t(translations.personalization.yourCorner)}</p>
-            <h2 className="font-display text-3xl text-[#FFF8F0] mb-2">
-              {getTimeGreeting()}. {customerName ? `${customerName}, ${t(translations.personalization.niceToSeeYou)}` : t(translations.personalization.niceAgain)}
-            </h2>
-            <p className="text-[#B8B0A8]">
-              {t(translations.personalization.visit)} #{visitCount}. {memory.preferredLocation && `${t(translations.personalization.favLocation)} ${memory.preferredLocation}.`}
-            </p>
-          </motion.div>
-        </div>
-      </section>
-    )
-  }
-
-  // Anonymous - Meet ANIMA
-  if (isAnonymous) {
-    return (
-      <section className="py-12 bg-[#1F1D1A]">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-[#252320] border border-[#3D3936] p-8 flex flex-col md:flex-row items-center gap-8"
-          >
-            <div className="w-16 h-16 bg-[#FF6B35] flex items-center justify-center flex-shrink-0">
-              <Flame className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <p className="font-handwritten text-xl text-[#FF6B35] mb-1">{t(translations.personalization.meetAnima)}</p>
-              <h3 className="font-display text-2xl text-[#FFF8F0] mb-2">{t(translations.personalization.animaGuide)}</h3>
-              <p className="text-[#B8B0A8]">
-                {t(translations.personalization.animaDesc)}
-              </p>
-            </div>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              {t(translations.personalization.letsChat)}
-              <Sparkles className="w-4 h-4" />
-            </button>
-          </motion.div>
-        </div>
-      </section>
-    )
-  }
-
-  return null
-}
-
-// Menu Discovery with ANIMA Interaction Buttons
-function MenuDiscoveryTeaser() {
-  const { setIsOpen } = useAnimaStore()
-  const { t } = useI18n()
-
-  const handleAnimaAction = (action: string) => {
-    setIsOpen(true)
-    // ANIMA will pick up the context from the action
-  }
-
-  return (
-    <section className="py-24 md:py-32 bg-[#2D2A26]">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-            {t(translations.home.fromOven)}
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight mb-6">
-            {t(translations.home.specialties)}
-          </h2>
-
-          {/* ANIMA Interaction Buttons */}
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            <button
-              onClick={() => handleAnimaAction('surprise')}
-              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
-            >
-              <Shuffle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">{t(translations.home.surpriseMe)}</span>
-            </button>
-            <Link
-              href="/menu"
-              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
-            >
-              <ListChecks className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">{t(translations.home.iKnow)}</span>
-            </Link>
-            <button
-              onClick={() => handleAnimaAction('help')}
-              className="group flex items-center gap-3 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-6 py-4 transition-all"
-            >
-              <HelpCircle className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-              <span className="text-[#FFF8F0] font-medium">{t(translations.home.helpChoose)}</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {signaturePizzas.map((pizza, i) => (
-            <motion.div
-              key={pizza.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-              className="group"
-            >
-              <div className="aspect-square overflow-hidden mb-6 relative bg-[#252320]">
-                <img
-                  src={pizza.image}
-                  alt={pizza.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {pizza.badge && (
-                  <span className="absolute top-4 left-4 bg-[#FF6B35] text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
-                    {pizza.badge}
-                  </span>
-                )}
-                {pizza.tags?.includes('vegetarian') && (
-                  <span className="absolute top-4 right-4 text-xl" title="Vegetariana">
-                    🌱
-                  </span>
-                )}
-                {pizza.tags?.includes('spicy') && (
-                  <span className="absolute top-4 right-4 text-xl" title="Picante">
-                    🌶️
-                  </span>
-                )}
-              </div>
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-display text-xl text-[#FFF8F0]">{pizza.name}</h3>
-                <span className="text-white text-xl font-bold">{pizza.price}</span>
-              </div>
-              <p className="text-[#B8B0A8]">{pizza.description}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        <div className="text-center mt-16">
-          <Link
-            href="/menu"
-            className="group inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
-          >
-            {t(translations.home.viewFullMenu)}
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  )
+const stagger = {
+  animate: { transition: { staggerChildren: 0.15 } },
 }
 
 export default function Home() {
-  const { t } = useI18n()
-  const [pizzaCounter, setPizzaCounter] = useState(47832)
-
-  useEffect(() => {
-    // Simulate live pizza counter
-    const interval = setInterval(() => {
-      setPizzaCounter((prev) => prev + Math.floor(Math.random() * 3))
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+  const { t, locale } = useI18n()
 
   return (
-    <div className="min-h-screen bg-[#2D2A26]">
-      {/* Hero - The Kitchen Window */}
-      <section className="relative min-h-[100vh] flex items-center justify-center overflow-hidden">
-        {/* Background with warm overlay */}
+    <div className="min-h-screen bg-[#1F1D1A]">
+
+      {/* ─── HERO — Photography-led, minimal text ─── */}
+      <section className="relative min-h-[100vh] flex items-end overflow-hidden">
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             src="/images/heroes/homepage-pizzas.jpg"
-            alt="Trío de pizzas artesanales Simmer Down — La Maradona, Margherita, Prosciutto"
+            alt="Simmer Down — artisan wood-fired pizzas"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-[#2D2A26]/80" />
-          <div className="absolute inset-0 bg-oven-warmth" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A] via-[#1F1D1A]/60 to-transparent" />
         </div>
 
-        {/* Fire Particles */}
-        <FireParticles />
-
-        {/* Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-          {/* Live Counter Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-3 bg-[#252320]/80 border border-[#3D3936] px-5 py-3 mb-8"
+        {/* Content — bottom-aligned, restrained */}
+        <motion.div
+          variants={stagger}
+          initial="initial"
+          animate="animate"
+          className="relative z-10 max-w-6xl mx-auto px-6 pb-20 md:pb-28 w-full"
+        >
+          <motion.p
+            variants={fadeUp}
+            className="text-[#B8B0A8] text-sm uppercase tracking-[0.2em] mb-4"
           >
-            <Flame className="w-5 h-5 text-[#FF6B35] animate-oven-pulse" />
-            <span className="text-[#FFF8F0] font-medium">
-              <span className="text-[#FF6B35] font-bold">{pizzaCounter.toLocaleString()}</span> {t(translations.home.pizzasServed)}
-            </span>
-            <span className="live-dot" />
-          </motion.div>
+            Est. 2013 &mdash; El Salvador
+          </motion.p>
 
-          {/* Main Title */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-display text-5xl md:text-7xl lg:text-8xl text-[#FFF8F0] tracking-tight mb-6"
+            variants={fadeUp}
+            className="font-display text-5xl md:text-7xl lg:text-8xl text-[#FFF8F0] tracking-tight leading-[0.95] mb-6"
           >
             Simmer Down
           </motion.h1>
 
-          {/* Tagline */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-[#FFF8F0] mb-3 max-w-2xl mx-auto"
-          >
-            {t(translations.home.tagline)}
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="font-handwritten text-2xl text-[#FF6B35] mb-4"
-          >
-            {t(translations.home.years)}
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base text-[#B8B0A8] mb-10 max-w-xl mx-auto italic"
+            variants={fadeUp}
+            className="text-lg md:text-xl text-[#B8B0A8] max-w-lg mb-10 leading-relaxed"
           >
             {t(translations.home.subtitle)}
           </motion.p>
 
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
+          <motion.div variants={fadeUp} className="flex gap-4">
+            <Link
+              href="/reservations"
+              className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] px-7 py-4 text-sm uppercase tracking-[0.1em] font-semibold transition-all hover:bg-white min-h-[52px]"
+            >
+              {t(translations.nav.reservations)}
+            </Link>
             <Link
               href="/menu"
-              className="group inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 text-lg font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
+              className="inline-flex items-center gap-2 border border-[#FFF8F0]/30 text-[#FFF8F0] px-7 py-4 text-sm uppercase tracking-[0.1em] font-semibold transition-all hover:border-[#FFF8F0]/60 min-h-[52px]"
             >
-              {t(translations.nav.orderNow)}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/locations"
-              className="inline-flex items-center justify-center gap-2 bg-[#252320]/80 hover:bg-[#3D3936] text-[#FFF8F0] px-8 py-4 text-lg font-semibold transition-all border border-[#3D3936] min-h-[56px]"
-            >
-              <MapPin className="w-5 h-5" />
-              {t(translations.home.findLocation)}
+              {t(translations.nav.menu)}
             </Link>
           </motion.div>
-
-          {/* Trust Indicators */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-wrap justify-center gap-6 mt-12 text-sm text-[#B8B0A8]"
-          >
-            <div className="flex items-center gap-2">
-              <ChefHat className="w-4 h-4 text-[#FF6B35]" />
-              <span>{t(translations.home.woodFired)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Music className="w-4 h-4 text-[#FF6B35]" />
-              <span>{t(translations.home.liveMusic)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-[#FF6B35] fill-[#FF6B35]" />
-              <span>4.9 {t(translations.home.reviews)}</span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="w-px h-16 bg-[#FFF8F0]/30"
-          />
-        </div>
+        </motion.div>
       </section>
 
-      {/* Live Activity Ticker */}
-      <LiveActivityTicker />
-
-      {/* Personalized Section */}
-      <PersonalizedSection />
-
-      {/* Menu Discovery Teaser with ANIMA Buttons */}
-      <MenuDiscoveryTeaser />
-
-      {/* Locations Pulse */}
-      <section className="py-24 md:py-32 bg-[#252320]">
+      {/* ─── SIGNATURE DISHES — Photography grid, no badges ─── */}
+      <section className="py-28 md:py-36 bg-[#1F1D1A]">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-              {t(translations.home.uniqueDestinations)}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-16"
+          >
+            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
+              {t(translations.home.fromOven)}
             </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight">
-              {t(translations.home.ourLocations)}
+            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] tracking-tight">
+              {t(translations.home.specialties)}
             </h2>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {locations.slice(0, 3).map((location, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {signatureDishes.map((dish, i) => (
               <motion.div
-                key={location.name}
+                key={dish.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="group relative overflow-hidden bg-[#2D2A26] border border-[#3D3936] hover:border-[#FF6B35]/50 transition-all"
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="group"
               >
-                <div className="aspect-[4/3]">
-                  <img
-                    src={location.image}
-                    alt={`Simmer Down ${location.name} - ${location.vibe}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2D2A26] via-[#2D2A26]/50 to-transparent" />
-                </div>
-
-                {/* Status Badge */}
-                <div className="absolute top-4 left-4">
-                  {location.isOpen ? (
-                    <span className="inline-flex items-center gap-2 bg-[#4CAF50]/90 text-white text-sm font-semibold px-3 py-1">
-                      <span className="w-2 h-2 bg-white animate-pulse" />
-                      {t(translations.home.open)}
-                    </span>
-                  ) : (
-                    <span className="bg-[#6B6560] text-white text-sm font-semibold px-3 py-1">
-                      {t(translations.home.closed)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <p className="font-handwritten text-lg text-[#FF6B35] mb-1">{location.vibe}</p>
-                  <h3 className="font-display text-2xl text-[#FFF8F0] mb-2">{location.name}</h3>
-                  <p className="text-[#B8B0A8] text-sm mb-4">{location.description}</p>
-
-                  <div className="flex gap-3">
-                    <a
-                      href={`tel:${location.phone.replace(/\s/g, '')}`}
-                      className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-3 text-center font-semibold transition-colors min-h-[48px] flex items-center justify-center gap-2"
-                    >
-                      <Phone className="w-4 h-4" />
-                      {t(translations.home.call)}
-                    </a>
-                    <Link
-                      href="/menu"
-                      className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 text-center font-semibold transition-colors min-h-[48px] flex items-center justify-center"
-                    >
-                      {t(translations.nav.order)}
-                    </Link>
+                <Link href="/menu" className="block">
+                  <div className="aspect-[4/5] overflow-hidden mb-5 relative">
+                    <img
+                      src={dish.image}
+                      alt={dish.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
                   </div>
-                </div>
+                  <h3 className="font-display text-lg text-[#FFF8F0] mb-1 group-hover:text-[#C9A84C] transition-colors">
+                    {dish.name}
+                  </h3>
+                  <p className="text-sm text-[#6B6560] leading-relaxed">
+                    {dish.description[locale]}
+                  </p>
+                </Link>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mt-14"
+          >
             <Link
-              href="/locations"
-              className="inline-flex items-center gap-2 text-[#FF6B35] hover:text-[#FF8A5C] font-semibold transition-colors"
+              href="/menu"
+              className="inline-flex items-center gap-3 text-[#FFF8F0] text-sm uppercase tracking-[0.15em] font-medium hover:text-[#C9A84C] transition-colors group"
             >
-              {t(translations.home.viewAll)}
-              <ArrowRight className="w-4 h-4" />
+              {t(translations.home.viewFullMenu)}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* The Story Teaser */}
-      <section className="py-24 md:py-32 bg-[#2D2A26]">
+      {/* ─── STORY — One image, one paragraph ─── */}
+      <section className="py-28 md:py-36 bg-[#252320]">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
             >
-              <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+              <img
+                src="/images/menu/terramar-maitre.jpg"
+                alt="Terramar al Maitre — surf & turf"
+                className="w-full aspect-[4/5] object-cover"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
                 {t(translations.home.ourStory)}
               </p>
-              <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6 tracking-tight">
+              <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] tracking-tight mb-8">
                 {t(translations.home.moreThanRestaurant)}
               </h2>
-              <div className="space-y-4 text-[#B8B0A8] text-lg leading-relaxed">
+              <div className="space-y-5 text-[#B8B0A8] leading-relaxed">
                 <p>
                   {t(translations.home.story1)} <strong className="text-[#FFF8F0]">Santa Ana</strong>{t(translations.home.story1b)}
                 </p>
                 <p>
                   {t(translations.home.story2)} <strong className="text-[#FFF8F0]">Lago de Coatepeque</strong> {t(translations.home.story2b)} <strong className="text-[#FFF8F0]">Surf City</strong>{t(translations.home.story2c)}
                 </p>
-                <p className="italic text-[#FFF8F0]">
+                <p className="font-display italic text-[#FFF8F0] text-lg">
                   {t(translations.home.story3)}
                 </p>
               </div>
               <Link
                 href="/about"
-                className="inline-flex items-center gap-2 text-[#FF6B35] hover:text-[#FF8A5C] font-semibold mt-8 transition-colors"
+                className="inline-flex items-center gap-3 mt-10 text-[#FFF8F0] text-sm uppercase tracking-[0.15em] font-medium hover:text-[#C9A84C] transition-colors group"
               >
                 {t(translations.home.fullStory)}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <img
-                src="/images/menu/terramar-maitre.jpg"
-                alt="Terramar al Maître — camarones jumbo y lomito de res con mantequilla maître"
-                className="w-full aspect-square object-cover"
-              />
-              <div className="absolute inset-0 border border-[#FF6B35]/20" />
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Events Teaser */}
-      <section className="py-24 md:py-32 bg-[#252320]">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
-            {t(translations.home.uniqueExperiences)}
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6 tracking-tight">
-            {t(translations.home.moreThanPizza)}
-          </h2>
-          <p className="text-[#B8B0A8] text-lg max-w-2xl mx-auto mb-12">
-            {t(translations.home.moreThanPizzaDesc)}
-          </p>
+      {/* ─── LOCATIONS — Photography grid ─── */}
+      <section className="py-28 md:py-36 bg-[#1F1D1A]">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex items-end justify-between mb-16"
+          >
+            <div>
+              <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
+                {locale === 'es' ? '5 destinos' : '5 destinations'}
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] tracking-tight">
+                {t(translations.home.ourLocations)}
+              </h2>
+            </div>
+            <Link
+              href="/locations"
+              className="hidden md:inline-flex items-center gap-3 text-[#6B6560] text-sm uppercase tracking-[0.15em] font-medium hover:text-[#FFF8F0] transition-colors group"
+            >
+              {t(translations.home.viewAll)}
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {[
-              { icon: Music, title: t(translations.home.jazzNights), desc: t(translations.home.jazzDesc) },
-              { icon: ChefHat, title: t(translations.home.pizzaWorkshops), desc: t(translations.home.workshopsDesc) },
-              { icon: Users, title: t(translations.home.privateEvents), desc: t(translations.home.privateEventsDesc) },
-            ].map((item, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {locations.map((location, i) => (
               <motion.div
-                key={item.title}
+                key={location.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-[#2D2A26] border border-[#3D3936] p-8 hover:border-[#FF6B35]/50 transition-colors"
+                transition={{ delay: i * 0.08, duration: 0.6 }}
               >
-                <item.icon className="w-10 h-10 text-[#FF6B35] mx-auto mb-4" />
-                <h3 className="font-display text-xl text-[#FFF8F0] mb-2">{item.title}</h3>
-                <p className="text-[#B8B0A8]">{item.desc}</p>
+                <Link href="/locations" className="block group">
+                  <div className="aspect-[3/4] overflow-hidden mb-4 relative">
+                    <img
+                      src={location.image}
+                      alt={`Simmer Down ${location.name}`}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A]/80 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4">
+                      <p className="text-[#FFF8F0] font-display text-lg">{location.name}</p>
+                      <p className="text-[#B8B0A8] text-xs uppercase tracking-wider">{location.vibe}</p>
+                    </div>
+                  </div>
+                </Link>
               </motion.div>
             ))}
           </div>
 
           <Link
-            href="/events"
-            className="inline-flex items-center gap-2 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] px-8 py-4 font-semibold transition-all min-h-[56px]"
+            href="/locations"
+            className="md:hidden inline-flex items-center gap-3 mt-10 text-[#6B6560] text-sm uppercase tracking-[0.15em] font-medium hover:text-[#FFF8F0] transition-colors group"
           >
-            {t(translations.home.viewAllEvents)}
-            <ArrowRight className="w-5 h-5" />
+            {t(translations.home.viewAll)}
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </section>
 
-      {/* CTA - Join SimmerLovers */}
-      <section className="py-24 md:py-32 bg-[#FF6B35]">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      {/* ─── RESERVE CTA — Understated, confident ─── */}
+      <section className="py-28 md:py-36 bg-[#252320] border-t border-[#3D3936]/30">
+        <div className="max-w-3xl mx-auto px-6 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <p className="font-handwritten text-2xl text-white/90 mb-4">
-              {t(translations.home.joinFamily)}
+            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
+              {locale === 'es' ? '5 ubicaciones en El Salvador' : '5 locations in El Salvador'}
             </p>
-            <h2 className="font-display text-4xl md:text-5xl text-white mb-6 tracking-tight">
-              SimmerLovers
+            <h2 className="font-display text-3xl md:text-5xl text-[#FFF8F0] tracking-tight mb-6">
+              {locale === 'es' ? 'Tu mesa te espera' : 'Your table awaits'}
             </h2>
-            <p className="text-xl text-white/90 mb-4">
-              {t(translations.home.loyaltyProgram)}
+            <p className="text-[#B8B0A8] text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+              {locale === 'es'
+                ? 'Reserva tu experiencia en cualquiera de nuestras ubicaciones.'
+                : 'Reserve your experience at any of our locations.'}
             </p>
-            <p className="text-lg text-white/70 mb-10">
-              {t(translations.home.earnRewards)}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/simmerlovers"
-                className="group inline-flex items-center justify-center gap-2 bg-[#2D2A26] hover:bg-[#1F1D1A] text-white px-10 py-5 text-xl font-semibold transition-all hover:translate-y-[-2px] min-h-[56px]"
-              >
-                {t(translations.home.joinFree)}
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+            <Link
+              href="/reservations"
+              className="inline-flex items-center gap-3 bg-[#FFF8F0] text-[#1F1D1A] px-8 py-4 text-sm uppercase tracking-[0.1em] font-semibold transition-all hover:bg-white min-h-[52px]"
+            >
+              {t(translations.nav.reservations)}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </motion.div>
         </div>
       </section>

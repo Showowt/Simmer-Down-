@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, Plus_Jakarta_Sans, Caveat } from 'next/font/google'
+import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
@@ -20,11 +20,7 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-const caveat = Caveat({
-  subsets: ['latin'],
-  variable: '--font-caveat',
-  display: 'swap',
-})
+// Caveat removed — using Playfair Display italic for accent text
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://simmerdownsv.com'),
@@ -86,7 +82,7 @@ export default function RootLayout({
       <head>
         <meta name="theme-color" content="#2D2A26" />
       </head>
-      <body className={`${playfair.variable} ${jakarta.variable} ${caveat.variable} font-body bg-[#2D2A26] text-[#FFF8F0] antialiased`}>
+      <body className={`${playfair.variable} ${jakarta.variable} font-body bg-[#2D2A26] text-[#FFF8F0] antialiased`}>
         <AppProviders>
           {/* Skip Link for Accessibility */}
           <a

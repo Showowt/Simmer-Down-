@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Check,
   Flame,
-  Sparkles,
   Search,
   X,
   Info,
@@ -384,7 +383,7 @@ function MenuListItem({
       {/* Left: Name + Description */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="font-display text-base text-[#FFF8F0] group-hover:text-[#FF6B35] transition-colors">
+          <h3 className="font-display text-base text-[#FFF8F0] group-hover:text-[#C9A84C] transition-colors">
             {item.name}
           </h3>
           {item.bestSeller && (
@@ -466,32 +465,26 @@ export default function MenuPage() {
     LocationId | undefined
   >(undefined);
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
-  const { setIsOpen } = useAnimaStore();
-
-  // Categories with icons (inside component for i18n access)
+  // Consolidated categories + dietary filters in one row (inside component for i18n access)
   const categories = [
-    { id: "all", name: t(translations.menu.all), icon: "🍽️" },
-    { id: "entradas", name: t(translations.menu.starters), icon: "🥟" },
-    { id: "ensaladas", name: t(translations.menu.salads), icon: "🥗" },
-    { id: "pastas", name: t(translations.menu.pastas), icon: "🍝" },
-    { id: "pizzas", name: t(translations.menu.pizzas), icon: "🍕" },
-    { id: "pizzas-especiales", name: t(translations.menu.specials), icon: "⭐" },
-    { id: "platos-fuertes", name: t(translations.menu.mainCourse), icon: "🥩" },
-    { id: "mariscos", name: t(translations.menu.seafood), icon: "🦐" },
-    { id: "bebidas-frias", name: t(translations.menu.coldDrinks), icon: "🍹" },
-    { id: "bebidas-calientes", name: t(translations.menu.hotDrinks), icon: "☕" },
-    { id: "postres", name: t(translations.menu.desserts), icon: "🍰" },
-    { id: "cervezas", name: t(translations.menu.beers), icon: "🍺" },
-    { id: "menu-infantil", name: t(translations.menu.kids), icon: "👶" },
-  ];
-
-  // Dietary filters (inside component for i18n access)
-  const dietaryFilters = [
-    { id: "all", name: t(translations.menu.all), icon: "🍽️" },
-    { id: "vegetarian", name: t(translations.menu.vegetarian), icon: "🌱" },
-    { id: "seafood", name: t(translations.menu.seafood), icon: "🦐" },
-    { id: "spicy", name: t(translations.menu.spicy), icon: "🌶️" },
-    { id: "bestseller", name: t(translations.menu.favorites), icon: "⭐" },
+    { id: "all", name: t(translations.menu.all), type: "category" as const },
+    { id: "entradas", name: t(translations.menu.starters), type: "category" as const },
+    { id: "ensaladas", name: t(translations.menu.salads), type: "category" as const },
+    { id: "pastas", name: t(translations.menu.pastas), type: "category" as const },
+    { id: "pizzas", name: t(translations.menu.pizzas), type: "category" as const },
+    { id: "pizzas-especiales", name: t(translations.menu.specials), type: "category" as const },
+    { id: "platos-fuertes", name: t(translations.menu.mainCourse), type: "category" as const },
+    { id: "mariscos", name: t(translations.menu.seafood), type: "category" as const },
+    { id: "bebidas-frias", name: t(translations.menu.coldDrinks), type: "category" as const },
+    { id: "bebidas-calientes", name: t(translations.menu.hotDrinks), type: "category" as const },
+    { id: "postres", name: t(translations.menu.desserts), type: "category" as const },
+    { id: "cervezas", name: t(translations.menu.beers), type: "category" as const },
+    { id: "menu-infantil", name: t(translations.menu.kids), type: "category" as const },
+    // Dietary filters appended
+    { id: "vegetarian", name: t(translations.menu.vegetarian), type: "dietary" as const },
+    { id: "seafood-filter", name: t(translations.menu.seafood), type: "dietary" as const },
+    { id: "spicy", name: t(translations.menu.spicy), type: "dietary" as const },
+    { id: "bestseller", name: t(translations.menu.favorites), type: "dietary" as const },
   ];
 
   // Filter menu items based on all criteria
@@ -553,21 +546,20 @@ export default function MenuPage() {
     <div className="min-h-screen bg-[#2D2A26] pt-20">
       {/* Header */}
       <section className="py-16 border-b border-[#3D3936] relative overflow-hidden">
-        <div className="absolute inset-0 bg-oven-warmth opacity-30" />
         <div className="max-w-6xl mx-auto px-6 relative">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-              <p className="font-handwritten text-xl text-[#FF6B35] mb-2">
+              <p className="text-sm uppercase tracking-[0.2em] text-[#6B6560] mb-2">
                 {t(translations.menu.fromOven)}
               </p>
-              <h1 className="font-display text-4xl md:text-5xl text-[#FFF8F0] tracking-tight mb-4">
+              <h1 className="font-display text-3xl md:text-4xl text-[#FFF8F0] tracking-tight mb-4">
                 {t(translations.menu.ourMenu)}
               </h1>
               <p className="text-lg text-[#B8B0A8] max-w-xl">
                 {t(translations.menu.menuDesc)}
                 {selectedLocation && (
                   <span className="block mt-1 text-[#FF6B35]">
-                    📍 {LOCATIONS[selectedLocation].name}
+                    {LOCATIONS[selectedLocation].name}
                   </span>
                 )}
               </p>
@@ -594,15 +586,6 @@ export default function MenuPage() {
                 </select>
                 <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
               </div>
-              <button
-                onClick={() => setIsOpen(true)}
-                className="flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#FF6B35] border border-[#3D3936] hover:border-[#FF6B35] px-5 py-3 transition-all group min-h-[48px]"
-              >
-                <Sparkles className="w-5 h-5 text-[#FF6B35] group-hover:text-white transition-colors" />
-                <span className="text-[#FFF8F0] font-medium">
-                  {t(translations.menu.helpChoose)}
-                </span>
-              </button>
             </div>
           </div>
         </div>
@@ -620,7 +603,7 @@ export default function MenuPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t(translations.menu.searchPlaceholder)}
-                className="w-full pl-12 pr-12 py-3 bg-[#252320] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                className="w-full pl-12 pr-12 py-3 bg-[#252320] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#4A4540] placeholder:text-sm placeholder:tracking-wide focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
                 aria-label={t(translations.menu.searchMenu)}
               />
               {searchQuery && (
@@ -635,40 +618,36 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* Dietary Filters */}
-          <div className="py-3 border-b border-[#3D3936] flex gap-2 overflow-x-auto scrollbar-hide">
-            {dietaryFilters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveDietary(filter.id)}
-                className={`px-4 py-2 min-h-[44px] text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${
-                  activeDietary === filter.id
-                    ? "bg-[#FF6B35] text-white"
-                    : "text-[#B8B0A8] hover:text-[#FFF8F0] bg-[#252320] hover:bg-[#3D3936]"
-                }`}
-              >
-                <span>{filter.icon}</span>
-                {filter.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Category Filters */}
+          {/* Consolidated Filters */}
           <div className="flex gap-2 py-4 overflow-x-auto scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 min-h-[44px] text-sm font-semibold whitespace-nowrap transition-colors flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
-                  activeCategory === cat.id
-                    ? "bg-[#FF6B35] text-white"
-                    : "text-[#B8B0A8] hover:text-[#FFF8F0] hover:bg-[#3D3936]"
-                }`}
-              >
-                <span>{cat.icon}</span>
-                {cat.name}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isDietary = cat.type === "dietary";
+              const isActive = isDietary
+                ? activeDietary === (cat.id === "seafood-filter" ? "seafood" : cat.id)
+                : activeCategory === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    if (isDietary) {
+                      const dietaryId = cat.id === "seafood-filter" ? "seafood" : cat.id;
+                      setActiveDietary(activeDietary === dietaryId ? "all" : dietaryId);
+                    } else {
+                      setActiveCategory(cat.id);
+                      setActiveDietary("all");
+                    }
+                  }}
+                  className={`px-4 py-2 min-h-[44px] text-sm font-medium whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
+                    isActive
+                      ? "bg-[#FF6B35] text-white"
+                      : "text-[#B8B0A8] hover:text-[#FFF8F0] hover:bg-[#3D3936]"
+                  } ${isDietary && !isActive ? "border border-[#3D3936]" : ""}`}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -677,7 +656,7 @@ export default function MenuPage() {
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-6">
           {/* Results count */}
-          <p className="text-[#6B6560] mb-8">
+          <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-8">
             {filteredItems.length} {t(translations.menu.productsFound)}
             {searchQuery && ` ${t(translations.menu.for)} "${searchQuery}"`}
           </p>
@@ -695,7 +674,7 @@ export default function MenuPage() {
               <div key={categoryId} className="mb-16">
                 {activeCategory === "all" && (
                   <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#3D3936]">
-                    <span className="text-2xl">{categoryInfo?.icon}</span>
+                    <span className="text-2xl">{categoryIcons[categoryId] || ""}</span>
                     <h2 className="font-display text-2xl text-[#FFF8F0]">
                       {category || categoryInfo?.name}
                     </h2>
@@ -791,27 +770,6 @@ export default function MenuPage() {
         )}
       </AnimatePresence>
 
-      {/* ANIMA Help Banner */}
-      <section className="py-12 bg-[#252320] border-t border-[#3D3936]">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Flame className="w-6 h-6 text-[#FF6B35]" />
-            <span className="font-handwritten text-xl text-[#FF6B35]">
-              {t(translations.menu.needHelp)}
-            </span>
-          </div>
-          <p className="text-[#B8B0A8] mb-6">
-            {t(translations.menu.askAbout)}
-          </p>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold transition-all min-h-[56px]"
-          >
-            {t(translations.menu.talkToSophia)}
-            <Sparkles className="w-5 h-5" />
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
