@@ -227,7 +227,7 @@ export default function SimmerLoversPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26]">
+    <div className="min-h-screen bg-[#2D2A26] pt-28">
       <Hero signedIn={!!customer} />
 
       {customer ? (
@@ -256,7 +256,7 @@ export default function SimmerLoversPage() {
 // ─────────────────────────────────────────────
 function Hero({ signedIn }: { signedIn: boolean }) {
   return (
-    <section className="relative pt-32 pb-16 md:pb-24 overflow-hidden">
+    <section className="relative pt-4 pb-16 md:pb-24 overflow-hidden">
       <div className="absolute inset-0">
         <Image
           src="/images/heroes/homepage-pizzas.jpg"
@@ -282,7 +282,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="font-display text-5xl md:text-7xl text-[#FFF8F0] mb-6 leading-tight"
+          className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6 leading-tight tracking-tight"
         >
           Simmer <span className="text-[#FF6B35]">Lovers</span>
         </motion.h1>
@@ -983,7 +983,7 @@ function CallToAction({ signedIn }: { signedIn: boolean }) {
 // ─────────────────────────────────────────────
 function LoyaltyLoading() {
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 px-6">
+    <div className="min-h-screen bg-[#2D2A26] pt-28 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse space-y-8">
           <div className="h-16 bg-[#252320] w-1/2 mx-auto" />

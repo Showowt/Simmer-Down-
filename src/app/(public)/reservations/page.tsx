@@ -428,7 +428,7 @@ export default function ReservationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-24">
+    <div className="min-h-screen bg-[#2D2A26] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -437,10 +437,10 @@ export default function ReservationsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
               {t(b.subtitle)}
             </span>
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-[#FFF8F0] mb-6">
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[#FFF8F0] mb-6">
               {t(b.heading)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">

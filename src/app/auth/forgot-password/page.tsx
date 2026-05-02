@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-20">
+      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-20">
+    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

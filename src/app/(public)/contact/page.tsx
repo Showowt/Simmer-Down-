@@ -115,7 +115,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-24">
+    <div className="min-h-screen bg-[#2D2A26] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -124,10 +124,10 @@ export default function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
               {t(translations.contact.title)}
             </span>
-            <h1 className="text-4xl md:text-6xl font-bold text-[#FFF8F0] mb-6">
+            <h1 className="text-3xl md:text-4xl tracking-tight font-bold text-[#FFF8F0] mb-6">
               {t(translations.contact.heading)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
@@ -485,7 +485,7 @@ export default function ContactPage() {
       <section className="py-24 bg-[#252320] border-t border-[#3D3936]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-[#FF6B35] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
               FAQ
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-[#FFF8F0]">

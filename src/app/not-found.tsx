@@ -3,7 +3,7 @@ import { Home, Search } from 'lucide-react'
 
 export default function RootNotFound() {
   return (
-    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-32">
       <div className="text-center max-w-md">
         <div className="w-32 h-32 bg-[#FF6B35]/10 border border-[#FF6B35]/20 flex items-center justify-center mx-auto mb-8">
           <span className="text-7xl">🍕</span>

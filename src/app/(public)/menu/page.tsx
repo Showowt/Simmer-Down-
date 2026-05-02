@@ -543,7 +543,7 @@ export default function MenuPage() {
   }, [filteredItems, activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-20">
+    <div className="min-h-screen bg-[#2D2A26] pt-28">
       {/* Header */}
       <section className="py-16 border-b border-[#3D3936] relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">

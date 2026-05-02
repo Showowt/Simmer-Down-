@@ -32,7 +32,7 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-24">
+    <div className="min-h-screen bg-[#2D2A26] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">
@@ -40,7 +40,7 @@ export default function EventsPage() {
             <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.events.uniqueExperiences)}
             </p>
-            <h1 className="font-display text-4xl md:text-6xl text-[#FFF8F0] mb-6">
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[#FFF8F0] mb-6">
               {t(translations.events.eventsTitle)}
             </h1>
             <p className="text-xl text-[#B8B0A8]">
