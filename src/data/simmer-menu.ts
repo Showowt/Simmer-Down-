@@ -170,6 +170,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🦐 seafood', '🌶️ spicy'],
     bestSeller: true,
+    image: '/images/menu/food-IMG20052.jpg',
     locations: LAKE_AND_SURF
   },
   {
@@ -180,6 +181,7 @@ export const MENU: MenuItem[] = [
     category: 'entradas',
     tags: ['🦐 seafood'],
     bestSeller: true,
+    image: '/images/menu/food-IMG20063.jpg',
     locations: LAKE_AND_SURF
   },
   {
@@ -336,6 +338,7 @@ export const MENU: MenuItem[] = [
     price: 14.99,
     pricePersonal: 5.75,
     category: 'pizzas',
+    image: '/images/menu/pro-picollo.jpg',
     locations: ALL
   },
   {
@@ -454,6 +457,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 6.25,
     category: 'pizzas-especiales',
     tags: ['🦐 seafood'],
+    image: '/images/menu/pro-junio19.jpg',
     locations: ALL
   },
   {
