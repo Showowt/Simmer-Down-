@@ -117,7 +117,7 @@ export default function LocationsPage() {
         locale === "es"
           ? "En el corazón de la Zona Rosa, ideal para encuentros, cenas de negocios y noches largas con buena música."
           : "In the heart of the Zona Rosa, ideal for meetups, business dinners and long nights with great music.",
-      address: "Boulevard del Hipodromo, Colonia San Benito",
+      address: "#548, Colonia San Benito",
       city: "San Salvador, El Salvador",
       phone: "+503 7487-7792",
       hours: {
