@@ -345,6 +345,7 @@ export const MENU: MenuItem[] = [
     price: 14.99,
     pricePersonal: 5.75,
     category: 'pizzas',
+    image: '/images/menu/pro-IMG4632.jpg',
     locations: ALL
   },
   {
@@ -375,6 +376,7 @@ export const MENU: MenuItem[] = [
     pricePersonal: 5.75,
     category: 'pizzas',
     tags: ['🌱 veg'],
+    image: '/images/menu/pro-MG4664.jpg',
     locations: ALL
   },
   {
@@ -505,7 +507,7 @@ export const MENU: MenuItem[] = [
     category: 'platos-fuertes',
     tags: ['🦐 seafood', '🔥 signature'],
     bestSeller: true,
-    image: '/images/menu/terramar-maitre.jpg',
+    image: '/images/menu/pro-IMG4591.jpg',
     locations: ALL,
     locationPrices: { 'lago-coatepeque': 22.50 }
   },
@@ -517,7 +519,7 @@ export const MENU: MenuItem[] = [
     category: 'platos-fuertes',
     tags: ['🔥 signature', '⭐ #1'],
     bestSeller: true,
-    image: '/images/menu/medallon-lomito-maitre.jpg',
+    image: '/images/menu/pro-IMG4588.jpg',
     locations: ALL,
     locationPrices: { 'lago-coatepeque': 19.99 }
   },
