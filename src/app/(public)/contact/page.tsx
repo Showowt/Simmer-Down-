@@ -165,10 +165,28 @@ export default function ContactPage() {
                         +503 2445-5999 (Santa Ana)
                       </a>
                       <a
+                        href="tel:+50368316907"
+                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                      >
+                        +503 6831-6907 (Lago de Coatepeque)
+                      </a>
+                      <a
                         href="tel:+50374877792"
                         className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
                       >
                         +503 7487-7792 (San Benito)
+                      </a>
+                      <a
+                        href="tel:+50369904674"
+                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                      >
+                        +503 6990-4674 (Simmer Garden)
+                      </a>
+                      <a
+                        href="tel:+50375764655"
+                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                      >
+                        +503 7576-4655 (Surf City)
                       </a>
                       <p className="text-[#6B6560] text-sm mt-1">
                         {t(translations.contact.whatsappAvailable)}

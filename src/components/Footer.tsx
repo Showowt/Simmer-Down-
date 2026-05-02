@@ -6,7 +6,7 @@ import { Instagram, Facebook, Send, Flame, Heart, MapPin, Phone } from 'lucide-r
 import { useI18n, translations } from '@/lib/i18n'
 
 export default function Footer() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
 
@@ -171,15 +171,22 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-[#FFF8F0] mb-4 uppercase tracking-wider">{t(translations.footer.contactSection)}</h4>
             <ul className="space-y-3 text-sm text-[#6B6560]">
               <li>
+                <a href="tel:+50324554899" className="flex items-center gap-2 hover:text-[#FF6B35] transition-colors font-medium text-[#FFF8F0]">
+                  <Phone className="w-4 h-4" />
+                  +503 2455-4899
+                </a>
+                <span className="text-xs text-[#6B6560] ml-6">{locale === 'es' ? 'Reservaciones' : 'Reservations'}</span>
+              </li>
+              <li>
                 <a href="tel:+50324455999" className="flex items-center gap-2 hover:text-[#FF6B35] transition-colors">
                   <Phone className="w-4 h-4" />
-                  +503 2445-5999
+                  +503 2445-5999 <span className="text-[#6B6560]">Santa Ana</span>
                 </a>
               </li>
               <li>
                 <a href="tel:+50374877792" className="flex items-center gap-2 hover:text-[#FF6B35] transition-colors">
                   <Phone className="w-4 h-4" />
-                  +503 7487-7792
+                  +503 7487-7792 <span className="text-[#6B6560]">San Benito</span>
                 </a>
               </li>
               <li className="flex items-center gap-2">
