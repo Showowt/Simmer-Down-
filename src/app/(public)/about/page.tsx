@@ -178,7 +178,7 @@ export default function AboutPage() {
       {/* Quote */}
       <section className="py-28 md:py-32 bg-[#252320] border-y border-[#3D3936]">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <Quote className="w-12 h-12 text-[#FF6B35] mx-auto mb-6" />
+          <Quote className="w-12 h-12 text-[#C9A84C] mx-auto mb-6" />
           <blockquote className="font-display text-2xl md:text-3xl text-[#FFF8F0] italic mb-6">
             {locale === "es"
               ? "\u201CCreemos que la mejor gastronomia no solo alimenta: conecta, emociona y permanece. Por eso cuidamos cada detalle, para que cada visita se sienta familiar.\u201D"

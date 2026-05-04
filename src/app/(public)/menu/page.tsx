@@ -138,13 +138,13 @@ function IngredientModal({
         {/* Ingredients */}
         {ingredients && (
           <div className="mb-6">
-            <h4 className="text-[#FF6B35] font-semibold mb-3 flex items-center gap-2">
+            <h4 className="text-[#C9A84C] font-semibold mb-3 flex items-center gap-2">
               <span>🍽️</span> {t(translations.menu.ingredients)}
             </h4>
             <ul className="space-y-2">
               {ingredients.ingredients.map((ing, i) => (
                 <li key={i} className="text-[#B8B0A8] flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-[#FF6B35]" />
+                  <span className="w-1.5 h-1.5 bg-[#C9A84C]" />
                   {ing}
                 </li>
               ))}
@@ -543,7 +543,7 @@ export default function MenuPage() {
   }, [filteredItems, activeCategory]);
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-28">
+    <div className="min-h-screen bg-[#2D2A26] pt-32">
       {/* Header */}
       <section className="py-16 border-b border-[#3D3936] relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">

@@ -177,14 +177,14 @@ export default function CartPage() {
               </Link>
 
               {/* SimmerLovers upsell */}
-              <div className="mt-6 p-4 bg-[#FF6B35]/10 border border-[#FF6B35]/20">
-                <div className="flex items-center gap-2 text-[#FF6B35] text-sm font-medium mb-1">
+              <div className="mt-6 p-4 bg-[#C9A84C]/10 border border-[#C9A84C]/20">
+                <div className="flex items-center gap-2 text-[#C9A84C] text-sm font-medium mb-1">
                   <Sparkles className="w-4 h-4" />
                   SimmerLovers
                 </div>
                 <p className="text-[#B8B0A8] text-xs">
                   {t(translations.cart.earnPoints)} {Math.floor(total)} {t(translations.cart.pointsWithOrder)}
-                  <Link href="/simmerlovers" className="text-[#FF6B35] hover:underline ml-1">
+                  <Link href="/simmerlovers" className="text-[#C9A84C] hover:underline ml-1">
                     {t(translations.loyalty.joinFree)}
                   </Link>
                 </p>

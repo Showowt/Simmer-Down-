@@ -118,7 +118,7 @@ function OrderTracker() {
               Gracias por tu pedido. ¡Comenzaremos a preparar tu pizza de
               inmediato!
             </p>
-            <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/20 p-6 text-left mb-8">
+            <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 p-6 text-left mb-8">
               <p className="text-sm text-[#FF6B35]">
                 <strong>Modo Demo:</strong> Este es un pedido de demostración.
                 Tu pedido ha sido registrado en el sistema.

@@ -120,7 +120,7 @@ export function AnimatedTeamMember({
         />
       </div>
       <h3 className="font-display text-xl text-[#FFF8F0] mb-1">{name}</h3>
-      <p className="text-[#FF6B35] text-sm font-medium mb-3">{role}</p>
+      <p className="text-[#C9A84C] text-sm font-medium mb-3">{role}</p>
       <p className="text-[#B8B0A8]">{bio}</p>
     </motion.div>
   );
@@ -151,7 +151,7 @@ export function AnimatedMilestone({
         {icon}
       </div>
       <div className="pt-0.5">
-        <span className="font-handwritten text-xl text-[#FF6B35]">{year}</span>
+        <span className="font-display italic text-xl text-[#C9A84C]">{year}</span>
         <p className="text-[#FFF8F0] text-lg">{event}</p>
       </div>
     </motion.div>

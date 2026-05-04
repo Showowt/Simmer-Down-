@@ -227,7 +227,7 @@ export default function SimmerLoversPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-28">
+    <div className="min-h-screen bg-[#2D2A26] pt-32">
       <Hero signedIn={!!customer} />
 
       {customer ? (
@@ -284,7 +284,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           transition={{ delay: 0.1 }}
           className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6 leading-tight tracking-tight"
         >
-          Simmer <span className="text-[#FF6B35]">Lovers</span>
+          Simmer <span className="text-[#C9A84C]">Lovers</span>
         </motion.h1>
 
         <motion.p
@@ -361,7 +361,7 @@ function GuestView({
                 viewport={{ once: true }}
                 className="bg-[#252320] border border-[#3D3936] p-8"
               >
-                <div className="text-[#FF6B35] font-display text-5xl mb-4">{step.n}</div>
+                <div className="text-[#C9A84C] font-display text-5xl mb-4">{step.n}</div>
                 <h3 className="text-[#FFF8F0] text-xl font-semibold mb-2">{step.title}</h3>
                 <p className="text-[#B8B0A8]">{step.desc}</p>
               </motion.div>
@@ -636,7 +636,7 @@ function TierLadder({ tierConfigs }: { tierConfigs: TierConfig[] }) {
                     : `Desde ${tier.min_lifetime_points.toLocaleString("es-SV")} puntos`}
                 </p>
 
-                <div className="text-[#FF6B35] font-semibold text-sm mb-4">
+                <div className="text-[#C9A84C] font-semibold text-sm mb-4">
                   {tier.points_multiplier}× puntos en cada pedido
                 </div>
 
@@ -983,7 +983,7 @@ function CallToAction({ signedIn }: { signedIn: boolean }) {
 // ─────────────────────────────────────────────
 function LoyaltyLoading() {
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-28 px-6">
+    <div className="min-h-screen bg-[#2D2A26] pt-32 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse space-y-8">
           <div className="h-16 bg-[#252320] w-1/2 mx-auto" />

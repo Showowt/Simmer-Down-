@@ -203,16 +203,16 @@ export function EventsList() {
                 </p>
                 <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 text-[#B8B0A8]">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-[#FF6B35]" />
+                    <Calendar className="w-5 h-5 text-[#C9A84C]" />
                     <span className="capitalize">{formatEventDate(event.starts_at, event.recurrence)}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#FF6B35]" />
+                    <Clock className="w-5 h-5 text-[#C9A84C]" />
                     {formatEventTime(event.starts_at)}
                   </div>
                   {event.custom_venue && (
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-[#FF6B35]" />
+                      <MapPin className="w-5 h-5 text-[#C9A84C]" />
                       {event.custom_venue}
                     </div>
                   )}
@@ -290,18 +290,18 @@ export function EventsList() {
 
                     <div className="space-y-2 mb-6 text-sm">
                       <div className="flex items-center gap-2 text-[#6B6560]">
-                        <Calendar className="w-4 h-4 text-[#FF6B35]" />
+                        <Calendar className="w-4 h-4 text-[#C9A84C]" />
                         <span className="capitalize">
                           {formatEventDate(event.starts_at, event.recurrence)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-[#6B6560]">
-                        <Clock className="w-4 h-4 text-[#FF6B35]" />
+                        <Clock className="w-4 h-4 text-[#C9A84C]" />
                         {formatEventTime(event.starts_at)}
                       </div>
                       {event.custom_venue && (
                         <div className="flex items-center gap-2 text-[#6B6560]">
-                          <MapPin className="w-4 h-4 text-[#FF6B35]" />
+                          <MapPin className="w-4 h-4 text-[#C9A84C]" />
                           {event.custom_venue}
                         </div>
                       )}
@@ -344,7 +344,7 @@ export function PrivateEventsSection({
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <p className="font-handwritten text-2xl text-[#FF6B35] mb-4">
+            <p className="font-display italic text-2xl text-[#6B6560] mb-4">
               Eventos Privados
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">

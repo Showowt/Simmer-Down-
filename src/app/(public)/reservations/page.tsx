@@ -487,7 +487,7 @@ export default function ReservationsPage() {
                     </h3>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                        <MapPin className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-[#6B6560] text-sm">{t(b.location)}</p>
                           <p className="text-[#FFF8F0] font-medium">
@@ -496,7 +496,7 @@ export default function ReservationsPage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Calendar className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                        <Calendar className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-[#6B6560] text-sm">{t(b.date)}</p>
                           <p className="text-[#FFF8F0] font-medium capitalize">
@@ -505,14 +505,14 @@ export default function ReservationsPage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Clock className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                        <Clock className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-[#6B6560] text-sm">{t(b.time)}</p>
                           <p className="text-[#FFF8F0] font-medium">{selectedTime}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                        <Users className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-[#6B6560] text-sm">{t(b.guests)}</p>
                           <p className="text-[#FFF8F0] font-medium">
@@ -521,7 +521,7 @@ export default function ReservationsPage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <User className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                        <User className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="text-[#6B6560] text-sm">{t(b.name)}</p>
                           <p className="text-[#FFF8F0] font-medium">{name}</p>
@@ -565,7 +565,7 @@ export default function ReservationsPage() {
                   className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <MapPin className="w-5 h-5 text-[#FF6B35]" />
+                    <MapPin className="w-5 h-5 text-[#C9A84C]" />
                     <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.location)}</h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -604,7 +604,7 @@ export default function ReservationsPage() {
                   className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <Calendar className="w-5 h-5 text-[#FF6B35]" />
+                    <Calendar className="w-5 h-5 text-[#C9A84C]" />
                     <h2 className="text-lg font-semibold text-[#FFF8F0]">
                       {t(b.date)} & {t(b.time)}
                     </h2>
@@ -623,7 +623,7 @@ export default function ReservationsPage() {
                     {/* Time slots */}
                     <div className="bg-[#252320] border border-[#3D3936] p-4 sm:p-6">
                       <div className="flex items-center gap-2 mb-4">
-                        <Clock className="w-4 h-4 text-[#FF6B35]" />
+                        <Clock className="w-4 h-4 text-[#C9A84C]" />
                         <h3 className="text-sm font-semibold text-[#FFF8F0]">{t(b.selectTime)}</h3>
                       </div>
 
@@ -669,7 +669,7 @@ export default function ReservationsPage() {
                   className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <Users className="w-5 h-5 text-[#FF6B35]" />
+                    <Users className="w-5 h-5 text-[#C9A84C]" />
                     <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.guestCount)}</h2>
                   </div>
 
@@ -709,7 +709,7 @@ export default function ReservationsPage() {
                   className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <User className="w-5 h-5 text-[#FF6B35]" />
+                    <User className="w-5 h-5 text-[#C9A84C]" />
                     <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.contactInfo)}</h2>
                   </div>
 
@@ -783,7 +783,7 @@ export default function ReservationsPage() {
                   className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <FileText className="w-5 h-5 text-[#FF6B35]" />
+                    <FileText className="w-5 h-5 text-[#C9A84C]" />
                     <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.specialRequests)}</h2>
                   </div>
                   <textarea

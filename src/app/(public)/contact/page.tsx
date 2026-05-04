@@ -155,7 +155,7 @@ export default function ContactPage() {
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-[#6B6560] text-sm">{t(translations.contact.phones)}</p>
                       <a
@@ -195,7 +195,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-[#6B6560] text-sm">{t(translations.contact.emailLabel)}</p>
                       <a
@@ -208,7 +208,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-[#6B6560] text-sm">{t(translations.contact.locationsLabel)}</p>
                       <p className="text-[#FFF8F0] font-medium">
@@ -221,7 +221,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#FF6B35] mt-0.5 flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-[#6B6560] text-sm">{t(translations.contact.hours)}</p>
                       <p className="text-[#FFF8F0] font-medium">
@@ -275,7 +275,7 @@ export default function ContactPage() {
                     href="https://instagram.com/simmerdownsv"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#FF6B35] hover:text-white transition-colors"
+                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#C9A84C] hover:text-white transition-colors"
                     aria-label="Instagram"
                   >
                     <Instagram className="w-5 h-5" />
@@ -284,7 +284,7 @@ export default function ContactPage() {
                     href="https://facebook.com/simmerdownsv"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#FF6B35] hover:text-white transition-colors"
+                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#C9A84C] hover:text-white transition-colors"
                     aria-label="Facebook"
                   >
                     <Facebook className="w-5 h-5" />
