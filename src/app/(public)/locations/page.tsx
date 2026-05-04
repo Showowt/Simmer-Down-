@@ -62,11 +62,12 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Vista a la Catedral", "Música en Vivo", "Terraza"]
           : ["Cathedral View", "Live Music", "Terrace"],
-      image: "/images/locations/gallery-santa-ana/santa-ana-2.jpg",
+      image: "/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg",
       gallery: [
+        "/images/locations/gallery-santa-ana/santa-ana-awards.jpg",
         "/images/locations/gallery-santa-ana/santa-ana-1.jpg",
-        "/images/locations/gallery-santa-ana/santa-ana-2.jpg",
         "/images/locations/gallery-santa-ana/santa-ana-3.jpg",
+        "/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg",
       ],
       iconType: "coffee",
       isOpen: true,

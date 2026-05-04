@@ -11,7 +11,7 @@ const locations = [
     name: 'Santa Ana',
     vibe: 'El Origen',
     description: { es: 'Frente a la catedral, donde todo comenzo.', en: 'Facing the cathedral, where it all began.' },
-    image: '/images/locations/gallery-santa-ana/santa-ana-2.jpg',
+    image: '/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg',
   },
   {
     name: 'Lago de Coatepeque',

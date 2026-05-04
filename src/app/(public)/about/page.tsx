@@ -148,8 +148,8 @@ export default function AboutPage() {
               </div>
               <div className="relative h-48 mt-8">
                 <Image
-                  src="/images/locations/santa-ana-cover.jpg"
-                  alt="Simmer Down frente a la Catedral de Santa Ana"
+                  src="/images/locations/gallery-santa-ana/santa-ana-awards.jpg"
+                  alt="Simmer Down Santa Ana — TripAdvisor #1 Travellers Choice"
                   fill
                   className="object-cover"
                 />
