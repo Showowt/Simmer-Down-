@@ -11,19 +11,19 @@ const locations = [
     name: 'Santa Ana',
     vibe: 'El Origen',
     description: { es: 'Frente a la catedral, donde todo comenzo.', en: 'Facing the cathedral, where it all began.' },
-    image: '/images/locations/santa-ana-cover.jpg',
+    image: '/images/locations/gallery-santa-ana/santa-ana-2.jpg',
   },
   {
     name: 'Lago de Coatepeque',
     vibe: 'Vista al Lago',
     description: { es: 'Pizza con la mejor vista del volcan.', en: 'Pizza with the best volcano view.' },
-    image: '/images/locations/coatepeque-cover.jpg',
+    image: '/images/locations/gallery-coatepeque/coatepeque-2.jpg',
   },
   {
     name: 'San Benito',
     vibe: 'San Salvador',
     description: { es: 'El corazon cosmopolita de la ciudad.', en: 'The cosmopolitan heart of the city.' },
-    image: '/images/locations/san-benito-cover.jpg',
+    image: '/images/locations/gallery-san-benito/san-benito-1.jpg',
   },
   {
     name: 'Surf City',

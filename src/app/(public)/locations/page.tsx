@@ -62,7 +62,7 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Vista a la Catedral", "Música en Vivo", "Terraza"]
           : ["Cathedral View", "Live Music", "Terrace"],
-      image: "/images/locations/santa-ana-cover.jpg",
+      image: "/images/locations/gallery-santa-ana/santa-ana-2.jpg",
       gallery: [
         "/images/locations/gallery-santa-ana/santa-ana-1.jpg",
         "/images/locations/gallery-santa-ana/santa-ana-2.jpg",
@@ -103,7 +103,7 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Vista al Lago", "Atardeceres", "Zona Privada"]
           : ["Lake View", "Sunsets", "Private Area"],
-      image: "/images/locations/coatepeque-cover.jpg",
+      image: "/images/locations/gallery-coatepeque/coatepeque-2.jpg",
       gallery: [
         "/images/locations/gallery-coatepeque/coatepeque-1.jpg",
         "/images/locations/gallery-coatepeque/coatepeque-2.jpg",
@@ -145,7 +145,7 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Zona Rosa", "Jazz Nights", "Valet Parking"]
           : ["Zona Rosa", "Jazz Nights", "Valet Parking"],
-      image: "/images/locations/san-benito-cover.jpg",
+      image: "/images/locations/gallery-san-benito/san-benito-1.jpg",
       gallery: [
         "/images/locations/gallery-san-benito/san-benito-1.jpg",
         "/images/locations/gallery-san-benito/san-benito-2.jpg",
@@ -185,7 +185,7 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Jardín", "Café de Altura", "Montaña"]
           : ["Garden", "Altitude Coffee", "Mountain"],
-      image: "/images/locations/simmer-garden-hero.jpg",
+      image: "/images/locations/gallery-garden/garden-1.jpg",
       gallery: [
         "/images/locations/gallery-garden/garden-1.jpg",
         "/images/locations/gallery-garden/garden-2.jpg",
