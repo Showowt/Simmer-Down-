@@ -26,6 +26,7 @@ export default function LocationsPage() {
     hours: { weekday: string; weekend: string };
     features: string[];
     image: string;
+    gallery?: string[];
     iconType: IconType;
     isOpen: boolean;
     rating: number;
@@ -62,6 +63,11 @@ export default function LocationsPage() {
           ? ["Vista a la Catedral", "Música en Vivo", "Terraza"]
           : ["Cathedral View", "Live Music", "Terrace"],
       image: "/images/locations/santa-ana-cover.jpg",
+      gallery: [
+        "/images/locations/gallery-santa-ana/santa-ana-1.jpg",
+        "/images/locations/gallery-santa-ana/santa-ana-2.jpg",
+        "/images/locations/gallery-santa-ana/santa-ana-3.jpg",
+      ],
       iconType: "coffee",
       isOpen: true,
       rating: 4.9,
@@ -98,6 +104,12 @@ export default function LocationsPage() {
           ? ["Vista al Lago", "Atardeceres", "Zona Privada"]
           : ["Lake View", "Sunsets", "Private Area"],
       image: "/images/locations/coatepeque-cover.jpg",
+      gallery: [
+        "/images/locations/gallery-coatepeque/coatepeque-1.jpg",
+        "/images/locations/gallery-coatepeque/coatepeque-2.jpg",
+        "/images/locations/gallery-coatepeque/coatepeque-3.jpg",
+        "/images/locations/gallery-coatepeque/coatepeque-4.jpg",
+      ],
       iconType: "mountain",
       isOpen: true,
       rating: 4.9,
@@ -134,6 +146,12 @@ export default function LocationsPage() {
           ? ["Zona Rosa", "Jazz Nights", "Valet Parking"]
           : ["Zona Rosa", "Jazz Nights", "Valet Parking"],
       image: "/images/locations/san-benito-cover.jpg",
+      gallery: [
+        "/images/locations/gallery-san-benito/san-benito-1.jpg",
+        "/images/locations/gallery-san-benito/san-benito-2.jpg",
+        "/images/locations/gallery-san-benito/san-benito-3.jpg",
+        "/images/locations/gallery-san-benito/san-benito-4.jpg",
+      ],
       iconType: "music",
       isOpen: true,
       rating: 4.8,
@@ -168,6 +186,11 @@ export default function LocationsPage() {
           ? ["Jardín", "Café de Altura", "Montaña"]
           : ["Garden", "Altitude Coffee", "Mountain"],
       image: "/images/locations/simmer-garden-hero.jpg",
+      gallery: [
+        "/images/locations/gallery-garden/garden-1.jpg",
+        "/images/locations/gallery-garden/garden-2.jpg",
+        "/images/locations/gallery-garden/garden-3.jpg",
+      ],
       iconType: "coffee",
       isOpen: false,
       rating: 4.9,
@@ -201,6 +224,12 @@ export default function LocationsPage() {
           ? ["Vista al Mar", "Surf Vibes", "Cocteles"]
           : ["Ocean View", "Surf Vibes", "Cocktails"],
       image: "/images/locations/surf-city-exterior.jpg",
+      gallery: [
+        "/images/locations/gallery-surf-city/surf-city-1.jpg",
+        "/images/locations/gallery-surf-city/surf-city-2.jpg",
+        "/images/locations/gallery-surf-city/surf-city-3.jpg",
+        "/images/locations/gallery-surf-city/surf-city-4.jpg",
+      ],
       iconType: "waves",
       isOpen: true,
       rating: 4.8,
