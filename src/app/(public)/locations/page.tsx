@@ -185,11 +185,11 @@ export default function LocationsPage() {
         locale === "es"
           ? ["Jardín", "Café de Altura", "Montaña"]
           : ["Garden", "Altitude Coffee", "Mountain"],
-      image: "/images/locations/gallery-garden/garden-1.jpg",
+      image: "/images/locations/gallery-garden/garden-4.jpg",
       gallery: [
         "/images/locations/gallery-garden/garden-1.jpg",
-        "/images/locations/gallery-garden/garden-2.jpg",
-        "/images/locations/gallery-garden/garden-3.jpg",
+        "/images/locations/gallery-garden/garden-4.jpg",
+        "/images/locations/gallery-garden/garden-5.png",
       ],
       iconType: "coffee",
       isOpen: false,
