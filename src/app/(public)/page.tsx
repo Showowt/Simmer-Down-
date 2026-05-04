@@ -94,6 +94,10 @@ export default function Home() {
             Est. 2013 &mdash; El Salvador
           </motion.p>
 
+          <motion.div variants={fadeUp} className="mb-6">
+            <img src="/logos/logo-icon.svg" alt="" className="w-12 h-12 mb-4" aria-hidden="true" />
+          </motion.div>
+
           <motion.h1
             variants={fadeUp}
             className="font-display text-5xl md:text-7xl lg:text-8xl text-[#FFF8F0] tracking-tight leading-[0.95] mb-6"

@@ -46,12 +46,13 @@ export default function Header() {
       >
         <nav className="max-w-6xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
-            {/* Logo — typography only, no icon */}
+            {/* Logo — flame icon + typography */}
             <Link
               href="/"
-              className="font-display text-xl tracking-[0.02em] text-[#FFF8F0] hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              Simmer Down
+              <img src="/logos/logo-icon.svg" alt="" className="w-7 h-7" aria-hidden="true" />
+              <span className="font-display text-xl tracking-[0.02em] text-[#FFF8F0]">Simmer Down</span>
             </Link>
 
             {/* Desktop Nav — clean, spaced, understated */}
@@ -132,6 +133,9 @@ export default function Header() {
               className="absolute inset-0 flex flex-col items-center justify-center"
             >
               <div className="space-y-1 text-center">
+                <div className="mb-8">
+                  <img src="/logos/logo-icon.svg" alt="" className="w-10 h-10 mx-auto" aria-hidden="true" />
+                </div>
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.href}

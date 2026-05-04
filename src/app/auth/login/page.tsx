@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Mail, Lock, AlertCircle, Flame, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useI18n, translations } from '@/lib/i18n'
 import Link from 'next/link'
@@ -55,8 +55,8 @@ function LoginForm() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 font-display text-2xl text-[#FFF8F0] mb-4">
-            <Flame className="w-8 h-8 text-[#FF6B35]" />
+          <Link href="/" className="inline-flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] mb-4">
+            <img src="/logos/logo-icon.svg" alt="" className="w-8 h-8" aria-hidden="true" />
             Simmer Down
           </Link>
           <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.welcomeBack)}</h1>
