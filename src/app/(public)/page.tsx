@@ -5,15 +5,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, Menu, ShoppingBag, MapPin, ChevronDown, MessageCircle } from 'lucide-react'
-import { useI18n } from '@/lib/i18n'
+import { ArrowRight, MapPin, Truck, Store, ChevronDown, Sparkles } from 'lucide-react'
+import { useI18n, translations } from '@/lib/i18n'
 import { useCartStore } from '@/store/cart'
+import { useAuth } from '@/hooks/useAuth'
+import { ScrollReveal } from '@/components/cinema/ScrollReveal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type OrderType = 'delivery' | 'pickup'
 
-// ─── Promo Data ───────────────────────────────────────────────────────────────
+// ─── Static Data ──────────────────────────────────────────────────────────────
 
 const PROMOS = [
   {
@@ -25,9 +27,6 @@ const PROMOS = [
     price: '$24.99',
     badgeEs: '🔥 HOT DEAL',
     badgeEn: '🔥 HOT DEAL',
-    gradient: 'from-orange-500 to-red-600',
-    bgGradient: 'from-orange-400/20 to-red-500/20',
-    emoji: '🍕',
     image: '/images/menu/pizza-memoravel.jpg',
   },
   {
@@ -35,13 +34,10 @@ const PROMOS = [
     titleEs: 'PIZZA DEL MES',
     titleEn: 'PIZZA OF THE MONTH',
     subtitleEs: 'La Memoravel — Favorita de todos',
-    subtitleEn: 'La Memoravel — Everyone\'s Favorite',
+    subtitleEn: "La Memoravel — Everyone's Favorite",
     price: '$12.99',
     badgeEs: '⭐ NUEVO',
     badgeEn: '⭐ NEW',
-    gradient: 'from-green-600 to-emerald-700',
-    bgGradient: 'from-green-400/20 to-emerald-500/20',
-    emoji: '🌿',
     image: '/images/menu/pizza-maradona.jpg',
   },
   {
@@ -53,138 +49,73 @@ const PROMOS = [
     price: '2×1',
     badgeEs: '📅 SOLO MARTES',
     badgeEn: '📅 TUE ONLY',
-    gradient: 'from-purple-600 to-pink-600',
-    bgGradient: 'from-purple-400/20 to-pink-500/20',
-    emoji: '🎉',
     image: '/images/menu/pizzas-hero.jpg',
   },
 ]
 
-// ─── Category Data ────────────────────────────────────────────────────────────
-
 const CATEGORIES = [
+  { id: 'pizzas',        labelEs: 'Pizzas',         labelEn: 'Pizzas',    emoji: '🍕', image: '/images/menu/pizza-memoravel.jpg' },
+  { id: 'pastas',        labelEs: 'Pastas',          labelEn: 'Pastas',    emoji: '🍝', image: '/images/menu/food-IMG20045.jpg' },
+  { id: 'mariscos',      labelEs: 'Mariscos',        labelEn: 'Seafood',   emoji: '🦐', image: '/images/menu/entradas-seafood-trio.jpg' },
+  { id: 'entradas',      labelEs: 'Entradas',        labelEn: 'Starters',  emoji: '🥟', image: '/images/menu/entradas-cheese-balls.jpg' },
+  { id: 'platos-fuertes', labelEs: 'Platos Fuertes', labelEn: 'Mains',    emoji: '🍽️', image: '/images/menu/pro-IMG4591.jpg' },
+  { id: 'bebidas',       labelEs: 'Bebidas',         labelEn: 'Drinks',    emoji: '🍺', image: '/images/menu/cervezas.jpg' },
+  { id: 'postres',       labelEs: 'Postres',         labelEn: 'Desserts',  emoji: '🍫', image: '/images/menu/brownie-helado.jpg' },
+  { id: 'cafe',          labelEs: 'Café',            labelEn: 'Coffee',    emoji: '☕', image: '/images/menu/frozen-positive.jpg' },
+]
+
+const SIGNATURES = [
   {
-    id: 'pizzas',
-    labelEs: 'Pizzas',
-    labelEn: 'Pizzas',
-    emoji: '🍕',
+    id: 'memoravel',
+    name: 'La Memoravel',
+    descEs: 'Fajitas de res y pollo, BBQ artesanal, ajonjolí tostado. La más pedida desde 2013.',
+    descEn: 'Beef & chicken fajitas, artisan BBQ, toasted sesame. Our most ordered since 2013.',
     image: '/images/menu/pizza-memoravel.jpg',
-    badge: null,
-    gradient: 'from-red-500 to-orange-400',
+    href: '/menu?category=pizzas',
   },
   {
-    id: 'combos',
-    labelEs: 'Combos',
-    labelEn: 'Combos',
-    emoji: '🔥',
+    id: 'terramar',
+    name: 'Terramar al Maître',
+    descEs: 'Langostinos salteados en mantequilla de hierbas finas y vino blanco.',
+    descEn: 'Prawns sautéed in fine herb butter and white wine.',
     image: '/images/menu/pro-IMG4591.jpg',
-    badge: '🔥 POPULAR',
-    gradient: 'from-orange-500 to-yellow-400',
+    href: '/menu?category=mariscos',
   },
   {
-    id: 'entradas',
-    labelEs: 'Entradas',
-    labelEn: 'Starters',
-    emoji: '🥟',
-    image: '/images/menu/entradas-seafood-trio.jpg',
-    badge: null,
-    gradient: 'from-amber-500 to-orange-400',
-  },
-  {
-    id: 'pastas',
-    labelEs: 'Pastas',
-    labelEn: 'Pastas',
-    emoji: '🍝',
+    id: 'fettuccine',
+    name: 'Fettuccine Calamardiña',
+    descEs: 'Calamar fresco en salsa de tomate natural con albahaca y toque picante.',
+    descEn: 'Fresh squid in natural tomato sauce with basil and a hint of spice.',
     image: '/images/menu/food-IMG20045.jpg',
-    badge: 'NUEVO',
-    gradient: 'from-yellow-500 to-amber-400',
-  },
-  {
-    id: 'mariscos',
-    labelEs: 'Mariscos',
-    labelEn: 'Seafood',
-    emoji: '🦐',
-    image: '/images/menu/entradas-cheese-balls.jpg',
-    badge: null,
-    gradient: 'from-blue-500 to-cyan-400',
-  },
-  {
-    id: 'bebidas',
-    labelEs: 'Bebidas',
-    labelEn: 'Drinks',
-    emoji: '🥤',
-    image: '/images/menu/cervezas.jpg',
-    badge: null,
-    gradient: 'from-cyan-500 to-blue-400',
-  },
-  {
-    id: 'postres',
-    labelEs: 'Postres',
-    labelEn: 'Desserts',
-    emoji: '🍰',
-    image: '/images/menu/brownie-helado.jpg',
-    badge: null,
-    gradient: 'from-pink-500 to-rose-400',
-  },
-  {
-    id: 'cafe',
-    labelEs: 'Café',
-    labelEn: 'Coffee',
-    emoji: '☕',
-    image: '/images/menu/frozen-positive.jpg',
-    badge: null,
-    gradient: 'from-stone-600 to-amber-700',
+    href: '/menu?category=pastas',
   },
 ]
 
-// ─── Bottom Nav Config ────────────────────────────────────────────────────────
-
-const NAV_TABS = [
-  {
-    id: 'menu',
-    labelEs: 'Menú',
-    labelEn: 'Menu',
-    icon: '🍕',
-    href: '/menu',
-  },
-  {
-    id: 'favorites',
-    labelEs: 'Favoritos',
-    labelEn: 'Favorites',
-    icon: '❤️',
-    href: '/simmerlovers',
-  },
-  {
-    id: 'coupons',
-    labelEs: 'Cupones',
-    labelEn: 'Coupons',
-    icon: '🎟️',
-    href: '/events',
-  },
-  {
-    id: 'login',
-    labelEs: 'Ingresar',
-    labelEn: 'Sign In',
-    icon: '👤',
-    href: '/auth/login',
-  },
+const LOCATIONS = [
+  { id: 'santa-ana',   nameEs: 'Santa Ana',       nameEn: 'Santa Ana',       vibeEs: 'Origen',         vibeEn: 'Origin',        image: '/images/locations/santa-ana-interior-2.jpg' },
+  { id: 'coatepeque',  nameEs: 'Coatepeque',       nameEn: 'Coatepeque',      vibeEs: 'Frente al lago', vibeEn: 'Lakeside',       image: '/images/locations/coatepeque-2.jpg' },
+  { id: 'san-benito',  nameEs: 'San Benito',        nameEn: 'San Benito',      vibeEs: 'Jazz & Pizza',   vibeEn: 'Jazz & Pizza',   image: '/images/locations/san-benito-1.jpg' },
+  { id: 'garden',      nameEs: 'Simmer Garden',    nameEn: 'Simmer Garden',   vibeEs: 'Al aire libre',  vibeEn: 'Open Air',       image: '/images/locations/garden-4.jpg' },
+  { id: 'surf-city',   nameEs: 'Surf City',         nameEn: 'Surf City',       vibeEs: 'Frente al mar',  vibeEn: 'Oceanfront',     image: '/images/locations/surf-city-exterior.jpg' },
 ]
+
+const LOCATION_NAMES = ['Santa Ana', 'San Benito', 'Lago de Coatepeque', 'Surf City', 'Simmer Garden']
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   const router = useRouter()
+  const { user } = useAuth()
   const cartCount = useCartStore((s) => s.getItemCount())
 
   const [orderType, setOrderType] = useState<OrderType>('delivery')
   const [activePromo, setActivePromo] = useState(0)
-  const [activeTab, setActiveTab] = useState('menu')
   const [locationOpen, setLocationOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState('Santa Ana')
+  const [activeTab, setActiveTab] = useState('home')
   const promoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Auto-rotate promo carousel
   const startCarousel = useCallback(() => {
     promoIntervalRef.current = setInterval(() => {
       setActivePromo((prev) => (prev + 1) % PROMOS.length)
@@ -204,160 +135,229 @@ export default function Home() {
     startCarousel()
   }
 
-  const handleCategoryClick = (categoryId: string) => {
-    router.push(`/menu?category=${categoryId}`)
-  }
-
-  const locations = ['Santa Ana', 'San Benito', 'Lago de Coatepeque', 'Surf City', 'Simmer Garden']
-
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-20">
+    <div className="min-h-screen bg-[#1F1D1A] font-sans pb-20 lg:pb-0">
 
-      {/* ─── STICKY HEADER ────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/logos/logo-full.svg"
-              alt="Simmer Down"
-              width={130}
-              height={40}
-              className="h-9 w-auto object-contain"
-              priority
-            />
-          </Link>
+      {/* ════════════════════════════════════════════════════════════════════
+          1. HERO — Full-viewport photo background
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="relative min-h-[100vh] flex items-end overflow-hidden">
 
-          {/* Right actions */}
-          <div className="flex items-center gap-3">
-            {/* Cart badge */}
-            <Link href="/cart" className="relative p-1.5 text-gray-700 hover:text-red-600 transition-colors">
-              <ShoppingBag className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Search */}
-            <button
-              className="p-1.5 text-gray-700 hover:text-red-600 transition-colors"
-              aria-label={locale === 'es' ? 'Buscar' : 'Search'}
-              onClick={() => router.push('/menu')}
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Hamburger */}
-            <button
-              className="p-1.5 text-gray-700 hover:text-red-600 transition-colors"
-              aria-label={locale === 'es' ? 'Abrir menú' : 'Open menu'}
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
+        {/* Photo background */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/heroes/homepage-pizzas.jpg"
+            alt="Simmer Down"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A] via-[#1F1D1A]/60 to-transparent" />
         </div>
-      </header>
 
-      {/* ─── MAIN CONTENT ─────────────────────────────────────────────────── */}
-      <main className="max-w-lg mx-auto">
+        {/* Bottom-aligned content */}
+        <div className="relative z-10 w-full px-6 pb-16 max-w-5xl mx-auto">
+          {/* Est badge */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="text-[#C9A84C] text-xs font-semibold tracking-[0.25em] uppercase mb-5"
+          >
+            Est. 2013
+          </motion.p>
 
-        {/* ── ORDER TYPE TOGGLE ────────────────────────────────────────────── */}
-        <div className="px-4 pt-4 pb-2">
-          <div className="flex bg-gray-100 rounded-full p-1 gap-1">
+          {/* Logo icon */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
+            className="mb-6"
+          >
+            <Image
+              src="/logos/logo-icon.svg"
+              alt="Simmer Down icon"
+              width={64}
+              height={64}
+              className="w-14 h-14 object-contain"
+            />
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
+            className="font-display text-[clamp(3rem,10vw,7rem)] font-bold text-[#FFF8F0] leading-none tracking-tight mb-4"
+          >
+            Simmer Down
+          </motion.h1>
+
+          {/* Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35, ease: 'easeOut' }}
+            className="text-[#B8B0A8] text-base md:text-lg mb-10 max-w-md"
+          >
+            {t(translations.home.tagline)}
+          </motion.p>
+
+          {/* CTA buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: 'easeOut' }}
+            className="flex flex-wrap gap-3"
+          >
+            <Link
+              href="/reservations"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-[#FFF8F0] text-[#FFF8F0] text-sm font-semibold tracking-wide uppercase hover:bg-[#FFF8F0] hover:text-[#1F1D1A] transition-all duration-300"
+            >
+              {t(translations.nav.reservations)}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/menu"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6B35] text-white text-sm font-semibold tracking-wide uppercase hover:bg-[#E55A2B] transition-all duration-300"
+            >
+              {t(translations.nav.orderNow)}
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          2. ORDER MODE STRIP
+      ════════════════════════════════════════════════════════════════════ */}
+      <div className="bg-[#252320] border-t border-b border-[#3D3936]/30 py-3">
+        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between gap-4 flex-wrap">
+
+          {/* Delivery / Pickup toggle */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setOrderType('delivery')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-4 py-2 border text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${
                 orderType === 'delivery'
-                  ? 'bg-red-600 text-white shadow-md shadow-red-200'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-[#FF6B35]/15 text-[#FF6B35] border-[#FF6B35]'
+                  : 'text-[#6B6560] border-[#3D3936] hover:text-[#B8B0A8] hover:border-[#B8B0A8]/40'
               }`}
             >
-              <span className="text-base">🛵</span>
-              <span className="truncate">
-                {locale === 'es' ? 'A DOMICILIO' : 'DELIVERY'}
-              </span>
+              <Truck className="w-3.5 h-3.5" />
+              {locale === 'es' ? 'A Domicilio' : 'Delivery'}
             </button>
             <button
               onClick={() => setOrderType('pickup')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-4 py-2 border text-xs font-semibold uppercase tracking-wide transition-all duration-200 ${
                 orderType === 'pickup'
-                  ? 'bg-red-600 text-white shadow-md shadow-red-200'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-[#FF6B35]/15 text-[#FF6B35] border-[#FF6B35]'
+                  : 'text-[#6B6560] border-[#3D3936] hover:text-[#B8B0A8] hover:border-[#B8B0A8]/40'
               }`}
             >
-              <span className="text-base">🏪</span>
-              <span className="truncate">
-                {locale === 'es' ? 'RECOGER EN TIENDA' : 'PICK UP'}
-              </span>
+              <Store className="w-3.5 h-3.5" />
+              {locale === 'es' ? 'Recoger' : 'Pick Up'}
             </button>
           </div>
-        </div>
 
-        {/* ── PROMO CAROUSEL ───────────────────────────────────────────────── */}
-        <section className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-extrabold text-gray-900">
+          {/* Location dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setLocationOpen(!locationOpen)}
+              className="flex items-center gap-2 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors text-xs font-medium"
+            >
+              <MapPin className="w-3.5 h-3.5 text-[#FF6B35]" />
+              <span>{selectedLocation}</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${locationOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {locationOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-full mt-2 bg-[#252320] border border-[#3D3936] shadow-2xl z-50 min-w-[180px]"
+                >
+                  {LOCATION_NAMES.map((loc) => (
+                    <button
+                      key={loc}
+                      onClick={() => { setSelectedLocation(loc); setLocationOpen(false) }}
+                      className={`w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-left transition-colors hover:bg-[#3D3936]/40 ${
+                        selectedLocation === loc ? 'text-[#FF6B35]' : 'text-[#B8B0A8]'
+                      }`}
+                    >
+                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                      {loc}
+                      {selectedLocation === loc && <span className="ml-auto text-[#FF6B35]">✓</span>}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          3. PROMO CAROUSEL
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-16 bg-[#1F1D1A]">
+        <div className="max-w-5xl mx-auto px-6">
+          <ScrollReveal>
+            <h2 className="font-display text-2xl md:text-3xl text-[#FFF8F0] mb-8">
               {locale === 'es' ? 'Lo Más Hot 🔥' : 'Hottest Deals 🔥'}
             </h2>
-          </div>
+          </ScrollReveal>
 
-          {/* Carousel track */}
-          <div className="relative overflow-hidden rounded-2xl h-40">
+          {/* Carousel */}
+          <div className="relative overflow-hidden h-64 md:h-80 bg-[#252320] border border-[#3D3936]">
             <AnimatePresence mode="wait">
               {PROMOS.map((promo, index) =>
                 index === activePromo ? (
                   <motion.div
                     key={promo.id}
-                    initial={{ opacity: 0, x: 40 }}
+                    initial={{ opacity: 0, x: 60 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -40 }}
-                    transition={{ duration: 0.35, ease: 'easeInOut' }}
-                    className={`absolute inset-0 bg-gradient-to-r ${promo.gradient} flex items-center p-5 overflow-hidden`}
+                    exit={{ opacity: 0, x: -60 }}
+                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    className="absolute inset-0 flex"
                   >
-                    {/* Text side */}
-                    <div className="flex-1 min-w-0 pr-4 z-10">
-                      {/* Badge */}
-                      <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-[11px] font-bold px-2.5 py-1 rounded-full mb-2">
+                    {/* Text */}
+                    <div className="flex-1 flex flex-col justify-center px-8 md:px-12 z-10">
+                      <span className="inline-block bg-[#FF6B35]/20 text-[#FF6B35] text-[10px] font-bold px-3 py-1 uppercase tracking-widest mb-4 self-start">
                         {locale === 'es' ? promo.badgeEs : promo.badgeEn}
                       </span>
-
-                      <h3 className="text-white font-extrabold text-xl leading-tight mb-1">
+                      <h3 className="font-display text-2xl md:text-4xl text-[#FFF8F0] leading-tight mb-2">
                         {locale === 'es' ? promo.titleEs : promo.titleEn}
                       </h3>
-                      <p className="text-white/80 text-xs leading-snug mb-3">
+                      <p className="text-[#B8B0A8] text-sm mb-5">
                         {locale === 'es' ? promo.subtitleEs : promo.subtitleEn}
                       </p>
-
-                      {/* Price badge */}
-                      <div className="inline-flex items-center bg-white rounded-xl px-3 py-1.5">
-                        <span className="text-red-600 font-extrabold text-lg leading-none">
+                      <div className="inline-flex self-start">
+                        <span className="bg-[#FF6B35] text-white font-bold text-xl px-5 py-2.5">
                           {promo.price}
                         </span>
                       </div>
                     </div>
 
-                    {/* Image circle */}
-                    <div className="relative flex-shrink-0 w-28 h-28">
-                      {/* Decorative ring */}
-                      <div className="absolute inset-0 rounded-full bg-white/10 scale-110" />
-                      <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white/30 shadow-xl relative z-10">
-                        <Image
-                          src={promo.image}
-                          alt={locale === 'es' ? promo.titleEs : promo.titleEn}
-                          fill
-                          className="object-cover"
-                          sizes="112px"
-                        />
-                      </div>
+                    {/* Photo */}
+                    <div className="relative w-2/5 md:w-1/2 flex-shrink-0">
+                      <Image
+                        src={promo.image}
+                        alt={locale === 'es' ? promo.titleEs : promo.titleEn}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 40vw, 50vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#252320] via-[#252320]/30 to-transparent" />
                     </div>
-
-                    {/* Background decoration */}
-                    <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/5" />
-                    <div className="absolute -left-4 -top-4 w-20 h-20 rounded-full bg-white/5" />
                   </motion.div>
                 ) : null
               )}
@@ -365,291 +365,366 @@ export default function Home() {
           </div>
 
           {/* Dot navigation */}
-          <div className="flex items-center justify-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-5">
             {PROMOS.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToPromo(index)}
-                className={`rounded-full transition-all duration-300 ${
+                className={`transition-all duration-300 ${
                   index === activePromo
-                    ? 'w-6 h-2 bg-red-600'
-                    : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    ? 'w-8 h-2 bg-[#C9A84C]'
+                    : 'w-2 h-2 bg-[#3D3936] hover:bg-[#6B6560]'
                 }`}
                 aria-label={`Promo ${index + 1}`}
               />
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── MASCOT GREETING ──────────────────────────────────────────────── */}
-        <section className="px-4 pt-2 pb-3">
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-            {/* Mascot avatar */}
-            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center shadow-md">
-              <Image
-                src="/logos/logo-icon.svg"
-                alt="Simmer Down mascot"
-                width={32}
-                height={32}
-                className="w-8 h-8 object-contain"
-              />
-            </div>
+      {/* ════════════════════════════════════════════════════════════════════
+          4. CATEGORY GRID
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-[#2D2A26]">
+        <div className="max-w-5xl mx-auto px-6">
+          <ScrollReveal>
+            <h2 className="font-display text-2xl md:text-3xl text-[#FFF8F0] mb-10">
+              {locale === 'es' ? 'Nuestro Menú' : 'Our Menu'}
+            </h2>
+          </ScrollReveal>
 
-            {/* Text */}
-            <div className="flex-1 min-w-0">
-              <p className="font-extrabold text-gray-900 text-base leading-tight">
-                {locale === 'es' ? '¡Hola!' : 'Hello!'}
-              </p>
-              <p className="text-gray-500 text-sm leading-tight mt-0.5 truncate">
-                {locale === 'es' ? '¡Hoy es día de pizza! 🍕' : "Today is pizza day! 🍕"}
-              </p>
-            </div>
-
-            {/* Chat button */}
-            <a
-              href="https://wa.me/50322455999?text=Hola!%20Quiero%20hacer%20un%20pedido%20en%20Simmer%20Down%20%F0%9F%8D%95"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-md transition-colors"
-              aria-label={locale === 'es' ? 'Chatear por WhatsApp' : 'Chat on WhatsApp'}
-            >
-              <MessageCircle className="w-5 h-5 text-white" />
-            </a>
-          </div>
-        </section>
-
-        {/* ── CATEGORY GRID ────────────────────────────────────────────────── */}
-        <section className="px-4 pt-2 pb-4">
-          <h2 className="text-lg font-extrabold text-gray-900 mb-3">
-            {locale === 'es' ? 'Menú' : 'Menu'}
-          </h2>
-
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {CATEGORIES.map((cat, i) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id)}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.3 }}
-                whileTap={{ scale: 0.97 }}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-red-100 transition-all duration-200 text-left group"
-              >
-                {/* Image */}
-                <div className="relative h-28 overflow-hidden">
-                  <Image
-                    src={cat.image}
-                    alt={locale === 'es' ? cat.labelEs : cat.labelEn}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 512px) 50vw, 256px"
-                  />
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-                  {/* Badge */}
-                  {cat.badge && (
-                    <div className="absolute top-2 left-2">
-                      <span className="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                        {cat.badge}
-                      </span>
+              <ScrollReveal key={cat.id} delay={i * 60}>
+                <button
+                  onClick={() => router.push(`/menu?category=${cat.id}`)}
+                  className="group w-full overflow-hidden border border-[#3D3936] hover:border-[#FF6B35]/50 transition-all duration-300"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={cat.image}
+                      alt={locale === 'es' ? cat.labelEs : cat.labelEn}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A]/90 via-[#1F1D1A]/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-[#FFF8F0] font-semibold text-sm leading-tight">
+                        <span className="mr-1.5">{cat.emoji}</span>
+                        {locale === 'es' ? cat.labelEs : cat.labelEn}
+                      </p>
                     </div>
-                  )}
-
-                  {/* Emoji anchor */}
-                  <div className="absolute bottom-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-lg shadow">
-                    {cat.emoji}
                   </div>
-                </div>
-
-                {/* Label */}
-                <div className="px-3 py-2.5">
-                  <p className="font-extrabold text-gray-900 text-sm group-hover:text-red-600 transition-colors">
-                    {locale === 'es' ? cat.labelEs : cat.labelEn}
-                  </p>
-                </div>
-              </motion.button>
+                </button>
+              </ScrollReveal>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── QUICK ACCESS BANNER ──────────────────────────────────────────── */}
-        <section className="px-4 pb-6">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            {/* WhatsApp CTA */}
-            <a
-              href="https://wa.me/50322455999?text=Hola!%20Quiero%20hacer%20un%20pedido%20en%20Simmer%20Down%20%F0%9F%8D%95"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3.5 bg-green-500 hover:bg-green-600 transition-colors"
-            >
-              <span className="text-xl">📞</span>
-              <span className="text-white font-bold text-sm flex-1">
-                {locale === 'es' ? 'Pedir por WhatsApp' : 'Order via WhatsApp'}
-              </span>
-              <span className="text-white/70 text-xs font-medium">
-                {locale === 'es' ? 'Rápido y fácil →' : 'Fast & easy →'}
-              </span>
-            </a>
+      {/* ════════════════════════════════════════════════════════════════════
+          5. SIGNATURE DISHES
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-[#1F1D1A]">
+        <div className="max-w-5xl mx-auto px-6">
+          <ScrollReveal>
+            <p className="text-[#C9A84C] text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+              {locale === 'es' ? 'Lo que nos define' : 'What defines us'}
+            </p>
+            <h2 className="font-display text-2xl md:text-3xl text-[#FFF8F0] mb-12">
+              {t(translations.home.specialties)}
+            </h2>
+          </ScrollReveal>
 
-            {/* Location selector */}
-            <div className="relative">
-              <button
-                onClick={() => setLocationOpen(!locationOpen)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors border-t border-gray-100"
-              >
-                <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <span className="text-gray-700 font-semibold text-sm flex-1 text-left">
-                  {selectedLocation}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                    locationOpen ? 'rotate-180' : ''
-                  }`}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {SIGNATURES.map((dish, i) => (
+              <ScrollReveal key={dish.id} delay={i * 100}>
+                <Link href={dish.href} className="group block overflow-hidden border border-[#3D3936] hover:border-[#FF6B35]/50 transition-all duration-300">
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    <Image
+                      src={dish.image}
+                      alt={dish.name}
+                      fill
+                      className="object-cover transition-transform duration-600 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A]/95 via-[#1F1D1A]/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <h3 className="font-display text-xl text-[#FFF8F0] mb-2">{dish.name}</h3>
+                      <p className="text-[#B8B0A8] text-xs leading-relaxed">
+                        {locale === 'es' ? dish.descEs : dish.descEn}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          6. LOCATIONS
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-[#2D2A26]">
+        <div className="max-w-5xl mx-auto px-6">
+          <ScrollReveal>
+            <p className="text-[#C9A84C] text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+              {t(translations.home.uniqueDestinations)}
+            </p>
+            <h2 className="font-display text-2xl md:text-3xl text-[#FFF8F0] mb-12">
+              {t(translations.home.ourLocations)}
+            </h2>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {LOCATIONS.map((loc, i) => (
+              <ScrollReveal key={loc.id} delay={i * 80}>
+                <Link href={`/locations#${loc.id}`} className="group block overflow-hidden border border-[#3D3936] hover:border-[#C9A84C]/50 transition-all duration-300">
+                  <div className="relative aspect-[3/4] overflow-hidden">
+                    <Image
+                      src={loc.image}
+                      alt={locale === 'es' ? loc.nameEs : loc.nameEn}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A]/90 via-[#1F1D1A]/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                      <p className="text-[#FFF8F0] font-semibold text-xs mb-0.5">
+                        {locale === 'es' ? loc.nameEs : loc.nameEn}
+                      </p>
+                      <p className="text-[#C9A84C] text-[10px] font-medium tracking-wide">
+                        {locale === 'es' ? loc.vibeEs : loc.vibeEn}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          7. BRAND STORY
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-[#252320]">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Photo */}
+            <ScrollReveal>
+              <div className="relative aspect-[4/5] overflow-hidden border border-[#3D3936]">
+                <Image
+                  src="/images/menu/pizza-memoravel.jpg"
+                  alt={locale === 'es' ? 'Nuestra historia' : 'Our story'}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-              </button>
+                <div className="absolute inset-0 bg-[#1F1D1A]/20" />
+              </div>
+            </ScrollReveal>
 
-              {/* Dropdown */}
-              <AnimatePresence>
-                {locationOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden border-t border-gray-100"
-                  >
-                    {locations.map((loc) => (
-                      <button
-                        key={loc}
-                        onClick={() => {
-                          setSelectedLocation(loc)
-                          setLocationOpen(false)
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-sm ${
-                          selectedLocation === loc
-                            ? 'text-red-600 font-bold'
-                            : 'text-gray-600 font-medium'
-                        }`}
-                      >
-                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                        {loc}
-                        {selectedLocation === loc && (
-                          <span className="ml-auto text-red-600">✓</span>
-                        )}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {/* Text */}
+            <ScrollReveal delay={150}>
+              <p className="text-[#C9A84C] text-xs font-semibold tracking-[0.2em] uppercase mb-4">
+                {t(translations.home.ourStory)}
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] leading-tight mb-8">
+                {t(translations.home.moreThanRestaurant)}
+              </h2>
+
+              <div className="space-y-5 text-[#B8B0A8] text-sm leading-relaxed">
+                <p>
+                  {t(translations.home.story1)}{' '}
+                  <strong className="text-[#FFF8F0]">Santa Ana</strong>
+                  {t(translations.home.story1b)}
+                </p>
+                <p>
+                  {t(translations.home.story2)}{' '}
+                  <strong className="text-[#FFF8F0]">San Benito</strong>{' '}
+                  {t(translations.home.story2b)}{' '}
+                  <strong className="text-[#FFF8F0]">Surf City</strong>
+                  {t(translations.home.story2c)}
+                </p>
+                <p className="text-[#FFF8F0] font-medium">
+                  {t(translations.home.story3)}
+                </p>
+              </div>
+
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 mt-8 text-[#FF6B35] text-sm font-semibold hover:gap-3 transition-all duration-200"
+              >
+                {t(translations.home.fullStory)}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </ScrollReveal>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── FEATURED DISH SPOTLIGHT ──────────────────────────────────────── */}
-        <section className="px-4 pb-6">
-          <h2 className="text-lg font-extrabold text-gray-900 mb-3">
-            {locale === 'es' ? 'Plato Destacado' : 'Featured Dish'}
-          </h2>
-          <Link href="/menu?category=pizzas" className="block">
-            <div className="relative rounded-2xl overflow-hidden h-48 group">
-              <Image
-                src="/images/menu/pizza-memoravel.jpg"
-                alt="La Memoravel"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 512px) 100vw, 512px"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <span className="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide mb-2 inline-block">
-                      {locale === 'es' ? '⭐ LA MÁS PEDIDA' : '⭐ MOST ORDERED'}
-                    </span>
-                    <h3 className="text-white font-extrabold text-xl leading-tight">
-                      La Memoravel
-                    </h3>
-                    <p className="text-white/70 text-xs mt-0.5">
-                      {locale === 'es'
-                        ? 'Fajitas de res y pollo, BBQ, ajonjolí'
-                        : 'Beef & chicken fajitas, BBQ, sesame'}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 bg-white rounded-xl px-3 py-2 ml-3">
-                    <p className="text-red-600 font-extrabold text-lg leading-none">$12.99</p>
-                  </div>
-                </div>
+      {/* ════════════════════════════════════════════════════════════════════
+          8. SIMMERLOVERS CTA
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-16 bg-[#1F1D1A]">
+        <div className="max-w-5xl mx-auto px-6">
+          <ScrollReveal>
+            <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 p-10 md:p-14 text-center">
+              <div className="flex justify-center mb-5">
+                <Sparkles className="w-8 h-8 text-[#C9A84C]" />
               </div>
+              <p className="text-[#C9A84C] text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+                SimmerLovers
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+                {t(translations.home.joinFamily)}
+              </h2>
+              <p className="text-[#B8B0A8] text-sm max-w-md mx-auto mb-8 leading-relaxed">
+                {t(translations.home.earnRewards)}
+              </p>
+              <Link
+                href="/simmerlovers"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#C9A84C] text-[#1F1D1A] text-sm font-bold uppercase tracking-wide hover:bg-[#F5D47A] transition-all duration-300"
+              >
+                {t(translations.home.joinFree)}
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </Link>
-        </section>
+          </ScrollReveal>
+        </div>
+      </section>
 
-        {/* ── SURF & TURF SPOTLIGHT ─────────────────────────────────────────── */}
-        <section className="px-4 pb-8">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Terramar */}
-            <Link href="/menu?category=mariscos" className="block group">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="relative h-32">
-                  <Image
-                    src="/images/menu/pro-IMG4591.jpg"
-                    alt="Terramar al Maitre"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 512px) 50vw, 256px"
-                  />
-                </div>
-                <div className="p-3">
-                  <p className="text-gray-900 font-extrabold text-xs leading-tight">Terramar al Maitre</p>
-                  <p className="text-red-600 font-bold text-sm mt-0.5">$16.99</p>
-                </div>
-              </div>
-            </Link>
-
-            {/* Fettuccine */}
-            <Link href="/menu?category=pastas" className="block group">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                <div className="relative h-32">
-                  <Image
-                    src="/images/menu/food-IMG20045.jpg"
-                    alt="Fettuccine Calamardiña"
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 512px) 50vw, 256px"
-                  />
-                </div>
-                <div className="p-3">
-                  <p className="text-gray-900 font-extrabold text-xs leading-tight">Fettuccine Calamardiña</p>
-                  <p className="text-red-600 font-bold text-sm mt-0.5">$13.99</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </section>
-
-      </main>
-
-      {/* ─── BOTTOM NAVIGATION (FIXED) ────────────────────────────────────── */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 bg-red-600 safe-area-pb">
-        <div className="max-w-lg mx-auto flex items-stretch h-16">
-          {NAV_TABS.map((tab) => (
+      {/* ════════════════════════════════════════════════════════════════════
+          9. RESERVATION CTA
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="py-20 bg-[#252320]">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <ScrollReveal>
+            <p className="text-[#C9A84C] text-xs font-semibold tracking-[0.2em] uppercase mb-4">
+              {locale === 'es' ? 'Reservaciones' : 'Reservations'}
+            </p>
+            <h2 className="font-display text-3xl md:text-5xl text-[#FFF8F0] mb-3">
+              {locale === 'es' ? 'Tu mesa te espera.' : 'Your table awaits.'}
+            </h2>
+            <p className="text-[#B8B0A8] text-sm mb-10 max-w-sm mx-auto">
+              {locale === 'es'
+                ? 'Reserva en segundos. Sin llamadas. Sin esperas.'
+                : 'Reserve in seconds. No calls. No waiting.'}
+            </p>
             <Link
-              key={tab.id}
-              href={tab.href}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-opacity ${
-                activeTab === tab.id ? 'opacity-100' : 'opacity-60 hover:opacity-80'
-              }`}
+              href="/reservations"
+              className="inline-flex items-center gap-2 px-10 py-4 border border-[#FFF8F0] text-[#FFF8F0] text-sm font-semibold uppercase tracking-wide hover:bg-[#FFF8F0] hover:text-[#1F1D1A] transition-all duration-300"
             >
-              <span className="text-xl leading-none">{tab.icon}</span>
-              <span className="text-white text-[10px] font-bold tracking-wide leading-none">
-                {locale === 'es' ? tab.labelEs : tab.labelEn}
-              </span>
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 w-8 h-0.5 bg-white rounded-full" />
-              )}
+              {t(translations.nav.reservations)}
+              <ArrowRight className="w-4 h-4" />
             </Link>
-          ))}
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          FOOTER CREDIT
+      ════════════════════════════════════════════════════════════════════ */}
+      <footer className="py-6 bg-[#1F1D1A] border-t border-[#3D3936]/30 text-center">
+        <p className="text-[#6B6560] text-[11px] tracking-wide">
+          Crafted by{' '}
+          <a
+            href="https://machinemind.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#C9A84C] hover:text-[#F5D47A] transition-colors"
+          >
+            MachineMind
+          </a>
+        </p>
+      </footer>
+
+      {/* ════════════════════════════════════════════════════════════════════
+          10. BOTTOM NAV — Mobile only
+      ════════════════════════════════════════════════════════════════════ */}
+      <nav className="fixed bottom-0 inset-x-0 z-50 lg:hidden bg-[#1F1D1A] border-t border-[#3D3936]">
+        <div className="flex items-stretch h-16 safe-area-pb">
+
+          {/* Home */}
+          <Link
+            href="/"
+            onClick={() => setActiveTab('home')}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              activeTab === 'home' ? 'text-[#FF6B35]' : 'text-[#6B6560] hover:text-[#B8B0A8]'
+            }`}
+          >
+            <span className="text-xl leading-none">🏠</span>
+            <span className="text-[9px] font-semibold tracking-wide uppercase leading-none mt-0.5">
+              {locale === 'es' ? 'Inicio' : 'Home'}
+            </span>
+          </Link>
+
+          {/* Menu */}
+          <Link
+            href="/menu"
+            onClick={() => setActiveTab('menu')}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              activeTab === 'menu' ? 'text-[#FF6B35]' : 'text-[#6B6560] hover:text-[#B8B0A8]'
+            }`}
+          >
+            <span className="text-xl leading-none">🍕</span>
+            <span className="text-[9px] font-semibold tracking-wide uppercase leading-none mt-0.5">
+              {locale === 'es' ? 'Menú' : 'Menu'}
+            </span>
+          </Link>
+
+          {/* Cart */}
+          <Link
+            href="/cart"
+            onClick={() => setActiveTab('cart')}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 relative transition-colors ${
+              activeTab === 'cart' ? 'text-[#FF6B35]' : 'text-[#6B6560] hover:text-[#B8B0A8]'
+            }`}
+          >
+            <span className="text-xl leading-none relative">
+              🛒
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 bg-[#FF6B35] text-white text-[9px] font-bold flex items-center justify-center px-0.5 leading-none">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </span>
+            <span className="text-[9px] font-semibold tracking-wide uppercase leading-none mt-0.5">
+              {locale === 'es' ? 'Ordenar' : 'Order'}
+            </span>
+          </Link>
+
+          {/* SimmerLovers */}
+          <Link
+            href="/simmerlovers"
+            onClick={() => setActiveTab('simmerlovers')}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              activeTab === 'simmerlovers' ? 'text-[#FF6B35]' : 'text-[#6B6560] hover:text-[#B8B0A8]'
+            }`}
+          >
+            <span className="text-xl leading-none">⭐</span>
+            <span className="text-[9px] font-semibold tracking-wide uppercase leading-none mt-0.5">
+              Lovers
+            </span>
+          </Link>
+
+          {/* Account */}
+          <Link
+            href={user ? '/account' : '/auth/login'}
+            onClick={() => setActiveTab('account')}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              activeTab === 'account' ? 'text-[#FF6B35]' : 'text-[#6B6560] hover:text-[#B8B0A8]'
+            }`}
+          >
+            <span className="text-xl leading-none">👤</span>
+            <span className="text-[9px] font-semibold tracking-wide uppercase leading-none mt-0.5">
+              {locale === 'es' ? 'Cuenta' : 'Account'}
+            </span>
+          </Link>
         </div>
       </nav>
 
