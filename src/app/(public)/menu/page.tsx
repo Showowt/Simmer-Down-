@@ -457,7 +457,7 @@ function MenuListItem({
 }
 
 export default function MenuPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeDietary, setActiveDietary] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -482,7 +482,7 @@ export default function MenuPage() {
     { id: "menu-infantil", name: t(translations.menu.kids), type: "category" as const },
     // Dietary filters appended
     { id: "vegetarian", name: t(translations.menu.vegetarian), type: "dietary" as const },
-    { id: "seafood-filter", name: t(translations.menu.seafood), type: "dietary" as const },
+    { id: "seafood-filter", name: locale === 'es' ? 'Con Mariscos' : 'Has Seafood', type: "dietary" as const },
     { id: "spicy", name: t(translations.menu.spicy), type: "dietary" as const },
     { id: "bestseller", name: t(translations.menu.favorites), type: "dietary" as const },
   ];

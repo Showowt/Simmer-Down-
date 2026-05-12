@@ -59,7 +59,7 @@ export default function Footer() {
           {/* Column 2: Navigation */}
           <div>
             <h4 className="text-xs font-medium text-[#FFF8F0] uppercase tracking-[0.15em] mb-6">
-              {locale === 'es' ? 'Navegacion' : 'Navigation'}
+              {locale === 'es' ? 'Navegaci\u00f3n' : 'Navigation'}
             </h4>
             <ul className="space-y-3">
               {navigationLinks.map((link) => (
@@ -83,18 +83,18 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li>
                 <a
-                  href="tel:+50324554899"
+                  href="tel:+50324455999"
                   className="text-[#B8B0A8] hover:text-[#C9A84C] transition-colors duration-300"
                 >
-                  +503 2455-4899
+                  +503 2445-5999
                 </a>
               </li>
               <li>
                 <a
-                  href="mailto:info@simmerdown.com.sv"
+                  href="mailto:info@simmerdownsv.com"
                   className="text-[#B8B0A8] hover:text-[#C9A84C] transition-colors duration-300"
                 >
-                  info@simmerdown.com.sv
+                  info@simmerdownsv.com
                 </a>
               </li>
               <li className="text-[#6B6560] pt-1">

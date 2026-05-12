@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -12,8 +12,6 @@ import {
   Truck,
   Store,
   ArrowLeft,
-  Lock,
-  CreditCard,
   AlertCircle,
   ChevronDown,
   Wallet,
@@ -22,18 +20,13 @@ import {
   Check,
   X,
   Loader2,
+  Info,
 } from "lucide-react";
 import Link from "next/link";
 
 import { useCartStore } from "@/store/cart";
 import { useI18n, translations } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
-import {
-  CardForm,
-  validateCardForm,
-  type CardFormValue,
-} from "@/components/checkout/CardForm";
-import { ThreeDSModal } from "@/components/checkout/ThreeDSModal";
 
 interface Location {
   id: string;
@@ -113,8 +106,6 @@ const fallbackLocations: Location[] = [
   },
 ];
 
-type PaymentMethod = "card" | "cash";
-
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getSubtotal, clearCart } = useCartStore();
@@ -123,7 +114,6 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [locations, setLocations] = useState<Location[]>(fallbackLocations);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -134,19 +124,6 @@ export default function CheckoutPage() {
     city: "",
     notes: "",
   });
-  const [card, setCard] = useState<CardFormValue>({
-    pan: "",
-    cvv: "",
-    exp: "",
-    holder: "",
-  });
-  const [cardErrors, setCardErrors] = useState<
-    Partial<Record<keyof CardFormValue, string>>
-  >({});
-  const [threeDsData, setThreeDsData] = useState<{
-    orderId: string;
-    redirectData: string;
-  } | null>(null);
 
   // Promo code state
   const [promoExpanded, setPromoExpanded] = useState(false);
@@ -183,32 +160,6 @@ export default function CheckoutPage() {
     fetchLocations();
   }, []);
 
-  const handle3DsResult = useCallback(
-    async (res: {
-      type: "paid" | "failed" | "timeout" | "closed";
-      orderId: string;
-      message?: string;
-    }) => {
-      setThreeDsData(null);
-      if (res.type === "paid") {
-        clearCart();
-        router.push(`/orders?id=${res.orderId}&paid=1`);
-        return;
-      }
-      if (res.type === "failed") {
-        setError(res.message || "El pago no pudo completarse. Intenta de nuevo.");
-      } else if (res.type === "timeout") {
-        setError(
-          "La autenticación tomó demasiado tiempo. Revisa tu pedido y vuelve a intentar.",
-        );
-      } else {
-        setError("Pago cancelado.");
-      }
-      setLoading(false);
-    },
-    [router, clearCart],
-  );
-
   if (!mounted) {
     return (
       <div className="min-h-screen bg-[#2D2A26] pt-32">
@@ -222,17 +173,18 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0 && !threeDsData) {
+  if (items.length === 0) {
     router.push("/cart");
     return null;
   }
 
   const subtotal = getSubtotal();
   const currentLocation = locations.find((l) => l.id === selectedLocation);
-  const deliveryFee =
+  const locationDeliveryFee =
     orderType === "delivery" && currentLocation?.delivery_enabled
       ? currentLocation.delivery_fee || 3.99
       : 0;
+  const deliveryFee = subtotal >= 25 ? 0 : locationDeliveryFee;
   const discountAmount = appliedPromo?.discount_amount ?? 0;
   const total = Math.max(0, subtotal + deliveryFee - discountAmount);
 
@@ -351,32 +303,6 @@ export default function CheckoutPage() {
     };
   };
 
-  const initiatePayment = async (orderId: string) => {
-    const response = await fetch("/api/payments/initiate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId,
-        card,
-        billing: {
-          line1: orderType === "delivery" ? formData.address : currentLocation?.address_line1 || "—",
-          city: orderType === "delivery" ? formData.city : currentLocation?.city || "San Salvador",
-          postalCode: "01101",
-          countryCode: "SV",
-          email: formData.email || null,
-          phone: formData.phone,
-        },
-      }),
-    });
-    const body = await response.json();
-    if (!response.ok || !body?.success) {
-      throw new Error(
-        body?.message || "No se pudo iniciar el pago con tarjeta.",
-      );
-    }
-    return body as { spiToken: string; redirectData: string; orderId: string };
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -388,30 +314,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (paymentMethod === "card") {
-      const validationErrors = validateCardForm(card);
-      if (validationErrors) {
-        setCardErrors(validationErrors);
-        setError(t(translations.checkout.checkCardData));
-        setLoading(false);
-        return;
-      }
-      setCardErrors({});
-    }
-
     try {
       const order = await createOrder();
-
-      if (paymentMethod === "cash") {
-        clearCart();
-        router.push(`/orders?id=${order.id}&number=${order.orderNumber}`);
-        return;
-      }
-
-      const { redirectData, orderId } = await initiatePayment(order.id);
-      setThreeDsData({ orderId, redirectData });
+      clearCart();
+      router.push(`/orders?id=${order.id}&number=${order.orderNumber}`);
     } catch (err) {
-      console.error("checkout submit error", err);
+      console.error("[CheckoutPage] submit error", err);
       setError(
         err instanceof Error
           ? err.message
@@ -591,7 +499,7 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                  {t(translations.checkout.email)} {paymentMethod === "card" ? "*" : `(${t(translations.checkout.emailOptional)})`}
+                  {t(translations.checkout.email)} ({t(translations.checkout.emailOptional)})
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
@@ -599,7 +507,6 @@ export default function CheckoutPage() {
                     id="email"
                     type="email"
                     autoComplete="email"
-                    required={paymentMethod === "card"}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] transition"
@@ -671,7 +578,7 @@ export default function CheckoutPage() {
             </div>
           </motion.div>
 
-          {/* Payment method */}
+          {/* Payment method — cash only (card coming soon via PowerTranz HPP) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -681,43 +588,23 @@ export default function CheckoutPage() {
             <h2 className="font-display text-lg text-[#FFF8F0] mb-4">
               {t(translations.checkout.paymentMethod)}
             </h2>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("card")}
-                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
-                  paymentMethod === "card"
-                    ? "border-[#FF6B35] bg-[#FF6B35]/10 text-[#FF6B35]"
-                    : "border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560]"
-                }`}
-              >
-                <CreditCard className="w-5 h-5" />
-                <span className="font-medium">{t(translations.checkout.card)}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("cash")}
-                className={`p-4 border-2 flex items-center justify-center gap-3 transition-all min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] ${
-                  paymentMethod === "cash"
-                    ? "border-[#FF6B35] bg-[#FF6B35]/10 text-[#FF6B35]"
-                    : "border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560]"
-                }`}
-              >
-                <Wallet className="w-5 h-5" />
-                <span className="font-medium">
-                  {orderType === "delivery" ? t(translations.checkout.payOnDelivery) : t(translations.checkout.payAtStore)}
-                </span>
-              </button>
+            <div className="p-4 border-2 border-[#FF6B35] bg-[#FF6B35]/10 flex items-center gap-3 min-h-[56px]">
+              <Wallet className="w-5 h-5 text-[#FF6B35]" />
+              <span className="font-medium text-[#FF6B35]">
+                {orderType === "delivery"
+                  ? t(translations.checkout.payOnDelivery)
+                  : t(translations.checkout.payAtStore)}
+              </span>
             </div>
-
-            {paymentMethod === "card" && (
-              <CardForm
-                value={card}
-                onChange={setCard}
-                disabled={loading}
-                errors={cardErrors}
-              />
-            )}
+            <p className="mt-3 text-sm text-[#B8B0A8]">
+              {orderType === "delivery"
+                ? "Paga en efectivo o POS al recibir tu pedido / Pay cash or POS on delivery"
+                : "Paga en el local al recoger tu pedido / Pay at the store when you pick up"}
+            </p>
+            <div className="mt-3 flex items-center gap-2 text-xs text-[#6B6560]">
+              <Info className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Pago con tarjeta pr&oacute;ximamente / Card payment coming soon</span>
+            </div>
           </motion.div>
 
           {/* Summary */}
@@ -871,24 +758,13 @@ export default function CheckoutPage() {
               </>
             ) : (
               <>
-                <Lock className="w-5 h-5" />
-                {paymentMethod === "card"
-                  ? `${t(translations.checkout.pay)} $${total.toFixed(2)}`
-                  : `${t(translations.checkout.confirmOrder)} · $${total.toFixed(2)}`}
+                {t(translations.checkout.confirmOrder)} &middot; ${total.toFixed(2)}
               </>
             )}
           </motion.button>
         </form>
       </div>
 
-      {threeDsData && (
-        <ThreeDSModal
-          orderId={threeDsData.orderId}
-          redirectData={threeDsData.redirectData}
-          onResult={handle3DsResult}
-          onClose={() => setThreeDsData(null)}
-        />
-      )}
     </div>
   );
 }

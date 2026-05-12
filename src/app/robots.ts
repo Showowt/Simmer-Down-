@@ -6,9 +6,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/auth/callback'],
+        disallow: ['/admin/', '/api/', '/auth/callback', '/kitchen/', '/checkout/', '/cart/', '/orders/'],
+      },
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: ['/admin/', '/api/', '/auth/callback', '/kitchen/'],
       },
     ],
     sitemap: 'https://simmerdownsv.com/sitemap.xml',
+    host: 'https://simmerdownsv.com',
   }
 }

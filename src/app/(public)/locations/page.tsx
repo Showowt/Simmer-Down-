@@ -85,7 +85,7 @@ export default function LocationsPage() {
           : "An experience facing one of the world's natural wonders",
       description:
         locale === "es"
-          ? "Contempla el atardecer sobre el lago volcanico mientras disfrutas de nuestras especialidades. Una experiencia única en El Salvador."
+          ? "Contempla el atardecer sobre el lago volcánico mientras disfrutas de nuestras especialidades. Una experiencia única en El Salvador."
           : "Watch the sunset over the volcanic lake while enjoying our specialties. A unique experience in El Salvador.",
       address: "Calle Principal al Lago #119",
       city: "Lago de Coatepeque, El Salvador",
@@ -169,8 +169,8 @@ export default function LocationsPage() {
           : "The Flower Route at its finest",
       description:
         locale === "es"
-          ? "Rodeado de naturaleza y el encanto del pueblo magico de Juayua. Perfecto para escapadas de fin de semana."
-          : "Surrounded by nature and the charm of the magical town of Juayua. Perfect for weekend getaways.",
+          ? "Rodeado de naturaleza y el encanto del pueblo mágico de Juayúa. Perfecto para escapadas de fin de semana."
+          : "Surrounded by nature and the charm of the magical town of Juayúa. Perfect for weekend getaways.",
       address: "Kilómetro 91.5, San José La Majada",
       city: "Juayua, Sonsonate, El Salvador",
       phone: "+503 6990-4674",
@@ -208,7 +208,7 @@ export default function LocationsPage() {
           : "Sunset, surf and freedom that only the coast offers",
       description:
         locale === "es"
-          ? "Nuestra ubicación mas nueva, donde el oceano y la pizza se encuentran. El spot perfecto despues de surfear."
+          ? "Nuestra ubicación más nueva, donde el océano y la pizza se encuentran. El spot perfecto después de surfear."
           : "Our newest location, where the ocean and pizza meet. The perfect spot after surfing.",
       address: "Hotel Casa Santa Emilia, Conchalio 2",
       city: "La Libertad, El Salvador",
@@ -222,7 +222,7 @@ export default function LocationsPage() {
       },
       features:
         locale === "es"
-          ? ["Vista al Mar", "Surf Vibes", "Cocteles"]
+          ? ["Vista al Mar", "Surf Vibes", "Cócteles"]
           : ["Ocean View", "Surf Vibes", "Cocktails"],
       image: "/images/locations/surf-city-exterior.jpg",
       gallery: [

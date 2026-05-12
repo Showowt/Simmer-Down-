@@ -199,10 +199,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-[#6B6560] text-sm">{t(translations.contact.emailLabel)}</p>
                       <a
-                        href="mailto:info@simmerdown.sv"
+                        href="mailto:info@simmerdownsv.com"
                         className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors"
                       >
-                        info@simmerdown.sv
+                        info@simmerdownsv.com
                       </a>
                     </div>
                   </div>

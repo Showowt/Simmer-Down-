@@ -61,6 +61,8 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'simmer-down-cart',
+      version: 2,
+      migrate: () => ({ items: [] }),
     }
   )
 )

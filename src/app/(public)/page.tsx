@@ -10,20 +10,26 @@ const locations = [
   {
     name: 'Santa Ana',
     vibe: 'El Origen',
-    description: { es: 'Frente a la catedral, donde todo comenzo.', en: 'Facing the cathedral, where it all began.' },
+    description: { es: 'Frente a la catedral, donde todo comenzó.', en: 'Facing the cathedral, where it all began.' },
     image: '/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg',
   },
   {
     name: 'Lago de Coatepeque',
     vibe: 'Vista al Lago',
-    description: { es: 'Pizza con la mejor vista del volcan.', en: 'Pizza with the best volcano view.' },
+    description: { es: 'Pizza con la mejor vista del volcán.', en: 'Pizza with the best volcano view.' },
     image: '/images/locations/gallery-coatepeque/coatepeque-2.jpg',
   },
   {
     name: 'San Benito',
     vibe: 'San Salvador',
-    description: { es: 'El corazon cosmopolita de la ciudad.', en: 'The cosmopolitan heart of the city.' },
+    description: { es: 'El corazón cosmopolita de la ciudad.', en: 'The cosmopolitan heart of the city.' },
     image: '/images/locations/gallery-san-benito/san-benito-1.jpg',
+  },
+  {
+    name: 'Simmer Garden',
+    vibe: 'Ruta de las Flores',
+    description: { es: 'Naturaleza, café de altura y el encanto de Juayúa.', en: 'Nature, altitude coffee and the charm of Juayúa.' },
+    image: '/images/locations/gallery-garden/garden-4.jpg',
   },
   {
     name: 'Surf City',
@@ -37,7 +43,7 @@ const locations = [
 const signatureDishes = [
   {
     name: 'La Memoravel',
-    description: { es: 'Fajitas de res y pollo, cebolla marinada, salsa BBQ, ajonjoli', en: 'Beef & chicken fajitas, marinated onion, BBQ sauce, sesame' },
+    description: { es: 'Fajitas de res y pollo, cebolla marinada, salsa BBQ, ajonjolí', en: 'Beef & chicken fajitas, marinated onion, BBQ sauce, sesame' },
     image: '/images/menu/pizza-memoravel.jpg',
   },
   {
@@ -46,7 +52,7 @@ const signatureDishes = [
     image: '/images/menu/pro-IMG4591.jpg',
   },
   {
-    name: 'Fettuccine Calamardina',
+    name: 'Fettuccine Calamardiña',
     description: { es: 'Calamares, camarones jumbo, almejas, mejillones en salsa marinera', en: 'Calamari, jumbo shrimp, clams, mussels in marinara sauce' },
     image: '/images/menu/food-IMG20045.jpg',
   },
@@ -224,10 +230,10 @@ export default function Home() {
               </h2>
               <div className="space-y-5 text-[#B8B0A8] leading-relaxed">
                 <p>
-                  {t(translations.home.story1)} <strong className="text-[#FFF8F0]">Santa Ana</strong>{t(translations.home.story1b)}
+                  {t(translations.home.story1)}{' '}<strong className="text-[#FFF8F0]">Santa Ana</strong>{t(translations.home.story1b)}
                 </p>
                 <p>
-                  {t(translations.home.story2)} <strong className="text-[#FFF8F0]">Lago de Coatepeque</strong> {t(translations.home.story2b)} <strong className="text-[#FFF8F0]">Surf City</strong>{t(translations.home.story2c)}
+                  {t(translations.home.story2)}{' '}<strong className="text-[#FFF8F0]">Lago de Coatepeque</strong>{' '}{t(translations.home.story2b)}{' '}<strong className="text-[#FFF8F0]">Surf City</strong>{t(translations.home.story2c)}
                 </p>
                 <p className="font-display italic text-[#FFF8F0] text-lg">
                   {t(translations.home.story3)}
@@ -272,7 +278,7 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {locations.map((location, i) => (
               <motion.div
                 key={location.name}

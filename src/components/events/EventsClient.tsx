@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { useI18n, translations } from "@/lib/i18n";
 
 // ─────────────────────────────────────────────
 // Real events schema (matches prod DB)
@@ -49,29 +50,33 @@ const fallbackEvents: DbEvent[] = [
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
-function formatEventDate(iso: string, recurrence?: string | null): string {
+function formatEventDate(iso: string, recurrence?: string | null, locale?: string): string {
   const date = new Date(iso);
   if (isNaN(date.getTime())) return "";
+  const dateLocale = locale === 'en' ? "en-US" : "es-SV";
   if (recurrence === "monthly") {
-    return "Cada mes · Simmer Down San Benito";
+    return locale === 'en'
+      ? "Every month \u00b7 Simmer Down San Benito"
+      : "Cada mes \u00b7 Simmer Down San Benito";
   }
   if (recurrence === "weekly") {
-    return date.toLocaleDateString("es-SV", {
+    return date.toLocaleDateString(dateLocale, {
       weekday: "long",
     });
   }
-  return date.toLocaleDateString("es-SV", {
+  return date.toLocaleDateString(dateLocale, {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
 }
 
-function formatEventTime(iso: string): string {
+function formatEventTime(iso: string, locale?: string): string {
   const date = new Date(iso);
   if (isNaN(date.getTime())) return "";
+  const dateLocale = locale === 'en' ? "en-US" : "es-SV";
   return date
-    .toLocaleTimeString("es-SV", {
+    .toLocaleTimeString(dateLocale, {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
@@ -79,23 +84,26 @@ function formatEventTime(iso: string): string {
     .replace(" ", "");
 }
 
-function deriveCoverPrice(tags?: string[] | null): string | null {
+function deriveCoverPrice(tags?: string[] | null, locale?: string): string | null {
   if (!tags) return null;
-  for (const t of tags) {
-    if (t.startsWith("cover-")) return `$${t.slice("cover-".length)}`;
-    if (t.startsWith("preventa-")) return `Preventa $${t.slice("preventa-".length)}`;
+  for (const tag of tags) {
+    if (tag.startsWith("cover-")) return `$${tag.slice("cover-".length)}`;
+    if (tag.startsWith("preventa-")) {
+      const price = tag.slice("preventa-".length);
+      return locale === 'en' ? `Pre-sale $${price}` : `Preventa $${price}`;
+    }
   }
   return null;
 }
 
-function firstCategoryTag(tags?: string[] | null): string {
-  if (!tags || tags.length === 0) return "Evento";
+function firstCategoryTag(tags?: string[] | null, locale?: string): string {
+  if (!tags || tags.length === 0) return locale === 'en' ? "Event" : "Evento";
   const priority = ["music", "salsa", "rock", "poetry", "comedy", "openmic", "tribute", "signature"];
-  const display: Record<string, string> = {
-    music: "Música",
+  const displayEs: Record<string, string> = {
+    music: "M\u00fasica",
     salsa: "Salsa",
     rock: "Rock",
-    poetry: "Poesía",
+    poetry: "Poes\u00eda",
     comedy: "Comedia",
     openmic: "Open Mic",
     tribute: "Tributo",
@@ -103,6 +111,19 @@ function firstCategoryTag(tags?: string[] | null): string {
     live: "En vivo",
     monthly: "Mensual",
   };
+  const displayEn: Record<string, string> = {
+    music: "Music",
+    salsa: "Salsa",
+    rock: "Rock",
+    poetry: "Poetry",
+    comedy: "Comedy",
+    openmic: "Open Mic",
+    tribute: "Tribute",
+    signature: "Signature",
+    live: "Live",
+    monthly: "Monthly",
+  };
+  const display = locale === 'en' ? displayEn : displayEs;
   for (const p of priority) {
     if (tags.includes(p)) return display[p] || p;
   }
@@ -113,6 +134,7 @@ function firstCategoryTag(tags?: string[] | null): string {
 // EventsList — main component
 // ─────────────────────────────────────────────
 export function EventsList() {
+  const { t, locale } = useI18n();
   const [events, setEvents] = useState<DbEvent[]>(fallbackEvents);
   // Render the fallback on SSR so the page isn't blank on first paint.
   const [loading, setLoading] = useState(false);
@@ -193,22 +215,22 @@ export function EventsList() {
               <div className="p-8 md:p-12">
                 <span className="inline-flex items-center gap-2 bg-[#FF6B35] text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 mb-6">
                   <Star className="w-3.5 h-3.5" />
-                  Evento Destacado
+                  {locale === 'es' ? 'Evento Destacado' : 'Featured Event'}
                 </span>
                 <h2 className="font-display text-3xl md:text-5xl text-[#FFF8F0] mb-4 leading-tight">
-                  {event.title}
+                  {locale === 'es' ? (event.title_es || event.title) : event.title}
                 </h2>
                 <p className="text-lg text-[#B8B0A8] mb-6">
-                  {event.description_es || event.description}
+                  {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}
                 </p>
                 <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 text-[#B8B0A8]">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-[#C9A84C]" />
-                    <span className="capitalize">{formatEventDate(event.starts_at, event.recurrence)}</span>
+                    <span className="capitalize">{formatEventDate(event.starts_at, event.recurrence, locale)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-[#C9A84C]" />
-                    {formatEventTime(event.starts_at)}
+                    {formatEventTime(event.starts_at, locale)}
                   </div>
                   {event.custom_venue && (
                     <div className="flex items-center gap-2">
@@ -216,9 +238,9 @@ export function EventsList() {
                       {event.custom_venue}
                     </div>
                   )}
-                  {deriveCoverPrice(event.tags) && (
+                  {deriveCoverPrice(event.tags, locale) && (
                     <div className="flex items-center gap-2 text-[#C9A84C] font-semibold">
-                      {deriveCoverPrice(event.tags)}
+                      {deriveCoverPrice(event.tags, locale)}
                     </div>
                   )}
                 </div>
@@ -226,7 +248,7 @@ export function EventsList() {
                   href="/contact"
                   className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
                 >
-                  Reservar Tu Lugar
+                  {locale === 'es' ? 'Reservar Tu Lugar' : 'Reserve Your Spot'}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </div>
@@ -240,7 +262,7 @@ export function EventsList() {
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="font-display text-3xl text-[#FFF8F0] mb-12">
-              Próximos Eventos
+              {locale === 'es' ? 'Próximos Eventos' : 'Upcoming Events'}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -257,7 +279,7 @@ export function EventsList() {
                     {event.image_url ? (
                       <Image
                         src={event.image_url}
-                        alt={event.title}
+                        alt={locale === 'es' ? (event.title_es || event.title) : event.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
@@ -268,13 +290,13 @@ export function EventsList() {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/70 via-transparent to-transparent" />
                     <div className="absolute top-3 left-3">
                       <span className="bg-[#2D2A26]/80 backdrop-blur-sm text-[#FFF8F0] text-xs font-semibold px-3 py-1">
-                        {firstCategoryTag(event.tags)}
+                        {firstCategoryTag(event.tags, locale)}
                       </span>
                     </div>
-                    {deriveCoverPrice(event.tags) && (
+                    {deriveCoverPrice(event.tags, locale) && (
                       <div className="absolute top-3 right-3">
                         <span className="bg-[#FF6B35] text-white text-sm font-bold px-3 py-1">
-                          {deriveCoverPrice(event.tags)}
+                          {deriveCoverPrice(event.tags, locale)}
                         </span>
                       </div>
                     )}
@@ -282,22 +304,22 @@ export function EventsList() {
 
                   <div className="p-6">
                     <h3 className="font-display text-xl text-[#FFF8F0] mb-2 line-clamp-2">
-                      {event.title}
+                      {locale === 'es' ? (event.title_es || event.title) : event.title}
                     </h3>
                     <p className="text-[#B8B0A8] text-sm mb-4 line-clamp-2">
-                      {event.description_es || event.description}
+                      {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}
                     </p>
 
                     <div className="space-y-2 mb-6 text-sm">
                       <div className="flex items-center gap-2 text-[#6B6560]">
                         <Calendar className="w-4 h-4 text-[#C9A84C]" />
                         <span className="capitalize">
-                          {formatEventDate(event.starts_at, event.recurrence)}
+                          {formatEventDate(event.starts_at, event.recurrence, locale)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-[#6B6560]">
                         <Clock className="w-4 h-4 text-[#C9A84C]" />
-                        {formatEventTime(event.starts_at)}
+                        {formatEventTime(event.starts_at, locale)}
                       </div>
                       {event.custom_venue && (
                         <div className="flex items-center gap-2 text-[#6B6560]">
@@ -311,7 +333,7 @@ export function EventsList() {
                       href="/contact"
                       className="block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition-colors min-h-[48px]"
                     >
-                      Reservar
+                      {locale === 'es' ? 'Reservar' : 'Reserve'}
                     </Link>
                   </div>
                 </motion.div>
@@ -335,6 +357,8 @@ export function PrivateEventsSection({
 }: {
   eventTypes: PrivateEventType[];
 }) {
+  const { t, locale } = useI18n();
+
   return (
     <section className="py-24 bg-[#252320] border-t border-[#3D3936]">
       <div className="max-w-6xl mx-auto px-6">
@@ -345,15 +369,15 @@ export function PrivateEventsSection({
             viewport={{ once: true }}
           >
             <p className="font-display italic text-2xl text-[#6B6560] mb-4">
-              Eventos Privados
+              {locale === 'es' ? 'Eventos Privados' : 'Private Events'}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
-              Tu Evento Con Nosotros
+              {locale === 'es' ? 'Tu Evento Con Nosotros' : 'Your Event With Us'}
             </h2>
             <p className="text-lg text-[#B8B0A8] mb-8">
-              ¿Buscas el lugar perfecto para tu próxima celebración? Ofrecemos
-              espacios para eventos privados, menús personalizados y servicio de
-              catering para hacer tu evento inolvidable.
+              {locale === 'es'
+                ? '¿Buscas el lugar perfecto para tu próxima celebración? Ofrecemos espacios para eventos privados, menús personalizados y servicio de catering para hacer tu evento inolvidable.'
+                : 'Looking for the perfect place for your next celebration? We offer spaces for private events, custom menus and catering service to make your event unforgettable.'}
             </p>
 
             <div className="space-y-6 mb-8">
@@ -376,7 +400,7 @@ export function PrivateEventsSection({
               href="/contact"
               className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
             >
-              Solicitar Información
+              {locale === 'es' ? 'Solicitar Información' : 'Request Information'}
               <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>

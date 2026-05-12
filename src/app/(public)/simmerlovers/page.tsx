@@ -23,6 +23,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useToastStore } from "@/components/Toast";
+import { useI18n, translations } from "@/lib/i18n";
 
 // ─────────────────────────────────────────────
 // Real production schema types
@@ -92,13 +93,13 @@ const tierIcon: Record<Tier, React.ComponentType<{ className?: string }>> = {
   platinum: Crown,
 };
 
-const perkIcons = [
-  { icon: Gift, title: "Recompensas de Cumpleaños" },
-  { icon: Zap, title: "Ofertas Flash Exclusivas" },
-  { icon: Sparkles, title: "Acceso Anticipado al Menú" },
-  { icon: Users, title: "Invitaciones a Eventos VIP" },
-  { icon: Percent, title: "Descuentos de Miembro" },
-  { icon: Calendar, title: "Pickup Prioritario" },
+const perkIconsData = [
+  { icon: Gift, title_es: "Recompensas de Cumpleaños", title_en: "Birthday Rewards" },
+  { icon: Zap, title_es: "Ofertas Flash Exclusivas", title_en: "Exclusive Flash Offers" },
+  { icon: Sparkles, title_es: "Acceso Anticipado al Menú", title_en: "Early Menu Access" },
+  { icon: Users, title_es: "Invitaciones a Eventos VIP", title_en: "VIP Event Invitations" },
+  { icon: Percent, title_es: "Descuentos de Miembro", title_en: "Member Discounts" },
+  { icon: Calendar, title_es: "Pickup Prioritario", title_en: "Priority Pickup" },
 ];
 
 function createClient() {
@@ -170,6 +171,7 @@ const FALLBACK_REWARDS: LoyaltyReward[] = [
 // Main page
 // ─────────────────────────────────────────────
 export default function SimmerLoversPage() {
+  const { t, locale } = useI18n();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [tierConfigs, setTierConfigs] = useState<TierConfig[]>(FALLBACK_TIERS);
   const [rewards, setRewards] = useState<LoyaltyReward[]>(FALLBACK_REWARDS);
@@ -228,7 +230,7 @@ export default function SimmerLoversPage() {
 
   return (
     <div className="min-h-screen bg-[#2D2A26] pt-32">
-      <Hero signedIn={!!customer} />
+      <Hero signedIn={!!customer} t={t} locale={locale} />
 
       {customer ? (
         <MemberDashboard
@@ -236,17 +238,19 @@ export default function SimmerLoversPage() {
           tierConfigs={tierConfigs}
           rewards={rewards}
           transactions={transactions}
+          t={t}
+          locale={locale}
           onUpdate={(next, tx) => {
             setCustomer(next);
             if (tx) setTransactions([tx, ...transactions]);
           }}
         />
       ) : (
-        <GuestView tierConfigs={tierConfigs} rewards={rewards} />
+        <GuestView tierConfigs={tierConfigs} rewards={rewards} t={t} locale={locale} />
       )}
 
-      <PerksSection />
-      <CallToAction signedIn={!!customer} />
+      <PerksSection t={t} locale={locale} />
+      <CallToAction signedIn={!!customer} t={t} locale={locale} />
     </div>
   );
 }
@@ -254,7 +258,7 @@ export default function SimmerLoversPage() {
 // ─────────────────────────────────────────────
 // Hero
 // ─────────────────────────────────────────────
-function Hero({ signedIn }: { signedIn: boolean }) {
+function Hero({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
     <section className="relative pt-4 pb-16 md:pb-24 overflow-hidden">
       <div className="absolute inset-0">
@@ -275,7 +279,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           className="inline-flex items-center gap-2 bg-[#252320] border border-[#3D3936] text-[#C9A84C] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
         >
           <Flame className="w-4 h-4" />
-          Programa de Lealtad
+          {t(translations.loyalty.loyaltyProgram)}
         </motion.div>
 
         <motion.h1
@@ -293,7 +297,7 @@ function Hero({ signedIn }: { signedIn: boolean }) {
           transition={{ delay: 0.2 }}
           className="text-xl md:text-2xl text-[#B8B0A8] max-w-2xl mx-auto mb-8"
         >
-          Puntos por cada pedido. Recompensas que se sienten. Una tribu que come bien.
+          {t(translations.loyalty.tagline)}
         </motion.p>
 
         {!signedIn && (
@@ -307,14 +311,14 @@ function Hero({ signedIn }: { signedIn: boolean }) {
               href="/auth/signup?loyalty=1"
               className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold flex items-center gap-2 transition min-h-[56px]"
             >
-              Unirme gratis
+              {t(translations.loyalty.joinFree)}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/auth/login"
               className="text-[#FFF8F0] hover:text-[#FF6B35] transition px-4 py-3"
             >
-              Ya soy miembro · Ingresar
+              {t(translations.loyalty.alreadyMember)}
             </Link>
           </motion.div>
         )}
@@ -329,9 +333,13 @@ function Hero({ signedIn }: { signedIn: boolean }) {
 function GuestView({
   tierConfigs,
   rewards,
+  t,
+  locale,
 }: {
   tierConfigs: TierConfig[];
   rewards: LoyaltyReward[];
+  t: (obj: { es: string; en: string }) => string;
+  locale: string;
 }) {
   return (
     <>
@@ -339,19 +347,18 @@ function GuestView({
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
-              Cómo funciona
+              {t(translations.loyalty.howItWorks)}
             </h2>
             <p className="text-[#B8B0A8] max-w-2xl mx-auto">
-              Gana puntos en cada pedido. Sube de tier con tu historial. Canjea
-              por platos, descuentos y experiencias reales.
+              {t(translations.loyalty.howItWorksDesc)}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             {[
-              { n: "1", title: "Unite", desc: "Creá tu cuenta en 30 segundos. Gratis, para siempre." },
-              { n: "2", title: "Pedí", desc: "Ganás 1+ puntos por cada USD que gastás (multiplicador por tier)." },
-              { n: "3", title: "Canjeá", desc: "Bebidas gratis, pizzas, pizza-parties y eventos VIP." },
+              { n: "1", title: t(translations.loyalty.step1), desc: t(translations.loyalty.step1Desc) },
+              { n: "2", title: t(translations.loyalty.step2), desc: t(translations.loyalty.step2Desc) },
+              { n: "3", title: t(translations.loyalty.step3), desc: t(translations.loyalty.step3Desc) },
             ].map((step, i) => (
               <motion.div
                 key={step.n}
@@ -370,9 +377,9 @@ function GuestView({
         </div>
       </section>
 
-      <TierLadder tierConfigs={tierConfigs} />
+      <TierLadder tierConfigs={tierConfigs} t={t} locale={locale} />
 
-      <RewardsGrid rewards={rewards} currentPoints={0} canRedeem={false} />
+      <RewardsGrid rewards={rewards} currentPoints={0} canRedeem={false} t={t} locale={locale} />
     </>
   );
 }
@@ -385,12 +392,16 @@ function MemberDashboard({
   tierConfigs,
   rewards,
   transactions,
+  t,
+  locale,
   onUpdate,
 }: {
   customer: Customer;
   tierConfigs: TierConfig[];
   rewards: LoyaltyReward[];
   transactions: LoyaltyTransaction[];
+  t: (obj: { es: string; en: string }) => string;
+  locale: string;
   onUpdate: (customer: Customer, newTx: LoyaltyTransaction | null) => void;
 }) {
   const [redeeming, setRedeeming] = useState<string | null>(null);
@@ -420,15 +431,20 @@ function MemberDashboard({
 
   const handleRedeem = async (reward: LoyaltyReward) => {
     if (customer.loyalty_points_balance < reward.points_required) {
+      const diff = reward.points_required - customer.loyalty_points_balance;
       addToast(
-        `Necesitas ${reward.points_required - customer.loyalty_points_balance} puntos más`,
+        locale === 'es'
+          ? `Necesitas ${diff} puntos más`
+          : `You need ${diff} more points`,
         "error",
       );
       return;
     }
     if (!canRedeemTier(reward.min_tier_required)) {
       addToast(
-        `Esta recompensa requiere tier ${reward.min_tier_required}`,
+        locale === 'es'
+          ? `Esta recompensa requiere tier ${reward.min_tier_required}`
+          : `This reward requires ${reward.min_tier_required} tier`,
         "error",
       );
       return;
@@ -465,13 +481,19 @@ function MemberDashboard({
         { ...customer, loyalty_points_balance: newBalance },
         tx as LoyaltyTransaction,
       );
+      const rewardName = locale === 'es' ? (reward.name_es || reward.name) : reward.name;
       addToast(
-        `¡Canjeaste ${reward.name_es || reward.name}! Muestra este recibo en tu próxima visita.`,
+        locale === 'es'
+          ? `¡Canjeaste ${rewardName}! Muestra este recibo en tu próxima visita.`
+          : `You redeemed ${rewardName}! Show this receipt on your next visit.`,
         "success",
       );
     } catch (err) {
       console.error("Redeem failed:", err);
-      addToast("No se pudo canjear. Intenta de nuevo.", "error");
+      addToast(
+        locale === 'es' ? "No se pudo canjear. Intenta de nuevo." : "Could not redeem. Please try again.",
+        "error",
+      );
     } finally {
       setRedeeming(null);
     }
@@ -507,33 +529,33 @@ function MemberDashboard({
               </div>
               <div>
                 <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
-                  Tier
+                  {t(translations.loyalty.tier)}
                 </p>
                 <p
                   className="font-display text-2xl capitalize"
                   style={{ color: currentTier.color_hex }}
                 >
-                  {currentTier.display_name_es || currentTier.display_name}
+                  {locale === 'es' ? (currentTier.display_name_es || currentTier.display_name) : currentTier.display_name}
                 </p>
                 <p className="text-xs text-[#6B6560] mt-1">
-                  {currentTier.points_multiplier}× puntos
+                  {currentTier.points_multiplier}× {t(translations.loyalty.points)}
                 </p>
               </div>
             </div>
 
             <div>
               <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
-                Hola, {customer.first_name || "Simmer Lover"}
+                {locale === 'es' ? 'Hola' : 'Hello'}, {customer.first_name || "Simmer Lover"}
               </p>
               <p className="font-display text-5xl md:text-6xl text-[#FFF8F0] mb-1">
-                {customer.loyalty_points_balance.toLocaleString("es-SV")}
+                {customer.loyalty_points_balance.toLocaleString(locale === 'es' ? "es-SV" : "en-US")}
               </p>
-              <p className="text-[#B8B0A8] text-sm">puntos disponibles</p>
+              <p className="text-[#B8B0A8] text-sm">{t(translations.loyalty.availablePoints)}</p>
               {nextTier && (
                 <div className="mt-4 max-w-md">
                   <div className="flex justify-between text-xs text-[#6B6560] mb-1.5">
-                    <span>Próximo tier: <span className="text-[#FFF8F0] capitalize">{nextTier.display_name_es || nextTier.display_name}</span></span>
-                    <span>{pointsToNext.toLocaleString("es-SV")} puntos</span>
+                    <span>{t(translations.loyalty.nextTier)} <span className="text-[#FFF8F0] capitalize">{locale === 'es' ? (nextTier.display_name_es || nextTier.display_name) : nextTier.display_name}</span></span>
+                    <span>{pointsToNext.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} {t(translations.loyalty.points)}</span>
                   </div>
                   <div className="h-1.5 bg-[#3D3936] overflow-hidden">
                     <div
@@ -549,9 +571,9 @@ function MemberDashboard({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-1 gap-3 text-sm">
-              <Stat label="Pedidos" value={customer.total_orders} />
+              <Stat label={t(translations.loyalty.orders)} value={customer.total_orders} />
               <Stat
-                label="Gastado"
+                label={t(translations.loyalty.spent)}
                 value={`$${Number(customer.total_spent ?? 0).toFixed(2)}`}
               />
             </div>
@@ -565,9 +587,11 @@ function MemberDashboard({
           onRedeem={handleRedeem}
           redeemingId={redeeming}
           canRedeemTier={canRedeemTier}
+          t={t}
+          locale={locale}
         />
 
-        {transactions.length > 0 && <TransactionHistory transactions={transactions} />}
+        {transactions.length > 0 && <TransactionHistory transactions={transactions} t={t} locale={locale} />}
       </div>
     </section>
   );
@@ -587,17 +611,16 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 // ─────────────────────────────────────────────
 // Tier ladder
 // ─────────────────────────────────────────────
-function TierLadder({ tierConfigs }: { tierConfigs: TierConfig[] }) {
+function TierLadder({ tierConfigs, t, locale }: { tierConfigs: TierConfig[]; t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
     <section className="py-16 md:py-20 px-6 border-t border-[#3D3936]">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
-            4 Tiers. Cada uno con su fuego.
+            {t(translations.loyalty.tiers)}
           </h2>
           <p className="text-[#B8B0A8] max-w-2xl mx-auto">
-            Subís de tier por puntos acumulados de por vida. Una vez que llegás,
-            no bajás.
+            {t(translations.loyalty.tiersDesc)}
           </p>
         </div>
 
@@ -628,20 +651,20 @@ function TierLadder({ tierConfigs }: { tierConfigs: TierConfig[] }) {
                   className="font-display text-2xl capitalize mb-1"
                   style={{ color: tier.color_hex }}
                 >
-                  {tier.display_name_es || tier.display_name}
+                  {locale === 'es' ? (tier.display_name_es || tier.display_name) : tier.display_name}
                 </h3>
                 <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-4">
                   {tier.min_lifetime_points === 0
-                    ? "Al unirte"
-                    : `Desde ${tier.min_lifetime_points.toLocaleString("es-SV")} puntos`}
+                    ? t(translations.loyalty.onJoin)
+                    : `${t(translations.loyalty.from)} ${tier.min_lifetime_points.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} ${t(translations.loyalty.points)}`}
                 </p>
 
                 <div className="text-[#C9A84C] font-semibold text-sm mb-4">
-                  {tier.points_multiplier}× puntos en cada pedido
+                  {tier.points_multiplier}× {t(translations.loyalty.pointsPerOrder)}
                 </div>
 
                 <ul className="space-y-2 text-sm text-[#B8B0A8] flex-1">
-                  {(tier.perks_es || tier.perks).map((perk, j) => (
+                  {(locale === 'es' ? (tier.perks_es || tier.perks) : tier.perks.length > 0 ? tier.perks : (tier.perks_es || [])).map((perk, j) => (
                     <li key={j} className="flex items-start gap-2">
                       <CheckCircle
                         className="w-4 h-4 mt-0.5 flex-shrink-0"
@@ -670,6 +693,8 @@ function RewardsGrid({
   onRedeem,
   redeemingId,
   canRedeemTier,
+  t,
+  locale,
 }: {
   rewards: LoyaltyReward[];
   currentPoints: number;
@@ -677,6 +702,8 @@ function RewardsGrid({
   onRedeem?: (reward: LoyaltyReward) => void;
   redeemingId?: string | null;
   canRedeemTier?: (tier: Tier) => boolean;
+  t: (obj: { es: string; en: string }) => string;
+  locale: string;
 }) {
   return (
     <section className="py-12 md:py-16 px-6">
@@ -684,19 +711,19 @@ function RewardsGrid({
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
             <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-2">
-              Recompensas
+              {t(translations.loyalty.rewards)}
             </h2>
             <p className="text-[#B8B0A8]">
               {canRedeem
-                ? "Canjeá ahora o ahorrá para las grandes."
-                : "Todo esto te espera cuando te unís."}
+                ? t(translations.loyalty.redeemNow)
+                : t(translations.loyalty.awaitingYou)}
             </p>
           </div>
           {canRedeem && (
             <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/30 px-4 py-2 text-sm">
-              <span className="text-[#6B6560]">Balance:</span>{" "}
+              <span className="text-[#6B6560]">{t(translations.loyalty.balance)}</span>{" "}
               <span className="text-[#FF6B35] font-bold">
-                {currentPoints.toLocaleString("es-SV")} pts
+                {currentPoints.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} pts
               </span>
             </div>
           )}
@@ -704,7 +731,9 @@ function RewardsGrid({
 
         {rewards.length === 0 ? (
           <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
-            <p className="text-[#B8B0A8]">Pronto agregamos más recompensas.</p>
+            <p className="text-[#B8B0A8]">
+              {locale === 'es' ? "Pronto agregamos más recompensas." : "More rewards coming soon."}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -713,6 +742,8 @@ function RewardsGrid({
               const tierLocked =
                 canRedeem && canRedeemTier && !canRedeemTier(reward.min_tier_required);
               const isRedeeming = redeemingId === reward.id;
+              const rewardName = locale === 'es' ? (reward.name_es || reward.name) : reward.name;
+              const rewardDesc = locale === 'es' ? (reward.description_es || reward.description) : (reward.description || reward.description_es);
 
               return (
                 <motion.div
@@ -731,7 +762,7 @@ function RewardsGrid({
                     {reward.image_url ? (
                       <Image
                         src={reward.image_url}
-                        alt={reward.name_es || reward.name}
+                        alt={rewardName}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className={`object-cover transition-opacity ${
@@ -744,7 +775,7 @@ function RewardsGrid({
                       </div>
                     )}
                     <div className="absolute top-3 left-3 bg-[#2D2A26]/90 backdrop-blur-sm px-3 py-1 text-sm font-bold text-[#FF6B35]">
-                      {reward.points_required.toLocaleString("es-SV")} pts
+                      {reward.points_required.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} pts
                     </div>
                     {tierLocked && (
                       <div className="absolute top-3 right-3 bg-[#2D2A26]/90 backdrop-blur-sm p-1.5">
@@ -755,15 +786,15 @@ function RewardsGrid({
 
                   <div className="p-5">
                     <h3 className="font-display text-xl text-[#FFF8F0] mb-1">
-                      {reward.name_es || reward.name}
+                      {rewardName}
                     </h3>
                     <p className="text-sm text-[#B8B0A8] mb-4 line-clamp-2 min-h-[2.5rem]">
-                      {reward.description_es || reward.description || "\u00a0"}
+                      {rewardDesc || "\u00a0"}
                     </p>
 
                     {reward.min_tier_required !== "bronze" && (
                       <p className="text-xs text-[#C9A84C] mb-3 capitalize">
-                        Tier {reward.min_tier_required}+
+                        {t(translations.loyalty.tier)} {reward.min_tier_required}+
                       </p>
                     )}
 
@@ -780,11 +811,11 @@ function RewardsGrid({
                         {isRedeeming ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : tierLocked ? (
-                          "Tier requerido"
+                          t(translations.loyalty.tierRequired)
                         ) : affordable ? (
-                          "Canjear"
+                          t(translations.loyalty.redeem)
                         ) : (
-                          `Faltan ${(reward.points_required - currentPoints).toLocaleString("es-SV")} pts`
+                          `${t(translations.loyalty.remaining)} ${(reward.points_required - currentPoints).toLocaleString(locale === 'es' ? "es-SV" : "en-US")} pts`
                         )}
                       </button>
                     ) : (
@@ -792,7 +823,7 @@ function RewardsGrid({
                         href="/auth/signup?loyalty=1"
                         className="w-full block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition min-h-[48px]"
                       >
-                        Unirme para canjear
+                        {t(translations.loyalty.joinToRedeem)}
                       </Link>
                     )}
                   </div>
@@ -811,38 +842,44 @@ function RewardsGrid({
 // ─────────────────────────────────────────────
 function TransactionHistory({
   transactions,
+  t,
+  locale,
 }: {
   transactions: LoyaltyTransaction[];
+  t: (obj: { es: string; en: string }) => string;
+  locale: string;
 }) {
   const label = (type: string) => {
     switch (type) {
       case "earn":
       case "earned":
-        return { text: "Ganado", color: "text-[#4CAF50]" };
+        return { text: t(translations.loyalty.earned), color: "text-[#4CAF50]" };
       case "redeem":
       case "redeemed":
-        return { text: "Canjeado", color: "text-[#FF6B35]" };
+        return { text: t(translations.loyalty.redeemed), color: "text-[#FF6B35]" };
       case "bonus":
       case "birthday_bonus":
       case "tier_bonus":
       case "referral_bonus":
-        return { text: "Bono", color: "text-[#C9A84C]" };
+        return { text: t(translations.loyalty.bonus), color: "text-[#C9A84C]" };
       case "adjustment":
       case "adjusted":
-        return { text: "Ajuste", color: "text-[#B8B0A8]" };
+        return { text: t(translations.loyalty.adjusted), color: "text-[#B8B0A8]" };
       case "expired":
       case "expiration":
-        return { text: "Expirado", color: "text-[#6B6560]" };
+        return { text: t(translations.loyalty.expired), color: "text-[#6B6560]" };
       default:
         return { text: type, color: "text-[#B8B0A8]" };
     }
   };
 
+  const dateLocale = locale === 'es' ? "es-SV" : "en-US";
+
   return (
     <section className="mt-12">
       <h2 className="font-display text-2xl text-[#FFF8F0] mb-6 flex items-center gap-3">
         <TrendingUp className="w-6 h-6 text-[#FF6B35]" />
-        Historial de puntos
+        {t(translations.loyalty.pointsHistory)}
       </h2>
       <div className="bg-[#252320] border border-[#3D3936] overflow-hidden">
         <div className="divide-y divide-[#3D3936]">
@@ -864,7 +901,7 @@ function TransactionHistory({
                         {l.text}
                       </span>
                       <span className="text-xs text-[#6B6560]">
-                        {new Date(tx.created_at).toLocaleDateString("es-SV", {
+                        {new Date(tx.created_at).toLocaleDateString(dateLocale, {
                           day: "numeric",
                           month: "short",
                           year: "numeric",
@@ -883,10 +920,10 @@ function TransactionHistory({
                     }`}
                   >
                     {positive ? "+" : ""}
-                    {tx.points.toLocaleString("es-SV")}
+                    {tx.points.toLocaleString(dateLocale)}
                   </p>
                   <p className="text-xs text-[#6B6560]">
-                    saldo {tx.balance_after.toLocaleString("es-SV")}
+                    {t(translations.loyalty.balanceAfter)} {tx.balance_after.toLocaleString(dateLocale)}
                   </p>
                 </div>
               </div>
@@ -901,26 +938,26 @@ function TransactionHistory({
 // ─────────────────────────────────────────────
 // Perks strip
 // ─────────────────────────────────────────────
-function PerksSection() {
+function PerksSection({ t, locale }: { t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
     <section className="py-16 md:py-20 px-6 border-t border-[#3D3936] bg-[#252320]">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
-            Beneficios que sí se sienten
+            {t(translations.loyalty.benefitsThatCount)}
           </h2>
           <p className="text-[#B8B0A8] max-w-2xl mx-auto">
-            No es un cupón perdido en un email. Es acceso, servicio y noches que
-            no se repiten.
+            {t(translations.loyalty.benefitsDesc)}
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {perkIcons.map((p, i) => {
+          {perkIconsData.map((p, i) => {
             const Icon = p.icon;
+            const title = locale === 'es' ? p.title_es : p.title_en;
             return (
               <motion.div
-                key={p.title}
+                key={p.title_es}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
@@ -931,7 +968,7 @@ function PerksSection() {
                   <Icon className="w-5 h-5 text-[#FF6B35]" />
                 </div>
                 <h3 className="text-[#FFF8F0] font-semibold text-sm md:text-base pt-1">
-                  {p.title}
+                  {title}
                 </h3>
               </motion.div>
             );
@@ -945,7 +982,7 @@ function PerksSection() {
 // ─────────────────────────────────────────────
 // Bottom CTA
 // ─────────────────────────────────────────────
-function CallToAction({ signedIn }: { signedIn: boolean }) {
+function CallToAction({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
     <section className="py-28 md:py-32 px-6 bg-[#252320] border-t border-[#3D3936]/30">
       <div className="max-w-3xl mx-auto text-center">
@@ -957,19 +994,19 @@ function CallToAction({ signedIn }: { signedIn: boolean }) {
           <Flame className="w-12 h-12 text-[#C9A84C] mx-auto mb-6" />
           <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
             {signedIn
-              ? "Tu próxima noche ya está generando puntos"
-              : "La pizza también premia la lealtad"}
+              ? (locale === 'es' ? "Tu próxima noche ya está generando puntos" : "Your next night is already earning points")
+              : (locale === 'es' ? "La pizza también premia la lealtad" : "Pizza also rewards loyalty")}
           </h2>
           <p className="text-[#B8B0A8] text-xl mb-10">
             {signedIn
-              ? "Pedí, canjeá, volvé. Repetí."
-              : "30 segundos para crear tu cuenta. El resto de tu vida para canjear."}
+              ? (locale === 'es' ? "Pedí, canjeá, volvé. Repetí." : "Order, redeem, return. Repeat.")
+              : (locale === 'es' ? "30 segundos para crear tu cuenta. El resto de tu vida para canjear." : "30 seconds to create your account. A lifetime to redeem.")}
           </p>
           <Link
             href={signedIn ? "/menu" : "/auth/signup?loyalty=1"}
             className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
           >
-            {signedIn ? "Ir al menú" : "Unirme gratis"}
+            {signedIn ? (locale === 'es' ? "Ir al menú" : "Go to menu") : t(translations.loyalty.joinFree)}
             <ArrowRight className="w-5 h-5" />
           </Link>
         </motion.div>

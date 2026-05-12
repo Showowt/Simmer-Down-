@@ -30,7 +30,7 @@ export default function CartPage() {
   }
 
   const subtotal = getSubtotal()
-  const deliveryFee = subtotal > 0 ? 3.99 : 0
+  const deliveryFee = subtotal >= 25 ? 0 : subtotal > 0 ? 3.99 : 0
   const total = subtotal + deliveryFee
 
   if (items.length === 0) {
@@ -161,8 +161,19 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-[#B8B0A8]">{t(translations.cart.delivery)}</span>
-                  <span className="text-[#FFF8F0] font-medium">${deliveryFee.toFixed(2)}</span>
+                  <span className="text-[#FFF8F0] font-medium">
+                    {deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : '$0.00'}
+                  </span>
                 </div>
+                {deliveryFee === 0 && subtotal >= 25 ? (
+                  <p className="text-xs text-green-400">
+                    Envio gratis en pedidos mayores a $25 / Free delivery on orders over $25
+                  </p>
+                ) : subtotal > 0 && subtotal < 25 ? (
+                  <p className="text-xs text-[#6B6560]">
+                    Envio gratis en pedidos mayores a $25 / Free delivery on orders over $25
+                  </p>
+                ) : null}
                 <div className="border-t border-[#3D3936] pt-4 flex justify-between text-lg font-bold">
                   <span className="text-[#FFF8F0]">{t(translations.cart.total)}</span>
                   <span className="text-white">${total.toFixed(2)}</span>

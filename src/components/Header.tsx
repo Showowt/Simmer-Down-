@@ -41,7 +41,7 @@ export default function Header() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'bg-[#1F1D1A]/98 backdrop-blur-md border-b border-[#3D3936]/40'
-            : 'bg-transparent'
+            : 'bg-gradient-to-b from-[#1F1D1A]/80 to-transparent'
         }`}
       >
         <nav className="max-w-6xl mx-auto px-6">
