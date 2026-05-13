@@ -482,7 +482,6 @@ export default function MenuPage() {
     { id: "menu-infantil", name: t(translations.menu.kids), type: "category" as const },
     // Dietary filters appended
     { id: "vegetarian", name: t(translations.menu.vegetarian), type: "dietary" as const },
-    { id: "seafood-filter", name: locale === 'es' ? 'Con Mariscos' : 'Has Seafood', type: "dietary" as const },
     { id: "spicy", name: t(translations.menu.spicy), type: "dietary" as const },
     { id: "bestseller", name: t(translations.menu.favorites), type: "dietary" as const },
   ];
@@ -656,10 +655,12 @@ export default function MenuPage() {
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-6">
           {/* Results count */}
-          <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-8">
-            {filteredItems.length} {t(translations.menu.productsFound)}
-            {searchQuery && ` ${t(translations.menu.for)} "${searchQuery}"`}
-          </p>
+          {filteredItems.length > 0 && (
+            <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-8">
+              {filteredItems.length} {t(translations.menu.productsFound)}
+              {searchQuery && ` ${t(translations.menu.for)} "${searchQuery}"`}
+            </p>
+          )}
 
           {/* Grouped by category */}
           {Object.entries(groupedItems).map(([categoryId, items]) => {

@@ -75,7 +75,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#1F1D1A]">
 
       {/* ─── HERO — Photography-led, minimal text ─── */}
-      <section className="relative min-h-[100vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[85vh] md:min-h-[100vh] flex items-end overflow-hidden -mt-20">
         {/* Background */}
         <div className="absolute inset-0">
           <img
@@ -91,7 +91,7 @@ export default function Home() {
           variants={stagger}
           initial="initial"
           animate="animate"
-          className="relative z-10 max-w-6xl mx-auto px-6 pb-20 md:pb-28 w-full"
+          className="relative z-10 max-w-6xl mx-auto px-6 pb-12 md:pb-28 pt-24 md:pt-0 w-full"
         >
           <motion.p
             variants={fadeUp}
@@ -101,19 +101,19 @@ export default function Home() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mb-6">
-            <img src="/logos/logo-icon.svg" alt="" className="w-12 h-12 mb-4" aria-hidden="true" />
+            <img src="/logos/logo-icon.svg" alt="Simmer Down flame logo" className="w-12 h-12 mb-4" />
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
-            className="font-display text-5xl md:text-7xl lg:text-8xl text-[#FFF8F0] tracking-tight leading-[0.95] mb-6"
+            className="font-display text-4xl md:text-7xl lg:text-8xl text-[#FFF8F0] tracking-tight leading-[0.95] mb-4 md:mb-6"
           >
             Simmer Down
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            className="text-lg md:text-xl text-[#B8B0A8] max-w-lg mb-10 leading-relaxed"
+            className="text-base md:text-xl text-[#B8B0A8] max-w-lg mb-6 md:mb-10 leading-relaxed"
           >
             {t(translations.home.subtitle)}
           </motion.p>
@@ -230,10 +230,10 @@ export default function Home() {
               </h2>
               <div className="space-y-5 text-[#B8B0A8] leading-relaxed">
                 <p>
-                  {t(translations.home.story1)}{' '}<strong className="text-[#FFF8F0]">Santa Ana</strong>{t(translations.home.story1b)}
+                  {t(translations.home.storyParagraph1)}
                 </p>
                 <p>
-                  {t(translations.home.story2)}{' '}<strong className="text-[#FFF8F0]">Lago de Coatepeque</strong>{' '}{t(translations.home.story2b)}{' '}<strong className="text-[#FFF8F0]">Surf City</strong>{t(translations.home.story2c)}
+                  {t(translations.home.storyParagraph2)}
                 </p>
                 <p className="font-display italic text-[#FFF8F0] text-lg">
                   {t(translations.home.story3)}

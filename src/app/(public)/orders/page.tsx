@@ -59,18 +59,35 @@ function OrderTracker() {
   const fetchOrder = async (id: string) => {
     setLoading(true);
     setError("");
+
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("timeout")), 5000)
+    );
+
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const result = await Promise.race([
+        supabase.from("orders").select("*").eq("id", id).single(),
+        timeout,
+      ]);
 
-      if (error) throw error;
-      setOrder(data);
+      if (result.error) {
+        const status = result.error.code;
+        if (status === "PGRST116" || status === "404" || status === "400") {
+          setError("Pedido no encontrado. Verifica tu ID e intenta de nuevo. / Order not found. Check your ID and try again.");
+        } else {
+          setError("Error al buscar tu pedido. Intenta de nuevo. / Error searching for your order. Try again.");
+        }
+        setOrder(null);
+        return;
+      }
+      setOrder(result.data);
     } catch (err) {
-      setError("Pedido no encontrado");
+      if (err instanceof Error && err.message === "timeout") {
+        setError("La solicitud tardó demasiado. Verifica tu conexión e intenta de nuevo. / Request timed out. Check your connection and try again.");
+      } else {
+        setError("Pedido no encontrado. Verifica tu ID e intenta de nuevo. / Order not found. Check your ID and try again.");
+      }
       setOrder(null);
     } finally {
       setLoading(false);
@@ -467,7 +484,7 @@ function OrderTracker() {
                 </a>
               </div>
               <a
-                href={`https://wa.me/50378901234?text=${encodeURIComponent(`Hola! Quisiera información sobre mi orden #${order.order_number || order.id.slice(0, 8)}`)}`}
+                href={`https://wa.me/50324455999?text=${encodeURIComponent(`Hola! Quisiera información sobre mi orden #${order.order_number || order.id.slice(0, 8)}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"

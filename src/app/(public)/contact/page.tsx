@@ -290,7 +290,7 @@ export default function ContactPage() {
                     <Facebook className="w-5 h-5" />
                   </a>
                   <a
-                    href="https://wa.me/50374877792"
+                    href="https://wa.me/50324455999"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#25D366] hover:text-white transition-colors"

@@ -41,7 +41,7 @@ export default function Header() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'bg-[#1F1D1A]/98 backdrop-blur-md border-b border-[#3D3936]/40'
-            : 'bg-gradient-to-b from-[#1F1D1A]/80 to-transparent'
+            : 'bg-[#1F1D1A]/95 backdrop-blur-sm'
         }`}
       >
         <nav className="max-w-6xl mx-auto px-6">
@@ -51,12 +51,12 @@ export default function Header() {
               href="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src="/logos/logo-icon.svg" alt="" className="w-7 h-7" aria-hidden="true" />
+              <img src="/logos/logo-icon.svg" alt="Simmer Down logo" className="w-7 h-7" />
               <span className="font-display text-xl tracking-[0.02em] text-[#FFF8F0]">Simmer Down</span>
             </Link>
 
             {/* Desktop Nav — clean, spaced, understated */}
-            <div className="hidden lg:flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-10">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -104,7 +104,7 @@ export default function Header() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="lg:hidden p-3 text-[#FFF8F0] hover:opacity-70 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="md:hidden p-3 text-[#FFF8F0] hover:opacity-70 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label={isOpen ? t(translations.nav.closeMenu) : t(translations.nav.openMenu)}
                 aria-expanded={isOpen}
               >
@@ -122,7 +122,7 @@ export default function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 lg:hidden"
+            className="fixed inset-0 z-40 md:hidden"
           >
             <div className="absolute inset-0 bg-[#1F1D1A]/98 backdrop-blur-md" onClick={() => setIsOpen(false)} />
             <motion.nav
@@ -134,7 +134,7 @@ export default function Header() {
             >
               <div className="space-y-1 text-center">
                 <div className="mb-8">
-                  <img src="/logos/logo-icon.svg" alt="" className="w-10 h-10 mx-auto" aria-hidden="true" />
+                  <img src="/logos/logo-icon.svg" alt="Simmer Down logo" className="w-10 h-10 mx-auto" />
                 </div>
                 {navLinks.map((link, i) => (
                   <motion.div

@@ -28,7 +28,7 @@ export default function Footer() {
               href="/"
               className="flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] tracking-[0.02em]"
             >
-              <img src="/logos/logo-icon.svg" alt="" className="w-6 h-6" aria-hidden="true" />
+              <img src="/logos/logo-icon.svg" alt="Simmer Down logo" className="w-6 h-6" />
               Simmer Down
             </Link>
             <p className="mt-5 text-sm text-[#6B6560] leading-relaxed max-w-xs">

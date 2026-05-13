@@ -69,8 +69,9 @@ export function LocationCard({ location, index }: LocationCardProps) {
           <div className="aspect-[4/3] overflow-hidden relative">
             <Image
               src={location.image}
-              alt={location.name}
+              alt={`${location.name} — restaurante Simmer Down`}
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

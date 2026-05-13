@@ -5,7 +5,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: {
-    default: "Simmer Down | La Mejor Pizzería de El Salvador | Horno de Leña",
+    default: "Simmer Down | Pizzería & Restaurante | El Salvador",
     template: "%s | Simmer Down — Pizza Artesanal El Salvador",
   },
   description:
@@ -40,7 +40,7 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <main id="main-content">{children}</main>
+      <main id="main-content" className="pt-20">{children}</main>
       <Footer />
       <WhatsAppButton />
     </>

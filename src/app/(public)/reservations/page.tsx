@@ -348,6 +348,7 @@ export default function ReservationsPage() {
   // UI state
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   const selectedLocation = useMemo(
     () => locations.find((loc) => loc.id === selectedLocationId) || null,
@@ -382,15 +383,37 @@ export default function ReservationsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !selectedLocationId || !name || !phone) return
 
+    const errors: Record<string, string> = {}
+    if (!selectedLocationId) {
+      errors.location = locale === 'es' ? 'Selecciona una ubicación' : 'Select a location'
+    }
+    if (!selectedDate) {
+      errors.date = locale === 'es' ? 'Selecciona una fecha' : 'Select a date'
+    }
+    if (!selectedTime) {
+      errors.time = locale === 'es' ? 'Selecciona una hora' : 'Select a time'
+    }
+    if (!name.trim()) {
+      errors.name = locale === 'es' ? 'Ingresa tu nombre' : 'Enter your name'
+    }
+    if (!phone.trim()) {
+      errors.phone = locale === 'es' ? 'Ingresa tu teléfono' : 'Enter your phone number'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+
+    setValidationErrors({})
     setLoading(true)
 
     try {
       const supabase = createClient()
       const { error: dbError } = await supabase.from('reservations').insert({
         location_id: selectedLocationId,
-        date: formatDateShort(selectedDate),
+        date: formatDateShort(selectedDate!),
         time: selectedTime,
         guest_count: guestCount,
         customer_name: name,
@@ -425,6 +448,7 @@ export default function ReservationsPage() {
     setEmail('')
     setNotes('')
     setSubmitted(false)
+    setValidationErrors({})
   }
 
   return (
@@ -573,7 +597,7 @@ export default function ReservationsPage() {
                       <button
                         key={loc.id}
                         type="button"
-                        onClick={() => handleLocationChange(loc.id)}
+                        onClick={() => { handleLocationChange(loc.id); setValidationErrors((prev) => { const next = { ...prev }; delete next.location; return next }) }}
                         className={`
                           p-4 border text-left transition-all min-h-[56px]
                           ${selectedLocationId === loc.id
@@ -593,6 +617,9 @@ export default function ReservationsPage() {
                       </button>
                     ))}
                   </div>
+                  {validationErrors.location && (
+                    <p className="text-sm text-[#C73E1D] mt-3">{validationErrors.location}</p>
+                  )}
                 </motion.div>
 
                 {/* Date & Time */}
@@ -614,7 +641,7 @@ export default function ReservationsPage() {
                     {/* Calendar */}
                     <CalendarPicker
                       selectedDate={selectedDate}
-                      onSelectDate={handleDateSelect}
+                      onSelectDate={(date) => { handleDateSelect(date); setValidationErrors((prev) => { const next = { ...prev }; delete next.date; return next }) }}
                       location={selectedLocation}
                       locale={locale}
                       t={t}
@@ -641,7 +668,7 @@ export default function ReservationsPage() {
                             <button
                               key={slot}
                               type="button"
-                              onClick={() => setSelectedTime(slot)}
+                              onClick={() => { setSelectedTime(slot); setValidationErrors((prev) => { const next = { ...prev }; delete next.time; return next }) }}
                               className={`
                                 py-2.5 px-2 text-sm font-medium transition-all text-center
                                 ${selectedTime === slot
@@ -658,6 +685,12 @@ export default function ReservationsPage() {
                       )}
                     </div>
                   </div>
+                  {(validationErrors.date || validationErrors.time) && (
+                    <div className="mt-3 space-y-1">
+                      {validationErrors.date && <p className="text-sm text-[#C73E1D]">{validationErrors.date}</p>}
+                      {validationErrors.time && <p className="text-sm text-[#C73E1D]">{validationErrors.time}</p>}
+                    </div>
+                  )}
                 </motion.div>
 
                 {/* Guest count */}
@@ -726,11 +759,12 @@ export default function ReservationsPage() {
                           type="text"
                           required
                           value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                          onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.name; return next }) }}
+                          className={`w-full pl-11 pr-4 py-3 bg-[#3D3936] border text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px] ${validationErrors.name ? 'border-[#C73E1D]' : 'border-[#4A4642]'}`}
                           placeholder={t({ es: 'Tu nombre', en: 'Your name' })}
                         />
                       </div>
+                      {validationErrors.name && <p className="text-sm text-[#C73E1D] mt-1">{validationErrors.name}</p>}
                     </div>
 
                     {/* Phone */}
@@ -747,11 +781,12 @@ export default function ReservationsPage() {
                           inputMode="tel"
                           autoComplete="tel"
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                          onChange={(e) => { setPhone(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.phone; return next }) }}
+                          className={`w-full pl-11 pr-4 py-3 bg-[#3D3936] border text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px] ${validationErrors.phone ? 'border-[#C73E1D]' : 'border-[#4A4642]'}`}
                           placeholder="+503 XXXX-XXXX"
                         />
                       </div>
+                      {validationErrors.phone && <p className="text-sm text-[#C73E1D] mt-1">{validationErrors.phone}</p>}
                     </div>
 
                     {/* Email (optional) */}

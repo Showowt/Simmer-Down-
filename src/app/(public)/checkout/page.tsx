@@ -636,9 +636,18 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B6560]">{t(translations.cart.delivery)}</span>
                   <span className="text-[#FFF8F0]">
-                    {deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : t(translations.checkout.free)}
+                    {deliveryFee > 0 ? `$${deliveryFee.toFixed(2)}` : '$0.00'}
                   </span>
                 </div>
+                {orderType === 'delivery' && deliveryFee === 0 && subtotal >= 25 ? (
+                  <p className="text-xs text-green-400">
+                    Envio gratis en pedidos mayores a $25 / Free delivery on orders over $25
+                  </p>
+                ) : orderType === 'delivery' && subtotal > 0 && subtotal < 25 ? (
+                  <p className="text-xs text-[#6B6560]">
+                    Envio gratis en pedidos mayores a $25 / Free delivery on orders over $25
+                  </p>
+                ) : null}
                 {appliedPromo && (
                   <div className="flex justify-between text-sm">
                     <span className="text-green-400">

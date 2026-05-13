@@ -99,8 +99,11 @@ export default function CartPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl" aria-hidden="true">
-                      🍕
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+                      <ShoppingBag className="w-6 h-6 text-[#6B6560]" />
+                      <span className="text-[10px] text-[#6B6560] uppercase tracking-wider leading-tight text-center px-1">
+                        {item.category}
+                      </span>
                     </div>
                   )}
                 </div>

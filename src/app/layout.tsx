@@ -40,7 +40,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://simmerdownsv.com'),
   title: {
-    default: 'Simmer Down | La Mejor Pizza Artesanal de El Salvador | Horno de Leña',
+    default: 'Simmer Down | Pizzería & Restaurante | El Salvador',
     template: '%s | Simmer Down — Pizza Artesanal El Salvador'
   },
   description: 'La mejor pizza artesanal de horno de leña en El Salvador. 14 años, 5 ubicaciones, +8,000 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
@@ -161,6 +161,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // lang="es" is the default. The I18nProvider updates document.documentElement.lang
+  // on the client when the user toggles locale, but SSR always renders "es".
   return (
     <html lang="es" className="dark">
       <head>

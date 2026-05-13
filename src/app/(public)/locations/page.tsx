@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useI18n, translations } from "@/lib/i18n";
 import {
   LocationCard,
@@ -243,6 +244,16 @@ export default function LocationsPage() {
     <div className="min-h-screen bg-[#2D2A26] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg"
+            alt="Interior del restaurante Simmer Down"
+            fill
+            className="object-cover opacity-20"
+            priority
+          />
+          <div className="absolute inset-0 bg-[#2D2A26]/90" />
+        </div>
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
             <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">

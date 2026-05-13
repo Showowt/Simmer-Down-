@@ -333,7 +333,7 @@ export const MENU: MenuItem[] = [
   },
   {
     id: 'pizza-picolo',
-    name: 'Pizza Picolo',
+    name: 'Pizza Picollo',
     description: 'Grilled chicken, creamy garlic sauce, fresh cilantro',
     price: 14.99,
     pricePersonal: 5.75,

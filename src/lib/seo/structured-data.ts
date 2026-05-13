@@ -243,14 +243,6 @@ export function generateRestaurantSchema(location: LocationData) {
       opens: h.opens,
       closes: h.closes,
     })),
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: location.rating.toString(),
-      bestRating: '5',
-      worstRating: '1',
-      reviewCount: location.reviewCount.toString(),
-      ratingCount: location.reviewCount.toString(),
-    },
     parentOrganization: {
       '@type': 'Organization',
       '@id': `${BASE_URL}/#organization`,
