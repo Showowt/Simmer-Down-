@@ -1,122 +1,84 @@
 /**
  * SIMMER DOWN - ASSET MANAGEMENT SYSTEM
  *
- * Integrates Google Drive images into the site.
- * Provides fallback handling and optimization.
- * Migration path to Supabase Storage included.
+ * Complete inventory of all assets mapped to local paths.
+ * Google Drive IDs retained for CDN/Supabase migration.
+ * NO external fallbacks — all images are real Simmer Down assets.
  */
 
 // ============================================================================
-// GOOGLE DRIVE ASSET MAPPING
+// LOGOS
 // ============================================================================
 
-export const DRIVE_ASSETS = {
-  products: {
-    picollo: '1uoS3RIVoAvz0vgXgQLqJGUqFN5Y9X6yY',
-    pizza1: '1uTdUEjZcxbazvzj6KpzkDFRFo3H43jZz',
-    pizza2: '1jAwci7wMMKtorESR6FfrzUroetathY5X',
-    pizza3: '1Y5HOb_KwG5xxpPY1W2Eg6Au5Not2RCbv',
-    ambiance1: '1nKt-5CO3jXfk0bJ1_sdg4NkEDb1oHn88',
-    hero: '12bynndYB2vpNYKmrwjt_pmCOw9fjwxms',
-  },
-
-  thumbnails: {
-    thumb1: '1IGNCllYGBIs1fdRJJJgRarRZtVaFTGsG',
-    thumb2: '1zo32iwzvDk1000l2eDhb7MnB0Iq2CjTp',
-    thumb3: '1mHmgzjtKDXV_fLBwApQOO59cMC7KjAvn',
-    thumb4: '1TLl92Q1HZKDZlS73QUY5jf2nWeBeDwDu',
-    thumb5: '1gdvopMQDbtMlJNqBuQYroJy_EJDR2d3B',
-    thumb6: '1_wZSStSDZO31Ga87Omf1lHo0poAEwC3Q',
-    thumb7: '1E8hcjQxjuYssZ6J6qIw6GsB2rS61L7Po',
-    thumb8: '1Fhu9yPoWvMsgjjbqC05ZitbebrSo81AT',
-  },
-
-  locations: {
-    santaAna: { folder: '1tgt_7XcpV6omjRtR6_2SZdebeO9xf2Cy' },
-    sanSalvador: { folder: '1m5bsacSZ4iAt0pkk4GQZh3W1c_QNLL42' },
-    simmerGarden: { folder: '1Hzptl0zw5hL9xwOL6K09CEHSUYBB59ov' },
-    lago: { folder: '1FE9wvoa2MNUA9_7PgQmDPpQahOT2fhUC' },
-  },
-
-  content: {
-    gallery: '1R5R9-bWm2qLJ65YQL5W0phML3rVUzkRr',
-  },
-} as const
-
-// ============================================================================
-// URL GENERATION
-// ============================================================================
-
-export function getDriveImageUrl(
-  fileId: string,
-  size: 'thumbnail' | 'medium' | 'full' = 'medium'
-): string {
-  switch (size) {
-    case 'thumbnail':
-      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w200`
-    case 'medium':
-      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
-    case 'full':
-      return `https://lh3.googleusercontent.com/d/${fileId}`
-    default:
-      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
-  }
-}
-
-export function getDriveDirectUrl(fileId: string): string {
-  return `https://drive.google.com/uc?export=view&id=${fileId}`
+export const LOGOS = {
+  /** Primary brand logo (flame + SIMMER DOWN wordmark) — official SVG from brand kit */
+  main: '/logos/logo-brand-full.svg',
+  /** Icon-only version for favicons, loading screens, small spaces */
+  icon: '/logos/logo-icon.svg',
+  /** Full horizontal version */
+  full: '/logos/logo-full.svg',
+  /** Simmer Garden sub-brand — official SVG */
+  garden: '/logos/simmer-garden-official.svg',
 }
 
 // ============================================================================
-// ASSET HELPERS
+// HERO / PRODUCT PHOTOS (Professional Photography)
 // ============================================================================
 
-export function getProductImage(
-  key: keyof typeof DRIVE_ASSETS.products,
-  size: 'thumbnail' | 'medium' | 'full' = 'medium'
-): string {
-  const fileId = DRIVE_ASSETS.products[key]
-  return getDriveImageUrl(fileId, size)
-}
-
-export function getThumbnail(
-  key: keyof typeof DRIVE_ASSETS.thumbnails
-): string {
-  const fileId = DRIVE_ASSETS.thumbnails[key]
-  return getDriveImageUrl(fileId, 'thumbnail')
-}
-
-export const FALLBACK_IMAGES = {
-  pizza: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80',
-  pasta: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80',
-  salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80',
-  restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80',
-  hero: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1200&q=80',
+export const PRODUCT_PHOTOS = {
+  /** Picollo pizza — grilled chicken pizza, hero-quality (Drive: 1uoS3RIVoAvz0vgXgQLqJGUqFN5Y9X6yY) */
+  picollo: '/images/menu/pro-picollo.jpg',
+  /** Professional platter shot (Drive: 12bynndYB2vpNYKmrwjt_pmCOw9fjwxms) */
+  heroPlatter: '/images/menu/pro-MG4664.jpg',
+  /** Fresh from oven shot (Drive: 1jAwci7wMMKtorESR6FfrzUroetathY5X) */
+  freshPizza: '/images/menu/pro-IMG4632.jpg',
+  /** Premium feature shot (Drive: 1nKt-5CO3jXfk0bJ1_sdg4NkEDb1oHn88) */
+  june19Feature: '/images/menu/pro-junio19.jpg',
+  /** Pizza detail/texture shot (Drive: 1Y5HOb_KwG5xxpPY1W2Eg6Au5Not2RCbv) */
+  pizzaDetail: '/images/menu/pro-IMG4591.jpg',
+  /** Restaurant ambiance (Drive: 1uTdUEjZcxbazvzj6KpzkDFRFo3H43jZz) */
+  ambiance: '/images/menu/pro-IMG4588.jpg',
+  /** Homepage hero pizzas */
+  homepageHero: '/images/heroes/homepage-pizzas.jpg',
 }
 
 // ============================================================================
-// MENU ITEM TO IMAGE MAPPING
+// MENU ITEM PHOTOS (Web-optimized)
 // ============================================================================
 
-export function getMenuItemImage(
-  _categorySlug: string,
-  itemIndex: number
-): string {
-  const thumbnailKeys = Object.keys(DRIVE_ASSETS.thumbnails) as Array<keyof typeof DRIVE_ASSETS.thumbnails>
-  const key = thumbnailKeys[itemIndex % thumbnailKeys.length]
-  return getDriveImageUrl(DRIVE_ASSETS.thumbnails[key], 'medium')
-}
-
-export const CATEGORY_IMAGES: Record<string, string> = {
-  'pizzas': getProductImage('picollo', 'full'),
-  'specialty-pizzas': getProductImage('pizza1', 'full'),
-  'pasta': getProductImage('pizza2', 'medium'),
-  'salads': FALLBACK_IMAGES.salad,
-  'tickets': getProductImage('pizza3', 'medium'),
-  'main-courses': getProductImage('ambiance1', 'medium'),
-  'cold-drinks': FALLBACK_IMAGES.restaurant,
-  'local-beers': FALLBACK_IMAGES.restaurant,
-  'childrens-menu': getThumbnail('thumb1'),
+export const MENU_PHOTOS = {
+  // Named menu items with real photos
+  pizzaMaradona: '/images/menu/pizza-maradona.jpg',
+  pizzaMemoravel: '/images/menu/pizza-memoravel.jpg',
+  molcajeteCoulotte: '/images/menu/molcajete-coulotte.jpg',
+  terramarMaitre: '/images/menu/terramar-maitre.jpg',
+  medallonLomito: '/images/menu/medallon-lomito-maitre.jpg',
+  cheeseBalls: '/images/menu/entradas-cheese-balls.jpg',
+  fettuccineMarTierra: '/images/menu/pasta-fettuccine-mar-tierra.jpg',
+  penneBrocoli: '/images/menu/pasta-penne-brocoli-tocino.jpg',
+  brownieHelado: '/images/menu/brownie-helado.jpg',
+  pannaCotta: '/images/menu/panna-cotta.jpg',
+  michelada: '/images/menu/michelada.jpg',
+  // Professional food photography series
+  food01: '/images/menu/food-IMG20040.jpg',
+  food02: '/images/menu/food-IMG20042.jpg',
+  food03: '/images/menu/food-IMG20044.jpg',
+  food04: '/images/menu/food-IMG20045.jpg',
+  food05: '/images/menu/food-IMG20048.jpg',
+  food06: '/images/menu/food-IMG20051.jpg',
+  food07: '/images/menu/food-IMG20052.jpg',
+  food08: '/images/menu/food-IMG20059.jpg',
+  food09: '/images/menu/food-IMG20060.jpg',
+  food10: '/images/menu/food-IMG20063.jpg',
+  // Product numbered series
+  product01: '/images/menu/product-01.jpg',
+  product02: '/images/menu/product-02.jpg',
+  product03: '/images/menu/product-03.jpg',
+  product04: '/images/menu/product-04.jpg',
+  product05: '/images/menu/product-05.jpg',
+  product06: '/images/menu/product-06.jpg',
+  product07: '/images/menu/product-07.jpg',
+  product08: '/images/menu/product-08.jpg',
 }
 
 // ============================================================================
@@ -125,41 +87,105 @@ export const CATEGORY_IMAGES: Record<string, string> = {
 
 export const LOCATION_IMAGES: Record<string, { hero: string; gallery: string[] }> = {
   'santa-ana': {
-    hero: getProductImage('ambiance1', 'full'),
+    hero: '/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg',
     gallery: [
-      getProductImage('pizza1', 'medium'),
-      getProductImage('pizza2', 'medium'),
-      getProductImage('pizza3', 'medium'),
+      '/images/locations/gallery-santa-ana/santa-ana-awards.jpg',
+      '/images/locations/gallery-santa-ana/santa-ana-1.jpg',
+      '/images/locations/gallery-santa-ana/santa-ana-3.jpg',
+      '/images/locations/gallery-santa-ana/santa-ana-interior-3.jpg',
+      '/images/locations/gallery-santa-ana/santa-ana-interior-4.jpg',
+      '/images/locations/drive-santa-ana/santa-ana-drive-01.png',
+      '/images/locations/drive-santa-ana/santa-ana-drive-02.png',
+      '/images/locations/drive-santa-ana/santa-ana-drive-03.png',
     ],
   },
-  'lago-coatepeque': {
-    hero: getProductImage('hero', 'full'),
+  'coatepeque': {
+    hero: '/images/locations/gallery-coatepeque/coatepeque-2.jpg',
     gallery: [
-      getProductImage('picollo', 'medium'),
-      getProductImage('pizza1', 'medium'),
+      '/images/locations/gallery-coatepeque/coatepeque-1.jpg',
+      '/images/locations/gallery-coatepeque/coatepeque-3.jpg',
+      '/images/locations/gallery-coatepeque/coatepeque-4.jpg',
+      '/images/locations/drive-lago/lago-01.jpg',
+      '/images/locations/drive-lago/lago-02.jpg',
+      '/images/locations/drive-lago/lago-03.jpg',
+      '/images/locations/drive-lago/lago-04.jpg',
+      '/images/locations/drive-lago/lago-05.jpg',
     ],
   },
   'san-benito': {
-    hero: getProductImage('pizza2', 'full'),
+    hero: '/images/locations/gallery-san-benito/san-benito-1.jpg',
     gallery: [
-      getProductImage('pizza3', 'medium'),
-      getProductImage('ambiance1', 'medium'),
+      '/images/locations/gallery-san-benito/san-benito-2.jpg',
+      '/images/locations/gallery-san-benito/san-benito-3.jpg',
+      '/images/locations/gallery-san-benito/san-benito-4.jpg',
+    ],
+  },
+  'juayua': {
+    hero: '/images/locations/gallery-garden/garden-4.jpg',
+    gallery: [
+      '/images/locations/gallery-garden/garden-1.jpg',
+      '/images/locations/gallery-garden/garden-2.jpg',
+      '/images/locations/gallery-garden/garden-3.jpg',
+      '/images/locations/gallery-garden/garden-5.png',
+      '/images/locations/drive-garden/garden-drive-01.jpg',
+      '/images/locations/drive-garden/garden-drive-02.jpg',
+      '/images/locations/drive-garden/garden-drive-03.png',
+      '/images/locations/drive-garden/garden-drive-04.jpg',
+      '/images/locations/drive-garden/garden-drive-05.jpg',
     ],
   },
   'surf-city': {
-    hero: getProductImage('picollo', 'full'),
+    hero: '/images/locations/surf-city-exterior.jpg',
     gallery: [
-      getProductImage('hero', 'medium'),
-      getProductImage('pizza1', 'medium'),
+      '/images/locations/gallery-surf-city/surf-city-1.jpg',
+      '/images/locations/gallery-surf-city/surf-city-2.jpg',
+      '/images/locations/gallery-surf-city/surf-city-3.jpg',
+      '/images/locations/gallery-surf-city/surf-city-4.jpg',
     ],
   },
-  'simmer-garden': {
-    hero: getProductImage('ambiance1', 'full'),
-    gallery: [
-      getProductImage('picollo', 'medium'),
-      getProductImage('pizza2', 'medium'),
-    ],
-  },
+}
+
+/** Shared restaurant photos (awards wall, interiors) */
+export const SHARED_PHOTOS = [
+  '/images/locations/drive-shared/awards-wall.jpg',
+  '/images/locations/drive-shared/shared-02.jpg',
+  '/images/locations/drive-shared/shared-03.jpg',
+  '/images/locations/drive-shared/shared-04.jpg',
+]
+
+// ============================================================================
+// CATEGORY HERO IMAGES
+// ============================================================================
+
+export const CATEGORY_IMAGES: Record<string, string> = {
+  'pizzas': PRODUCT_PHOTOS.picollo,
+  'specialty-pizzas': PRODUCT_PHOTOS.freshPizza,
+  'pasta': MENU_PHOTOS.fettuccineMarTierra,
+  'entradas': MENU_PHOTOS.cheeseBalls,
+  'ensaladas': MENU_PHOTOS.food04,
+  'platos-fuertes': MENU_PHOTOS.terramarMaitre,
+  'mariscos': MENU_PHOTOS.food02,
+  'postres': MENU_PHOTOS.brownieHelado,
+  'bebidas': MENU_PHOTOS.product02,
+  'cervezas': MENU_PHOTOS.michelada,
+  'infantil': MENU_PHOTOS.product03,
+  'main-courses': PRODUCT_PHOTOS.ambiance,
+  'cold-drinks': MENU_PHOTOS.product07,
+  'local-beers': MENU_PHOTOS.michelada,
+  'childrens-menu': MENU_PHOTOS.product03,
+}
+
+// ============================================================================
+// EVENT IMAGES
+// ============================================================================
+
+export const EVENT_IMAGES = {
+  simmermania: '/images/events/simmermania-marzo.jpg',
+  musicosPoetas: '/images/events/musicos-poetas-locos-abril.jpg',
+  zoeSiddhartha: '/images/events/zoe-siddhartha-bandalos.jpg',
+  salzon: '/images/events/salzon-mayo.jpg',
+  openMic: '/images/events/open-mic-abril.jpg',
+  musicosLineup: '/images/events/musicos-poetas-locos-lineup.jpg',
 }
 
 // ============================================================================
@@ -167,72 +193,113 @@ export const LOCATION_IMAGES: Record<string, { hero: string; gallery: string[] }
 // ============================================================================
 
 export const PROMO_IMAGES = {
-  '2x1': getProductImage('pizza1', 'full'),
-  'family': getProductImage('picollo', 'full'),
-  'happy-hour': getProductImage('ambiance1', 'full'),
-  'seasonal': getProductImage('hero', 'full'),
+  '2x1': PRODUCT_PHOTOS.freshPizza,
+  'family': PRODUCT_PHOTOS.picollo,
+  'happy-hour': PRODUCT_PHOTOS.ambiance,
+  'seasonal': PRODUCT_PHOTOS.heroPlatter,
 }
 
 // ============================================================================
-// LOGO ASSETS
+// BRAND / HERO IMAGES
 // ============================================================================
 
-export const LOGO = {
-  main: {
-    svg: `<svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 0C50 0 20 40 20 70C20 95 35 110 50 110C65 110 80 95 80 70C80 40 50 0 50 0Z" fill="url(#flame-gradient)"/>
-      <path d="M50 30C50 30 35 55 35 75C35 90 42 100 50 100C58 100 65 90 65 75C65 55 50 30 50 30Z" fill="#8B1E1E"/>
-      <defs>
-        <linearGradient id="flame-gradient" x1="50" y1="0" x2="50" y2="110" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#FF6B35"/>
-          <stop offset="100%" stop-color="#8B1E1E"/>
-        </linearGradient>
-      </defs>
-    </svg>`,
-  },
+export const BRAND_IMAGES = {
+  elSalvadorMap: '/images/brand/el-salvador-map.jpg',
+  directionsMap: '/images/brand/locations-directions-map.jpg',
+  escapeGarden: '/images/heroes/escape-garden.jpg',
+  surfCityDusk: '/images/heroes/surf-city-dusk.jpg',
+}
 
-  text: {
-    fontFamily: "'Bebas Neue', 'Impact', sans-serif",
-    simmerColor: '#FF6B35',
-    downColor: '#1a1a1a',
-  },
+// ============================================================================
+// LOGO TAGLINES PER LOCATION
+// ============================================================================
 
-  taglines: {
-    'lago-coatepeque': 'GASTRONOMIA / ESTANCIA / AVENTURA',
-    'san-benito': 'En El Corazon De San Benito',
-    'santa-ana': 'Frente a Catedral',
-    'surf-city': 'Surf - Pizza - Vibes',
-    'simmer-garden': 'Cafe & Pizza Garden',
+export const LOCATION_TAGLINES: Record<string, string> = {
+  'santa-ana': 'Frente a Catedral',
+  'coatepeque': 'Gastronomia / Estancia / Aventura',
+  'san-benito': 'En El Corazon De San Benito',
+  'surf-city': 'Surf - Pizza - Vibes',
+  'juayua': 'Cafe & Pizza Garden',
+}
+
+// ============================================================================
+// GOOGLE DRIVE IDS (for CDN migration reference)
+// ============================================================================
+
+export const DRIVE_IDS = {
+  logos: {
+    main: '1bky4wGZMxrEdgmcAr8tOdi2NxBUuJV8f',
+    garden: '12k5WBrHOhuRN_yAxhDxuG-jqe7eSoLBe',
+  },
+  products: {
+    picollo: '1uoS3RIVoAvz0vgXgQLqJGUqFN5Y9X6yY',
+    heroPlatter: '12bynndYB2vpNYKmrwjt_pmCOw9fjwxms',
+    freshPizza: '1jAwci7wMMKtorESR6FfrzUroetathY5X',
+    june19Feature: '1nKt-5CO3jXfk0bJ1_sdg4NkEDb1oHn88',
+    pizzaDetail: '1Y5HOb_KwG5xxpPY1W2Eg6Au5Not2RCbv',
+    ambiance: '1uTdUEjZcxbazvzj6KpzkDFRFo3H43jZz',
+  },
+  menuPdfs: {
+    santaAnaEs: '1rcqsVH-n4goxYO4zAj0_WQTLl1RilIM9',
+    santaAnaEn: '1pg46Ez52QEpoxBOd4q2yzGcfjLP6bfq1',
+    lagoEs: '1Q-otXuIK-JR-brDPPOMIb2jCKXj6LDQP',
+    sanBenitoEs: '1pgA_zoxDrxV3rjK-iWtt852T5qta5KrB',
+    sanBenitoEn: '1A-IrNdJrm1GVhJ-lDMMQkDUjNLHHtf_N',
+    surfCityEs: '1ulsAcD2CDI_YwbhOQxDB4C_vLAQKWOyN',
+  },
+  folders: {
+    mainProject: '11piHufp59gC0J0JUvFMi0fS4cISOxsK7',
+    productPhotos: '1HnbWAEVPtvB2k7v42VnLhl02GbdbHfDN',
+    sharedPhotos: '104oDh7G3uXWSZaPtXoJzqW3DvZ9bTMSp',
+  },
+} as const
+
+// ============================================================================
+// MENU PDF LINKS (Google Drive viewer — downloadable)
+// ============================================================================
+
+export const MENU_PDFS: Record<string, { es?: string; en?: string }> = {
+  'santa-ana': {
+    es: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.santaAnaEs}/view`,
+    en: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.santaAnaEn}/view`,
+  },
+  'coatepeque': {
+    es: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.lagoEs}/view`,
+  },
+  'san-benito': {
+    es: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.sanBenitoEs}/view`,
+    en: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.sanBenitoEn}/view`,
+  },
+  'surf-city': {
+    es: `https://drive.google.com/file/d/${DRIVE_IDS.menuPdfs.surfCityEs}/view`,
   },
 }
 
 // ============================================================================
-// IMAGE COMPONENT HELPERS
+// MENU ITEM IMAGE ROTATION (for items without specific photos)
 // ============================================================================
 
-export function getDriveImageProps(
-  fileId: string,
-  alt: string,
-  size: 'thumbnail' | 'medium' | 'full' = 'medium'
-) {
-  const dimensions = {
-    thumbnail: { width: 200, height: 150 },
-    medium: { width: 800, height: 600 },
-    full: { width: 1920, height: 1080 },
-  }
+const MENU_ROTATION = [
+  MENU_PHOTOS.product01,
+  MENU_PHOTOS.product02,
+  MENU_PHOTOS.product03,
+  MENU_PHOTOS.product04,
+  MENU_PHOTOS.product05,
+  MENU_PHOTOS.product06,
+  MENU_PHOTOS.product07,
+  MENU_PHOTOS.product08,
+  MENU_PHOTOS.food01,
+  MENU_PHOTOS.food02,
+  MENU_PHOTOS.food03,
+  MENU_PHOTOS.food04,
+]
 
-  return {
-    src: getDriveImageUrl(fileId, size),
-    alt,
-    width: dimensions[size].width,
-    height: dimensions[size].height,
-    blurDataURL: getDriveImageUrl(fileId, 'thumbnail'),
-    placeholder: 'blur' as const,
-  }
+export function getMenuItemImage(_categorySlug: string, itemIndex: number): string {
+  return MENU_ROTATION[itemIndex % MENU_ROTATION.length]
 }
 
 // ============================================================================
-// SUPABASE STORAGE MIGRATION HELPERS
+// SUPABASE STORAGE HELPERS (for future migration)
 // ============================================================================
 
 export function getSupabaseStorageUrl(
@@ -241,7 +308,6 @@ export function getSupabaseStorageUrl(
   transform?: { width?: number; height?: number; quality?: number }
 ): string {
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-
   let url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`
 
   if (transform) {
@@ -249,17 +315,8 @@ export function getSupabaseStorageUrl(
     if (transform.width) params.set('width', String(transform.width))
     if (transform.height) params.set('height', String(transform.height))
     if (transform.quality) params.set('quality', String(transform.quality))
-
     url = `${SUPABASE_URL}/storage/v1/render/image/public/${bucket}/${path}?${params}`
   }
 
   return url
-}
-
-export const STORAGE_PATHS = {
-  products: 'images/products',
-  locations: 'images/locations',
-  promos: 'images/promos',
-  logos: 'images/logos',
-  menu: 'images/menu',
 }
