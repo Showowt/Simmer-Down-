@@ -101,7 +101,7 @@ export default function Home() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mb-6">
-            <img src="/logos/logo-icon.svg" alt="Simmer Down flame logo" className="w-12 h-12 mb-4" />
+            <img src="/logos/logo-brand-full.svg" alt="Simmer Down flame logo" className="w-12 h-12 mb-4" />
           </motion.div>
 
           <motion.h1

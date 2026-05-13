@@ -56,7 +56,7 @@ function LoginForm() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] mb-4">
-            <img src="/logos/logo-icon.svg" alt="" className="w-8 h-8" aria-hidden="true" />
+            <img src="/logos/logo-brand-full.svg" alt="" className="w-8 h-8" aria-hidden="true" />
             Simmer Down
           </Link>
           <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.welcomeBack)}</h1>

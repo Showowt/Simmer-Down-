@@ -14,7 +14,7 @@ export const LOGOS = {
   /** Primary brand logo (flame + SIMMER DOWN wordmark) — official SVG from brand kit */
   main: '/logos/logo-brand-full.svg',
   /** Icon-only version for favicons, loading screens, small spaces */
-  icon: '/logos/logo-icon.svg',
+  icon: '/logos/logo-brand-full.svg',
   /** Full horizontal version */
   full: '/logos/logo-full.svg',
   /** Simmer Garden sub-brand — official SVG */
