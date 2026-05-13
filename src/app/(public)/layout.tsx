@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { MobileNav } from "@/components/mobile";
 
 export const metadata: Metadata = {
   title: {
@@ -40,9 +41,10 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <main id="main-content" className="pt-20">{children}</main>
+      <main id="main-content" className="pt-20 pb-16 md:pb-0">{children}</main>
       <Footer />
       <WhatsAppButton />
+      <MobileNav />
     </>
   );
 }
