@@ -18,16 +18,17 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
 import { orderStatusLabel } from "@/lib/order-status";
+import { useI18n } from "@/lib/i18n";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 
 const statusSteps = [
-  { id: "pending", label: "Recibido", icon: Clock },
-  { id: "in_progress", label: "Preparando", icon: ChefHat },
-  { id: "ready", label: "Listo", icon: Package },
-  { id: "delivered", label: "Entregado", icon: Truck },
+  { id: "pending", label: { es: "Recibido", en: "Received" }, icon: Clock },
+  { id: "in_progress", label: { es: "Preparando", en: "Preparing" }, icon: ChefHat },
+  { id: "ready", label: { es: "Listo", en: "Ready" }, icon: Package },
+  { id: "delivered", label: { es: "Entregado", en: "Delivered" }, icon: Truck },
 ];
 
 function OrderTracker() {
@@ -35,6 +36,7 @@ function OrderTracker() {
   const orderId = searchParams.get("id");
   const orderNumber = searchParams.get("number");
   const isDemo = searchParams.get("demo");
+  const { t } = useI18n();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [searchId, setSearchId] = useState("");
@@ -82,6 +84,19 @@ function OrderTracker() {
         return;
       }
       setOrder(result.data);
+
+      // Fetch order items from the order_items table
+      try {
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("item_name, quantity, unit_price, line_total")
+          .eq("order_id", id);
+        if (items && items.length > 0) {
+          setOrderItems(items);
+        }
+      } catch {
+        // Non-critical — order still displays without line items
+      }
     } catch (err) {
       if (err instanceof Error && err.message === "timeout") {
         setError("La solicitud tardó demasiado. Verifica tu conexión e intenta de nuevo. / Request timed out. Check your connection and try again.");
@@ -105,13 +120,28 @@ function OrderTracker() {
     ? statusSteps.findIndex((s) => s.id === order.status)
     : -1;
 
-  // Get items from either items_json or items
-  const getOrderItems = (order: Order) => {
-    if (order.items_json && Array.isArray(order.items_json)) {
-      return order.items_json;
+  // Order items from the order_items join or legacy fields
+  const [orderItems, setOrderItems] = useState<Array<{
+    item_name: string;
+    quantity: number;
+    unit_price: number;
+    line_total: number;
+  }>>([]);
+
+  // Get items from either fetched order_items, items_json, or items
+  const getOrderItems = (ord: Order) => {
+    if (orderItems.length > 0) {
+      return orderItems.map((oi) => ({
+        name: oi.item_name,
+        quantity: oi.quantity,
+        price: oi.unit_price,
+      }));
     }
-    if (order.items && Array.isArray(order.items)) {
-      return order.items;
+    if (ord.items_json && Array.isArray(ord.items_json)) {
+      return ord.items_json;
+    }
+    if (ord.items && Array.isArray(ord.items)) {
+      return ord.items;
     }
     return [];
   };
@@ -129,16 +159,21 @@ function OrderTracker() {
               <CheckCircle className="w-12 h-12 text-[#4CAF50]" />
             </div>
             <h1 className="text-3xl font-bold text-[#FFF8F0] mb-4">
-              ¡Pedido Realizado!
+              {t({ es: "¡Pedido Realizado!", en: "Order Placed!" })}
             </h1>
             <p className="text-[#B8B0A8] mb-8">
-              Gracias por tu pedido. ¡Comenzaremos a preparar tu pizza de
-              inmediato!
+              {t({
+                es: "Gracias por tu pedido. ¡Comenzaremos a preparar tu pizza de inmediato!",
+                en: "Thank you for your order. We'll start preparing your pizza right away!",
+              })}
             </p>
             <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 p-6 text-left mb-8">
               <p className="text-sm text-[#FF6B35]">
-                <strong>Modo Demo:</strong> Este es un pedido de demostración.
-                Tu pedido ha sido registrado en el sistema.
+                <strong>{t({ es: "Modo Demo:", en: "Demo Mode:" })}</strong>{" "}
+                {t({
+                  es: "Este es un pedido de demostración. Tu pedido ha sido registrado en el sistema.",
+                  en: "This is a demo order. Your order has been registered in the system.",
+                })}
               </p>
             </div>
             <Link
@@ -146,7 +181,7 @@ function OrderTracker() {
               className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition min-h-[56px]"
             >
               <ArrowLeft className="w-5 h-5" />
-              Volver al Menú
+              {t({ es: "Volver al Menú", en: "Back to Menu" })}
             </Link>
           </motion.div>
         </div>
@@ -162,10 +197,13 @@ function OrderTracker() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl font-bold text-[#FFF8F0] mb-2">
-            Rastrea Tu Pedido
+            {t({ es: "Rastrea Tu Pedido", en: "Track Your Order" })}
           </h1>
           <p className="text-[#6B6560] mb-8">
-            Ingresa tu ID de pedido o número para ver el estado
+            {t({
+              es: "Ingresa tu ID de pedido o número para ver el estado",
+              en: "Enter your order ID or number to see the status",
+            })}
           </p>
 
           {/* Search Form */}
@@ -173,7 +211,7 @@ function OrderTracker() {
             <div className="flex gap-3">
               <div className="flex-1 relative">
                 <label htmlFor="order-search" className="sr-only">
-                  ID del pedido
+                  {t({ es: "ID del pedido", en: "Order ID" })}
                 </label>
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
                 <input
@@ -181,7 +219,7 @@ function OrderTracker() {
                   type="text"
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
-                  placeholder="Ingresa tu ID de pedido"
+                  placeholder={t({ es: "Ingresa tu ID de pedido", en: "Enter your order ID" })}
                   className="w-full pl-12 pr-4 py-3 bg-[#252320] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
                 />
               </div>
@@ -189,7 +227,7 @@ function OrderTracker() {
                 type="submit"
                 className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition min-h-[48px]"
               >
-                Buscar
+                {t({ es: "Buscar", en: "Search" })}
               </button>
             </div>
           </form>
@@ -198,7 +236,7 @@ function OrderTracker() {
         {loading && (
           <div className="bg-[#252320] border border-[#3D3936] p-8 text-center">
             <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent mx-auto" />
-            <p className="text-[#6B6560] mt-4">Cargando pedido...</p>
+            <p className="text-[#6B6560] mt-4">{t({ es: "Cargando pedido...", en: "Loading order..." })}</p>
           </div>
         )}
 
@@ -233,14 +271,16 @@ function OrderTracker() {
                   <PartyPopper className="w-10 h-10 text-[#4CAF50]" />
                 </motion.div>
                 <h2 className="text-2xl font-bold text-[#FFF8F0] mb-2">
-                  ¡Pedido Realizado!
+                  {t({ es: "¡Pedido Realizado!", en: "Order Placed!" })}
                 </h2>
                 <p className="text-[#B8B0A8]">
-                  Tu pedido #{order.order_number || order.id.slice(0, 8)} está
-                  en camino
+                  {t({
+                    es: `Tu pedido #${order.order_number || order.id.slice(0, 8)} está en camino`,
+                    en: `Your order #${order.order_number || order.id.slice(0, 8)} is on its way`,
+                  })}
                 </p>
                 <p className="text-[#FF6B35] font-medium mt-2">
-                  Tiempo estimado: 30-45 minutos
+                  {t({ es: "Tiempo estimado: 30-45 minutos", en: "Estimated time: 30-45 minutes" })}
                 </p>
               </motion.div>
             ) : (
@@ -250,10 +290,10 @@ function OrderTracker() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-[#FFF8F0]">
-                    ¡Pedido Confirmado!
+                    {t({ es: "¡Pedido Confirmado!", en: "Order Confirmed!" })}
                   </h2>
                   <p className="text-[#B8B0A8] text-sm">
-                    Pedido #{order.order_number || order.id.slice(0, 8)}
+                    {t({ es: "Pedido", en: "Order" })} #{order.order_number || order.id.slice(0, 8)}
                   </p>
                 </div>
               </div>
@@ -263,13 +303,13 @@ function OrderTracker() {
             <div className="bg-[#252320] border border-[#3D3936] p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm text-[#6B6560]">Estado</p>
+                  <p className="text-sm text-[#6B6560]">{t({ es: "Estado", en: "Status" })}</p>
                   <p className="font-medium text-[#FFF8F0]">
                     {orderStatusLabel(order.status)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#6B6560]">Tiempo Estimado</p>
+                  <p className="text-sm text-[#6B6560]">{t({ es: "Tiempo Estimado", en: "Estimated Time" })}</p>
                   <p className="font-medium text-[#FFF8F0]">30-45 min</p>
                 </div>
               </div>
@@ -309,7 +349,7 @@ function OrderTracker() {
                               : "text-[#6B6560]"
                           }`}
                         >
-                          {step.label}
+                          {t(step.label)}
                         </span>
                       </div>
                     );
@@ -321,15 +361,15 @@ function OrderTracker() {
             {/* Order Details */}
             <div className="bg-[#252320] border border-[#3D3936] p-6">
               <h2 className="font-semibold text-[#FFF8F0] mb-4">
-                Detalles del Pedido
+                {t({ es: "Detalles del Pedido", en: "Order Details" })}
               </h2>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">Cliente</span>
+                  <span className="text-[#6B6560]">{t({ es: "Cliente", en: "Customer" })}</span>
                   <span className="text-[#FFF8F0]">{order.customer_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">Teléfono</span>
+                  <span className="text-[#6B6560]">{t({ es: "Teléfono", en: "Phone" })}</span>
                   <a
                     href={`tel:${order.customer_phone}`}
                     className="text-[#FF6B35] hover:underline"
@@ -338,25 +378,26 @@ function OrderTracker() {
                   </a>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">Tipo</span>
+                  <span className="text-[#6B6560]">{t({ es: "Tipo", en: "Type" })}</span>
                   <span className="text-[#FFF8F0]">
                     {order.order_type === "delivery" || order.is_delivery
                       ? "Delivery"
-                      : "Para recoger"}
+                      : t({ es: "Para recoger", en: "Pickup" })}
                   </span>
                 </div>
-                {order.delivery_address && (
+                {(order.delivery_address_line1 || order.delivery_address) && (
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">Dirección</span>
+                    <span className="text-[#6B6560]">{t({ es: "Dirección", en: "Address" })}</span>
                     <span className="text-[#FFF8F0] text-right max-w-[200px]">
-                      {order.delivery_address}
+                      {order.delivery_address_line1 || order.delivery_address}
+                      {order.delivery_city && `, ${order.delivery_city}`}
                     </span>
                   </div>
                 )}
               </div>
 
               <div className="border-t border-[#3D3936] mt-4 pt-4">
-                <h3 className="font-medium text-[#FFF8F0] mb-3">Artículos</h3>
+                <h3 className="font-medium text-[#FFF8F0] mb-3">{t({ es: "Artículos", en: "Items" })}</h3>
                 {getOrderItems(order).length > 0 ? (
                   getOrderItems(order).map((item, i) => (
                     <div key={i} className="flex justify-between text-sm py-1">
@@ -374,7 +415,7 @@ function OrderTracker() {
                   </p>
                 ) : (
                   <p className="text-[#6B6560] text-sm">
-                    Sin datos de artículos
+                    {t({ es: "Sin datos de artículos", en: "No item data available" })}
                   </p>
                 )}
                 <div className="border-t border-[#3D3936] mt-3 pt-3 space-y-1">
@@ -385,15 +426,23 @@ function OrderTracker() {
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#6B6560]">Envío</span>
+                    <span className="text-[#6B6560]">{t({ es: "Envío", en: "Delivery" })}</span>
                     <span className="text-[#FFF8F0]">
                       ${(order.delivery_fee || 0).toFixed(2)}
                     </span>
                   </div>
+                  {(order.discount_amount != null && order.discount_amount > 0) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-green-400">{t({ es: "Descuento", en: "Discount" })}</span>
+                      <span className="text-green-400">
+                        -${order.discount_amount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-lg pt-2">
                     <span className="text-[#FFF8F0]">Total</span>
                     <span className="text-white">
-                      ${(order.total || 0).toFixed(2)}
+                      ${(order.total_amount || order.total || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -403,10 +452,10 @@ function OrderTracker() {
             {/* Payment Details */}
             {(order.payment_status || order.card_last4) && (
               <div className="bg-[#252320] border border-[#3D3936] p-6">
-                <h2 className="font-semibold text-[#FFF8F0] mb-4">Pago</h2>
+                <h2 className="font-semibold text-[#FFF8F0] mb-4">{t({ es: "Pago", en: "Payment" })}</h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">Estado</span>
+                    <span className="text-[#6B6560]">{t({ es: "Estado", en: "Status" })}</span>
                     <span
                       className={`font-medium ${
                         order.payment_status === "paid"
@@ -418,31 +467,31 @@ function OrderTracker() {
                       }`}
                     >
                       {order.payment_status === "paid"
-                        ? "Pagado"
+                        ? t({ es: "Pagado", en: "Paid" })
                         : order.payment_status === "failed"
-                          ? "Fallido"
+                          ? t({ es: "Fallido", en: "Failed" })
                           : order.payment_status === "voided"
-                            ? "Anulado"
+                            ? t({ es: "Anulado", en: "Voided" })
                             : order.payment_status === "refunded"
-                              ? "Reembolsado"
+                              ? t({ es: "Reembolsado", en: "Refunded" })
                               : order.payment_status === "processing_3ds"
-                                ? "Autenticando"
-                                : "Pendiente"}
+                                ? t({ es: "Autenticando", en: "Authenticating" })
+                                : t({ es: "Pendiente", en: "Pending" })}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">Método</span>
+                    <span className="text-[#6B6560]">{t({ es: "Método", en: "Method" })}</span>
                     <span className="text-[#FFF8F0] capitalize">
                       {order.payment_method === "card"
-                        ? "Tarjeta"
+                        ? t({ es: "Tarjeta", en: "Card" })
                         : order.payment_method === "cash"
-                          ? "Efectivo"
-                          : order.payment_method || "—"}
+                          ? t({ es: "Efectivo", en: "Cash" })
+                          : order.payment_method || "\u2014"}
                     </span>
                   </div>
                   {order.card_brand && order.card_last4 && (
                     <div className="flex justify-between">
-                      <span className="text-[#6B6560]">Tarjeta</span>
+                      <span className="text-[#6B6560]">{t({ es: "Tarjeta", en: "Card" })}</span>
                       <span className="text-[#FFF8F0]">
                         {order.card_brand} ···· {order.card_last4}
                       </span>
@@ -450,7 +499,7 @@ function OrderTracker() {
                   )}
                   {order.authorization_code && (
                     <div className="flex justify-between">
-                      <span className="text-[#6B6560]">Autorización</span>
+                      <span className="text-[#6B6560]">{t({ es: "Autorización", en: "Authorization" })}</span>
                       <span className="text-[#FFF8F0] font-mono text-xs">
                         {order.authorization_code}
                       </span>
@@ -473,14 +522,14 @@ function OrderTracker() {
                   href="/menu"
                   className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-4 font-medium text-center transition min-h-[56px] flex items-center justify-center"
                 >
-                  Volver al Menú
+                  {t({ es: "Volver al Menú", en: "Back to Menu" })}
                 </Link>
                 <a
                   href="tel:+50322637890"
                   className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"
                 >
                   <Phone className="w-5 h-5" />
-                  Llamar
+                  {t({ es: "Llamar", en: "Call" })}
                 </a>
               </div>
               <a
@@ -490,7 +539,7 @@ function OrderTracker() {
                 className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"
               >
                 <MessageCircle className="w-5 h-5" />
-                Chat por WhatsApp
+                {t({ es: "Chat por WhatsApp", en: "Chat on WhatsApp" })}
               </a>
             </div>
           </motion.div>
@@ -500,7 +549,7 @@ function OrderTracker() {
           <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
             <Search className="w-12 h-12 text-[#6B6560] mx-auto mb-4" />
             <p className="text-[#6B6560]">
-              Ingresa tu ID de pedido para rastrearlo
+              {t({ es: "Ingresa tu ID de pedido para rastrearlo", en: "Enter your order ID to track it" })}
             </p>
           </div>
         )}

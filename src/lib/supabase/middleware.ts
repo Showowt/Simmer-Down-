@@ -4,8 +4,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 export async function updateSession(request: NextRequest) {
   // Skip middleware if Supabase is not configured
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    // Still protect routes even without Supabase
-    const protectedPaths = ['/admin', '/account']
+    // Still protect admin routes even without Supabase
+    const protectedPaths = ['/admin']
     if (protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
       const url = request.nextUrl.clone()
       url.pathname = '/auth/login'
@@ -44,7 +44,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes that require authentication
-  const protectedPaths = ['/account', '/admin']
+  // Note: /account handles its own unauthenticated state with a "please log in" UI
+  // to avoid redirect loops between /account and /auth/login
+  const protectedPaths = ['/admin']
   const isProtectedPath = protectedPaths.some(path =>
     request.nextUrl.pathname.startsWith(path)
   )
@@ -73,10 +75,16 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
+  // Only redirect if the user has a verified email (truly authenticated)
+  // This prevents redirect loops when sessions are stale or partially valid
   const authPaths = ['/auth/login', '/auth/signup']
-  if (authPaths.includes(request.nextUrl.pathname) && user) {
+  if (authPaths.includes(request.nextUrl.pathname) && user?.email_confirmed_at) {
     const url = request.nextUrl.clone()
     url.pathname = '/account'
+    // Preserve query params like loyalty=1
+    request.nextUrl.searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value)
+    })
     return NextResponse.redirect(url)
   }
 

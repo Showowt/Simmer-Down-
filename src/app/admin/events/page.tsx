@@ -18,6 +18,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { CANONICAL_LOCATION_SLUGS } from "@/lib/locations";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 // ─────────────────────────────────────────────
@@ -167,6 +168,7 @@ export default function AdminEventsPage() {
       const { data, error: fetchErr } = await supabase
         .from("locations")
         .select("id, name")
+        .in("slug", [...CANONICAL_LOCATION_SLUGS])
         .order("name", { ascending: true });
 
       if (fetchErr) throw fetchErr;

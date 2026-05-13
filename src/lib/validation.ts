@@ -115,13 +115,13 @@ export type SophiaMessageInput = z.infer<typeof sophiaMessageSchema>;
 // ═══════════════════════════════════════════════════════════════
 
 export const animaContextSchema = z.object({
-  customerName: z.string().max(100).optional(),
-  customerPhone: z.string().max(20).optional(),
-  loyaltyTier: z.string().max(20).optional(),
-  loyaltyPoints: z.number().min(0).optional(),
-  visitCount: z.number().min(0).optional(),
-  favoriteItems: z.array(z.string()).max(10).optional(),
-  dietaryPreferences: z.array(z.string()).max(5).optional(),
+  customerName: z.string().max(100).optional().nullable(),
+  customerPhone: z.string().max(20).optional().nullable(),
+  loyaltyTier: z.string().max(20).optional().nullable(),
+  loyaltyPoints: z.number().min(0).optional().nullable(),
+  visitCount: z.number().min(0).optional().nullable(),
+  favoriteItems: z.array(z.string()).max(10).optional().nullable(),
+  dietaryPreferences: z.array(z.string()).max(5).optional().nullable(),
   cartItems: z
     .array(
       z.object({
@@ -131,10 +131,11 @@ export const animaContextSchema = z.object({
       }),
     )
     .max(20)
-    .optional(),
+    .optional()
+    .nullable(),
   currentTime: z.string(),
   dayOfWeek: z.string(),
-  language: z.enum(["es", "en"]).optional(),
+  language: z.enum(["es", "en"]).optional().nullable(),
 });
 
 export const animaMessageSchema = z.object({
@@ -172,6 +173,91 @@ export const contactFormSchema = z.object({
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
+
+// ═══════════════════════════════════════════════════════════════
+// Reservation Form Schema
+// ═══════════════════════════════════════════════════════════════
+
+const VALID_LOCATION_IDS = [
+  "santa-ana",
+  "coatepeque",
+  "san-benito",
+  "juayua",
+  "surf-city",
+] as const;
+
+export const reservationFormSchema = z
+  .object({
+    location_id: z.enum(VALID_LOCATION_IDS, {
+      error: "Ubicación inválida / Invalid location",
+    }),
+    date: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        "Formato de fecha inválido. Usa: YYYY-MM-DD",
+      ),
+    time: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, "Formato de hora inválido. Usa: HH:MM"),
+    guest_count: z
+      .number()
+      .int()
+      .min(1, "Mínimo 1 persona")
+      .max(20, "Para grupos mayores a 20 personas, contáctanos directamente"),
+    customer_name: z
+      .string()
+      .min(2, "El nombre debe tener al menos 2 caracteres")
+      .max(100, "El nombre es demasiado largo"),
+    customer_phone: z
+      .string()
+      .min(7, "El teléfono debe tener al menos 7 dígitos")
+      .max(20, "El teléfono es demasiado largo"),
+    customer_email: z
+      .string()
+      .email("Correo electrónico inválido")
+      .max(255)
+      .optional()
+      .nullable()
+      .or(z.literal("")),
+    special_requests: z
+      .string()
+      .max(1000, "Las solicitudes especiales son demasiado largas")
+      .optional()
+      .nullable()
+      .or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      // Ensure date is not in the past
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const reservationDate = new Date(data.date + "T00:00:00");
+      return reservationDate >= today;
+    },
+    {
+      message:
+        "No se pueden hacer reservaciones en fechas pasadas / Cannot book past dates",
+      path: ["date"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Ensure date is not more than 30 days out
+      const maxDate = new Date();
+      maxDate.setDate(maxDate.getDate() + 30);
+      maxDate.setHours(23, 59, 59, 999);
+      const reservationDate = new Date(data.date + "T00:00:00");
+      return reservationDate <= maxDate;
+    },
+    {
+      message:
+        "Solo se permiten reservaciones hasta 30 días en el futuro / Max 30 days ahead",
+      path: ["date"],
+    },
+  );
+
+export type ReservationFormInput = z.infer<typeof reservationFormSchema>;
 
 // ═══════════════════════════════════════════════════════════════
 // Validation Error Response Helper

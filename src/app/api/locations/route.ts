@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import logger from "@/lib/logger";
+import { CANONICAL_LOCATION_SLUGS } from "@/lib/locations";
 import { createServiceClient } from "@/lib/supabase/service";
 import {
   checkRateLimit,
@@ -91,6 +92,7 @@ export async function GET(
       `,
       )
       .eq("is_active", true)
+      .in("slug", [...CANONICAL_LOCATION_SLUGS])
       .order("name");
 
     if (locErr) {

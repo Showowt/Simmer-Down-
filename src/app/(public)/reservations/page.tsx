@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n, translations } from '@/lib/i18n'
-import { createClient } from '@/lib/supabase/client'
 
 // ═══════════════════════════════════════════════════════════════
 // Location Data
@@ -348,6 +347,7 @@ export default function ReservationsPage() {
   // UI state
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   const selectedLocation = useMemo(
@@ -407,32 +407,50 @@ export default function ReservationsPage() {
     }
 
     setValidationErrors({})
+    setSubmitError('')
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error: dbError } = await supabase.from('reservations').insert({
-        location_id: selectedLocationId,
-        date: formatDateShort(selectedDate!),
-        time: selectedTime,
-        guest_count: guestCount,
-        customer_name: name,
-        customer_phone: phone,
-        customer_email: email || null,
-        special_requests: notes || null,
-        status: 'confirmed',
+      const res = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_id: selectedLocationId,
+          date: formatDateShort(selectedDate!),
+          time: selectedTime,
+          guest_count: guestCount,
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || null,
+          special_requests: notes || null,
+        }),
       })
 
-      if (dbError) {
-        // Graceful degradation: if table doesn't exist, still show confirmation
-        console.warn('[Reservations] DB insert failed:', dbError.message)
+      const result = await res.json()
+
+      if (!res.ok) {
+        // Handle validation errors from the server
+        if (result.errors && Array.isArray(result.errors)) {
+          const serverErrors: Record<string, string> = {}
+          for (const err of result.errors) {
+            if (err.field) serverErrors[err.field] = err.message
+          }
+          setValidationErrors(serverErrors)
+          return
+        }
+        // Handle rate limit or other errors
+        setSubmitError(
+          result.error || result.message || (locale === 'es' ? 'Error al reservar. Intenta de nuevo.' : 'Reservation failed. Please try again.')
+        )
+        return
       }
 
       setSubmitted(true)
     } catch (err) {
       console.error('[Reservations] Submit error:', err)
-      // Still show confirmation to user
-      setSubmitted(true)
+      setSubmitError(
+        locale === 'es' ? 'Error de conexión. Intenta de nuevo.' : 'Connection error. Please try again.'
+      )
     } finally {
       setLoading(false)
     }
@@ -448,6 +466,7 @@ export default function ReservationsPage() {
     setEmail('')
     setNotes('')
     setSubmitted(false)
+    setSubmitError('')
     setValidationErrors({})
   }
 
@@ -830,6 +849,17 @@ export default function ReservationsPage() {
                     placeholder={t(b.specialRequestsPlaceholder)}
                   />
                 </motion.div>
+
+                {/* Submit Error */}
+                {submitError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[#C73E1D]/10 border border-[#C73E1D]/30 p-4 text-center"
+                  >
+                    <p className="text-[#C73E1D] text-sm">{submitError}</p>
+                  </motion.div>
+                )}
 
                 {/* Submit */}
                 <motion.div

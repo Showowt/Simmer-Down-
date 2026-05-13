@@ -18,7 +18,7 @@ export function CardForm() {
     <div className="p-6 bg-[#1F1D1A] border border-[#3D3936] text-center space-y-3">
       <CreditCard className="w-8 h-8 text-[#6B6560] mx-auto" />
       <p className="text-[#B8B0A8] text-sm">
-        Pago con tarjeta pr&oacute;ximamente / Card payment coming soon
+        Pago con tarjeta pr{"\u00f3"}ximamente / Card payment coming soon
       </p>
     </div>
   );

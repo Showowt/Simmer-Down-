@@ -26,6 +26,7 @@ import Link from "next/link";
 
 import { useCartStore } from "@/store/cart";
 import { useI18n, translations } from "@/lib/i18n";
+import { CANONICAL_LOCATION_SLUGS } from "@/lib/locations";
 import { createClient } from "@/lib/supabase/client";
 
 interface Location {
@@ -144,12 +145,15 @@ export default function CheckoutPage() {
           )
           .eq("is_active", true)
           .eq("is_accepting_orders", true)
+          .in("slug", [...CANONICAL_LOCATION_SLUGS])
           .order("name");
 
         if (error) throw error;
         if (data && data.length > 0) {
           setLocations(data);
-          setSelectedLocation(data[0].id);
+          // Default to Santa Ana (flagship) if available, otherwise first
+          const flagship = data.find((l: { slug: string }) => l.slug === "santa-ana");
+          setSelectedLocation(flagship ? flagship.id : data[0].id);
         } else {
           setSelectedLocation(fallbackLocations[0].id);
         }
@@ -603,7 +607,7 @@ export default function CheckoutPage() {
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs text-[#6B6560]">
               <Info className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Pago con tarjeta pr&oacute;ximamente / Card payment coming soon</span>
+              <span>Pago con tarjeta pr{"\u00f3"}ximamente / Card payment coming soon</span>
             </div>
           </motion.div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { CANONICAL_LOCATION_SLUGS } from '@/lib/locations'
 import { Flame, Lock, MapPin, AlertCircle } from 'lucide-react'
 
 const KITCHEN_SESSION_KEY = 'simmerdown-kitchen-session'
@@ -54,8 +55,9 @@ export default function KitchenLoginPage() {
       const supabase = createClient()
       const { data } = await supabase
         .from('locations')
-        .select('id, name')
+        .select('id, name, slug')
         .eq('is_active', true)
+        .in('slug', [...CANONICAL_LOCATION_SLUGS])
         .order('name')
       if (data && data.length > 0) {
         setLocations(data)

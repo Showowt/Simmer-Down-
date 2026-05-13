@@ -6,6 +6,7 @@ import { X, Send, Flame, ChevronRight, Mic, MicOff, ShoppingCart, Plus, MapPin, 
 import { useAnimaStore } from '@/store/anima'
 import { useCartStore } from '@/store/cart'
 import { useRouter } from 'next/navigation'
+import { useI18n } from '@/lib/i18n'
 
 interface MenuItem {
   id: string
@@ -24,17 +25,62 @@ interface Message {
   actions?: string[]
 }
 
-const quickActions = [
-  { label: 'Ver Menú', action: 'menu', icon: UtensilsCrossed },
-  { label: 'Mis Pedidos', action: 'orders', icon: ShoppingCart },
-  { label: 'Ubicaciones', action: 'locations', icon: MapPin },
-  { label: 'Eventos', action: 'events', icon: Calendar },
-]
+// Bilingual quick actions
+const quickActionsI18n = {
+  es: [
+    { label: 'Ver Menú', action: 'menu', icon: UtensilsCrossed },
+    { label: 'Mis Pedidos', action: 'orders', icon: ShoppingCart },
+    { label: 'Ubicaciones', action: 'locations', icon: MapPin },
+    { label: 'Eventos', action: 'events', icon: Calendar },
+  ],
+  en: [
+    { label: 'View Menu', action: 'menu', icon: UtensilsCrossed },
+    { label: 'My Orders', action: 'orders', icon: ShoppingCart },
+    { label: 'Locations', action: 'locations', icon: MapPin },
+    { label: 'Events', action: 'events', icon: Calendar },
+  ],
+}
+
+// Bilingual labels for inline action buttons returned by the API
+const actionLabels: Record<string, { es: string; en: string }> = {
+  menu: { es: 'Ver Menú', en: 'View Menu' },
+  view_menu: { es: 'Ver Menú', en: 'View Menu' },
+  recommendations: { es: 'Recomendaciones', en: 'Recommendations' },
+  locations: { es: 'Ubicaciones', en: 'Locations' },
+  events: { es: 'Eventos', en: 'Events' },
+  orders: { es: 'Mis Pedidos', en: 'My Orders' },
+  promos: { es: 'Promociones', en: 'Promos' },
+  order: { es: 'Ordenar', en: 'Order' },
+  add_to_cart: { es: 'Agregar', en: 'Add to Cart' },
+  view_cart: { es: 'Ver Carrito', en: 'View Cart' },
+  checkout: { es: 'Pagar', en: 'Checkout' },
+  track_order: { es: 'Rastrear Pedido', en: 'Track Order' },
+  help: { es: 'Ayuda', en: 'Help' },
+  other_options: { es: 'Otras Opciones', en: 'Other Options' },
+  other_categories: { es: 'Más Categorías', en: 'More Categories' },
+  more_options: { es: 'Más Opciones', en: 'More Options' },
+  add_more: { es: 'Agregar Más', en: 'Add More' },
+  clear_cart: { es: 'Vaciar Carrito', en: 'Clear Cart' },
+  more_info: { es: 'Más Info', en: 'More Info' },
+  new_order: { es: 'Nuevo Pedido', en: 'New Order' },
+  confirm_repeat: { es: 'Confirmar', en: 'Confirm' },
+  modify: { es: 'Modificar', en: 'Modify' },
+  enter_phone: { es: 'Ingresar Teléfono', en: 'Enter Phone' },
+  reserve: { es: 'Reservar', en: 'Reserve' },
+  directions: { es: 'Direcciones', en: 'Directions' },
+  santa_ana: { es: 'Santa Ana', en: 'Santa Ana' },
+  coatepeque: { es: 'Coatepeque', en: 'Coatepeque' },
+  ensaladas: { es: 'Ensaladas', en: 'Salads' },
+  pizzas: { es: 'Pizzas', en: 'Pizzas' },
+  bebidas: { es: 'Bebidas', en: 'Drinks' },
+  postres: { es: 'Postres', en: 'Desserts' },
+}
 
 type ChatState = 'collapsed' | 'proactive' | 'expanded'
 
 export default function AnimaChatV2() {
   const router = useRouter()
+  const { locale } = useI18n()
   const {
     isOpen,
     setIsOpen,
@@ -45,6 +91,8 @@ export default function AnimaChatV2() {
     setHasSeenWelcome,
     memory
   } = useAnimaStore()
+
+  const quickActions = quickActionsI18n[locale] || quickActionsI18n.es
 
   const addItem = useCartStore((state) => state.addItem)
   const cartItems = useCartStore((state) => state.items)
@@ -128,16 +176,17 @@ export default function AnimaChatV2() {
   const callAnima = useCallback(async (userMessage: string) => {
     try {
       const context = {
-        customerName,
-        customerPhone: memory.preferredLocation,
-        loyaltyTier,
+        customerName: customerName || undefined,
+        customerPhone: memory.preferredLocation || undefined,
+        loyaltyTier: loyaltyTier || undefined,
         loyaltyPoints: 0,
         visitCount,
-        favoriteItems: memory.favoriteItems,
-        dietaryPreferences: memory.dietaryPreferences,
+        favoriteItems: memory.favoriteItems || [],
+        dietaryPreferences: memory.dietaryPreferences || [],
         cartItems: cartItems.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
         currentTime: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-        dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' })
+        dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+        language: locale,
       }
 
       const res = await fetch('/api/anima', {
@@ -146,24 +195,39 @@ export default function AnimaChatV2() {
         body: JSON.stringify({ message: userMessage, context })
       })
 
+      if (!res.ok) {
+        console.error('[AnimaChatV2] API returned', res.status)
+        const fallback = locale === 'en'
+          ? 'Sorry, I had a small issue. Please try again.'
+          : 'Disculpa, tuve un pequeño problema. ¿Puedes intentar de nuevo?'
+        return {
+          response: fallback,
+          suggestedItems: [],
+          actions: ['menu', 'locations', 'help']
+        }
+      }
+
       const data = await res.json()
       return data
     } catch (error) {
-      console.error('ANIMA API error:', error)
+      console.error('[AnimaChatV2] ANIMA API error:', error)
+      const fallback = locale === 'en'
+        ? 'Sorry, I had a small issue. Please try again.'
+        : 'Disculpa, tuve un pequeño problema. ¿Puedes intentar de nuevo?'
       return {
-        response: 'Disculpa, tuve un pequeño problema. ¿Puedes intentar de nuevo?',
+        response: fallback,
         suggestedItems: [],
-        actions: []
+        actions: ['menu', 'locations', 'help']
       }
     }
-  }, [customerName, loyaltyTier, visitCount, memory, cartItems])
+  }, [customerName, loyaltyTier, visitCount, memory, cartItems, locale])
 
   // Initialize greeting from API
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const initGreeting = async () => {
         setIsTyping(true)
-        const response = await callAnima('Hola')
+        const response = await callAnima(locale === 'en' ? 'Hello' : 'Hola')
         setMessages([{
           id: '1',
           role: 'anima',
@@ -219,27 +283,31 @@ export default function AnimaChatV2() {
   }
 
   const handleQuickAction = async (action: string) => {
-    const actionMessages: Record<string, string> = {
-      menu: 'Quiero ver el menú',
-      orders: 'Mis pedidos',
-      locations: '¿Dónde están ubicados?',
-      events: '¿Qué eventos tienen?',
-      recommendations: 'Recomiéndame algo',
-      view_menu: 'Muéstrame el menú',
-      add_to_cart: 'Agrégalo al carrito',
-      view_cart: 'Ver mi carrito',
-      promos: '¿Qué promociones tienen?',
-      checkout: 'Quiero pagar',
-      track_order: '¿Dónde está mi pedido?',
-      pizzas: 'Muéstrame las pizzas',
-      ensaladas: 'Muéstrame las ensaladas',
-      bebidas: 'Muéstrame las bebidas',
-      postres: 'Muéstrame los postres',
-      other_options: 'Muéstrame otras opciones',
-      other_categories: '¿Qué más tienen?',
-      add_more: 'Quiero agregar más',
-      help: '¿Cómo funciona?'
+    const actionMessagesI18n: Record<string, { es: string; en: string }> = {
+      menu: { es: 'Quiero ver el menú', en: 'I want to see the menu' },
+      orders: { es: 'Mis pedidos', en: 'My orders' },
+      locations: { es: '¿Dónde están ubicados?', en: 'Where are you located?' },
+      events: { es: '¿Qué eventos tienen?', en: 'What events do you have?' },
+      recommendations: { es: 'Recomiéndame algo', en: 'Recommend something' },
+      view_menu: { es: 'Muéstrame el menú', en: 'Show me the menu' },
+      add_to_cart: { es: 'Agrégalo al carrito', en: 'Add it to cart' },
+      view_cart: { es: 'Ver mi carrito', en: 'View my cart' },
+      promos: { es: '¿Qué promociones tienen?', en: 'What promos do you have?' },
+      checkout: { es: 'Quiero pagar', en: 'I want to checkout' },
+      track_order: { es: '¿Dónde está mi pedido?', en: 'Where is my order?' },
+      pizzas: { es: 'Muéstrame las pizzas', en: 'Show me the pizzas' },
+      ensaladas: { es: 'Muéstrame las ensaladas', en: 'Show me the salads' },
+      bebidas: { es: 'Muéstrame las bebidas', en: 'Show me the drinks' },
+      postres: { es: 'Muéstrame los postres', en: 'Show me the desserts' },
+      other_options: { es: 'Muéstrame otras opciones', en: 'Show me other options' },
+      other_categories: { es: '¿Qué más tienen?', en: 'What else do you have?' },
+      add_more: { es: 'Quiero agregar más', en: 'I want to add more' },
+      help: { es: '¿Cómo funciona?', en: 'How does it work?' },
     }
+
+    const actionMessages: Record<string, string> = Object.fromEntries(
+      Object.entries(actionMessagesI18n).map(([key, val]) => [key, val[locale] || val.es])
+    )
 
     const message = actionMessages[action] || action
     setInput(message)
@@ -309,10 +377,14 @@ export default function AnimaChatV2() {
       created_at: new Date().toISOString()
     })
 
+    const confirmContent = locale === 'en'
+      ? `Done! ${item.name} added to your cart. Anything else?`
+      : `¡Listo! ${item.name} agregado a tu carrito. ¿Algo más?`
+
     const confirmMessage: Message = {
       id: Date.now().toString(),
       role: 'anima',
-      content: `¡Listo! ${item.name} agregado a tu carrito. ¿Algo más?`,
+      content: confirmContent,
       timestamp: new Date(),
       actions: ['view_cart', 'recommendations', 'menu']
     }
@@ -328,6 +400,13 @@ export default function AnimaChatV2() {
   const getProactiveMessage = () => {
     const hour = new Date().getHours()
     const day = new Date().getDay()
+
+    if (locale === 'en') {
+      if (visitCount > 2) return 'Great to see you again! The usual?'
+      if (day === 0 || day === 6) return 'Weekend vibes! A pizza to celebrate?'
+      if (hour >= 17 && hour <= 21) return 'Pizza for dinner? I can help you choose.'
+      return 'Hungry? Let me help you find your perfect pizza.'
+    }
 
     if (visitCount > 2) return '¡Qué bueno verte de nuevo! ¿Lo de siempre?'
     if (day === 0 || day === 6) return '¡Fin de semana! ¿Una pizza para celebrar?'
@@ -375,7 +454,7 @@ export default function AnimaChatV2() {
                   <h3 className="font-semibold text-[#FFF8F0] text-sm">ANIMA</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-[#4CAF50] animate-pulse" />
-                    En línea
+                    {locale === 'en' ? 'Online' : 'En línea'}
                   </p>
                 </div>
               </div>
@@ -390,14 +469,14 @@ export default function AnimaChatV2() {
                   onClick={openChat}
                   className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                 >
-                  Sí, platiquemos
+                  {locale === 'en' ? "Yes, let's chat" : 'Sí, platiquemos'}
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={dismissProactive}
                   className="px-4 bg-[#3D3936] hover:bg-[#4A4642] text-[#B8B0A8] py-3 text-sm"
                 >
-                  Ahora no
+                  {locale === 'en' ? 'Not now' : 'Ahora no'}
                 </button>
               </div>
             </div>
@@ -424,7 +503,7 @@ export default function AnimaChatV2() {
                   <h3 className="font-semibold text-[#FFF8F0]">ANIMA</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-2 h-2 bg-[#4CAF50] animate-pulse" />
-                    El alma de Simmer Down
+                    {locale === 'en' ? 'The Soul of Simmer Down' : 'El alma de Simmer Down'}
                   </p>
                 </div>
               </div>
@@ -495,7 +574,7 @@ export default function AnimaChatV2() {
                             onClick={() => handleQuickAction(action)}
                             className="px-2.5 py-1.5 bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] text-xs transition-colors capitalize"
                           >
-                            {action.replace(/_/g, ' ')}
+                            {actionLabels[action]?.[locale] || action.replace(/_/g, ' ')}
                           </button>
                         ))}
                       </div>
@@ -526,7 +605,7 @@ export default function AnimaChatV2() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escribe un mensaje..."
+                  placeholder={locale === 'en' ? 'Type a message...' : 'Escribe un mensaje...'}
                   className="flex-1 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] text-sm"
                 />
                 {recognitionRef.current && (

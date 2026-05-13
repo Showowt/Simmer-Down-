@@ -17,17 +17,17 @@ import logger from "@/lib/logger";
 // Now with rate limiting and input validation
 
 interface AnimaContext {
-  customerName?: string;
-  customerPhone?: string;
-  loyaltyTier?: string;
-  loyaltyPoints?: number;
-  visitCount?: number;
-  favoriteItems?: string[];
-  dietaryPreferences?: string[];
-  cartItems?: { name: string; quantity: number; price: number }[];
+  customerName?: string | null;
+  customerPhone?: string | null;
+  loyaltyTier?: string | null;
+  loyaltyPoints?: number | null;
+  visitCount?: number | null;
+  favoriteItems?: string[] | null;
+  dietaryPreferences?: string[] | null;
+  cartItems?: { name: string; quantity: number; price: number }[] | null;
   currentTime: string;
   dayOfWeek: string;
-  language?: "es" | "en";
+  language?: "es" | "en" | null;
 }
 
 interface MenuItem {

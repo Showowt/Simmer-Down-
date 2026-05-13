@@ -62,6 +62,7 @@ export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [notAuthenticated, setNotAuthenticated] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState({ full_name: '', phone: '', address: '' })
   const [saving, setSaving] = useState(false)
@@ -73,7 +74,8 @@ export default function AccountPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      router.push('/auth/login')
+      setLoading(false)
+      setNotAuthenticated(true)
       return
     }
 
@@ -148,6 +150,36 @@ export default function AccountPage() {
     if (profile.loyalty_tier === 'starter') return 500 - profile.loyalty_points
     if (profile.loyalty_tier === 'flame') return 1500 - profile.loyalty_points
     return 0
+  }
+
+  if (notAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+        <div className="w-full max-w-md text-center">
+          <div className="bg-[#252320] border border-[#3D3936] p-8">
+            <div className="w-16 h-16 bg-[#FF6B35]/10 flex items-center justify-center mx-auto mb-6">
+              <User className="w-8 h-8 text-[#FF6B35]" />
+            </div>
+            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-3">Inicia sesión para continuar</h1>
+            <p className="text-[#6B6560] mb-6">
+              Necesitas una cuenta para acceder a tu perfil, puntos y pedidos.
+            </p>
+            <Link
+              href="/auth/login"
+              className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors"
+            >
+              Iniciar Sesión
+            </Link>
+            <p className="text-[#6B6560] mt-4 text-sm">
+              ¿No tienes cuenta?{' '}
+              <Link href="/auth/signup" className="text-[#FF6B35] hover:underline font-medium">
+                Regístrate gratis
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
