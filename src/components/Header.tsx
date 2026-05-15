@@ -51,8 +51,7 @@ export default function Header() {
               href="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src="/logos/logo-brand-full.svg" alt="Simmer Down logo" className="w-7 h-7" />
-              <span className="font-display text-xl tracking-[0.02em] text-[#FFF8F0]">Simmer Down</span>
+              <img src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" className="h-10 w-auto" />
             </Link>
 
             {/* Desktop Nav — clean, spaced, understated */}
@@ -134,7 +133,7 @@ export default function Header() {
             >
               <div className="space-y-1 text-center">
                 <div className="mb-8">
-                  <img src="/logos/logo-brand-full.svg" alt="Simmer Down logo" className="w-10 h-10 mx-auto" />
+                  <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-14 w-auto mx-auto" />
                 </div>
                 {navLinks.map((link, i) => (
                   <motion.div

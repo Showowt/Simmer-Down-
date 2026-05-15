@@ -182,7 +182,7 @@ function OrderTracker() {
                 {t({ es: "Volver al Menú", en: "Back to Menu" })}
               </Link>
               <a
-                href="https://wa.me/50324455999"
+                href="https://wa.me/50375764655"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 py-4 font-semibold transition min-h-[56px]"
@@ -584,7 +584,7 @@ function OrderTracker() {
                 </a>
               </div>
               <a
-                href={`https://wa.me/50324455999?text=${encodeURIComponent(`Hola! Quisiera información sobre mi orden #${order.order_number || order.id.slice(0, 8)}`)}`}
+                href={`https://wa.me/50375764655?text=${encodeURIComponent(`Hola! Quisiera información sobre mi orden #${order.order_number || order.id.slice(0, 8)}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"

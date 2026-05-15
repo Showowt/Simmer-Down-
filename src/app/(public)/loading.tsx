@@ -7,7 +7,7 @@ export default function PublicLoading() {
           <div className="absolute inset-0 border-4 border-[#3D3936]" />
           <div className="absolute inset-0 border-4 border-transparent border-t-[#FF6B35] animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <img src="/logos/logo-brand-full.svg" alt="Simmer Down" className="w-8 h-8 animate-pulse" />
+            <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-8 w-auto animate-pulse" />
           </div>
         </div>
 

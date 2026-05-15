@@ -151,9 +151,8 @@ export default function SignupPage() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] mb-4">
-            <img src="/logos/logo-brand-full.svg" alt="" className="w-8 h-8" aria-hidden="true" />
-            Simmer Down
+          <Link href="/" className="inline-block mb-4">
+            <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-12 w-auto mx-auto" />
           </Link>
           <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.joinSimmerLovers)}</h1>
           <p className="text-[#6B6560] mt-2">{t(translations.auth.signupSubtitle)}</p>

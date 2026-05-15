@@ -24,15 +24,17 @@ export interface WhatsAppLocation {
 
 /**
  * WhatsApp numbers per location.
- * Format: country code + number, digits only (e.g. "50324455999")
- * Update these when client provides per-location numbers.
+ * Format: country code + number, digits only (e.g. "50375764655")
+ * Primary order line: +503 7576-4655 (handles all reservations & orders)
  */
+export const ORDER_WHATSAPP = '50375764655'
+
 export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
   {
     id: 'santa-ana',
     name: 'Santa Ana',
     slug: 'santa-ana',
-    whatsapp: '50324455999',
+    whatsapp: ORDER_WHATSAPP,
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
   },
@@ -40,7 +42,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'coatepeque',
     name: 'Lago de Coatepeque',
     slug: 'coatepeque',
-    whatsapp: '50324455999',
+    whatsapp: ORDER_WHATSAPP,
     address: 'Calle Principal al Lago #119',
     city: 'Coatepeque',
   },
@@ -48,7 +50,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'san-benito',
     name: 'San Benito',
     slug: 'san-benito',
-    whatsapp: '50324455999',
+    whatsapp: ORDER_WHATSAPP,
     address: 'Boulevard del Hipódromo',
     city: 'San Salvador',
   },
@@ -56,7 +58,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'simmer-garden',
     name: 'Simmer Garden',
     slug: 'juayua',
-    whatsapp: '50324455999',
+    whatsapp: ORDER_WHATSAPP,
     address: 'Kilómetro 91.5, San José La Majada',
     city: 'Juayúa, Sonsonate',
   },
@@ -64,7 +66,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'surf-city',
     name: 'Surf City',
     slug: 'surf-city',
-    whatsapp: '50324455999',
+    whatsapp: ORDER_WHATSAPP,
     address: 'Hotel Casa Santa Emilia',
     city: 'La Libertad',
   },

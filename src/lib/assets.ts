@@ -11,12 +11,12 @@
 // ============================================================================
 
 export const LOGOS = {
-  /** Primary brand logo (flame + SIMMER DOWN wordmark) — official SVG from brand kit */
-  main: '/logos/logo-brand-full.svg',
+  /** Primary brand logo (flame + SIMMER DOWN wordmark) — official 2026 rebrand */
+  main: '/logos/logo-simmer-light.svg',
   /** Icon-only version for favicons, loading screens, small spaces */
-  icon: '/logos/logo-brand-full.svg',
-  /** Full horizontal version */
-  full: '/logos/logo-full.svg',
+  icon: '/logos/logo-simmer-light.svg',
+  /** Full brand logo (dark version for light backgrounds) */
+  full: '/logos/logo-simmer-nuevo.svg',
   /** Simmer Garden sub-brand — official SVG */
   garden: '/logos/simmer-garden-official.svg',
 }

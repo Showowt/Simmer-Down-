@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
 import { useI18n, translations } from "@/lib/i18n";
 
-const WHATSAPP_NUMBER = "+50324455999"; // Main — Santa Ana (HQ)
+const WHATSAPP_NUMBER = "+50375764655"; // Orders & Reservations
 const DEFAULT_MESSAGE = "Hola! Me gustaria hacer una consulta...";
 
 interface WhatsAppButtonProps {
