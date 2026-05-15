@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
@@ -77,11 +78,14 @@ export default function Home() {
       {/* ─── HERO — Photography-led, minimal text ─── */}
       <section className="relative min-h-[85vh] md:min-h-[100vh] flex items-end overflow-hidden -mt-20">
         {/* Background */}
-        <div className="absolute inset-0">
-          <img
+        <div className="absolute inset-0 bg-[#1F1D1A]">
+          <Image
             src="/images/heroes/homepage-pizzas.jpg"
             alt="Simmer Down — artisan wood-fired pizzas"
-            className="w-full h-full object-cover"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A] via-[#1F1D1A]/60 to-transparent" />
         </div>
@@ -101,7 +105,7 @@ export default function Home() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mb-6">
-            <img src="/logos/logo-brand-full.svg" alt="Simmer Down flame logo" className="w-12 h-12 mb-4" />
+            <Image src="/logos/logo-brand-full.svg" alt="Simmer Down flame logo" width={48} height={48} className="mb-4" />
           </motion.div>
 
           <motion.h1
@@ -164,11 +168,13 @@ export default function Home() {
                 className="group"
               >
                 <Link href="/menu" className="block">
-                  <div className="aspect-[4/5] overflow-hidden mb-5 relative">
-                    <img
+                  <div className="aspect-[4/5] overflow-hidden mb-5 relative bg-[#252320]">
+                    <Image
                       src={dish.image}
                       alt={dish.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   </div>
                   <h3 className="font-display text-lg text-[#FFF8F0] mb-1 group-hover:text-[#C9A84C] transition-colors">
@@ -209,11 +215,15 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <img
-                src="/images/menu/terramar-maitre.jpg"
-                alt="Terramar al Maitre — surf & turf"
-                className="w-full aspect-[4/5] object-cover"
-              />
+              <div className="relative aspect-[4/5] bg-[#252320]">
+                <Image
+                  src="/images/menu/terramar-maitre.jpg"
+                  alt="Terramar al Maitre — surf & turf"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+              </div>
             </motion.div>
 
             <motion.div
@@ -288,11 +298,13 @@ export default function Home() {
                 transition={{ delay: i * 0.08, duration: 0.6 }}
               >
                 <Link href="/locations" className="block group">
-                  <div className="aspect-[3/4] overflow-hidden mb-4 relative">
-                    <img
+                  <div className="aspect-[3/4] overflow-hidden mb-4 relative bg-[#252320]">
+                    <Image
                       src={location.image}
                       alt={`Simmer Down ${location.name}`}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1F1D1A]/80 via-transparent to-transparent" />
                     <div className="absolute bottom-4 left-4">

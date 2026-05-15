@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ArrowLeft, Sparkles } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ArrowLeft, Sparkles, MessageCircle } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useI18n, translations } from '@/lib/i18n'
 
@@ -185,9 +185,10 @@ export default function CartPage() {
 
               <Link
                 href="/checkout"
-                className="mt-6 w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#252320] active:scale-[0.98] min-h-[56px]"
+                className="mt-6 w-full bg-[#25D366] hover:bg-[#20BD5A] text-white py-4 font-semibold flex items-center justify-center gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-[#252320] active:scale-[0.98] min-h-[56px]"
               >
-                {t(translations.cart.proceedToPayment)} <ArrowRight className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5" />
+                {t(translations.cart.proceedToPayment)}
               </Link>
 
               {/* SimmerLovers upsell */}

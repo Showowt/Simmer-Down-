@@ -150,7 +150,7 @@ export const translations = {
     subtotal: { es: 'Subtotal', en: 'Subtotal' },
     delivery: { es: 'Envío', en: 'Delivery' },
     total: { es: 'Total', en: 'Total' },
-    proceedToPayment: { es: 'Proceder al Pago', en: 'Proceed to Payment' },
+    proceedToPayment: { es: 'Ordenar por WhatsApp', en: 'Order via WhatsApp' },
     orderSummary: { es: 'Resumen del Pedido', en: 'Order Summary' },
     earnPoints: { es: 'Gana', en: 'Earn' },
     pointsWithOrder: { es: '¡puntos con este pedido!', en: 'points with this order!' },
@@ -204,6 +204,13 @@ export const translations = {
     expiration: { es: 'Fecha de Expiración', en: 'Expiration Date' },
     cvv: { es: 'CVV', en: 'CVV' },
     cardComingSoon: { es: 'Pago con tarjeta próximamente', en: 'Card payment coming soon' },
+    orderViaWhatsApp: { es: 'Ordenar por WhatsApp', en: 'Order via WhatsApp' },
+    sendToWhatsApp: { es: 'Enviar Pedido por WhatsApp', en: 'Send Order via WhatsApp' },
+    selectYourLocation: { es: '¿En cuál sucursal quieres ordenar?', en: 'Which location do you want to order from?' },
+    yourInfo: { es: 'Tus Datos', en: 'Your Info' },
+    whatsAppExplainer: { es: 'Tu pedido se enviará directo al WhatsApp de la sucursal. Ellos confirmarán tu orden.', en: 'Your order will be sent directly to the location\'s WhatsApp. They will confirm your order.' },
+    nameRequired: { es: 'Por favor ingresa tu nombre', en: 'Please enter your name' },
+    phoneRequired: { es: 'Por favor ingresa tu teléfono', en: 'Please enter your phone number' },
   },
 
   // ─── Contact ───

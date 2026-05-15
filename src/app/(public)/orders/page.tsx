@@ -36,6 +36,7 @@ function OrderTracker() {
   const orderId = searchParams.get("id");
   const orderNumber = searchParams.get("number");
   const isDemo = searchParams.get("demo");
+  const isWhatsAppSent = searchParams.get("whatsapp") === "sent";
   const { t } = useI18n();
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -145,6 +146,56 @@ function OrderTracker() {
     }
     return [];
   };
+
+  // WhatsApp order sent confirmation
+  if (isWhatsAppSent && !order) {
+    return (
+      <div className="min-h-screen bg-[#2D2A26] pt-32">
+        <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="w-24 h-24 bg-[#25D366]/10 border border-[#25D366]/20 flex items-center justify-center mx-auto mb-6">
+              <MessageCircle className="w-12 h-12 text-[#25D366]" />
+            </div>
+            <h1 className="text-3xl font-bold text-[#FFF8F0] mb-4">
+              {t({ es: "¡Pedido Enviado!", en: "Order Sent!" })}
+            </h1>
+            <p className="text-[#B8B0A8] mb-2">
+              {t({
+                es: "Tu pedido fue enviado por WhatsApp a la sucursal.",
+                en: "Your order was sent via WhatsApp to the location.",
+              })}
+            </p>
+            <p className="text-[#6B6560] text-sm mb-8">
+              {t({
+                es: "Ellos confirmarán tu pedido y te darán un tiempo estimado de preparación.",
+                en: "They will confirm your order and give you an estimated preparation time.",
+              })}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/menu"
+                className="inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition min-h-[56px]"
+              >
+                {t({ es: "Volver al Menú", en: "Back to Menu" })}
+              </Link>
+              <a
+                href="https://wa.me/50324455999"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 py-4 font-semibold transition min-h-[56px]"
+              >
+                <MessageCircle className="w-5 h-5" />
+                {t({ es: "Abrir WhatsApp", en: "Open WhatsApp" })}
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   // Demo success state
   if (isDemo && !order) {
