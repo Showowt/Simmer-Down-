@@ -1,29 +1,22 @@
 import type { Metadata } from "next";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import NewHeader from "@/components/layout/NewHeader";
+import NewBottomNav from "@/components/layout/NewBottomNav";
+import NewLocationBar from "@/components/layout/NewLocationBar";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { MobileNav } from "@/components/mobile";
 
 export const metadata: Metadata = {
   title: {
-    default: "Simmer Down | Pizzería & Restaurante | El Salvador",
-    template: "%s | Simmer Down — Pizza Artesanal El Salvador",
+    default: "Simmer Down | Pizza Artesanal | El Salvador",
+    template: "%s | Simmer Down",
   },
   description:
-    "La mejor pizza artesanal de horno de leña en El Salvador. 5 ubicaciones, 14 años, +8,000 reseñas ⭐4.9. Pizzas, pastas, cortes y experiencias gastro-musicales en Santa Ana, San Benito, Lago de Coatepeque, Surf City y Juayúa.",
+    "Pizza artesanal de horno de leña en El Salvador. 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito, Surf City, Simmer Garden. Ordena por WhatsApp.",
   openGraph: {
     type: "website",
     locale: "es_SV",
     alternateLocale: "en_US",
-    siteName: "Simmer Down — La Mejor Pizza de El Salvador",
-    images: [
-      {
-        url: "/og/home.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Simmer Down — La Mejor Pizza Artesanal de Horno de Leña en El Salvador",
-      },
-    ],
+    siteName: "Simmer Down — Pizza Artesanal El Salvador",
+    images: [{ url: "/og/home.jpg", width: 1200, height: 630, alt: "Simmer Down — Pizza Artesanal El Salvador" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -39,12 +32,12 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Header />
-      <main id="main-content" className="pt-20 pb-16 md:pb-0">{children}</main>
-      <Footer />
+    <div className="min-h-screen bg-[#0A0A0A] text-white">
+      <NewHeader />
+      <NewLocationBar />
+      <main id="main-content">{children}</main>
       <WhatsAppButton />
-      <MobileNav />
-    </>
+      <NewBottomNav />
+    </div>
   );
 }

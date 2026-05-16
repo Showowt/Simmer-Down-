@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google'
+import { Bebas_Neue, DM_Sans } from 'next/font/google'
 import './globals.css'
 import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
@@ -14,27 +14,26 @@ import {
   RESTAURANT_FAQS,
 } from '@/lib/seo/structured-data'
 
-// ANIMA Typography System
-const playfair = Playfair_Display({
+// Cinema Typography System — Simmer Down
+const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  weight: '400',
+  variable: '--font-bebas',
   display: 'swap',
 })
 
-const jakarta = Plus_Jakarta_Sans({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-jakarta',
+  variable: '--font-dm-sans',
   display: 'swap',
 })
-
-// Caveat removed — using Playfair Display italic for accent text
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
-  themeColor: '#2D2A26',
+  themeColor: '#0A0A0A',
 }
 
 export const metadata: Metadata = {
@@ -172,7 +171,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://qusvynxzslpmjoqfabyq.supabase.co" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
-      <body className={`${playfair.variable} ${jakarta.variable} font-body bg-[#2D2A26] text-[#FFF8F0] antialiased`}>
+      <body className={`${bebasNeue.variable} ${dmSans.variable} font-body bg-[#0A0A0A] text-white antialiased`}>
         <AppProviders>
           {/* Skip Link for Accessibility */}
           <a

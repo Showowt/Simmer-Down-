@@ -1,293 +1,510 @@
 @import "tailwindcss";
 
 /* ========================================
-   ANIMA DESIGN SYSTEM - Simmer Down
-   The Kitchen Window Color Palette
+   SIMMER DOWN — Cinema Design System
+   La Tagliatella-grade luxury for El Salvador's #1 pizza brand
+======================================== */
+
+@theme {
+  /* Brand Colors */
+  --color-primary: #E85D04;
+  --color-primary-dark: #C2410C;
+  --color-primary-light: #FB923C;
+  --color-gold: #FBBF24;
+  --color-gold-dim: #D97706;
+
+  /* Surface Palette */
+  --color-background: #0A0A0A;
+  --color-surface: #1A1A1A;
+  --color-surface-elevated: #2A2A2A;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-warm: rgba(232, 93, 4, 0.2);
+
+  /* Text */
+  --color-text: #FFFFFF;
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  --color-text-faint: rgba(255, 255, 255, 0.25);
+
+  /* State */
+  --color-whatsapp: #25D366;
+  --color-whatsapp-dark: #128C7E;
+  --color-error: #EF4444;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+
+  /* Typography */
+  --font-display: var(--font-bebas), 'Bebas Neue', sans-serif;
+  --font-body: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
+
+  /* Spacing */
+  --spacing-safe-top: env(safe-area-inset-top);
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+  --spacing-safe-left: env(safe-area-inset-left);
+  --spacing-safe-right: env(safe-area-inset-right);
+
+  /* Animations */
+  --animate-fade-in: fadeIn 0.6s ease forwards;
+  --animate-fade-up: fadeUp 0.6s ease forwards;
+  --animate-slide-up: slideUp 0.5s ease forwards;
+  --animate-slide-down: slideDown 0.5s ease forwards;
+  --animate-scale-in: scaleIn 0.4s ease forwards;
+  --animate-pulse-soft: pulseSoft 3s ease-in-out infinite;
+  --animate-ticker: tickerScroll 40s linear infinite;
+  --animate-float: floatGentle 4s ease-in-out infinite;
+}
+
+/* ========================================
+   KEYFRAMES
+======================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulseRing {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ========================================
+   CSS CUSTOM PROPERTIES (Runtime tokens)
 ======================================== */
 
 :root {
-  /* Core ANIMA Palette */
-  --oven-glow: #FF6B35;
-  --oven-glow-dark: #E55A2B;
-  --oven-glow-light: #FF8A5C;
-  --charred-wood: #2D2A26;
-  --charred-wood-light: #3D3936;
-  --cream-cheese: #FFF8F0;
-  --cream-cheese-dark: #F5EDE3;
-  --olive-oil: #A8B545;
-  --olive-oil-dark: #8A9A38;
-  --tomato-red: #C73E1D;
-  --tomato-red-dark: #A83316;
+  --primary:          #E85D04;
+  --primary-dark:     #C2410C;
+  --primary-light:    #FB923C;
+  --gold:             #FBBF24;
+  --gold-dim:         #D97706;
+  --background:       #0A0A0A;
+  --surface:          #1A1A1A;
+  --surface-elevated: #2A2A2A;
+  --border:           rgba(255, 255, 255, 0.08);
+  --border-warm:      rgba(232, 93, 4, 0.2);
+  --text:             #FFFFFF;
+  --text-muted:       rgba(255, 255, 255, 0.5);
+  --text-faint:       rgba(255, 255, 255, 0.25);
+  --whatsapp:         #25D366;
+  --whatsapp-dark:    #128C7E;
+  --error:            #EF4444;
+  --success:          #10B981;
+  --warning:          #F59E0B;
 
-  /* Semantic Colors */
-  --background: var(--charred-wood);
-  --background-warm: #1F1D1A;
-  --foreground: var(--cream-cheese);
-  --foreground-muted: #B8B0A8;
-  --primary: var(--oven-glow);
-  --primary-dark: var(--oven-glow-dark);
-  --accent: var(--olive-oil);
-  --danger: var(--tomato-red);
-
-  /* Surface Colors */
-  --surface-1: #252320;
-  --surface-2: #2D2A26;
-  --surface-3: #353230;
-  --surface-elevated: #3D3936;
-
-  /* Border Colors */
-  --border: #3D3936;
-  --border-warm: #4A4642;
-
-  /* State Colors */
-  --success: #4CAF50;
-  --warning: #FF9800;
-  --info: #2196F3;
-  --error: var(--tomato-red);
-
-  /* Brass/Gold Accent */
-  --color-brass: #C9A84C;
-  --color-brass-light: #D4B85A;
-
-  /* Legacy Support */
-  --muted: var(--foreground-muted);
-  --card: var(--surface-1);
-  --card-hover: var(--surface-elevated);
+  /* Glow shadows */
+  --glow-primary: 0 0 40px rgba(232, 93, 4, 0.25);
+  --glow-primary-strong: 0 0 60px rgba(232, 93, 4, 0.4);
+  --glow-gold: 0 0 40px rgba(251, 191, 36, 0.2);
 }
 
 /* ========================================
-   TYPOGRAPHY - ANIMA Font System
+   RESET & BASE
 ======================================== */
 
-.font-display {
-  font-family: var(--font-playfair), 'Playfair Display', serif;
-}
-
-.font-body {
-  font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
-}
-
-.font-accent {
-  font-family: var(--font-playfair), 'Playfair Display', serif;
-  font-style: italic;
-}
-
-.font-handwritten {
-  font-family: var(--font-playfair), 'Playfair Display', serif;
-  font-style: italic;
-}
-
-/* ========================================
-   BASE STYLES
-======================================== */
-
-* {
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  min-height: 100dvh;
 }
 
 ::selection {
-  background: var(--oven-glow);
-  color: var(--charred-wood);
+  background: var(--primary);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 /* ========================================
-   ANIMA WARM GRADIENTS (Subtle, warm only)
+   TYPOGRAPHY UTILITIES
 ======================================== */
 
-.bg-warm-gradient {
-  background: linear-gradient(180deg, var(--background-warm) 0%, var(--charred-wood) 100%);
+.font-display {
+  font-family: var(--font-bebas), 'Bebas Neue', sans-serif;
+  letter-spacing: 0.02em;
 }
 
-.bg-oven-warmth {
-  background: radial-gradient(ellipse at bottom, rgba(201, 168, 76, 0.03) 0%, transparent 70%);
+.font-body {
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
+}
+
+/* Cinematic section title — Bebas Neue, fluid size */
+.section-title {
+  font-family: var(--font-bebas), 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.section-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-muted);
+  line-height: 1.6;
 }
 
 /* ========================================
-   ANIMA GLOW EFFECTS
+   BUTTON SYSTEM
 ======================================== */
 
-.glow-oven {
-  box-shadow: 0 0 60px rgba(255, 107, 53, 0.1);
-}
-
-.glow-oven-subtle {
-  box-shadow: 0 0 30px rgba(255, 107, 53, 0.06);
-}
-
-.text-glow-oven {
-  text-shadow: 0 0 40px rgba(255, 107, 53, 0.2);
-}
-
-/* ========================================
-   ANIMA CARD STYLES (No rounded corners)
-======================================== */
-
-.card-anima {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  transition: all 0.3s ease;
-}
-
-.card-anima:hover {
-  border-color: var(--color-brass);
-  box-shadow: none;
-}
-
-.card-warm {
-  background: var(--surface-2);
-  border: 1px solid var(--border-warm);
-}
-
-/* ========================================
-   ANIMA BUTTON STYLES
-======================================== */
-
-.btn-anima {
-  background: #FFF8F0;
-  color: #1F1D1A;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
   font-weight: 600;
-  padding: 1rem 2rem;
+  font-size: 0.9375rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.875rem 1.75rem;
   min-height: 52px;
+  border-radius: 0.5rem;
   border: none;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn-anima:hover {
-  background: #FFFFFF;
-  transform: none;
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
-.btn-anima-outline {
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary — orange gradient with glow */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 24px rgba(232, 93, 4, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  box-shadow: var(--glow-primary-strong);
+}
+
+/* Secondary — dark surface with border */
+.btn-secondary {
+  background: var(--surface-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--surface);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* WhatsApp CTA */
+.btn-whatsapp {
+  background: linear-gradient(135deg, var(--whatsapp) 0%, var(--whatsapp-dark) 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 24px rgba(37, 211, 102, 0.25);
+}
+
+.btn-whatsapp:hover {
+  box-shadow: 0 4px 40px rgba(37, 211, 102, 0.4);
+}
+
+/* Ghost — transparent, outline on hover */
+.btn-ghost {
   background: transparent;
-  color: #FFF8F0;
-  border: 1px solid rgba(255, 248, 240, 0.2);
-  padding: 1rem 2rem;
-  min-height: 52px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Gold accent */
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  color: #0A0A0A;
+  font-weight: 700;
+  box-shadow: 0 4px 24px rgba(251, 191, 36, 0.2);
+}
+
+.btn-gold:hover {
+  box-shadow: var(--glow-gold);
+}
+
+/* Sizes */
+.btn-sm {
+  font-size: 0.8125rem;
+  padding: 0.625rem 1.25rem;
+  min-height: 40px;
+}
+
+.btn-lg {
+  font-size: 1rem;
+  padding: 1.125rem 2.25rem;
+  min-height: 60px;
+  border-radius: 0.75rem;
+}
+
+/* ========================================
+   CARD SYSTEM
+======================================== */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover {
+  border-color: var(--border-warm);
+  box-shadow: var(--glow-primary);
+}
+
+.card-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.card-glass {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+}
+
+/* ========================================
+   BADGE SYSTEM
+======================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  line-height: 1;
 }
 
-.btn-anima-outline:hover {
-  border-color: rgba(255, 248, 240, 0.5);
+.badge-primary {
+  background: rgba(232, 93, 4, 0.15);
+  color: var(--primary-light);
+  border: 1px solid rgba(232, 93, 4, 0.3);
+}
+
+.badge-gold {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-surface {
+  background: var(--surface-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
 
 /* ========================================
-   SCROLLBAR STYLING
+   GLOW & GRADIENT UTILITIES
 ======================================== */
 
-::-webkit-scrollbar {
-  width: 8px;
+.glow-primary {
+  box-shadow: var(--glow-primary);
 }
 
-::-webkit-scrollbar-track {
-  background: var(--background);
+.glow-primary-strong {
+  box-shadow: var(--glow-primary-strong);
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border);
+.glow-gold {
+  box-shadow: var(--glow-gold);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground-muted);
+.text-glow-primary {
+  text-shadow: 0 0 40px rgba(232, 93, 4, 0.4);
 }
 
-/* ========================================
-   ANIMA ANIMATIONS
-======================================== */
-
-@keyframes oven-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+.text-glow-gold {
+  text-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
 }
 
-@keyframes float-gentle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
-@keyframes ember-float {
-  0% {
-    transform: translateY(0) translateX(0) scale(1);
-    opacity: 0;
-  }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% {
-    transform: translateY(-100px) translateX(20px) scale(0.5);
-    opacity: 0;
-  }
+.bg-gradient-surface {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
 }
 
-@keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-
-.animate-oven-pulse {
-  animation: oven-pulse 5s ease-in-out infinite;
-}
-
-.animate-float-gentle {
-  animation: float-gentle 4s ease-in-out infinite;
-}
-
-.animate-ticker {
-  animation: ticker-scroll 45s linear infinite;
-}
-
-.animate-ember {
-  animation: ember-float 4s ease-out infinite;
+.bg-gradient-radial-primary {
+  background: radial-gradient(ellipse at center, rgba(232, 93, 4, 0.08) 0%, transparent 70%);
 }
 
 /* ========================================
-   ANIMA LIVE INDICATOR
+   LIVE INDICATOR
 ======================================== */
 
 .live-dot {
   width: 8px;
   height: 8px;
-  background: #4CAF50;
+  border-radius: 50%;
+  background: var(--success);
   position: relative;
+  flex-shrink: 0;
 }
 
 .live-dot::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: #4CAF50;
-  animation: pulse-ring 2s ease-out infinite;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulseRing 2s ease-out infinite;
 }
 
 /* ========================================
-   UTILITY CLASSES
+   ANIMATION UTILITY CLASSES
 ======================================== */
+
+.animate-fade-in   { animation: fadeIn 0.6s ease both; }
+.animate-fade-up   { animation: fadeUp 0.6s ease both; }
+.animate-slide-up  { animation: slideUp 0.5s ease both; }
+.animate-slide-down { animation: slideDown 0.5s ease both; }
+.animate-scale-in  { animation: scaleIn 0.4s ease both; }
+.animate-pulse-soft { animation: pulseSoft 3s ease-in-out infinite; }
+.animate-ticker    { animation: tickerScroll 40s linear infinite; }
+.animate-float     { animation: floatGentle 4s ease-in-out infinite; }
+
+/* Staggered children delay helpers */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ========================================
+   SAFE AREA UTILITIES (Mobile notch/nav)
+======================================== */
+
+.pt-safe { padding-top: env(safe-area-inset-top); }
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pl-safe { padding-left: env(safe-area-inset-left); }
+.pr-safe { padding-right: env(safe-area-inset-right); }
+
+.mt-safe { margin-top: env(safe-area-inset-top); }
+.mb-safe { margin-bottom: env(safe-area-inset-bottom); }
+
+/* ========================================
+   SCROLLBAR UTILITIES
+======================================== */
+
+/* Hide scrollbar, keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Styled scrollbar for content areas */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb {
+  background: var(--surface-elevated);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 93, 4, 0.4);
+}
+
+/* ========================================
+   LINE CLAMP UTILITIES
+======================================== */
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .line-clamp-2 {
   display: -webkit-box;
@@ -303,48 +520,31 @@ body {
   overflow: hidden;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* ========================================
+   TEXT UTILITIES
+======================================== */
+
+.text-balance { text-wrap: balance; }
+.text-pretty  { text-wrap: pretty; }
+
+/* ========================================
+   DIVIDER UTILITIES
+======================================== */
+
+.divider {
+  height: 1px;
+  background: var(--border);
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.text-balance {
-  text-wrap: balance;
+.divider-warm {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.3;
 }
 
 /* ========================================
    ACCESSIBILITY
 ======================================== */
-
-:focus-visible {
-  outline: 2px solid var(--oven-glow);
-  outline-offset: 2px;
-}
-
-button:active:not(:disabled),
-a:active {
-  transform: scale(0.98);
-}
-
-.skip-link {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: var(--oven-glow);
-  color: white;
-  padding: 0.5rem 1rem;
-  transform: translateY(-100%);
-  transition: transform 0.2s;
-  z-index: 100;
-}
-
-.skip-link:focus {
-  transform: translateY(0);
-}
 
 .sr-only {
   position: absolute;
@@ -358,14 +558,30 @@ a:active {
   border-width: 0;
 }
 
+.skip-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: var(--primary);
+  color: #ffffff;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  z-index: 9999;
+  transform: translateY(-100%);
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 /* ========================================
    REDUCED MOTION
 ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
