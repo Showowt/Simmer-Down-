@@ -107,7 +107,7 @@ export default function NewLocationBar() {
               <button
                 key={option.value}
                 onClick={() => setOrderType(option.value)}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-md text-[11px] sm:text-[12px] font-semibold transition-all duration-200 whitespace-nowrap ${
+                className={`px-3 sm:px-3.5 py-2 rounded-md text-[11px] sm:text-[12px] font-semibold transition-all duration-200 whitespace-nowrap min-h-[36px] ${
                   isActive
                     ? 'bg-[#E85D04] text-white shadow-sm'
                     : 'text-white/50 hover:text-white/80'

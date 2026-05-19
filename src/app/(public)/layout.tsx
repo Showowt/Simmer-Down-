@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import NewHeader from "@/components/layout/NewHeader";
 import NewBottomNav from "@/components/layout/NewBottomNav";
 import NewLocationBar from "@/components/layout/NewLocationBar";
+import LocationSheet from "@/components/layout/LocationSheet";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function PublicLayout({
       <NewHeader />
       <NewLocationBar />
       <main id="main-content">{children}</main>
+      <LocationSheet />
       <WhatsAppButton />
       <NewBottomNav />
     </div>

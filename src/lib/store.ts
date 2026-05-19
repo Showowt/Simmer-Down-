@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useState, useEffect, useCallback } from 'react'
 import {
   type Location,
   type MenuItem,
@@ -8,7 +9,10 @@ import {
   type MenuItemModifier,
   calculateItemTotal,
   calculateCartTotal,
+  getNearestLocation,
+  getLocationDistances,
   TRANSLATIONS,
+  LOCATIONS,
 } from '@/lib/data'
 
 // ============================================
@@ -157,4 +161,45 @@ export function useTranslation() {
   const language = useUIStore((s) => s.language)
   const t = (key: string): string => TRANSLATIONS[language]?.[key] || key
   return { t, language }
+}
+
+// ============================================
+// GEOLOCATION HOOK
+// ============================================
+
+interface GeoState {
+  lat: number | null
+  lng: number | null
+  loading: boolean
+  error: string | null
+  distances: Array<{ location: Location; distanceKm: number }> | null
+  nearestLocation: Location | null
+}
+
+export function useGeolocation() {
+  const [state, setState] = useState<GeoState>({
+    lat: null, lng: null, loading: false, error: null, distances: null, nearestLocation: null,
+  })
+
+  const requestLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setState((s) => ({ ...s, error: 'Geolocation not supported' }))
+      return
+    }
+    setState((s) => ({ ...s, loading: true, error: null }))
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        const distances = getLocationDistances(latitude, longitude)
+        const { location: nearest } = getNearestLocation(latitude, longitude)
+        setState({ lat: latitude, lng: longitude, loading: false, error: null, distances, nearestLocation: nearest })
+      },
+      (err) => {
+        setState((s) => ({ ...s, loading: false, error: err.message }))
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    )
+  }, [])
+
+  return { ...state, requestLocation }
 }

@@ -93,7 +93,7 @@ export default function NewHeader() {
           </nav>
 
           {/* Right — Language toggle + mobile hamburger */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
@@ -139,7 +139,7 @@ export default function NewHeader() {
           />
 
           {/* Drawer */}
-          <div className="absolute top-16 left-0 right-0 bg-[#0A0A0A] border-b border-white/[0.08] shadow-2xl">
+          <div className="absolute top-16 left-0 right-0 bg-[#0A0A0A] border-b border-white/[0.08] shadow-2xl max-h-[calc(100vh-4rem)] overflow-y-auto">
             <nav className="px-6 py-4 space-y-1" aria-label="Menú móvil">
               {NAV_LINKS.map(({ href, labelKey }) => (
                 <Link

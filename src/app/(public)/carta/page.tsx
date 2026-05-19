@@ -114,7 +114,7 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
           <span className="text-[#E85D04] font-bold text-sm">
             {item.sizes ? `Desde ${formatPrice(item.basePrice)}` : formatPrice(item.basePrice)}
           </span>
-          <span className="w-8 h-8 rounded-full bg-[#E85D04] flex items-center justify-center shrink-0 group-hover:bg-[#ff6a1f] transition-colors">
+          <span className="w-10 h-10 rounded-full bg-[#E85D04] flex items-center justify-center shrink-0 group-hover:bg-[#ff6a1f] transition-colors">
             <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
           </span>
         </div>
@@ -211,7 +211,7 @@ function ItemDetailSheet() {
         {/* Close button */}
         <button
           onClick={closeMenuItemSheet}
-          className="absolute top-4 right-4 z-20 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+          className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4 text-white" />
@@ -427,7 +427,7 @@ function FloatingCartBar() {
   return (
     <Link
       href="/carrito"
-      className="fixed bottom-20 left-4 right-4 z-40 bg-[#E85D04] text-white rounded-xl px-4 py-3.5 shadow-2xl flex items-center justify-between hover:bg-[#ff6a1f] active:scale-[0.98] transition-all duration-150"
+      className="fixed left-4 right-4 z-30 bg-[#E85D04] text-white rounded-xl px-4 py-3.5 shadow-2xl flex items-center justify-between hover:bg-[#ff6a1f] active:scale-[0.98] transition-all duration-150 bottom-[calc(5rem+env(safe-area-inset-bottom))] lg:bottom-6"
       aria-label={`Ver carrito — ${itemCount} artículos`}
     >
       <div className="flex items-center gap-3">
