@@ -219,7 +219,7 @@ export default function SophiaChat() {
       {/* Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-30 lg:bottom-6 lg:right-6 lg:z-50 w-16 h-16 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg"
         aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat con Sophia'}
       >
         {isOpen ? (
@@ -233,7 +233,7 @@ export default function SophiaChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] h-[600px] bg-white flex flex-col shadow-2xl border border-gray-200 overflow-hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] lg:inset-auto lg:bottom-24 lg:right-6 lg:w-[380px] lg:h-[600px] bg-white flex flex-col shadow-2xl border border-gray-200 overflow-hidden">
           {/* Header */}
           <div className="bg-emerald-600 text-white p-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-500 flex items-center justify-center text-xl">

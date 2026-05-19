@@ -426,7 +426,7 @@ export default function AnimaChatV2() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={openChat}
-            className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-lg shadow-[#FF6B35]/30 transition-all group"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-50 lg:bottom-6 lg:right-6 w-16 h-16 bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-lg shadow-[#FF6B35]/30 transition-all group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Hablar con ANIMA"
@@ -445,7 +445,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-80 bg-[#252320] border border-[#3D3936] shadow-2xl"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-50 w-80 lg:bottom-6 lg:right-6 bg-[#252320] border border-[#3D3936] shadow-2xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-[#3D3936]">
               <div className="flex items-center gap-3">
@@ -493,7 +493,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-48px)] h-[650px] max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[650px] lg:max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-[#3D3936] bg-[#252320]">

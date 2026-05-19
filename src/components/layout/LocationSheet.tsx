@@ -69,7 +69,7 @@ export default function LocationSheet() {
           <X className="w-4 h-4 text-white" />
         </button>
 
-        <div className="px-5 pb-8">
+        <div className="px-5 pb-24 lg:pb-8">
           {/* Header */}
           <div className="mt-3 mb-5">
             <h2 className="font-display text-2xl text-white tracking-wide">

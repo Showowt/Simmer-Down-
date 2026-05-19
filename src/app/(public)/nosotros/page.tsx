@@ -137,7 +137,7 @@ export default function NosotrosPage() {
   const { language: locale } = useTranslation()
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden pb-20 lg:pb-0">
 
       {/* ══════════════════════════════════════════════════
           1. HERO — Full-viewport, image background
