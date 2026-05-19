@@ -522,7 +522,7 @@ export default function CartaPage() {
       </div>
 
       {/* ── STICKY CONTROLS ──────────────────────────────── */}
-      <div className="sticky top-[72px] z-30 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-white/6">
+      <div className="sticky top-[108px] z-30 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-white/6">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* SEARCH BAR */}

@@ -32,7 +32,7 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32">
+    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">

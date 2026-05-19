@@ -229,7 +229,7 @@ export default function SimmerLoversPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32">
+    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0">
       <Hero signedIn={!!customer} t={t} locale={locale} />
 
       {customer ? (
@@ -1020,7 +1020,7 @@ function CallToAction({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { e
 // ─────────────────────────────────────────────
 function LoyaltyLoading() {
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 px-6">
+    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse space-y-8">
           <div className="h-16 bg-[#252320] w-1/2 mx-auto" />
