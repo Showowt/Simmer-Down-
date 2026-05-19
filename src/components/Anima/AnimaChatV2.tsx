@@ -426,14 +426,13 @@ export default function AnimaChatV2() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={openChat}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-50 lg:bottom-6 lg:right-6 w-16 h-16 bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-lg shadow-[#FF6B35]/30 transition-all group"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-6 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-md shadow-[#FF6B35]/20 transition-all group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Hablar con ANIMA"
           >
-            <span className="absolute inset-0 bg-[#FF6B35] animate-ping opacity-20" />
-            <Flame className="w-7 h-7 relative z-10 group-hover:animate-bounce" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#4CAF50] border-2 border-[#2D2A26]" />
+            <Flame className="w-5 h-5 lg:w-6 lg:h-6 relative z-10" />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 lg:w-3 lg:h-3 bg-[#4CAF50] rounded-full border-2 border-[#0A0A0A]" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -445,7 +444,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-50 w-80 lg:bottom-6 lg:right-6 bg-[#252320] border border-[#3D3936] shadow-2xl"
+            className="fixed bottom-6 right-6 z-50 w-80 hidden lg:block bg-[#252320] border border-[#3D3936] shadow-2xl rounded-xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-[#3D3936]">
               <div className="flex items-center gap-3">
@@ -493,7 +492,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[650px] lg:max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl"
+            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-[#3D3936] bg-[#252320]">
