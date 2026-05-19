@@ -17,33 +17,33 @@ export default function EventsPage() {
     {
       title: t(translations.events.birthdayParties),
       description: t(translations.events.birthdayDesc),
-      icon: <PartyPopper className="w-6 h-6 text-[#FF6B35]" />,
+      icon: <PartyPopper className="w-6 h-6 text-[#E85D04]" />,
     },
     {
       title: t(translations.events.corporateEvents),
       description: t(translations.events.corporateDesc),
-      icon: <Users className="w-6 h-6 text-[#FF6B35]" />,
+      icon: <Users className="w-6 h-6 text-[#E85D04]" />,
     },
     {
       title: t(translations.events.privateDinners),
       description: t(translations.events.privateDinnersDesc),
-      icon: <Utensils className="w-6 h-6 text-[#FF6B35]" />,
+      icon: <Utensils className="w-6 h-6 text-[#E85D04]" />,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-0">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
-            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-4">
+            <p className="text-white/40 text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.events.uniqueExperiences)}
             </p>
-            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[#FFF8F0] mb-6">
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-white mb-6">
               {t(translations.events.eventsTitle)}
             </h1>
-            <p className="text-xl text-[#B8B0A8]">
+            <p className="text-xl text-white/60">
               {t(translations.events.eventsDesc)}
             </p>
           </AnimatedHero>
@@ -57,18 +57,18 @@ export default function EventsPage() {
       <PrivateEventsSection eventTypes={privateEventTypes} />
 
       {/* CTA */}
-      <section className="py-28 md:py-32 bg-[#252320] border-t border-[#3D3936]/30">
+      <section className="py-28 md:py-32 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <AnimatedCTA>
-            <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
+            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
               {t(translations.events.dontMiss)}
             </h2>
-            <p className="text-xl text-[#B8B0A8] mb-10">
+            <p className="text-xl text-white/60 mb-10">
               {t(translations.events.subscribeEvents)}
             </p>
             <Link
               href="/simmerlovers"
-              className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-10 py-5 text-xl font-semibold transition-all min-h-[56px]"
+              className="inline-flex items-center gap-2 bg-white text-[#0A0A0A] hover:bg-white px-10 py-5 text-xl font-semibold transition-all min-h-[56px]"
             >
               {t(translations.events.joinSimmerLovers)}
               <ArrowRight className="w-6 h-6" />

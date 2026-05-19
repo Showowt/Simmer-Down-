@@ -150,7 +150,7 @@ function OrderTracker() {
   // WhatsApp order sent confirmation
   if (isWhatsAppSent && !order) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] pt-32">
+      <div className="min-h-screen bg-[#0A0A0A] pt-32">
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -159,16 +159,16 @@ function OrderTracker() {
             <div className="w-24 h-24 bg-[#25D366]/10 border border-[#25D366]/20 flex items-center justify-center mx-auto mb-6">
               <MessageCircle className="w-12 h-12 text-[#25D366]" />
             </div>
-            <h1 className="text-3xl font-bold text-[#FFF8F0] mb-4">
+            <h1 className="text-3xl font-bold text-white mb-4">
               {t({ es: "¡Pedido Enviado!", en: "Order Sent!" })}
             </h1>
-            <p className="text-[#B8B0A8] mb-2">
+            <p className="text-white/60 mb-2">
               {t({
                 es: "Tu pedido fue enviado por WhatsApp a la sucursal.",
                 en: "Your order was sent via WhatsApp to the location.",
               })}
             </p>
-            <p className="text-[#6B6560] text-sm mb-8">
+            <p className="text-white/40 text-sm mb-8">
               {t({
                 es: "Ellos confirmarán tu pedido y te darán un tiempo estimado de preparación.",
                 en: "They will confirm your order and give you an estimated preparation time.",
@@ -177,7 +177,7 @@ function OrderTracker() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/menu"
-                className="inline-flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition min-h-[56px]"
+                className="inline-flex items-center justify-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-4 font-semibold transition min-h-[56px]"
               >
                 {t({ es: "Volver al Menú", en: "Back to Menu" })}
               </Link>
@@ -200,7 +200,7 @@ function OrderTracker() {
   // Demo success state
   if (isDemo && !order) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] pt-32">
+      <div className="min-h-screen bg-[#0A0A0A] pt-32">
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -209,17 +209,17 @@ function OrderTracker() {
             <div className="w-24 h-24 bg-[#4CAF50]/10 border border-[#4CAF50]/20 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-12 h-12 text-[#4CAF50]" />
             </div>
-            <h1 className="text-3xl font-bold text-[#FFF8F0] mb-4">
+            <h1 className="text-3xl font-bold text-white mb-4">
               {t({ es: "¡Pedido Realizado!", en: "Order Placed!" })}
             </h1>
-            <p className="text-[#B8B0A8] mb-8">
+            <p className="text-white/60 mb-8">
               {t({
                 es: "Gracias por tu pedido. ¡Comenzaremos a preparar tu pizza de inmediato!",
                 en: "Thank you for your order. We'll start preparing your pizza right away!",
               })}
             </p>
-            <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/20 p-6 text-left mb-8">
-              <p className="text-sm text-[#FF6B35]">
+            <div className="bg-[#FBBF24]/10 border border-[#FBBF24]/20 p-6 text-left mb-8">
+              <p className="text-sm text-[#E85D04]">
                 <strong>{t({ es: "Modo Demo:", en: "Demo Mode:" })}</strong>{" "}
                 {t({
                   es: "Este es un pedido de demostración. Tu pedido ha sido registrado en el sistema.",
@@ -229,7 +229,7 @@ function OrderTracker() {
             </div>
             <Link
               href="/menu"
-              className="inline-flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-4 font-semibold transition min-h-[56px]"
+              className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-4 font-semibold transition min-h-[56px]"
             >
               <ArrowLeft className="w-5 h-5" />
               {t({ es: "Volver al Menú", en: "Back to Menu" })}
@@ -241,16 +241,16 @@ function OrderTracker() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-3xl font-bold text-[#FFF8F0] mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             {t({ es: "Rastrea Tu Pedido", en: "Track Your Order" })}
           </h1>
-          <p className="text-[#6B6560] mb-8">
+          <p className="text-white/40 mb-8">
             {t({
               es: "Ingresa tu ID de pedido o número para ver el estado",
               en: "Enter your order ID or number to see the status",
@@ -264,19 +264,19 @@ function OrderTracker() {
                 <label htmlFor="order-search" className="sr-only">
                   {t({ es: "ID del pedido", en: "Order ID" })}
                 </label>
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="order-search"
                   type="text"
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
                   placeholder={t({ es: "Ingresa tu ID de pedido", en: "Enter your order ID" })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#252320] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-[#1A1A1A] border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                 />
               </div>
               <button
                 type="submit"
-                className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-6 py-3 font-semibold transition min-h-[48px]"
+                className="bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-3 font-semibold transition min-h-[48px]"
               >
                 {t({ es: "Buscar", en: "Search" })}
               </button>
@@ -285,9 +285,9 @@ function OrderTracker() {
         </motion.div>
 
         {loading && (
-          <div className="bg-[#252320] border border-[#3D3936] p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-[#FF6B35] border-t-transparent mx-auto" />
-            <p className="text-[#6B6560] mt-4">{t({ es: "Cargando pedido...", en: "Loading order..." })}</p>
+          <div className="bg-[#1A1A1A] border border-white/10 p-8 text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-[#E85D04] border-t-transparent mx-auto" />
+            <p className="text-white/40 mt-4">{t({ es: "Cargando pedido...", en: "Loading order..." })}</p>
           </div>
         )}
 
@@ -312,7 +312,7 @@ function OrderTracker() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="bg-gradient-to-r from-[#4CAF50]/20 to-[#FF6B35]/20 border border-[#4CAF50]/30 p-8 text-center"
+                className="bg-gradient-to-r from-[#4CAF50]/20 to-[#E85D04]/20 border border-[#4CAF50]/30 p-8 text-center"
               >
                 <motion.div
                   animate={{ rotate: [0, -10, 10, -10, 0] }}
@@ -321,16 +321,16 @@ function OrderTracker() {
                 >
                   <PartyPopper className="w-10 h-10 text-[#4CAF50]" />
                 </motion.div>
-                <h2 className="text-2xl font-bold text-[#FFF8F0] mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   {t({ es: "¡Pedido Realizado!", en: "Order Placed!" })}
                 </h2>
-                <p className="text-[#B8B0A8]">
+                <p className="text-white/60">
                   {t({
                     es: `Tu pedido #${order.order_number || order.id.slice(0, 8)} está en camino`,
                     en: `Your order #${order.order_number || order.id.slice(0, 8)} is on its way`,
                   })}
                 </p>
-                <p className="text-[#FF6B35] font-medium mt-2">
+                <p className="text-[#E85D04] font-medium mt-2">
                   {t({ es: "Tiempo estimado: 30-45 minutos", en: "Estimated time: 30-45 minutes" })}
                 </p>
               </motion.div>
@@ -340,10 +340,10 @@ function OrderTracker() {
                   <CheckCircle className="w-6 h-6 text-[#4CAF50]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#FFF8F0]">
+                  <h2 className="text-lg font-semibold text-white">
                     {t({ es: "¡Pedido Confirmado!", en: "Order Confirmed!" })}
                   </h2>
-                  <p className="text-[#B8B0A8] text-sm">
+                  <p className="text-white/60 text-sm">
                     {t({ es: "Pedido", en: "Order" })} #{order.order_number || order.id.slice(0, 8)}
                   </p>
                 </div>
@@ -351,25 +351,25 @@ function OrderTracker() {
             )}
 
             {/* Order Status */}
-            <div className="bg-[#252320] border border-[#3D3936] p-6">
+            <div className="bg-[#1A1A1A] border border-white/10 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm text-[#6B6560]">{t({ es: "Estado", en: "Status" })}</p>
-                  <p className="font-medium text-[#FFF8F0]">
+                  <p className="text-sm text-white/40">{t({ es: "Estado", en: "Status" })}</p>
+                  <p className="font-medium text-white">
                     {orderStatusLabel(order.status)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#6B6560]">{t({ es: "Tiempo Estimado", en: "Estimated Time" })}</p>
-                  <p className="font-medium text-[#FFF8F0]">30-45 min</p>
+                  <p className="text-sm text-white/40">{t({ es: "Tiempo Estimado", en: "Estimated Time" })}</p>
+                  <p className="font-medium text-white">30-45 min</p>
                 </div>
               </div>
 
               {/* Progress Steps */}
               <div className="relative">
-                <div className="absolute top-5 left-0 right-0 h-1 bg-[#3D3936]">
+                <div className="absolute top-5 left-0 right-0 h-1 bg-white/10">
                   <div
-                    className="h-full bg-[#FF6B35] transition-all duration-500"
+                    className="h-full bg-[#E85D04] transition-all duration-500"
                     style={{
                       width: `${Math.max(0, (currentStepIndex / (statusSteps.length - 1)) * 100)}%`,
                     }}
@@ -387,17 +387,17 @@ function OrderTracker() {
                         <div
                           className={`w-10 h-10 flex items-center justify-center transition ${
                             isActive
-                              ? "bg-[#FF6B35] text-white"
-                              : "bg-[#3D3936] text-[#6B6560]"
-                          } ${isCurrent ? "ring-4 ring-[#FF6B35]/20" : ""}`}
+                              ? "bg-[#E85D04] text-white"
+                              : "bg-white/10 text-white/40"
+                          } ${isCurrent ? "ring-4 ring-[#E85D04]/20" : ""}`}
                         >
                           <Icon className="w-5 h-5" />
                         </div>
                         <span
                           className={`text-xs mt-2 ${
                             isActive
-                              ? "text-[#FFF8F0] font-medium"
-                              : "text-[#6B6560]"
+                              ? "text-white font-medium"
+                              : "text-white/40"
                           }`}
                         >
                           {t(step.label)}
@@ -410,27 +410,27 @@ function OrderTracker() {
             </div>
 
             {/* Order Details */}
-            <div className="bg-[#252320] border border-[#3D3936] p-6">
-              <h2 className="font-semibold text-[#FFF8F0] mb-4">
+            <div className="bg-[#1A1A1A] border border-white/10 p-6">
+              <h2 className="font-semibold text-white mb-4">
                 {t({ es: "Detalles del Pedido", en: "Order Details" })}
               </h2>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">{t({ es: "Cliente", en: "Customer" })}</span>
-                  <span className="text-[#FFF8F0]">{order.customer_name}</span>
+                  <span className="text-white/40">{t({ es: "Cliente", en: "Customer" })}</span>
+                  <span className="text-white">{order.customer_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">{t({ es: "Teléfono", en: "Phone" })}</span>
+                  <span className="text-white/40">{t({ es: "Teléfono", en: "Phone" })}</span>
                   <a
                     href={`tel:${order.customer_phone}`}
-                    className="text-[#FF6B35] hover:underline"
+                    className="text-[#E85D04] hover:underline"
                   >
                     {order.customer_phone}
                   </a>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#6B6560]">{t({ es: "Tipo", en: "Type" })}</span>
-                  <span className="text-[#FFF8F0]">
+                  <span className="text-white/40">{t({ es: "Tipo", en: "Type" })}</span>
+                  <span className="text-white">
                     {order.order_type === "delivery" || order.is_delivery
                       ? "Delivery"
                       : t({ es: "Para recoger", en: "Pickup" })}
@@ -438,8 +438,8 @@ function OrderTracker() {
                 </div>
                 {(order.delivery_address_line1 || order.delivery_address) && (
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">{t({ es: "Dirección", en: "Address" })}</span>
-                    <span className="text-[#FFF8F0] text-right max-w-[200px]">
+                    <span className="text-white/40">{t({ es: "Dirección", en: "Address" })}</span>
+                    <span className="text-white text-right max-w-[200px]">
                       {order.delivery_address_line1 || order.delivery_address}
                       {order.delivery_city && `, ${order.delivery_city}`}
                     </span>
@@ -447,38 +447,38 @@ function OrderTracker() {
                 )}
               </div>
 
-              <div className="border-t border-[#3D3936] mt-4 pt-4">
-                <h3 className="font-medium text-[#FFF8F0] mb-3">{t({ es: "Artículos", en: "Items" })}</h3>
+              <div className="border-t border-white/10 mt-4 pt-4">
+                <h3 className="font-medium text-white mb-3">{t({ es: "Artículos", en: "Items" })}</h3>
                 {getOrderItems(order).length > 0 ? (
                   getOrderItems(order).map((item, i) => (
                     <div key={i} className="flex justify-between text-sm py-1">
-                      <span className="text-[#B8B0A8]">
+                      <span className="text-white/60">
                         {item.quantity}x {item.name}
                       </span>
-                      <span className="text-[#FFF8F0]">
+                      <span className="text-white">
                         ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))
                 ) : order.items_description ? (
-                  <p className="text-[#B8B0A8] text-sm">
+                  <p className="text-white/60 text-sm">
                     {order.items_description}
                   </p>
                 ) : (
-                  <p className="text-[#6B6560] text-sm">
+                  <p className="text-white/40 text-sm">
                     {t({ es: "Sin datos de artículos", en: "No item data available" })}
                   </p>
                 )}
-                <div className="border-t border-[#3D3936] mt-3 pt-3 space-y-1">
+                <div className="border-t border-white/10 mt-3 pt-3 space-y-1">
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#6B6560]">Subtotal</span>
-                    <span className="text-[#FFF8F0]">
+                    <span className="text-white/40">Subtotal</span>
+                    <span className="text-white">
                       ${(order.subtotal || 0).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-[#6B6560]">{t({ es: "Envío", en: "Delivery" })}</span>
-                    <span className="text-[#FFF8F0]">
+                    <span className="text-white/40">{t({ es: "Envío", en: "Delivery" })}</span>
+                    <span className="text-white">
                       ${(order.delivery_fee || 0).toFixed(2)}
                     </span>
                   </div>
@@ -491,7 +491,7 @@ function OrderTracker() {
                     </div>
                   )}
                   <div className="flex justify-between font-bold text-lg pt-2">
-                    <span className="text-[#FFF8F0]">Total</span>
+                    <span className="text-white">Total</span>
                     <span className="text-white">
                       ${(order.total_amount || order.total || 0).toFixed(2)}
                     </span>
@@ -502,11 +502,11 @@ function OrderTracker() {
 
             {/* Payment Details */}
             {(order.payment_status || order.card_last4) && (
-              <div className="bg-[#252320] border border-[#3D3936] p-6">
-                <h2 className="font-semibold text-[#FFF8F0] mb-4">{t({ es: "Pago", en: "Payment" })}</h2>
+              <div className="bg-[#1A1A1A] border border-white/10 p-6">
+                <h2 className="font-semibold text-white mb-4">{t({ es: "Pago", en: "Payment" })}</h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">{t({ es: "Estado", en: "Status" })}</span>
+                    <span className="text-white/40">{t({ es: "Estado", en: "Status" })}</span>
                     <span
                       className={`font-medium ${
                         order.payment_status === "paid"
@@ -514,7 +514,7 @@ function OrderTracker() {
                           : order.payment_status === "failed" ||
                               order.payment_status === "voided"
                             ? "text-[#C73E1D]"
-                            : "text-[#C9A84C]"
+                            : "text-[#FBBF24]"
                       }`}
                     >
                       {order.payment_status === "paid"
@@ -531,8 +531,8 @@ function OrderTracker() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#6B6560]">{t({ es: "Método", en: "Method" })}</span>
-                    <span className="text-[#FFF8F0] capitalize">
+                    <span className="text-white/40">{t({ es: "Método", en: "Method" })}</span>
+                    <span className="text-white capitalize">
                       {order.payment_method === "card"
                         ? t({ es: "Tarjeta", en: "Card" })
                         : order.payment_method === "cash"
@@ -542,23 +542,23 @@ function OrderTracker() {
                   </div>
                   {order.card_brand && order.card_last4 && (
                     <div className="flex justify-between">
-                      <span className="text-[#6B6560]">{t({ es: "Tarjeta", en: "Card" })}</span>
-                      <span className="text-[#FFF8F0]">
+                      <span className="text-white/40">{t({ es: "Tarjeta", en: "Card" })}</span>
+                      <span className="text-white">
                         {order.card_brand} ···· {order.card_last4}
                       </span>
                     </div>
                   )}
                   {order.authorization_code && (
                     <div className="flex justify-between">
-                      <span className="text-[#6B6560]">{t({ es: "Autorización", en: "Authorization" })}</span>
-                      <span className="text-[#FFF8F0] font-mono text-xs">
+                      <span className="text-white/40">{t({ es: "Autorización", en: "Authorization" })}</span>
+                      <span className="text-white font-mono text-xs">
                         {order.authorization_code}
                       </span>
                     </div>
                   )}
                   {order.payment_error_message &&
                     order.payment_status === "failed" && (
-                      <div className="p-3 bg-[#C73E1D]/10 border border-[#C73E1D]/30 text-[#FFF8F0] text-xs">
+                      <div className="p-3 bg-[#C73E1D]/10 border border-[#C73E1D]/30 text-white text-xs">
                         {order.payment_error_message}
                       </div>
                     )}
@@ -571,13 +571,13 @@ function OrderTracker() {
               <div className="flex gap-3">
                 <Link
                   href="/menu"
-                  className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-4 font-medium text-center transition min-h-[56px] flex items-center justify-center"
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 font-medium text-center transition min-h-[56px] flex items-center justify-center"
                 >
                   {t({ es: "Volver al Menú", en: "Back to Menu" })}
                 </Link>
                 <a
                   href="tel:+50322637890"
-                  className="flex-1 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"
                 >
                   <Phone className="w-5 h-5" />
                   {t({ es: "Llamar", en: "Call" })}
@@ -597,9 +597,9 @@ function OrderTracker() {
         )}
 
         {!order && !loading && !error && !isDemo && (
-          <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
-            <Search className="w-12 h-12 text-[#6B6560] mx-auto mb-4" />
-            <p className="text-[#6B6560]">
+          <div className="bg-[#1A1A1A] border border-white/10 p-12 text-center">
+            <Search className="w-12 h-12 text-white/40 mx-auto mb-4" />
+            <p className="text-white/40">
               {t({ es: "Ingresa tu ID de pedido para rastrearlo", en: "Enter your order ID to track it" })}
             </p>
           </div>
@@ -613,11 +613,11 @@ export default function OrdersPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#2D2A26] pt-32">
+        <div className="min-h-screen bg-[#0A0A0A] pt-32">
           <div className="max-w-2xl mx-auto px-4 py-12">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-[#3D3936] w-1/3" />
-              <div className="h-12 bg-[#3D3936]" />
+              <div className="h-8 bg-white/10 w-1/3" />
+              <div className="h-12 bg-white/10" />
             </div>
           </div>
         </div>

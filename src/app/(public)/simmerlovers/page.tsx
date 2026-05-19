@@ -229,7 +229,7 @@ export default function SimmerLoversPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-0">
       <Hero signedIn={!!customer} t={t} locale={locale} />
 
       {customer ? (
@@ -269,14 +269,14 @@ function Hero({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: strin
           className="object-cover opacity-20"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2D2A26]/70 via-[#2D2A26]/90 to-[#2D2A26]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A]/70 via-[#0A0A0A]/90 to-[#0A0A0A]" />
       </div>
 
       <div className="relative max-w-5xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 bg-[#252320] border border-[#3D3936] text-[#C9A84C] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
+          className="inline-flex items-center gap-2 bg-[#1A1A1A] border border-white/10 text-[#FBBF24] px-4 py-1.5 text-sm uppercase tracking-wider mb-6"
         >
           <Flame className="w-4 h-4" />
           {t(translations.loyalty.loyaltyProgram)}
@@ -286,16 +286,16 @@ function Hero({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: strin
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-6 leading-tight tracking-tight"
+          className="font-display text-3xl md:text-4xl text-white mb-6 leading-tight tracking-tight"
         >
-          Simmer <span className="text-[#C9A84C]">Lovers</span>
+          Simmer <span className="text-[#FBBF24]">Lovers</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-xl md:text-2xl text-[#B8B0A8] max-w-2xl mx-auto mb-8"
+          className="text-xl md:text-2xl text-white/60 max-w-2xl mx-auto mb-8"
         >
           {t(translations.loyalty.tagline)}
         </motion.p>
@@ -309,14 +309,14 @@ function Hero({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: strin
           >
             <Link
               href="/auth/signup?loyalty=1"
-              className="bg-[#FF6B35] hover:bg-[#E55A2B] text-white px-8 py-4 font-semibold flex items-center gap-2 transition min-h-[56px]"
+              className="bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-semibold flex items-center gap-2 transition min-h-[56px]"
             >
               {t(translations.loyalty.joinFree)}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/auth/login"
-              className="text-[#FFF8F0] hover:text-[#FF6B35] transition px-4 py-3"
+              className="text-white hover:text-[#E85D04] transition px-4 py-3"
             >
               {t(translations.loyalty.alreadyMember)}
             </Link>
@@ -346,10 +346,10 @@ function GuestView({
       <section className="py-16 md:py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+            <h2 className="font-display text-3xl md:text-4xl text-white mb-4">
               {t(translations.loyalty.howItWorks)}
             </h2>
-            <p className="text-[#B8B0A8] max-w-2xl mx-auto">
+            <p className="text-white/60 max-w-2xl mx-auto">
               {t(translations.loyalty.howItWorksDesc)}
             </p>
           </div>
@@ -366,11 +366,11 @@ function GuestView({
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-[#252320] border border-[#3D3936] p-8"
+                className="bg-[#1A1A1A] border border-white/10 p-8"
               >
-                <div className="text-[#C9A84C] font-display text-5xl mb-4">{step.n}</div>
-                <h3 className="text-[#FFF8F0] text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-[#B8B0A8]">{step.desc}</p>
+                <div className="text-[#FBBF24] font-display text-5xl mb-4">{step.n}</div>
+                <h3 className="text-white text-xl font-semibold mb-2">{step.title}</h3>
+                <p className="text-white/60">{step.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -508,7 +508,7 @@ function MemberDashboard({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-[#1F1D1A] via-[#252320] to-[#1F1D1A] border border-[#FF6B35]/30 p-8 md:p-12 mb-12 relative overflow-hidden"
+          className="bg-gradient-to-br from-[#111111] via-[#1A1A1A] to-[#111111] border border-[#E85D04]/30 p-8 md:p-12 mb-12 relative overflow-hidden"
         >
           <div
             className="absolute inset-0 opacity-10"
@@ -528,7 +528,7 @@ function MemberDashboard({
                 <TierIcon className="w-8 h-8" />
               </div>
               <div>
-                <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
+                <p className="text-white/40 text-xs uppercase tracking-wider mb-1">
                   {t(translations.loyalty.tier)}
                 </p>
                 <p
@@ -537,27 +537,27 @@ function MemberDashboard({
                 >
                   {locale === 'es' ? (currentTier.display_name_es || currentTier.display_name) : currentTier.display_name}
                 </p>
-                <p className="text-xs text-[#6B6560] mt-1">
+                <p className="text-xs text-white/40 mt-1">
                   {currentTier.points_multiplier}× {t(translations.loyalty.points)}
                 </p>
               </div>
             </div>
 
             <div>
-              <p className="text-[#6B6560] text-xs uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs uppercase tracking-wider mb-1">
                 {locale === 'es' ? 'Hola' : 'Hello'}, {customer.first_name || "Simmer Lover"}
               </p>
-              <p className="font-display text-5xl md:text-6xl text-[#FFF8F0] mb-1">
+              <p className="font-display text-5xl md:text-6xl text-white mb-1">
                 {customer.loyalty_points_balance.toLocaleString(locale === 'es' ? "es-SV" : "en-US")}
               </p>
-              <p className="text-[#B8B0A8] text-sm">{t(translations.loyalty.availablePoints)}</p>
+              <p className="text-white/60 text-sm">{t(translations.loyalty.availablePoints)}</p>
               {nextTier && (
                 <div className="mt-4 max-w-md">
-                  <div className="flex justify-between text-xs text-[#6B6560] mb-1.5">
-                    <span>{t(translations.loyalty.nextTier)} <span className="text-[#FFF8F0] capitalize">{locale === 'es' ? (nextTier.display_name_es || nextTier.display_name) : nextTier.display_name}</span></span>
+                  <div className="flex justify-between text-xs text-white/40 mb-1.5">
+                    <span>{t(translations.loyalty.nextTier)} <span className="text-white capitalize">{locale === 'es' ? (nextTier.display_name_es || nextTier.display_name) : nextTier.display_name}</span></span>
                     <span>{pointsToNext.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} {t(translations.loyalty.points)}</span>
                   </div>
-                  <div className="h-1.5 bg-[#3D3936] overflow-hidden">
+                  <div className="h-1.5 bg-white/10 overflow-hidden">
                     <div
                       className="h-full transition-all duration-500"
                       style={{
@@ -599,11 +599,11 @@ function MemberDashboard({
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="bg-[#2D2A26]/50 px-4 py-3">
-      <p className="text-[10px] uppercase tracking-wider text-[#6B6560] mb-0.5">
+    <div className="bg-[#0A0A0A]/50 px-4 py-3">
+      <p className="text-[10px] uppercase tracking-wider text-white/40 mb-0.5">
         {label}
       </p>
-      <p className="text-[#FFF8F0] text-lg font-semibold">{value}</p>
+      <p className="text-white text-lg font-semibold">{value}</p>
     </div>
   );
 }
@@ -613,13 +613,13 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 // ─────────────────────────────────────────────
 function TierLadder({ tierConfigs, t, locale }: { tierConfigs: TierConfig[]; t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
-    <section className="py-16 md:py-20 px-6 border-t border-[#3D3936]">
+    <section className="py-16 md:py-20 px-6 border-t border-white/10">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+          <h2 className="font-display text-3xl md:text-4xl text-white mb-4">
             {t(translations.loyalty.tiers)}
           </h2>
-          <p className="text-[#B8B0A8] max-w-2xl mx-auto">
+          <p className="text-white/60 max-w-2xl mx-auto">
             {t(translations.loyalty.tiersDesc)}
           </p>
         </div>
@@ -634,7 +634,7 @@ function TierLadder({ tierConfigs, t, locale }: { tierConfigs: TierConfig[]; t: 
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
                 viewport={{ once: true }}
-                className="bg-[#252320] border border-[#3D3936] p-6 flex flex-col"
+                className="bg-[#1A1A1A] border border-white/10 p-6 flex flex-col"
                 style={{ borderTop: `3px solid ${tier.color_hex}` }}
               >
                 <div
@@ -653,17 +653,17 @@ function TierLadder({ tierConfigs, t, locale }: { tierConfigs: TierConfig[]; t: 
                 >
                   {locale === 'es' ? (tier.display_name_es || tier.display_name) : tier.display_name}
                 </h3>
-                <p className="text-xs text-[#6B6560] uppercase tracking-wider mb-4">
+                <p className="text-xs text-white/40 uppercase tracking-wider mb-4">
                   {tier.min_lifetime_points === 0
                     ? t(translations.loyalty.onJoin)
                     : `${t(translations.loyalty.from)} ${tier.min_lifetime_points.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} ${t(translations.loyalty.points)}`}
                 </p>
 
-                <div className="text-[#C9A84C] font-semibold text-sm mb-4">
+                <div className="text-[#FBBF24] font-semibold text-sm mb-4">
                   {tier.points_multiplier}× {t(translations.loyalty.pointsPerOrder)}
                 </div>
 
-                <ul className="space-y-2 text-sm text-[#B8B0A8] flex-1">
+                <ul className="space-y-2 text-sm text-white/60 flex-1">
                   {(locale === 'es' ? (tier.perks_es || tier.perks) : tier.perks.length > 0 ? tier.perks : (tier.perks_es || [])).map((perk, j) => (
                     <li key={j} className="flex items-start gap-2">
                       <CheckCircle
@@ -710,19 +710,19 @@ function RewardsGrid({
       <div className="max-w-6xl mx-auto">
         <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
           <div>
-            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-2">
+            <h2 className="font-display text-3xl md:text-4xl text-white mb-2">
               {t(translations.loyalty.rewards)}
             </h2>
-            <p className="text-[#B8B0A8]">
+            <p className="text-white/60">
               {canRedeem
                 ? t(translations.loyalty.redeemNow)
                 : t(translations.loyalty.awaitingYou)}
             </p>
           </div>
           {canRedeem && (
-            <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/30 px-4 py-2 text-sm">
-              <span className="text-[#6B6560]">{t(translations.loyalty.balance)}</span>{" "}
-              <span className="text-[#FF6B35] font-bold">
+            <div className="bg-[#E85D04]/10 border border-[#E85D04]/30 px-4 py-2 text-sm">
+              <span className="text-white/40">{t(translations.loyalty.balance)}</span>{" "}
+              <span className="text-[#E85D04] font-bold">
                 {currentPoints.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} pts
               </span>
             </div>
@@ -730,8 +730,8 @@ function RewardsGrid({
         </div>
 
         {rewards.length === 0 ? (
-          <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
-            <p className="text-[#B8B0A8]">
+          <div className="bg-[#1A1A1A] border border-white/10 p-12 text-center">
+            <p className="text-white/60">
               {locale === 'es' ? "Pronto agregamos más recompensas." : "More rewards coming soon."}
             </p>
           </div>
@@ -752,13 +752,13 @@ function RewardsGrid({
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
                   viewport={{ once: true }}
-                  className={`bg-[#252320] border overflow-hidden transition-all ${
+                  className={`bg-[#1A1A1A] border overflow-hidden transition-all ${
                     affordable && !tierLocked
-                      ? "border-[#FF6B35]/40 hover:border-[#FF6B35]"
-                      : "border-[#3D3936]"
+                      ? "border-[#E85D04]/40 hover:border-[#E85D04]"
+                      : "border-white/10"
                   }`}
                 >
-                  <div className="relative aspect-[16/10] bg-[#1F1D1A] overflow-hidden">
+                  <div className="relative aspect-[16/10] bg-[#111111] overflow-hidden">
                     {reward.image_url ? (
                       <Image
                         src={reward.image_url}
@@ -771,29 +771,29 @@ function RewardsGrid({
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Gift className="w-12 h-12 text-[#3D3936]" />
+                        <Gift className="w-12 h-12 text-white/10" />
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 bg-[#2D2A26]/90 backdrop-blur-sm px-3 py-1 text-sm font-bold text-[#FF6B35]">
+                    <div className="absolute top-3 left-3 bg-[#0A0A0A]/90 backdrop-blur-sm px-3 py-1 text-sm font-bold text-[#E85D04]">
                       {reward.points_required.toLocaleString(locale === 'es' ? "es-SV" : "en-US")} pts
                     </div>
                     {tierLocked && (
-                      <div className="absolute top-3 right-3 bg-[#2D2A26]/90 backdrop-blur-sm p-1.5">
-                        <Lock className="w-3.5 h-3.5 text-[#C9A84C]" />
+                      <div className="absolute top-3 right-3 bg-[#0A0A0A]/90 backdrop-blur-sm p-1.5">
+                        <Lock className="w-3.5 h-3.5 text-[#FBBF24]" />
                       </div>
                     )}
                   </div>
 
                   <div className="p-5">
-                    <h3 className="font-display text-xl text-[#FFF8F0] mb-1">
+                    <h3 className="font-display text-xl text-white mb-1">
                       {rewardName}
                     </h3>
-                    <p className="text-sm text-[#B8B0A8] mb-4 line-clamp-2 min-h-[2.5rem]">
+                    <p className="text-sm text-white/60 mb-4 line-clamp-2 min-h-[2.5rem]">
                       {rewardDesc || "\u00a0"}
                     </p>
 
                     {reward.min_tier_required !== "bronze" && (
-                      <p className="text-xs text-[#C9A84C] mb-3 capitalize">
+                      <p className="text-xs text-[#FBBF24] mb-3 capitalize">
                         {t(translations.loyalty.tier)} {reward.min_tier_required}+
                       </p>
                     )}
@@ -804,8 +804,8 @@ function RewardsGrid({
                         disabled={!affordable || tierLocked || isRedeeming}
                         className={`w-full py-3 font-semibold transition min-h-[48px] flex items-center justify-center gap-2 ${
                           affordable && !tierLocked
-                            ? "bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
-                            : "bg-[#3D3936] text-[#6B6560] cursor-not-allowed"
+                            ? "bg-[#E85D04] hover:bg-[#C2410C] text-white"
+                            : "bg-white/10 text-white/40 cursor-not-allowed"
                         }`}
                       >
                         {isRedeeming ? (
@@ -821,7 +821,7 @@ function RewardsGrid({
                     ) : (
                       <Link
                         href="/auth/signup?loyalty=1"
-                        className="w-full block text-center bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] py-3 font-semibold transition min-h-[48px]"
+                        className="w-full block text-center bg-white/10 hover:bg-[#E85D04] text-white py-3 font-semibold transition min-h-[48px]"
                       >
                         {t(translations.loyalty.joinToRedeem)}
                       </Link>
@@ -856,20 +856,20 @@ function TransactionHistory({
         return { text: t(translations.loyalty.earned), color: "text-[#4CAF50]" };
       case "redeem":
       case "redeemed":
-        return { text: t(translations.loyalty.redeemed), color: "text-[#FF6B35]" };
+        return { text: t(translations.loyalty.redeemed), color: "text-[#E85D04]" };
       case "bonus":
       case "birthday_bonus":
       case "tier_bonus":
       case "referral_bonus":
-        return { text: t(translations.loyalty.bonus), color: "text-[#C9A84C]" };
+        return { text: t(translations.loyalty.bonus), color: "text-[#FBBF24]" };
       case "adjustment":
       case "adjusted":
-        return { text: t(translations.loyalty.adjusted), color: "text-[#B8B0A8]" };
+        return { text: t(translations.loyalty.adjusted), color: "text-white/60" };
       case "expired":
       case "expiration":
-        return { text: t(translations.loyalty.expired), color: "text-[#6B6560]" };
+        return { text: t(translations.loyalty.expired), color: "text-white/40" };
       default:
-        return { text: type, color: "text-[#B8B0A8]" };
+        return { text: type, color: "text-white/60" };
     }
   };
 
@@ -877,12 +877,12 @@ function TransactionHistory({
 
   return (
     <section className="mt-12">
-      <h2 className="font-display text-2xl text-[#FFF8F0] mb-6 flex items-center gap-3">
-        <TrendingUp className="w-6 h-6 text-[#FF6B35]" />
+      <h2 className="font-display text-2xl text-white mb-6 flex items-center gap-3">
+        <TrendingUp className="w-6 h-6 text-[#E85D04]" />
         {t(translations.loyalty.pointsHistory)}
       </h2>
-      <div className="bg-[#252320] border border-[#3D3936] overflow-hidden">
-        <div className="divide-y divide-[#3D3936]">
+      <div className="bg-[#1A1A1A] border border-white/10 overflow-hidden">
+        <div className="divide-y divide-white/10">
           {transactions.map((tx) => {
             const l = label(tx.transaction_type);
             const positive = tx.points >= 0;
@@ -892,7 +892,7 @@ function TransactionHistory({
                 className="p-4 md:p-5 flex items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <Clock className="w-4 h-4 text-[#6B6560] flex-shrink-0" />
+                  <Clock className="w-4 h-4 text-white/40 flex-shrink-0" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span
@@ -900,7 +900,7 @@ function TransactionHistory({
                       >
                         {l.text}
                       </span>
-                      <span className="text-xs text-[#6B6560]">
+                      <span className="text-xs text-white/40">
                         {new Date(tx.created_at).toLocaleDateString(dateLocale, {
                           day: "numeric",
                           month: "short",
@@ -908,7 +908,7 @@ function TransactionHistory({
                         })}
                       </span>
                     </div>
-                    <p className="text-[#FFF8F0] text-sm truncate">
+                    <p className="text-white text-sm truncate">
                       {tx.description || "—"}
                     </p>
                   </div>
@@ -916,13 +916,13 @@ function TransactionHistory({
                 <div className="text-right flex-shrink-0">
                   <p
                     className={`font-mono font-semibold ${
-                      positive ? "text-[#4CAF50]" : "text-[#FF6B35]"
+                      positive ? "text-[#4CAF50]" : "text-[#E85D04]"
                     }`}
                   >
                     {positive ? "+" : ""}
                     {tx.points.toLocaleString(dateLocale)}
                   </p>
-                  <p className="text-xs text-[#6B6560]">
+                  <p className="text-xs text-white/40">
                     {t(translations.loyalty.balanceAfter)} {tx.balance_after.toLocaleString(dateLocale)}
                   </p>
                 </div>
@@ -940,13 +940,13 @@ function TransactionHistory({
 // ─────────────────────────────────────────────
 function PerksSection({ t, locale }: { t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
-    <section className="py-16 md:py-20 px-6 border-t border-[#3D3936] bg-[#252320]">
+    <section className="py-16 md:py-20 px-6 border-t border-white/10 bg-[#1A1A1A]">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] mb-4">
+          <h2 className="font-display text-3xl md:text-4xl text-white mb-4">
             {t(translations.loyalty.benefitsThatCount)}
           </h2>
-          <p className="text-[#B8B0A8] max-w-2xl mx-auto">
+          <p className="text-white/60 max-w-2xl mx-auto">
             {t(translations.loyalty.benefitsDesc)}
           </p>
         </div>
@@ -962,12 +962,12 @@ function PerksSection({ t, locale }: { t: (obj: { es: string; en: string }) => s
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 viewport={{ once: true }}
-                className="bg-[#2D2A26] border border-[#3D3936] p-5 md:p-6 flex items-start gap-4"
+                className="bg-[#0A0A0A] border border-white/10 p-5 md:p-6 flex items-start gap-4"
               >
-                <div className="w-10 h-10 bg-[#FF6B35]/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-[#FF6B35]" />
+                <div className="w-10 h-10 bg-[#E85D04]/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-[#E85D04]" />
                 </div>
-                <h3 className="text-[#FFF8F0] font-semibold text-sm md:text-base pt-1">
+                <h3 className="text-white font-semibold text-sm md:text-base pt-1">
                   {title}
                 </h3>
               </motion.div>
@@ -984,27 +984,27 @@ function PerksSection({ t, locale }: { t: (obj: { es: string; en: string }) => s
 // ─────────────────────────────────────────────
 function CallToAction({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: string; en: string }) => string; locale: string }) {
   return (
-    <section className="py-28 md:py-32 px-6 bg-[#252320] border-t border-[#3D3936]/30">
+    <section className="py-28 md:py-32 px-6 bg-[#1A1A1A] border-t border-white/10/30">
       <div className="max-w-3xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <Flame className="w-12 h-12 text-[#C9A84C] mx-auto mb-6" />
-          <h2 className="font-display text-4xl md:text-5xl text-[#FFF8F0] mb-6">
+          <Flame className="w-12 h-12 text-[#FBBF24] mx-auto mb-6" />
+          <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
             {signedIn
               ? (locale === 'es' ? "Tu próxima noche ya está generando puntos" : "Your next night is already earning points")
               : (locale === 'es' ? "La pizza también premia la lealtad" : "Pizza also rewards loyalty")}
           </h2>
-          <p className="text-[#B8B0A8] text-xl mb-10">
+          <p className="text-white/60 text-xl mb-10">
             {signedIn
               ? (locale === 'es' ? "Pedí, canjeá, volvé. Repetí." : "Order, redeem, return. Repeat.")
               : (locale === 'es' ? "30 segundos para crear tu cuenta. El resto de tu vida para canjear." : "30 seconds to create your account. A lifetime to redeem.")}
           </p>
           <Link
             href={signedIn ? "/menu" : "/auth/signup?loyalty=1"}
-            className="inline-flex items-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
+            className="inline-flex items-center gap-2 bg-white text-[#0A0A0A] hover:bg-white px-10 py-5 text-xl font-semibold transition min-h-[56px]"
           >
             {signedIn ? (locale === 'es' ? "Ir al menú" : "Go to menu") : t(translations.loyalty.joinFree)}
             <ArrowRight className="w-5 h-5" />
@@ -1020,15 +1020,15 @@ function CallToAction({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { e
 // ─────────────────────────────────────────────
 function LoyaltyLoading() {
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24 lg:pb-0 px-6">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-0 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse space-y-8">
-          <div className="h-16 bg-[#252320] w-1/2 mx-auto" />
-          <div className="h-6 bg-[#252320] w-2/3 mx-auto" />
-          <div className="h-40 bg-[#252320] mt-12" />
+          <div className="h-16 bg-[#1A1A1A] w-1/2 mx-auto" />
+          <div className="h-6 bg-[#1A1A1A] w-2/3 mx-auto" />
+          <div className="h-40 bg-[#1A1A1A] mt-12" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-64 bg-[#252320]" />
+              <div key={i} className="h-64 bg-[#1A1A1A]" />
             ))}
           </div>
         </div>

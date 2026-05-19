@@ -45,9 +45,9 @@ interface Order {
 }
 
 const tierColors = {
-  starter: 'bg-[#6B6560]',
-  flame: 'bg-[#FF6B35]',
-  inferno: 'bg-[#E55A2B]',
+  starter: 'bg-white/40',
+  flame: 'bg-[#E85D04]',
+  inferno: 'bg-[#C2410C]',
 }
 
 const tierIcons = {
@@ -153,25 +153,25 @@ export default function AccountPage() {
 
   if (notAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 pt-28">
         <div className="w-full max-w-md text-center">
-          <div className="bg-[#252320] border border-[#3D3936] p-8">
-            <div className="w-16 h-16 bg-[#FF6B35]/10 flex items-center justify-center mx-auto mb-6">
-              <User className="w-8 h-8 text-[#FF6B35]" />
+          <div className="bg-[#1A1A1A] border border-white/10 p-8">
+            <div className="w-16 h-16 bg-[#E85D04]/10 flex items-center justify-center mx-auto mb-6">
+              <User className="w-8 h-8 text-[#E85D04]" />
             </div>
-            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-3">Inicia sesión para continuar</h1>
-            <p className="text-[#6B6560] mb-6">
+            <h1 className="text-2xl font-bold text-white mb-3">Inicia sesión para continuar</h1>
+            <p className="text-white/40 mb-6">
               Necesitas una cuenta para acceder a tu perfil, puntos y pedidos.
             </p>
             <Link
               href="/auth/login"
-              className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors"
+              className="block w-full bg-[#E85D04] hover:bg-[#C2410C] text-white py-4 font-semibold transition-colors"
             >
               Iniciar Sesión
             </Link>
-            <p className="text-[#6B6560] mt-4 text-sm">
+            <p className="text-white/40 mt-4 text-sm">
               ¿No tienes cuenta?{' '}
-              <Link href="/auth/signup" className="text-[#FF6B35] hover:underline font-medium">
+              <Link href="/auth/signup" className="text-[#E85D04] hover:underline font-medium">
                 Regístrate gratis
               </Link>
             </p>
@@ -183,11 +183,11 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] pt-32">
+      <div className="min-h-screen bg-[#0A0A0A] pt-32">
         <div className="max-w-4xl mx-auto px-4">
           <div className="animate-pulse space-y-6">
-            <div className="h-40 bg-[#3D3936]" />
-            <div className="h-64 bg-[#3D3936]" />
+            <div className="h-40 bg-white/10" />
+            <div className="h-64 bg-white/10" />
           </div>
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function AccountPage() {
   const TierIcon = profile ? tierIcons[profile.loyalty_tier as keyof typeof tierIcons] || Star : Star
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -205,8 +205,8 @@ export default function AccountPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-display text-3xl text-[#FFF8F0]">Mi Cuenta</h1>
-          <p className="text-[#6B6560]">Gestiona tu perfil y revisa tu historial</p>
+          <h1 className="font-display text-3xl text-white">Mi Cuenta</h1>
+          <p className="text-white/40">Gestiona tu perfil y revisa tu historial</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -216,14 +216,14 @@ export default function AccountPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-[#252320] border border-[#3D3936] p-6"
+              className="bg-[#1A1A1A] border border-white/10 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xl text-[#FFF8F0]">Información Personal</h2>
+                <h2 className="font-display text-xl text-white">Información Personal</h2>
                 {!editing ? (
                   <button
                     onClick={() => setEditing(true)}
-                    className="flex items-center gap-2 text-[#FF6B35] hover:text-[#E55A2B] text-sm font-medium transition-colors"
+                    className="flex items-center gap-2 text-[#E85D04] hover:text-[#C2410C] text-sm font-medium transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
                     Editar
@@ -240,7 +240,7 @@ export default function AccountPage() {
                     </button>
                     <button
                       onClick={() => setEditing(false)}
-                      className="flex items-center gap-1 text-[#6B6560] hover:text-[#B8B0A8] text-sm font-medium transition-colors"
+                      className="flex items-center gap-1 text-white/40 hover:text-white/60 text-sm font-medium transition-colors"
                     >
                       <X className="w-4 h-4" />
                       Cancelar
@@ -252,31 +252,31 @@ export default function AccountPage() {
               {editing ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-[#6B6560] mb-1">Nombre</label>
+                    <label className="block text-sm text-white/40 mb-1">Nombre</label>
                     <input
                       type="text"
                       value={editForm.full_name}
                       onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#E85D04] transition"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-[#6B6560] mb-1">Teléfono</label>
+                    <label className="block text-sm text-white/40 mb-1">Teléfono</label>
                     <input
                       type="tel"
                       value={editForm.phone}
                       onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#E85D04] transition"
                       placeholder="+503 XXXX-XXXX"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-[#6B6560] mb-1">Dirección</label>
+                    <label className="block text-sm text-white/40 mb-1">Dirección</label>
                     <input
                       type="text"
                       value={editForm.address}
                       onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition"
+                      className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#E85D04] transition"
                       placeholder="Tu dirección de entrega"
                     />
                   </div>
@@ -284,31 +284,31 @@ export default function AccountPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-[#6B6560]" />
+                    <User className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-[#6B6560]">Nombre</p>
-                      <p className="text-[#FFF8F0]">{profile?.full_name || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">Nombre</p>
+                      <p className="text-white">{profile?.full_name || 'No especificado'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-[#6B6560]" />
+                    <Mail className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-[#6B6560]">Correo</p>
-                      <p className="text-[#FFF8F0]">{user?.email}</p>
+                      <p className="text-xs text-white/40">Correo</p>
+                      <p className="text-white">{user?.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-[#6B6560]" />
+                    <Phone className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-[#6B6560]">Teléfono</p>
-                      <p className="text-[#FFF8F0]">{profile?.phone || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">Teléfono</p>
+                      <p className="text-white">{profile?.phone || 'No especificado'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-[#6B6560]" />
+                    <MapPin className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-[#6B6560]">Dirección</p>
-                      <p className="text-[#FFF8F0]">{profile?.address || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">Dirección</p>
+                      <p className="text-white">{profile?.address || 'No especificado'}</p>
                     </div>
                   </div>
                 </div>
@@ -320,13 +320,13 @@ export default function AccountPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-[#252320] border border-[#3D3936] p-6"
+              className="bg-[#1A1A1A] border border-white/10 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xl text-[#FFF8F0]">Pedidos Recientes</h2>
+                <h2 className="font-display text-xl text-white">Pedidos Recientes</h2>
                 <Link
                   href="/orders"
-                  className="text-[#FF6B35] hover:text-[#E55A2B] text-sm font-medium transition-colors"
+                  className="text-[#E85D04] hover:text-[#C2410C] text-sm font-medium transition-colors"
                 >
                   Ver todos
                 </Link>
@@ -338,36 +338,36 @@ export default function AccountPage() {
                     <Link
                       key={order.id}
                       href={`/orders?id=${order.id}`}
-                      className="flex items-center justify-between p-4 bg-[#2D2A26] border border-[#3D3936] hover:border-[#FF6B35]/30 transition-colors"
+                      className="flex items-center justify-between p-4 bg-[#0A0A0A] border border-white/10 hover:border-[#E85D04]/30 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#FF6B35]/10 flex items-center justify-center">
-                          <ShoppingBag className="w-5 h-5 text-[#FF6B35]" />
+                        <div className="w-10 h-10 bg-[#E85D04]/10 flex items-center justify-center">
+                          <ShoppingBag className="w-5 h-5 text-[#E85D04]" />
                         </div>
                         <div>
-                          <p className="font-medium text-[#FFF8F0]">#{order.order_number}</p>
-                          <p className="text-xs text-[#6B6560]">
+                          <p className="font-medium text-white">#{order.order_number}</p>
+                          <p className="text-xs text-white/40">
                             {new Date(order.created_at).toLocaleDateString('es-SV')}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <p className="font-semibold text-[#FFF8F0]">${order.total.toFixed(2)}</p>
-                          <p className="text-xs text-[#FF6B35] capitalize">{order.status.replace('_', ' ')}</p>
+                          <p className="font-semibold text-white">${order.total.toFixed(2)}</p>
+                          <p className="text-xs text-[#E85D04] capitalize">{order.status.replace('_', ' ')}</p>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-[#6B6560]" />
+                        <ChevronRight className="w-4 h-4 text-white/40" />
                       </div>
                     </Link>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <ShoppingBag className="w-12 h-12 text-[#3D3936] mx-auto mb-3" />
-                  <p className="text-[#6B6560]">Aún no tienes pedidos</p>
+                  <ShoppingBag className="w-12 h-12 text-white/10 mx-auto mb-3" />
+                  <p className="text-white/40">Aún no tienes pedidos</p>
                   <Link
                     href="/menu"
-                    className="inline-block mt-4 text-[#FF6B35] hover:underline font-medium"
+                    className="inline-block mt-4 text-[#E85D04] hover:underline font-medium"
                   >
                     Ver Menú
                   </Link>
@@ -383,7 +383,7 @@ export default function AccountPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className={`relative overflow-hidden ${tierColors[profile?.loyalty_tier as keyof typeof tierColors] || 'bg-[#6B6560]'}`}
+              className={`relative overflow-hidden ${tierColors[profile?.loyalty_tier as keyof typeof tierColors] || 'bg-white/40'}`}
             >
               <div className="p-6">
                 <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
@@ -419,30 +419,30 @@ export default function AccountPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-[#252320] border border-[#3D3936] p-6"
+              className="bg-[#1A1A1A] border border-white/10 p-6"
             >
-              <h3 className="font-display text-lg text-[#FFF8F0] mb-4">Estadísticas</h3>
+              <h3 className="font-display text-lg text-white mb-4">Estadísticas</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6B6560] flex items-center gap-2">
+                  <span className="text-white/40 flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4" />
                     Total pedidos
                   </span>
-                  <span className="text-[#FFF8F0] font-medium">{profile?.total_orders || 0}</span>
+                  <span className="text-white font-medium">{profile?.total_orders || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6B6560] flex items-center gap-2">
+                  <span className="text-white/40 flex items-center gap-2">
                     <Gift className="w-4 h-4" />
                     Total gastado
                   </span>
-                  <span className="text-[#FFF8F0] font-medium">${(profile?.total_spent || 0).toFixed(2)}</span>
+                  <span className="text-white font-medium">${(profile?.total_spent || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#6B6560] flex items-center gap-2">
+                  <span className="text-white/40 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Miembro desde
                   </span>
-                  <span className="text-[#FFF8F0] font-medium">
+                  <span className="text-white font-medium">
                     {profile?.created_at
                       ? new Date(profile.created_at).toLocaleDateString('es-SV', { month: 'short', year: 'numeric' })
                       : '-'}
@@ -460,18 +460,18 @@ export default function AccountPage() {
             >
               <Link
                 href="/simmerlovers"
-                className="flex items-center justify-between p-4 bg-[#252320] border border-[#3D3936] hover:border-[#FF6B35]/30 transition-colors"
+                className="flex items-center justify-between p-4 bg-[#1A1A1A] border border-white/10 hover:border-[#E85D04]/30 transition-colors"
               >
-                <span className="flex items-center gap-3 text-[#FFF8F0]">
-                  <Gift className="w-5 h-5 text-[#FF6B35]" />
+                <span className="flex items-center gap-3 text-white">
+                  <Gift className="w-5 h-5 text-[#E85D04]" />
                   Ver Recompensas
                 </span>
-                <ChevronRight className="w-4 h-4 text-[#6B6560]" />
+                <ChevronRight className="w-4 h-4 text-white/40" />
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-between p-4 bg-[#252320] border border-[#3D3936] hover:border-[#C73E1D]/30 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-[#1A1A1A] border border-white/10 hover:border-[#C73E1D]/30 transition-colors"
               >
                 <span className="flex items-center gap-3 text-[#C73E1D]">
                   <LogOut className="w-5 h-5" />

@@ -11,7 +11,7 @@ export default function TermsPage() {
   const isEs = locale === 'es'
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32 pb-24">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -19,23 +19,23 @@ export default function TermsPage() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
             {isEs ? 'Volver al Inicio' : 'Back to Home'}
           </Link>
 
-          <h1 className="font-display text-4xl text-[#FFF8F0] mb-4">
+          <h1 className="font-display text-4xl text-white mb-4">
             {isEs ? 'T\u00e9rminos y Condiciones' : 'Terms and Conditions'}
           </h1>
-          <p className="text-[#6B6560] mb-12">
+          <p className="text-white/40 mb-12">
             {isEs ? '\u00daltima actualizaci\u00f3n: Febrero 2025' : 'Last updated: February 2025'}
           </p>
 
           <div className="prose prose-invert max-w-none">
-            <div className="space-y-8 text-[#B8B0A8]">
+            <div className="space-y-8 text-white/60">
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '1. Aceptaci\u00f3n de T\u00e9rminos' : '1. Acceptance of Terms'}
                 </h2>
                 <p>
@@ -46,7 +46,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '2. Servicios' : '2. Services'}
                 </h2>
                 <p className="mb-4">
@@ -74,7 +74,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '3. Pedidos y Pagos' : '3. Orders and Payments'}
                 </h2>
                 <ul className="list-disc pl-6 space-y-2">
@@ -99,7 +99,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '4. Entregas' : '4. Deliveries'}
                 </h2>
                 <ul className="list-disc pl-6 space-y-2">
@@ -122,7 +122,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '5. Programa SimmerLovers' : '5. SimmerLovers Program'}
                 </h2>
                 <ul className="list-disc pl-6 space-y-2">
@@ -145,7 +145,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '6. Cancelaciones y Reembolsos' : '6. Cancellations and Refunds'}
                 </h2>
                 <ul className="list-disc pl-6 space-y-2">
@@ -168,7 +168,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '7. Alergias e Informaci\u00f3n Nutricional' : '7. Allergies and Nutritional Information'}
                 </h2>
                 <p>
@@ -179,7 +179,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '8. Propiedad Intelectual' : '8. Intellectual Property'}
                 </h2>
                 <p>
@@ -190,7 +190,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '9. Limitaci\u00f3n de Responsabilidad' : '9. Limitation of Liability'}
                 </h2>
                 <p>
@@ -201,7 +201,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '10. Modificaciones' : '10. Modifications'}
                 </h2>
                 <p>
@@ -212,7 +212,7 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '11. Contacto' : '11. Contact'}
                 </h2>
                 <p className="mb-4">
@@ -221,13 +221,13 @@ export default function TermsPage() {
                     : 'For questions about these terms:'}
                 </p>
                 <ul className="list-none space-y-2">
-                  <li>Email: <a href="mailto:info@simmerdownsv.com" className="text-[#FF6B35] hover:underline">info@simmerdownsv.com</a></li>
-                  <li>{isEs ? 'Tel\u00e9fono' : 'Phone'}: <a href="tel:+50324455999" className="text-[#FF6B35] hover:underline">+503 2445-5999</a></li>
+                  <li>Email: <a href="mailto:info@simmerdownsv.com" className="text-[#E85D04] hover:underline">info@simmerdownsv.com</a></li>
+                  <li>{isEs ? 'Tel\u00e9fono' : 'Phone'}: <a href="tel:+50324455999" className="text-[#E85D04] hover:underline">+503 2445-5999</a></li>
                 </ul>
               </section>
 
               <section>
-                <h2 className="text-xl font-semibold text-[#FFF8F0] mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                   {isEs ? '12. Ley Aplicable' : '12. Governing Law'}
                 </h2>
                 <p>

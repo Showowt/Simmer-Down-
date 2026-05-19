@@ -115,7 +115,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -124,13 +124,13 @@ export default function ContactPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-white/40 font-semibold uppercase tracking-wider text-sm mb-4 block">
               {t(translations.contact.title)}
             </span>
-            <h1 className="text-3xl md:text-4xl tracking-tight font-bold text-[#FFF8F0] mb-6">
+            <h1 className="text-3xl md:text-4xl tracking-tight font-bold text-white mb-6">
               {t(translations.contact.heading)}
             </h1>
-            <p className="text-xl text-[#B8B0A8]">
+            <p className="text-xl text-white/60">
               {t(translations.contact.subtitle)}
             </p>
           </motion.div>
@@ -148,59 +148,59 @@ export default function ContactPage() {
               viewport={{ once: true }}
               className="lg:col-span-1 space-y-6"
             >
-              <div className="bg-[#252320] border border-[#3D3936] p-6">
-                <h3 className="text-lg font-semibold text-[#FFF8F0] mb-6">
+              <div className="bg-[#1A1A1A] border border-white/10 p-6">
+                <h3 className="text-lg font-semibold text-white mb-6">
                   {t(translations.contact.contactInfo)}
                 </h3>
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                    <Phone className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">{t(translations.contact.phones)}</p>
+                      <p className="text-white/40 text-sm">{t(translations.contact.phones)}</p>
                       <a
                         href="tel:+50324455999"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
                         +503 2445-5999 (Santa Ana)
                       </a>
                       <a
                         href="tel:+50368316907"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
                         +503 6831-6907 (Lago de Coatepeque)
                       </a>
                       <a
                         href="tel:+50374877792"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
                         +503 7487-7792 (San Benito)
                       </a>
                       <a
                         href="tel:+50369904674"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
                         +503 6990-4674 (Simmer Garden)
                       </a>
                       <a
                         href="tel:+50375764655"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors block"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
                         +503 7576-4655 (Surf City)
                       </a>
-                      <p className="text-[#6B6560] text-sm mt-1">
+                      <p className="text-white/40 text-sm mt-1">
                         {t(translations.contact.whatsappAvailable)}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">{t(translations.contact.emailLabel)}</p>
+                      <p className="text-white/40 text-sm">{t(translations.contact.emailLabel)}</p>
                       <a
                         href="mailto:info@simmerdownsv.com"
-                        className="text-[#FFF8F0] font-medium hover:text-[#FF6B35] transition-colors"
+                        className="text-white font-medium hover:text-[#E85D04] transition-colors"
                       >
                         info@simmerdownsv.com
                       </a>
@@ -208,26 +208,26 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">{t(translations.contact.locationsLabel)}</p>
-                      <p className="text-[#FFF8F0] font-medium">
+                      <p className="text-white/40 text-sm">{t(translations.contact.locationsLabel)}</p>
+                      <p className="text-white font-medium">
                         5 {t(translations.contact.branches)}
                       </p>
-                      <p className="text-[#6B6560] text-sm">
+                      <p className="text-white/40 text-sm">
                         Santa Ana · Coatepeque · San Benito · Juayúa · Surf City
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-[#6B6560] text-sm">{t(translations.contact.hours)}</p>
-                      <p className="text-[#FFF8F0] font-medium">
+                      <p className="text-white/40 text-sm">{t(translations.contact.hours)}</p>
+                      <p className="text-white font-medium">
                         11:00 AM - 10:00 PM
                       </p>
-                      <p className="text-[#6B6560] text-sm">
+                      <p className="text-white/40 text-sm">
                         {t(translations.contact.varyByLocation)}
                       </p>
                     </div>
@@ -236,28 +236,28 @@ export default function ContactPage() {
               </div>
 
               {/* Quick Links */}
-              <div className="bg-[#252320] border border-[#3D3936] p-6">
-                <h3 className="text-lg font-bold text-[#FFF8F0] mb-4">
+              <div className="bg-[#1A1A1A] border border-white/10 p-6">
+                <h3 className="text-lg font-bold text-white mb-4">
                   {t(translations.contact.quickLinks)}
                 </h3>
                 <div className="space-y-3">
                   <Link
                     href="/locations"
-                    className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors"
+                    className="flex items-center gap-3 text-white/60 hover:text-[#E85D04] transition-colors"
                   >
                     <MapPin className="w-5 h-5" />
                     {t(translations.contact.allLocations)}
                   </Link>
                   <Link
                     href="/menu"
-                    className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors"
+                    className="flex items-center gap-3 text-white/60 hover:text-[#E85D04] transition-colors"
                   >
                     <Clock className="w-5 h-5" />
                     {t(translations.contact.viewMenu)}
                   </Link>
                   <Link
                     href="/simmerlovers"
-                    className="flex items-center gap-3 text-[#B8B0A8] hover:text-[#FF6B35] transition-colors"
+                    className="flex items-center gap-3 text-white/60 hover:text-[#E85D04] transition-colors"
                   >
                     <Mail className="w-5 h-5" />
                     SimmerLovers
@@ -266,8 +266,8 @@ export default function ContactPage() {
               </div>
 
               {/* Social Media */}
-              <div className="bg-[#252320] border border-[#3D3936] p-6">
-                <h3 className="text-lg font-bold text-[#FFF8F0] mb-4">
+              <div className="bg-[#1A1A1A] border border-white/10 p-6">
+                <h3 className="text-lg font-bold text-white mb-4">
                   {t(translations.contact.socialMedia)}
                 </h3>
                 <div className="flex gap-3">
@@ -275,7 +275,7 @@ export default function ContactPage() {
                     href="https://instagram.com/simmerdownsv"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#C9A84C] hover:text-white transition-colors"
+                    className="w-12 h-12 flex items-center justify-center bg-white/10 text-white/60 hover:bg-[#FBBF24] hover:text-white transition-colors"
                     aria-label="Instagram"
                   >
                     <Instagram className="w-5 h-5" />
@@ -284,7 +284,7 @@ export default function ContactPage() {
                     href="https://facebook.com/simmerdownsv"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#C9A84C] hover:text-white transition-colors"
+                    className="w-12 h-12 flex items-center justify-center bg-white/10 text-white/60 hover:bg-[#FBBF24] hover:text-white transition-colors"
                     aria-label="Facebook"
                   >
                     <Facebook className="w-5 h-5" />
@@ -293,13 +293,13 @@ export default function ContactPage() {
                     href="https://wa.me/50324455999"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 flex items-center justify-center bg-[#3D3936] text-[#B8B0A8] hover:bg-[#25D366] hover:text-white transition-colors"
+                    className="w-12 h-12 flex items-center justify-center bg-white/10 text-white/60 hover:bg-[#25D366] hover:text-white transition-colors"
                     aria-label="WhatsApp"
                   >
                     <MessageCircle className="w-5 h-5" />
                   </a>
                 </div>
-                <p className="text-[#6B6560] text-sm mt-3">
+                <p className="text-white/40 text-sm mt-3">
                   @simmerdownsv {t(translations.contact.allPlatforms)}
                 </p>
               </div>
@@ -313,22 +313,22 @@ export default function ContactPage() {
               viewport={{ once: true }}
               className="lg:col-span-2"
             >
-              <div className="bg-[#252320] border border-[#3D3936] p-8">
+              <div className="bg-[#1A1A1A] border border-white/10 p-8">
                 {submitted ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-[#4CAF50]/10 flex items-center justify-center mx-auto mb-6">
                       <MessageSquare className="w-8 h-8 text-[#4CAF50]" />
                     </div>
-                    <h3 className="text-2xl font-bold text-[#FFF8F0] mb-2">
+                    <h3 className="text-2xl font-bold text-white mb-2">
                       {t(translations.contact.messageSent)}
                     </h3>
-                    <p className="text-[#B8B0A8]">
+                    <p className="text-white/60">
                       {t(translations.contact.thankYou)}
                     </p>
                   </div>
                 ) : (
                   <>
-                    <h3 className="text-xl font-bold text-[#FFF8F0] mb-6">
+                    <h3 className="text-xl font-bold text-white mb-6">
                       {t(translations.contact.sendMessage)}
                     </h3>
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -336,7 +336,7 @@ export default function ContactPage() {
                         <div>
                           <label
                             htmlFor="contact-name"
-                            className="block text-sm font-medium text-[#B8B0A8] mb-2"
+                            className="block text-sm font-medium text-white/60 mb-2"
                           >
                             {t(translations.booking.name)} *
                           </label>
@@ -348,14 +348,14 @@ export default function ContactPage() {
                             onChange={(e) =>
                               setFormData({ ...formData, name: e.target.value })
                             }
-                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                            className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                             placeholder={t(translations.contact.namePlaceholder)}
                           />
                         </div>
                         <div>
                           <label
                             htmlFor="contact-email"
-                            className="block text-sm font-medium text-[#B8B0A8] mb-2"
+                            className="block text-sm font-medium text-white/60 mb-2"
                           >
                             {t(translations.contact.emailLabel)} *
                           </label>
@@ -370,7 +370,7 @@ export default function ContactPage() {
                                 email: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                            className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                             placeholder={t(translations.contact.emailPlaceholder)}
                           />
                         </div>
@@ -380,7 +380,7 @@ export default function ContactPage() {
                         <div>
                           <label
                             htmlFor="contact-phone"
-                            className="block text-sm font-medium text-[#B8B0A8] mb-2"
+                            className="block text-sm font-medium text-white/60 mb-2"
                           >
                             {t(translations.contact.phoneOptional)}
                           </label>
@@ -396,14 +396,14 @@ export default function ContactPage() {
                                 phone: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                            className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                             placeholder={t(translations.contact.phonePlaceholder)}
                           />
                         </div>
                         <div>
                           <label
                             htmlFor="contact-reason"
-                            className="block text-sm font-medium text-[#B8B0A8] mb-2"
+                            className="block text-sm font-medium text-white/60 mb-2"
                           >
                             {t(translations.contact.reason)} *
                           </label>
@@ -418,7 +418,7 @@ export default function ContactPage() {
                                   reason: e.target.value,
                                 })
                               }
-                              className="w-full px-4 pr-10 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] focus:outline-none focus:border-[#FF6B35] transition appearance-none min-h-[48px] cursor-pointer"
+                              className="w-full px-4 pr-10 py-3 bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#E85D04] transition appearance-none min-h-[48px] cursor-pointer"
                             >
                               <option value="">{t(translations.contact.selectReason)}</option>
                               {contactReasons.map((reason) => (
@@ -427,7 +427,7 @@ export default function ContactPage() {
                                 </option>
                               ))}
                             </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560] pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none" />
                           </div>
                         </div>
                       </div>
@@ -435,7 +435,7 @@ export default function ContactPage() {
                       <div>
                         <label
                           htmlFor="contact-message"
-                          className="block text-sm font-medium text-[#B8B0A8] mb-2"
+                          className="block text-sm font-medium text-white/60 mb-2"
                         >
                           {t(translations.contact.message)} *
                         </label>
@@ -450,7 +450,7 @@ export default function ContactPage() {
                               message: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition resize-none"
+                          className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition resize-none"
                           placeholder={t(translations.contact.messagePlaceholder)}
                         />
                       </div>
@@ -458,7 +458,7 @@ export default function ContactPage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] text-white py-4 font-semibold transition-colors min-h-[56px]"
+                        className="w-full flex items-center justify-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 text-white py-4 font-semibold transition-colors min-h-[56px]"
                       >
                         {loading ? (
                           <>
@@ -482,13 +482,13 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-24 bg-[#252320] border-t border-[#3D3936]">
+      <section className="py-24 bg-[#1A1A1A] border-t border-white/10">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-white/40 font-semibold uppercase tracking-wider text-sm mb-4 block">
               FAQ
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-[#FFF8F0]">
+            <h2 className="text-3xl md:text-4xl font-black text-white">
               {t(translations.contact.faq)}
             </h2>
           </div>
@@ -501,25 +501,25 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-[#2D2A26] border border-[#3D3936] overflow-hidden"
+                className="bg-[#0A0A0A] border border-white/10 overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-6 text-left min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-inset"
+                  className="w-full flex items-center justify-between p-6 text-left min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E85D04] focus-visible:ring-inset"
                   aria-expanded={openFaq === i}
                 >
-                  <span className="font-semibold text-[#FFF8F0]">
+                  <span className="font-semibold text-white">
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`w-5 h-5 text-[#6B6560] transition-transform ${
+                    className={`w-5 h-5 text-white/40 transition-transform ${
                       openFaq === i ? "rotate-180" : ""
                     }`}
                   />
                 </button>
                 {openFaq === i && (
                   <div className="px-6 pb-6">
-                    <p className="text-[#B8B0A8]">{faq.answer}</p>
+                    <p className="text-white/60">{faq.answer}</p>
                   </div>
                 )}
               </motion.div>

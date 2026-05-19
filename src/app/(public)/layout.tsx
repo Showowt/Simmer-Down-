@@ -4,6 +4,7 @@ import NewBottomNav from "@/components/layout/NewBottomNav";
 import NewLocationBar from "@/components/layout/NewLocationBar";
 import LocationSheet from "@/components/layout/LocationSheet";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +38,7 @@ export default function PublicLayout({
       <NewHeader />
       <NewLocationBar />
       <main id="main-content">{children}</main>
+      <Footer />
       <LocationSheet />
       <WhatsAppButton />
       <NewBottomNav />

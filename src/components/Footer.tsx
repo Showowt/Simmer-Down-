@@ -19,7 +19,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="bg-[#1F1D1A]">
+    <footer className="bg-[#111111]">
       <div className="max-w-6xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
 
@@ -27,11 +27,11 @@ export default function Footer() {
           <div>
             <Link
               href="/"
-              className="flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] tracking-[0.02em]"
+              className="flex items-center gap-2.5 font-display text-2xl text-white tracking-[0.02em]"
             >
               <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" width={120} height={40} className="h-10 w-auto" />
             </Link>
-            <p className="mt-5 text-sm text-[#6B6560] leading-relaxed max-w-xs">
+            <p className="mt-5 text-sm text-white/40 leading-relaxed max-w-xs">
               {t(translations.footer.description)}
             </p>
             <div className="flex gap-5 mt-8">
@@ -39,7 +39,7 @@ export default function Footer() {
                 href="https://instagram.com/simmerdownsv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#6B6560] hover:text-[#C9A84C] transition-colors duration-300"
+                className="text-white/40 hover:text-[#FBBF24] transition-colors duration-300"
                 aria-label={t(translations.footer.followInstagram)}
               >
                 <Instagram className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function Footer() {
                 href="https://facebook.com/simmerdownsv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#6B6560] hover:text-[#C9A84C] transition-colors duration-300"
+                className="text-white/40 hover:text-[#FBBF24] transition-colors duration-300"
                 aria-label={t(translations.footer.followFacebook)}
               >
                 <Facebook className="w-4 h-4" />
@@ -58,7 +58,7 @@ export default function Footer() {
 
           {/* Column 2: Navigation */}
           <div>
-            <h4 className="text-xs font-medium text-[#FFF8F0] uppercase tracking-[0.15em] mb-6">
+            <h4 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
               {locale === 'es' ? 'Navegaci\u00f3n' : 'Navigation'}
             </h4>
             <ul className="space-y-3">
@@ -66,7 +66,7 @@ export default function Footer() {
                 <li key={link.href + link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[#B8B0A8] hover:text-[#C9A84C] transition-colors duration-300"
+                    className="text-sm text-white/60 hover:text-[#FBBF24] transition-colors duration-300"
                   >
                     {link.label}
                   </Link>
@@ -77,14 +77,14 @@ export default function Footer() {
 
           {/* Column 3: Contact */}
           <div>
-            <h4 className="text-xs font-medium text-[#FFF8F0] uppercase tracking-[0.15em] mb-6">
+            <h4 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
               {t(translations.footer.contactSection)}
             </h4>
             <ul className="space-y-4 text-sm">
               <li>
                 <a
                   href="tel:+50324455999"
-                  className="text-[#B8B0A8] hover:text-[#C9A84C] transition-colors duration-300"
+                  className="text-white/60 hover:text-[#FBBF24] transition-colors duration-300"
                 >
                   +503 2445-5999
                 </a>
@@ -92,12 +92,12 @@ export default function Footer() {
               <li>
                 <a
                   href="mailto:info@simmerdownsv.com"
-                  className="text-[#B8B0A8] hover:text-[#C9A84C] transition-colors duration-300"
+                  className="text-white/60 hover:text-[#FBBF24] transition-colors duration-300"
                 >
                   info@simmerdownsv.com
                 </a>
               </li>
-              <li className="text-[#6B6560] pt-1">
+              <li className="text-white/40 pt-1">
                 5 {t(translations.footer.locationsInSV)}
               </li>
             </ul>
@@ -107,22 +107,22 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-[#2A2724]">
+      <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-6 pb-20 lg:pb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-[#4A4642]">
+          <p className="text-xs text-white/20">
             &copy; 2026 Simmer Down
           </p>
           <div className="flex gap-4">
             <Link
               href="/privacy"
-              className="text-xs text-[#4A4642] hover:text-[#6B6560] transition-colors duration-300"
+              className="text-xs text-white/20 hover:text-white/40 transition-colors duration-300"
             >
               {t(translations.footer.privacy)}
             </Link>
-            <span className="text-[#3D3936] text-xs select-none">&middot;</span>
+            <span className="text-white/10 text-xs select-none">&middot;</span>
             <Link
               href="/terms"
-              className="text-xs text-[#4A4642] hover:text-[#6B6560] transition-colors duration-300"
+              className="text-xs text-white/20 hover:text-white/40 transition-colors duration-300"
             >
               {t(translations.footer.terms)}
             </Link>
