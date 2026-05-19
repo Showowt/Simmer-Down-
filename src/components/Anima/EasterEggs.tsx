@@ -136,7 +136,7 @@ export function SecretMenuTrigger() {
               <h3 className="text-2xl font-bold text-white mb-2">Menú Secreto</h3>
               <p className="text-zinc-400 mb-6">
                 Has encontrado el menú secreto de Simmer Down.
-                Menciona "El Código del Fundador" cuando ordenes.
+                Menciona {'"'}El Código del Fundador{'"'} cuando ordenes.
               </p>
               <div className="bg-zinc-800 p-4 mb-6">
                 <p className="text-orange-400 font-semibold">La Pizza del Chef</p>

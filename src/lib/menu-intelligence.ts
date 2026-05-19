@@ -41,7 +41,7 @@ export interface UpsellSuggestion {
   suggestion_en: string;
 }
 
-export interface AllergenInfo {
+interface AllergenInfo {
   code: string;
   name_es: string;
   name_en: string;
@@ -975,7 +975,7 @@ export function formatIngredientsResponse(
  * Find items by flavor/ingredient preference
  * Answers: "What do you recommend if I like Y?"
  */
-export function findItemsByPreference(
+function findItemsByPreference(
   preference: string,
   locationId?: LocationId,
 ): MenuItem[] {
@@ -1017,7 +1017,7 @@ export function findItemsByPreference(
  * Find items WITHOUT a specific allergen
  * Answers: "What can I eat if I'm allergic to X?"
  */
-export function findItemsWithoutAllergen(
+function findItemsWithoutAllergen(
   allergen: string,
   locationId?: LocationId,
   category?: string,
@@ -1043,7 +1043,7 @@ export function findItemsWithoutAllergen(
 /**
  * Get items containing a specific allergen (for warnings)
  */
-export function findItemsWithAllergen(
+function findItemsWithAllergen(
   allergen: string,
   locationId?: LocationId,
 ): MenuItem[] {
@@ -1083,7 +1083,7 @@ export function formatPriceWithSizes(
  * Get locations with delivery
  * Answers: "Which location has delivery?"
  */
-export function getLocationsWithDelivery(): (typeof LOCATIONS)[LocationId][] {
+function getLocationsWithDelivery(): (typeof LOCATIONS)[LocationId][] {
   return Object.values(LOCATIONS);
 }
 
@@ -1091,7 +1091,7 @@ export function getLocationsWithDelivery(): (typeof LOCATIONS)[LocationId][] {
  * Find closest location (simplified - returns all)
  * Answers: "Which location is closest?"
  */
-export function getLocationInfo(
+function getLocationInfo(
   locationCode?: string,
 ): (typeof LOCATIONS)[LocationId] | (typeof LOCATIONS)[LocationId][] {
   if (locationCode) {
@@ -1105,7 +1105,7 @@ export function getLocationInfo(
  * Get upsell suggestions for an item
  * Powers upsell recommendations
  */
-export function getUpsellSuggestions(
+function getUpsellSuggestions(
   item: MenuItem,
   locationId?: LocationId,
 ): UpsellSuggestion[] {
@@ -1148,7 +1148,7 @@ export function getUpsellSuggestions(
 /**
  * Generate complete upsell message
  */
-export function generateUpsellMessage(
+function generateUpsellMessage(
   item: MenuItem,
   lang: "es" | "en" = "es",
 ): string {
@@ -1215,19 +1215,4 @@ export function enrichMenuItem(
   };
 }
 
-// Export all the base menu functions too
-export {
-  MENU,
-  LOCATIONS,
-  CATEGORIES,
-  getMenuByLocation,
-  getMenuByCategory,
-  getBestSellers,
-  searchMenu,
-  getVegetarianItems,
-  getSeafoodItems,
-  getItemPrice,
-  formatPrice,
-};
-
-export type { LocationId, MenuItem };
+// Re-exports removed — consumers import directly from @/data/simmer-menu

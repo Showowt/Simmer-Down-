@@ -125,14 +125,14 @@ export default function HomePage() {
             {/* CTAs */}
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4">
               <Link
-                href="/menu"
+                href="/carta"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-[#E85D04] to-[#C2410C] text-white px-7 py-3.5 rounded-full font-semibold text-sm uppercase tracking-wider transition-all hover:shadow-[0_0_24px_rgba(232,93,4,0.5)] hover:scale-[1.02] active:scale-[0.98]"
               >
                 {locale === 'es' ? 'Ver Menú' : 'View Menu'}
                 <ChevronRight className="w-4 h-4" />
               </Link>
               <Link
-                href="/locations"
+                href="/restaurantes"
                 className="inline-flex items-center gap-2 border border-white/30 text-white px-7 py-3.5 rounded-full font-semibold text-sm uppercase tracking-wider transition-all hover:border-white/70 hover:bg-white/10 backdrop-blur-sm"
               >
                 <MapPin className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function HomePage() {
           {MENU_CATEGORIES.sort((a, b) => a.sortOrder - b.sortOrder).map((cat) => (
             <Link
               key={cat.id}
-              href={`/menu?category=${cat.id}`}
+              href={`/carta?category=${cat.id}`}
               className="flex-shrink-0 flex items-center gap-2 bg-[#1A1A1A] border border-white/10 px-5 py-2.5 rounded-full text-sm text-white/70 font-medium whitespace-nowrap transition-all hover:border-[#E85D04] hover:text-white hover:bg-[#E85D04]/10"
             >
               <span className="text-base leading-none">{cat.icon}</span>
@@ -211,7 +211,7 @@ export default function HomePage() {
               </h2>
             </div>
             <Link
-              href="/menu"
+              href="/carta"
               className="hidden md:inline-flex items-center gap-2 text-white/50 text-sm font-medium uppercase tracking-wider hover:text-[#E85D04] transition-colors"
             >
               {locale === 'es' ? 'Ver todo' : 'View all'}
@@ -306,7 +306,7 @@ export default function HomePage() {
             className="mt-8 md:hidden text-center"
           >
             <Link
-              href="/menu"
+              href="/carta"
               className="inline-flex items-center gap-2 text-white/60 text-sm font-medium uppercase tracking-wider hover:text-[#E85D04] transition-colors"
             >
               {locale === 'es' ? 'Ver menú completo' : 'View full menu'}
@@ -343,7 +343,7 @@ export default function HomePage() {
               </h2>
             </div>
             <Link
-              href="/locations"
+              href="/restaurantes"
               className="hidden md:inline-flex items-center gap-2 text-white/50 text-sm font-medium uppercase tracking-wider hover:text-[#FBBF24] transition-colors"
             >
               {locale === 'es' ? 'Ver todas' : 'View all'}
@@ -437,7 +437,7 @@ export default function HomePage() {
             className="mt-8 px-6 text-center"
           >
             <Link
-              href="/locations"
+              href="/restaurantes"
               className="inline-flex items-center gap-2 text-white/50 text-sm font-medium uppercase tracking-wider hover:text-[#FBBF24] transition-colors"
             >
               {locale === 'es' ? 'Ver Todas las Ubicaciones' : 'View All Locations'}

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { Instagram, Facebook } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
@@ -28,7 +29,7 @@ export default function Footer() {
               href="/"
               className="flex items-center gap-2.5 font-display text-2xl text-[#FFF8F0] tracking-[0.02em]"
             >
-              <img src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" className="h-10 w-auto" />
+              <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" width={120} height={40} className="h-10 w-auto" />
             </Link>
             <p className="mt-5 text-sm text-[#6B6560] leading-relaxed max-w-xs">
               {t(translations.footer.description)}

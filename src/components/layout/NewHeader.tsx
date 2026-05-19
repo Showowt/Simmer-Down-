@@ -29,12 +29,12 @@ export default function NewHeader() {
   const { t } = useTranslation()
 
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMenuOpen(false)
+    queueMicrotask(() => setIsMenuOpen(false))
   }, [pathname])
 
   // Prevent body scroll when mobile menu is open

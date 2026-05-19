@@ -24,9 +24,11 @@ export default function CartPage() {
   const [showLocationPicker, setShowLocationPicker] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-    if (customerName) setName(customerName)
-    if (customerPhone) setPhone(customerPhone)
+    queueMicrotask(() => {
+      setMounted(true)
+      if (customerName) setName(customerName)
+      if (customerPhone) setPhone(customerPhone)
+    })
   }, [customerName, customerPhone])
 
   if (!mounted) return <div className="min-h-screen bg-[#0A0A0A] pt-36"><div className="max-w-2xl mx-auto px-4"><div className="animate-pulse space-y-4"><div className="h-8 bg-[#1A1A1A] rounded-xl w-1/3" /><div className="h-32 bg-[#1A1A1A] rounded-xl" /></div></div></div>

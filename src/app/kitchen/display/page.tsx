@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { orderStatusLabel } from '@/lib/order-status'
@@ -135,7 +135,7 @@ function playNotificationBeep() {
 
 export default function KitchenDisplayPage() {
   const router = useRouter()
-  const supabase = useRef(createClient()).current
+  const supabase = useMemo(() => createClient(), [])
 
   const [session, setSession] = useState<KitchenSession | null>(null)
   const [orders, setOrders] = useState<KitchenOrder[]>([])
@@ -155,7 +155,7 @@ export default function KitchenDisplayPage() {
       router.replace('/kitchen/login')
       return
     }
-    setSession(s)
+    queueMicrotask(() => setSession(s))
   }, [router])
 
   const locationId = session?.locationId ?? ''
@@ -189,10 +189,12 @@ export default function KitchenDisplayPage() {
 
   useEffect(() => {
     if (!locationId) return
-    setLoading(true)
-    isInitialLoadRef.current = true
-    knownOrderIdsRef.current = new Set()
-    fetchOrders()
+    queueMicrotask(() => {
+      setLoading(true)
+      isInitialLoadRef.current = true
+      knownOrderIdsRef.current = new Set()
+      fetchOrders()
+    })
   }, [locationId, fetchOrders])
 
   // ── Realtime subscription ──

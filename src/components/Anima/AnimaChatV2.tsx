@@ -109,12 +109,14 @@ export default function AnimaChatV2() {
   // Speech recognition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
+  const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
       recognitionRef.current = new SpeechRecognition()
+      queueMicrotask(() => setHasSpeechRecognition(true))
       recognitionRef.current.continuous = false
       recognitionRef.current.interimResults = false
       recognitionRef.current.lang = 'es-ES'
@@ -257,7 +259,7 @@ export default function AnimaChatV2() {
     if (!input.trim()) return
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: input,
       timestamp: new Date()
@@ -270,7 +272,7 @@ export default function AnimaChatV2() {
     const response = await callAnima(input)
 
     const animaMessage: Message = {
-      id: (Date.now() + 1).toString(),
+      id: crypto.randomUUID(),
       role: 'anima',
       content: response.response,
       timestamp: new Date(),
@@ -340,7 +342,7 @@ export default function AnimaChatV2() {
 
     // Otherwise, send as message
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: message,
       timestamp: new Date()
@@ -353,7 +355,7 @@ export default function AnimaChatV2() {
     const response = await callAnima(message)
 
     const animaMessage: Message = {
-      id: (Date.now() + 1).toString(),
+      id: crypto.randomUUID(),
       role: 'anima',
       content: response.response,
       timestamp: new Date(),
@@ -382,7 +384,7 @@ export default function AnimaChatV2() {
       : `¡Listo! ${item.name} agregado a tu carrito. ¿Algo más?`
 
     const confirmMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'anima',
       content: confirmContent,
       timestamp: new Date(),
@@ -608,7 +610,7 @@ export default function AnimaChatV2() {
                   placeholder={locale === 'en' ? 'Type a message...' : 'Escribe un mensaje...'}
                   className="flex-1 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] text-sm"
                 />
-                {recognitionRef.current && (
+                {hasSpeechRecognition && (
                   <button
                     type="button"
                     onClick={toggleVoice}

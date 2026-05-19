@@ -65,7 +65,7 @@ export default function NewBottomNav() {
   const itemCount = useCartStore((s) => s.itemCount)
 
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   const isTabActive = (tab: Tab): boolean => {

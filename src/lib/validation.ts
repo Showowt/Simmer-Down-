@@ -11,7 +11,7 @@ import { z } from "zod";
 // El Salvador phone formats: +503 XXXX-XXXX, 503XXXXXXXX, XXXX-XXXX, XXXXXXXX
 const phoneRegex = /^(\+?503)?[\s-]?\d{4}[\s-]?\d{4}$/;
 
-export const phoneSchema = z
+const phoneSchema = z
   .string()
   .min(8, "El teléfono debe tener al menos 8 dígitos")
   .max(20, "El teléfono es demasiado largo")
@@ -24,7 +24,7 @@ export const phoneSchema = z
 // Order Item Schema
 // ═══════════════════════════════════════════════════════════════
 
-export const orderItemSchema = z.object({
+const orderItemSchema = z.object({
   id: z.string().min(1, "ID de item requerido"),
   name: z.string().min(1, "Nombre de item requerido"),
   quantity: z.number().int().min(1).max(99, "Cantidad máxima es 99"),
@@ -32,7 +32,7 @@ export const orderItemSchema = z.object({
   description: z.string().optional(),
 });
 
-export type OrderItem = z.infer<typeof orderItemSchema>;
+type OrderItem = z.infer<typeof orderItemSchema>;
 
 // ═══════════════════════════════════════════════════════════════
 // Create Order Schema
@@ -114,7 +114,7 @@ export type SophiaMessageInput = z.infer<typeof sophiaMessageSchema>;
 // Anima Chatbot Schema
 // ═══════════════════════════════════════════════════════════════
 
-export const animaContextSchema = z.object({
+const animaContextSchema = z.object({
   customerName: z.string().max(100).optional().nullable(),
   customerPhone: z.string().max(20).optional().nullable(),
   loyaltyTier: z.string().max(20).optional().nullable(),

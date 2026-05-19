@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -67,54 +67,53 @@ export default function AccountPage() {
   const [editForm, setEditForm] = useState({ full_name: '', phone: '', address: '' })
   const [saving, setSaving] = useState(false)
 
-  const loadUserData = useCallback(async () => {
-    const supabase = createClient()
-
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      setLoading(false)
-      setNotAuthenticated(true)
-      return
-    }
-
-    setUser({ id: user.id, email: user.email || '' })
-
-    // Get profile
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (profileData) {
-      setProfile(profileData)
-      setEditForm({
-        full_name: profileData.full_name || '',
-        phone: profileData.phone || '',
-        address: profileData.address || '',
-      })
-    }
-
-    // Get recent orders
-    const { data: ordersData } = await supabase
-      .from('orders')
-      .select('id, order_number, total, status, created_at')
-      .eq('customer_email', user.email)
-      .order('created_at', { ascending: false })
-      .limit(5)
-
-    if (ordersData) {
-      setOrders(ordersData)
-    }
-
-    setLoading(false)
-  }, [router])
-
   useEffect(() => {
+    const loadUserData = async () => {
+      const supabase = createClient()
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        setLoading(false)
+        setNotAuthenticated(true)
+        return
+      }
+
+      setUser({ id: user.id, email: user.email || '' })
+
+      // Get profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (profileData) {
+        setProfile(profileData)
+        setEditForm({
+          full_name: profileData.full_name || '',
+          phone: profileData.phone || '',
+          address: profileData.address || '',
+        })
+      }
+
+      // Get recent orders
+      const { data: ordersData } = await supabase
+        .from('orders')
+        .select('id, order_number, total, status, created_at')
+        .eq('customer_email', user.email)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (ordersData) {
+        setOrders(ordersData)
+      }
+
+      setLoading(false)
+    }
     loadUserData()
-  }, [loadUserData])
+  }, [router])
 
   const handleSaveProfile = async () => {
     if (!user) return

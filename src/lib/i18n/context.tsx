@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import { type Locale, translations, t as translate } from './translations'
 
 interface I18nContextValue {
@@ -15,14 +15,11 @@ const I18nContext = createContext<I18nContextValue | null>(null)
 const STORAGE_KEY = 'simmerdown-lang'
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('es')
-
-  useEffect(() => {
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window === 'undefined') return 'es'
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
-    if (stored === 'en' || stored === 'es') {
-      setLocaleState(stored)
-    }
-  }, [])
+    return (stored === 'en' || stored === 'es') ? stored : 'es'
+  })
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)

@@ -59,6 +59,12 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  async redirects() {
+    return [
+      { source: '/menu', destination: '/carta', permanent: true },
+      { source: '/locations', destination: '/restaurantes', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

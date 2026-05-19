@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 export default function PublicLoading() {
   return (
     <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center pt-24">
@@ -7,7 +9,7 @@ export default function PublicLoading() {
           <div className="absolute inset-0 border-4 border-[#3D3936]" />
           <div className="absolute inset-0 border-4 border-transparent border-t-[#FF6B35] animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-8 w-auto animate-pulse" />
+            <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={96} height={32} className="h-8 w-auto animate-pulse" />
           </div>
         </div>
 

@@ -46,7 +46,7 @@ export default function KitchenLoginPage() {
       router.replace('/kitchen/display')
       return
     }
-    setCheckingSession(false)
+    queueMicrotask(() => setCheckingSession(false))
   }, [router])
 
   // Fetch locations

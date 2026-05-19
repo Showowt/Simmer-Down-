@@ -120,8 +120,8 @@ export interface ReservationDetails {
 // CONSTANTS
 // ============================================
 
-export const TAX_RATE = 0.13;
-export const ORDER_WHATSAPP = '50375764655';
+const TAX_RATE = 0.13;
+// ORDER_WHATSAPP removed — unused (whatsapp-order.ts defines its own)
 
 // ============================================
 // LOCATIONS DATA
@@ -290,7 +290,7 @@ export const MENU_CATEGORIES: MenuCategory[] = [
 // PIZZA SIZES & MODIFIERS
 // ============================================
 
-export const PIZZA_SIZES: MenuItemSize[] = [
+const PIZZA_SIZES: MenuItemSize[] = [
   { id: 'personal', name: 'Personal (8")', nameEs: 'Personal (8")', priceModifier: 0 },
   { id: 'medium', name: 'Medium (12")', nameEs: 'Mediana (12")', priceModifier: 4.00 },
   { id: 'large', name: 'Large (16")', nameEs: 'Grande (16")', priceModifier: 8.00 },
@@ -405,8 +405,8 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
 
 export function formatPrice(amount: number): string { return `$${amount.toFixed(2)}`; }
 export function getLocationBySlug(slug: string): Location | undefined { return LOCATIONS.find((l) => l.slug === slug); }
-export function getLocationById(id: string): Location | undefined { return LOCATIONS.find((l) => l.id === id); }
-export function getCategoryById(id: string): MenuCategory | undefined { return MENU_CATEGORIES.find((c) => c.id === id); }
+function getLocationById(id: string): Location | undefined { return LOCATIONS.find((l) => l.id === id); }
+function getCategoryById(id: string): MenuCategory | undefined { return MENU_CATEGORIES.find((c) => c.id === id); }
 export function getItemsByCategory(categoryId: string): MenuItem[] { return MENU_ITEMS.filter((i) => i.categoryId === categoryId && i.isAvailable); }
 export function getFeaturedItems(): MenuItem[] { return MENU_ITEMS.filter((i) => i.isFeatured && i.isAvailable); }
 

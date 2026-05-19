@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,7 +28,7 @@ export default function Header() {
     { href: '/about', label: t(translations.nav.about) },
   ]
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { queueMicrotask(() => setMounted(true)) }, [])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -51,7 +52,7 @@ export default function Header() {
               href="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <img src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" className="h-10 w-auto" />
+              <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" width={120} height={40} className="h-10 w-auto" />
             </Link>
 
             {/* Desktop Nav — clean, spaced, understated */}
@@ -133,7 +134,7 @@ export default function Header() {
             >
               <div className="space-y-1 text-center">
                 <div className="mb-8">
-                  <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-14 w-auto mx-auto" />
+                  <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={168} height={56} className="h-14 w-auto mx-auto" />
                 </div>
                 {navLinks.map((link, i) => (
                   <motion.div

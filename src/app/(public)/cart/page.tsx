@@ -13,7 +13,7 @@ export default function CartPage() {
   const { items, updateQuantity, removeItem, getSubtotal } = useCartStore()
 
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   if (!mounted) {

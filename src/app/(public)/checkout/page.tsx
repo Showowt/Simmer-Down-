@@ -38,7 +38,7 @@ export default function CheckoutPage() {
   })
 
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   if (!mounted) {

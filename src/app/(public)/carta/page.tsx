@@ -138,10 +138,12 @@ function ItemDetailSheet() {
   // Reset state when a new item opens
   useEffect(() => {
     if (item) {
-      setQuantity(1)
-      setSelectedSize(item.sizes ? item.sizes[0] : undefined)
-      setSelectedModifiers([])
-      setNotes('')
+      queueMicrotask(() => {
+        setQuantity(1)
+        setSelectedSize(item.sizes ? item.sizes[0] : undefined)
+        setSelectedModifiers([])
+        setNotes('')
+      })
     }
   }, [item])
 
@@ -413,7 +415,7 @@ function FloatingCartBar() {
   const { itemCount, total } = useCartStore()
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { queueMicrotask(() => setMounted(true)) }, [])
 
   if (!mounted || itemCount === 0) return null
 

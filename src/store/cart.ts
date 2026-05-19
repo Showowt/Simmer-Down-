@@ -46,10 +46,10 @@ export interface DeliveryAddress {
 // CONSTANTS
 // ============================================================================
 
-export const FREE_DELIVERY_THRESHOLD = 25.00
-export const DELIVERY_FEE = 3.99
-export const TAX_RATE = 0.13 // 13% IVA in El Salvador
-export const POINTS_VALUE = 0.01 // $0.01 per point
+const FREE_DELIVERY_THRESHOLD = 25.00
+const DELIVERY_FEE = 3.99
+const TAX_RATE = 0.13 // 13% IVA in El Salvador
+const POINTS_VALUE = 0.01 // $0.01 per point
 
 // ============================================================================
 // STORE INTERFACE
@@ -324,34 +324,4 @@ export const useCartStore = create<CartState & CartActions>()(
   )
 )
 
-// ============================================================================
-// SELECTORS
-// ============================================================================
-
-export const selectCartItems = (state: CartState & CartActions) => state.items
-export const selectOrderType = (state: CartState & CartActions) => state.orderType
-export const selectLocation = (state: CartState & CartActions) => state.location
-export const selectDeliveryAddress = (state: CartState & CartActions) => state.deliveryAddress
-export const selectCustomerInfo = (state: CartState & CartActions) => ({
-  name: state.customerName,
-  phone: state.customerPhone,
-  email: state.customerEmail,
-})
-
-// ============================================================================
-// UTILITIES
-// ============================================================================
-
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(amount)
-}
-
-export function generateOrderNumber(): string {
-  const timestamp = Date.now().toString(36).toUpperCase()
-  const random = Math.random().toString(36).substr(2, 4).toUpperCase()
-  return `SD-${timestamp}-${random}`
-}
+// Selectors, formatCurrency, and generateOrderNumber removed — unused outside this module

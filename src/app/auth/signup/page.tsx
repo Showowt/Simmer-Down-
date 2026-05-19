@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff, Check, Gift } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useI18n, translations } from '@/lib/i18n'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function SignupPage() {
@@ -152,7 +153,7 @@ export default function SignupPage() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
-            <img src="/logos/logo-simmer-light.svg" alt="Simmer Down" className="h-12 w-auto mx-auto" />
+            <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={144} height={48} className="h-12 w-auto mx-auto" />
           </Link>
           <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.joinSimmerLovers)}</h1>
           <p className="text-[#6B6560] mt-2">{t(translations.auth.signupSubtitle)}</p>
