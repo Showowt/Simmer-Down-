@@ -244,8 +244,17 @@ export default function HomePage() {
                       sizes="(max-width: 768px) 50vw, 25vw"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl select-none">
-                      🍕
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#1A1A1A] via-[#111] to-[#0A0A0A] select-none overflow-hidden">
+                      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E85D04]/20 to-transparent" />
+                      <span className="text-[#E85D04]/60 font-display text-xl tracking-widest text-center px-4 leading-tight">
+                        {locale === 'es' ? item.nameEs : item.name}
+                      </span>
+                      {(item.descriptionEs || item.description) && (
+                        <span className="text-white/20 text-xs mt-2 px-5 text-center line-clamp-2 leading-relaxed">
+                          {locale === 'es' ? item.descriptionEs : item.description}
+                        </span>
+                      )}
                     </div>
                   )}
                   {/* Dietary badges */}

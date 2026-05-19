@@ -90,8 +90,13 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl opacity-30">🍕</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1A1A1A] via-[#111] to-[#0A0A0A] overflow-hidden">
+            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E85D04]/20 to-transparent" />
+            <span className="text-[#E85D04]/60 font-display text-lg tracking-widest text-center px-3 leading-tight">{item.nameEs}</span>
+            {item.descriptionEs && (
+              <span className="text-white/20 text-[10px] mt-2 px-4 text-center line-clamp-2 leading-relaxed">{item.descriptionEs}</span>
+            )}
           </div>
         )}
         <ItemBadges item={item} />
