@@ -68,7 +68,7 @@ export const LOCATIONS: LocationData[] = [
     longitude: -89.5597,
     rating: 4.9,
     reviewCount: 2100,
-    image: `${BASE_URL}/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg`,
+    image: `${BASE_URL}/images/locations/santa-ana-fachada.png`,
     hours: [
       { days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'], opens: '11:00', closes: '21:00' },
       { days: ['Friday', 'Saturday'], opens: '11:00', closes: '22:00' },

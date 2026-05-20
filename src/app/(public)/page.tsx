@@ -37,7 +37,7 @@ const fadeIn: Variants = {
 // ─── Location card covers ─────────────────────────────────────────────────
 
 const LOCATION_COVER: Record<string, string> = {
-  'santa-ana': '/images/locations/santa-ana-cover.jpg',
+  'santa-ana': '/images/locations/santa-ana-fachada.png',
   'lago-coatepeque': '/images/locations/coatepeque-dock-wide.jpg',
   'san-benito': '/images/locations/san-benito-cover.jpg',
   'surf-city': '/images/locations/surf-city-cover.jpg',
