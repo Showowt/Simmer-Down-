@@ -6,7 +6,7 @@ import { MapPin, Calendar, Clock, Users, User, Phone, MessageCircle, Check, Chev
 import { LOCATIONS, generateReservationUrl, isLocationOpen, type Location } from '@/lib/data'
 import { useTranslation } from '@/lib/store'
 
-const PARTY_SIZES = [1, 2, 3, 4, 5, 6, 7, 8]
+const PARTY_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20]
 
 function getTimeSlots(): string[] {
   const slots: string[] = []
