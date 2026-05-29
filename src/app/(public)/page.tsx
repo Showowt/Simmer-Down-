@@ -74,10 +74,10 @@ export default function HomePage() {
             className="object-cover object-center"
             sizes="100vw"
           />
-          {/* Gradient: opaque at bottom for text legibility, lighter at top */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-          {/* Left vignette */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+          {/* Gradient: strong at bottom for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
+          {/* Left vignette for text area */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
         </div>
 
         {/* Hero content — bottom-left */}
@@ -99,7 +99,7 @@ export default function HomePage() {
             {/* Main title */}
             <motion.h1
               variants={fadeUp}
-              className="font-display text-white leading-[0.92] mb-3"
+              className="font-display text-white leading-[0.92] mb-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
               style={{ fontSize: 'clamp(3rem, 8vw, 6rem)' }}
             >
               {locale === 'es' ? 'PIZZA ARTESANAL' : 'HANDCRAFTED PIZZA'}
@@ -108,7 +108,7 @@ export default function HomePage() {
             {/* Orange accent line */}
             <motion.p
               variants={fadeUp}
-              className="font-display text-[#E85D04] leading-[0.95] mb-6"
+              className="font-display text-[#E85D04] leading-[0.95] mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
               style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
             >
               {locale === 'es' ? 'SOLO BUENAS VIBRAS' : 'GOOD VIBES ONLY'}
@@ -360,7 +360,8 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          {/* Horizontal scroll */}
+          {/* Horizontal scroll with fade hint */}
+          <div className="relative">
           <div
             className="flex gap-4 px-6 overflow-x-auto pb-2"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -436,6 +437,9 @@ export default function HomePage() {
                 </motion.div>
               )
             })}
+          </div>
+          {/* Scroll fade hint — right edge */}
+          <div className="absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-[#1A1A1A] to-transparent pointer-events-none" />
           </div>
 
           {/* Bottom "ver todas" link */}
@@ -573,20 +577,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ── MachineMind credit ── */}
-      <div className="py-10 text-center bg-[#0A0A0A] border-t border-white/5">
-        <p className="text-white/15 text-[10px] tracking-[0.25em] uppercase">
-          Crafted by{' '}
-          <a
-            href="https://machinemind.co"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white/30 transition-colors"
-          >
-            MachineMind
-          </a>
-        </p>
-      </div>
+      {/* MachineMind credit moved to Footer component */}
     </div>
   )
 }

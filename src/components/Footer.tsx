@@ -110,7 +110,15 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-6 pb-20 lg:pb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-white/20">
-            &copy; 2026 Simmer Down
+            &copy; 2026 Simmer Down &middot;{' '}
+            <a
+              href="https://machinemind.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white/40 transition-colors"
+            >
+              Crafted by MachineMind
+            </a>
           </p>
           <div className="flex gap-4">
             <Link
