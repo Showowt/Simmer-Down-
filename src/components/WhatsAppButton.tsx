@@ -30,8 +30,8 @@ export default function WhatsAppButton({
       }
     };
 
-    // Also show after 5 seconds regardless
-    const timer = setTimeout(() => setIsVisible(true), 5000);
+    // Show after 15 seconds regardless
+    const timer = setTimeout(() => setIsVisible(true), 15000);
 
     window.addEventListener("scroll", handleScroll);
     return () => {
@@ -43,7 +43,7 @@ export default function WhatsAppButton({
   useEffect(() => {
     // Show tooltip bubble after button appears
     if (isVisible && showTooltip && !dismissed) {
-      const timer = setTimeout(() => setShowBubble(true), 3000);
+      const timer = setTimeout(() => setShowBubble(true), 8000);
       return () => clearTimeout(timer);
     }
   }, [isVisible, showTooltip, dismissed]);

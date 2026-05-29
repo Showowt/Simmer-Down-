@@ -150,13 +150,13 @@ export default function AnimaChatV2() {
     }
   }
 
-  // Proactive popup
+  // Proactive popup — delayed 30s to avoid jarring first impression
   useEffect(() => {
     if (!hasSeenWelcome && !isOpen) {
       const timer = setTimeout(() => {
         setShowProactive(true)
         setChatState('proactive')
-      }, 8000)
+      }, 30000)
       return () => clearTimeout(timer)
     }
   }, [hasSeenWelcome, isOpen])

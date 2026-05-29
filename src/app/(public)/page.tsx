@@ -461,7 +461,182 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          5. WHATSAPP CTA — Orange gradient
+          5. TESTIMONIALS — Customer reviews
+      ══════════════════════════════════════════════════ */}
+      <section aria-label="Testimonios" className="py-16 md:py-24 px-6 bg-[#0A0A0A]">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <div className="flex items-center justify-center gap-1.5 mb-3">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-5 h-5 text-[#FBBF24] fill-[#FBBF24]" />
+              ))}
+            </div>
+            <p className="text-[#FBBF24] text-xs font-semibold uppercase tracking-[0.2em] mb-2">
+              4.9 / 5 &middot; +8,000 {locale === 'es' ? 'reseñas' : 'reviews'}
+            </p>
+            <h2
+              className="font-display text-white leading-tight"
+              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}
+            >
+              {locale === 'es' ? 'LO QUE DICEN NUESTROS CLIENTES' : 'WHAT OUR GUESTS SAY'}
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Carlos M.',
+                location: 'Santa Ana',
+                textEs: 'La mejor pizza de El Salvador, sin duda. La Ghiottone es increíble y el ambiente con música en vivo es perfecto para una noche especial.',
+                textEn: 'The best pizza in El Salvador, no doubt. The Ghiottone is incredible and the live music atmosphere is perfect for a special night.',
+                rating: 5,
+              },
+              {
+                name: 'María José R.',
+                location: 'Lago de Coatepeque',
+                textEs: 'El Terramar al Maître es espectacular. La vista al lago desde la terraza, la comida fresca y el servicio impecable. Simmer Down nunca decepciona.',
+                textEn: 'The Terramar al Maître is spectacular. The lake view from the terrace, fresh food and impeccable service. Simmer Down never disappoints.',
+                rating: 5,
+              },
+              {
+                name: 'Roberto A.',
+                location: 'Surf City',
+                textEs: 'Comer pizza artesanal con los pies en la arena y un atardecer increíble. La Memoravel y una Heroica helada — combo perfecto.',
+                textEn: 'Eating artisan pizza with your feet in the sand and an incredible sunset. The Memoravel and a cold Heroica — perfect combo.',
+                rating: 5,
+              },
+            ].map((review, i) => (
+              <motion.div
+                key={review.name}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="bg-[#1A1A1A] rounded-xl border border-white/8 p-6 flex flex-col"
+              >
+                <div className="flex items-center gap-1 mb-4">
+                  {[...Array(review.rating)].map((_, j) => (
+                    <Star key={j} className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
+                  ))}
+                </div>
+                <p className="text-white/70 text-sm leading-relaxed flex-1 mb-5">
+                  &ldquo;{locale === 'es' ? review.textEs : review.textEn}&rdquo;
+                </p>
+                <div className="flex items-center gap-3 pt-4 border-t border-white/8">
+                  <div className="w-9 h-9 rounded-full bg-[#E85D04]/20 flex items-center justify-center text-[#E85D04] text-sm font-bold">
+                    {review.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{review.name}</p>
+                    <p className="text-white/40 text-xs">{review.location}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          6. EVENTS PREVIEW — Lifestyle teaser
+      ══════════════════════════════════════════════════ */}
+      <section aria-label="Eventos" className="py-16 md:py-24 px-6 bg-[#1A1A1A]">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-br from-[#0A0A0A] to-[#1A1A1A] rounded-2xl border border-white/8 overflow-hidden"
+          >
+            <div className="flex flex-col md:flex-row">
+              {/* Left — Text */}
+              <div className="p-8 md:p-12 flex-1 flex flex-col justify-center">
+                <p className="text-[#E85D04] text-xs font-semibold uppercase tracking-[0.2em] mb-3">
+                  {locale === 'es' ? 'Más que un restaurante' : 'More than a restaurant'}
+                </p>
+                <h2
+                  className="font-display text-white leading-tight mb-4"
+                  style={{ fontSize: 'clamp(1.6rem, 3.5vw, 2.5rem)' }}
+                >
+                  {locale === 'es' ? 'MÚSICA, ATARDECERES Y PIZZA' : 'MUSIC, SUNSETS & PIZZA'}
+                </h2>
+                <p className="text-white/50 text-sm md:text-base leading-relaxed mb-6 max-w-lg">
+                  {locale === 'es'
+                    ? 'Música en vivo los fines de semana, DJ sets al atardecer, eventos privados y la mejor vibra de El Salvador. Cada ubicación tiene su propio carácter.'
+                    : 'Live music on weekends, sunset DJ sets, private events and the best vibes in El Salvador. Each location has its own character.'}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
+                  >
+                    {locale === 'es' ? 'Ver Eventos' : 'View Events'}
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/reservar"
+                    className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white font-medium text-sm px-6 py-3 rounded-full border border-white/10 transition-all"
+                  >
+                    {locale === 'es' ? 'Reservar Mesa' : 'Reserve a Table'}
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right — Visual grid */}
+              <div className="grid grid-cols-2 gap-1 md:w-[340px] lg:w-[420px] shrink-0">
+                <div className="aspect-square bg-[#E85D04]/10 flex items-center justify-center">
+                  <div className="text-center px-3">
+                    <Flame className="w-8 h-8 text-[#E85D04] mx-auto mb-2" />
+                    <p className="text-white text-xs font-bold uppercase tracking-wide">
+                      {locale === 'es' ? 'Música en Vivo' : 'Live Music'}
+                    </p>
+                    <p className="text-white/40 text-[10px] mt-1">
+                      {locale === 'es' ? 'Vie & Sáb' : 'Fri & Sat'}
+                    </p>
+                  </div>
+                </div>
+                <div className="aspect-square bg-[#FBBF24]/10 flex items-center justify-center">
+                  <div className="text-center px-3">
+                    <Star className="w-8 h-8 text-[#FBBF24] mx-auto mb-2" />
+                    <p className="text-white text-xs font-bold uppercase tracking-wide">
+                      {locale === 'es' ? 'Eventos Privados' : 'Private Events'}
+                    </p>
+                    <p className="text-white/40 text-[10px] mt-1">Sala VIP</p>
+                  </div>
+                </div>
+                <div className="aspect-square bg-[#FBBF24]/10 flex items-center justify-center">
+                  <div className="text-center px-3">
+                    <MapPin className="w-8 h-8 text-[#FBBF24] mx-auto mb-2" />
+                    <p className="text-white text-xs font-bold uppercase tracking-wide">
+                      {locale === 'es' ? '5 Destinos' : '5 Destinations'}
+                    </p>
+                    <p className="text-white/40 text-[10px] mt-1">El Salvador</p>
+                  </div>
+                </div>
+                <div className="aspect-square bg-[#E85D04]/10 flex items-center justify-center">
+                  <div className="text-center px-3">
+                    <MessageCircle className="w-8 h-8 text-[#E85D04] mx-auto mb-2" />
+                    <p className="text-white text-xs font-bold uppercase tracking-wide">
+                      {locale === 'es' ? 'DJ Sets' : 'DJ Sets'}
+                    </p>
+                    <p className="text-white/40 text-[10px] mt-1">Sunset</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          7. WHATSAPP CTA — Orange gradient
       ══════════════════════════════════════════════════ */}
       <section aria-label="WhatsApp Order" className="pt-12 pb-6 md:py-16 px-6 bg-[#0A0A0A]">
         <motion.div
