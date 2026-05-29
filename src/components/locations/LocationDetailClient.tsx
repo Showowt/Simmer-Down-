@@ -79,7 +79,7 @@ export default function LocationDetailClient({ location }: { location: Location 
       : `Hi! I'd like to place an order at ${location.name}.`
   )}`
 
-  const embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${location.coordinates.lat},${location.coordinates.lng}&zoom=15&maptype=roadmap`
+  const embedUrl = `https://www.google.com/maps?q=${location.coordinates.lat},${location.coordinates.lng}&z=15&output=embed`
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
@@ -277,26 +277,31 @@ export default function LocationDetailClient({ location }: { location: Location 
             {locale === 'es' ? 'Ubicacion' : 'Location'}
           </h2>
           <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#1A1A1A]">
-            {/* Static map link (no API key needed) */}
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block relative h-[280px] md:h-[360px] bg-[#1A1A1A] group"
-            >
-              <Image
-                src={`https://maps.googleapis.com/maps/api/staticmap?center=${location.coordinates.lat},${location.coordinates.lng}&zoom=15&size=800x400&scale=2&maptype=roadmap&style=feature:all|element:geometry|color:0x1a1a1a&style=feature:all|element:labels.text.fill|color:0xfbbf24&style=feature:all|element:labels.text.stroke|color:0x0a0a0a&style=feature:road|element:geometry|color:0x2a2a2a&style=feature:water|element:geometry|color:0x0d1b2a&markers=color:0xE85D04|${location.coordinates.lat},${location.coordinates.lng}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`}
-                alt={`Mapa de ${location.name}`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                sizes="(max-width: 768px) 100vw, 800px"
+            {/* Interactive Google Maps embed */}
+            <div className="relative h-[280px] md:h-[360px]">
+              <iframe
+                src={embedUrl}
+                title={`Mapa de ${location.name}`}
+                className="w-full h-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
               />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-              <div className="absolute bottom-4 right-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#E85D04] text-white text-sm font-semibold shadow-lg">
-                <Navigation className="w-4 h-4" />
+            </div>
+            <div className="px-5 py-3 flex items-center justify-between bg-[#111]">
+              <p className="text-white/40 text-xs">
+                {location.address}, {location.city}
+              </p>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#E85D04] text-white text-xs font-semibold hover:bg-[#C2410C] transition-all"
+              >
+                <Navigation className="w-3.5 h-3.5" />
                 {locale === 'es' ? 'Abrir en Google Maps' : 'Open in Google Maps'}
-              </div>
-            </a>
+              </a>
+            </div>
           </div>
         </motion.div>
 
