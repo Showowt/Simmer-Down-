@@ -119,7 +119,7 @@ function buildSystemPrompt(language: "es" | "en"): string {
   const aboutBlock = `
 ## SOBRE SIMMER DOWN
 - Fundada en 2014 en Santa Ana, El Salvador
-- 14 años de experiencia
+- 12 años de experiencia
 - 5 ubicaciones en El Salvador
 - +8,000 reseñas con calificación 4.9 estrellas
 - Especialidad: Pizza artesanal de horno de leña

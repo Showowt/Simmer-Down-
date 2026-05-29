@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     default: 'Simmer Down | Pizzería & Restaurante | El Salvador',
     template: '%s | Simmer Down — Pizza Artesanal El Salvador'
   },
-  description: 'La mejor pizza artesanal de horno de leña en El Salvador. 14 años, 5 ubicaciones, +8,000 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
+  description: 'La mejor pizza artesanal de horno de leña en El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
   keywords: [
     // Primary — pizza dominance
     'mejor pizza El Salvador',
@@ -103,7 +103,7 @@ export const metadata: Metadata = {
     url: 'https://simmerdownsv.com',
     siteName: 'Simmer Down — La Mejor Pizza de El Salvador',
     title: 'Simmer Down | La Mejor Pizza Artesanal de Horno de Leña en El Salvador',
-    description: 'La pizza #1 de El Salvador. 14 años, 5 ubicaciones, +8,000 reseñas ⭐ 4.9. Horno de leña, ingredientes premium. Santa Ana, Coatepeque, San Benito, Juayúa, Surf City.',
+    description: 'La pizza #1 de El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas ⭐ 4.9. Horno de leña, ingredientes premium. Santa Ana, Coatepeque, San Benito, Juayúa, Surf City.',
     images: [
       {
         url: 'https://simmerdownsv.com/og/home.jpg',
@@ -119,7 +119,7 @@ export const metadata: Metadata = {
     site: '@simmerdownsv',
     creator: '@simmerdownsv',
     title: 'Simmer Down | La Mejor Pizza de El Salvador',
-    description: 'Pizza artesanal de horno de leña. 14 años, 5 ubicaciones, +8,000 reseñas. Santa Ana, Coatepeque, San Salvador, Juayúa, Surf City.',
+    description: 'Pizza artesanal de horno de leña. 12 años, 5 ubicaciones, +8,000 reseñas. Santa Ana, Coatepeque, San Salvador, Juayúa, Surf City.',
     images: {
       url: 'https://simmerdownsv.com/og/home.jpg',
       alt: 'Simmer Down — Pizza Artesanal de Horno de Leña',

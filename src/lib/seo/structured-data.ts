@@ -51,7 +51,7 @@ interface FAQItem {
 
 const BASE_URL = 'https://simmerdownsv.com'
 const BRAND_NAME = 'Simmer Down'
-const BRAND_DESCRIPTION = 'La mejor pizza artesanal de horno de leña en El Salvador. 14 años, 5 ubicaciones. Restaurante gastro-musical líder en Santa Ana, San Salvador, Coatepeque, Juayúa y Surf City.'
+const BRAND_DESCRIPTION = 'La mejor pizza artesanal de horno de leña en El Salvador. 12 años, 5 ubicaciones. Restaurante gastro-musical líder en Santa Ana, San Salvador, Coatepeque, Juayúa y Surf City.'
 
 // ─── Location Database ───────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ export const LOCATIONS: LocationData[] = [
   {
     id: 'santa-ana',
     name: 'Simmer Down Santa Ana',
-    description: 'El restaurante original de Simmer Down. La mejor pizza artesanal de horno de leña frente a la catedral histórica de Santa Ana. 14 años de tradición gastronómica.',
+    description: 'El restaurante original de Simmer Down. La mejor pizza artesanal de horno de leña frente a la catedral histórica de Santa Ana. 12 años de tradición gastronómica.',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
     region: 'Santa Ana',
@@ -350,7 +350,7 @@ export function generateWebSiteSchema() {
 export const RESTAURANT_FAQS: FAQItem[] = [
   {
     question: '¿Cuál es la mejor pizza en El Salvador?',
-    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 14 años de tradición, más de 8,000 reseñas positivas y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas en horno de leña con ingredientes premium.',
+    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 12 años de tradición, más de 8,000 reseñas positivas y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas en horno de leña con ingredientes premium.',
   },
   {
     question: '¿Dónde puedo comer pizza artesanal de horno de leña en El Salvador?',

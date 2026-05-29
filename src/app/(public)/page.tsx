@@ -459,7 +459,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════
           5. WHATSAPP CTA — Orange gradient
       ══════════════════════════════════════════════════ */}
-      <section aria-label="WhatsApp Order" className="py-16 px-6 bg-[#0A0A0A]">
+      <section aria-label="WhatsApp Order" className="pt-12 pb-6 md:py-16 px-6 bg-[#0A0A0A]">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -496,7 +496,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════════════════
           6. SIMMERLOVERS BANNER — Loyalty program teaser
       ══════════════════════════════════════════════════ */}
-      <section aria-label="SimmerLovers" className="py-16 px-6 bg-[#0A0A0A]">
+      <section aria-label="SimmerLovers" className="pt-6 pb-12 md:py-16 px-6 bg-[#0A0A0A]">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -574,14 +574,14 @@ export default function HomePage() {
       </section>
 
       {/* ── MachineMind credit ── */}
-      <div className="py-5 text-center bg-[#0A0A0A]">
-        <p className="text-white/20 text-xs tracking-widest uppercase">
+      <div className="py-10 text-center bg-[#0A0A0A] border-t border-white/5">
+        <p className="text-white/15 text-[10px] tracking-[0.25em] uppercase">
           Crafted by{' '}
           <a
             href="https://machinemind.co"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-white/40 transition-colors"
+            className="hover:text-white/30 transition-colors"
           >
             MachineMind
           </a>
