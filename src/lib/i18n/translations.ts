@@ -448,7 +448,7 @@ export const translations = {
     ourStory: { es: 'Nuestra Historia', en: 'Our Story' },
     tagline: { es: 'Restaurante y Destino Gastro-Musical', en: 'Restaurant & Gastro-Musical Destination' },
     subtitle: { es: 'Hay lugares que se visitan. Y hay lugares que se recuerdan. Simmer Down es parte de la memoria de El Salvador.', en: 'There are places you visit. And there are places you remember. Simmer Down is part of El Salvador\'s memory.' },
-    since2013: { es: 'Desde 2013', en: 'Since 2013' },
+    since2013: { es: 'Desde 2014', en: 'Since 2014' },
     whatWeBelieve: { es: 'Lo Que Creemos', en: 'What We Believe' },
     ourValues: { es: 'Nuestros Valores', en: 'Our Values' },
     theTeam: { es: 'El Equipo', en: 'The Team' },

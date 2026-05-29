@@ -155,7 +155,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white/25" />
-              <span>Est. 2013 &bull; El Salvador</span>
+              <span>Est. 2014 &bull; El Salvador</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white/25" />

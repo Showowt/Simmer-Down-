@@ -104,10 +104,8 @@ function buildSystemPrompt(language: "es" | "en"): string {
 - Base Sin Gluten: +$3.00
 
 ## TAMAÑOS DE PIZZA
-- Personal (8"): Precio base
-- Mediana (12"): +$4.00
-- Grande (16"): +$8.00
-- Familiar (20"): +$14.00`;
+- Personal (8"): Precio base (regulares desde $5.75, especialidad desde $6.25)
+- Grande (16"): Regulares $14.99, Especialidad $17.99`;
 
   // ── PROMOS ─────────────────────────────────────────────────
   const promoBlock = `
@@ -120,7 +118,7 @@ function buildSystemPrompt(language: "es" | "en"): string {
   // ── ABOUT THE BUSINESS ─────────────────────────────────────
   const aboutBlock = `
 ## SOBRE SIMMER DOWN
-- Fundada en 2013 en Santa Ana, El Salvador
+- Fundada en 2014 en Santa Ana, El Salvador
 - 14 años de experiencia
 - 5 ubicaciones en El Salvador
 - +8,000 reseñas con calificación 4.9 estrellas

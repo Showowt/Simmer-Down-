@@ -178,6 +178,15 @@ export async function POST(
 
   const paymentId = paymentRow.id;
 
+  // PowerTranz requires ISO 3166-1 numeric country codes (e.g. "222" for SV).
+  const COUNTRY_ALPHA_TO_NUMERIC: Record<string, string> = {
+    SV: "222", US: "840", GT: "320", HN: "340", NI: "558",
+    CR: "188", PA: "591", MX: "484", CO: "170", BZ: "084",
+  };
+  const numericCountry =
+    COUNTRY_ALPHA_TO_NUMERIC[billing.countryCode.toUpperCase()] ||
+    billing.countryCode;
+
   const saleRequest: SaleRequest = {
     TransactionIdentifier: transactionIdentifier,
     TotalAmount: Math.round(amount * 100) / 100,
@@ -197,7 +206,7 @@ export async function POST(
       City: billing.city,
       State: billing.state || undefined,
       PostalCode: billing.postalCode,
-      CountryCode: billing.countryCode,
+      CountryCode: numericCountry,
       EmailAddress: billing.email || order.customer_email || undefined,
       PhoneNumber: billing.phone || undefined,
     },

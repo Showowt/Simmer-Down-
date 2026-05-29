@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, MapPin } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, MapPin, CreditCard } from 'lucide-react'
 import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
 import { LOCATIONS, formatPrice, generateWhatsAppOrderUrl } from '@/lib/data'
 
@@ -190,6 +190,25 @@ export default function CartPage() {
 
         <p className="text-center text-xs text-white/30 mt-3">
           {language === 'es' ? 'Se abrirá WhatsApp con tu pedido listo para enviar' : 'WhatsApp will open with your order ready to send'}
+        </p>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mt-4 mb-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs text-white/30 uppercase">{language === 'es' ? 'o paga en linea' : 'or pay online'}</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Card Payment Button */}
+        <Link href="/checkout">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+            className="w-full py-4 bg-[#E85D04] hover:bg-[#C2410C] text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg cursor-pointer">
+            <CreditCard className="w-6 h-6" />
+            {language === 'es' ? 'Pagar con Tarjeta' : 'Pay with Card'} &middot; {formatPrice(total)}
+          </motion.div>
+        </Link>
+        <p className="text-center text-xs text-white/30 mt-3">
+          {language === 'es' ? 'Visa, Mastercard y Amex — pago seguro por Credomatic' : 'Visa, Mastercard & Amex — secure payment via Credomatic'}
         </p>
       </div>
     </div>

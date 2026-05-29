@@ -86,7 +86,7 @@ const VALUES = [
 
 const MILESTONES = [
   {
-    year: '2013',
+    year: '2014',
     titleEs: 'Nace Simmer Down',
     titleEn: 'Simmer Down is Born',
     descEs: 'Abrimos nuestras puertas en Santa Ana, frente a la historica catedral.',
@@ -172,7 +172,7 @@ export default function NosotrosPage() {
               variants={fadeUp}
               className="text-[#FBBF24] text-xs font-semibold uppercase tracking-[0.3em] mb-6"
             >
-              {locale === 'es' ? 'Desde 2013 en El Salvador' : 'Since 2013 in El Salvador'}
+              {locale === 'es' ? 'Desde 2014 en El Salvador' : 'Since 2014 in El Salvador'}
             </motion.p>
 
             {/* Main title */}
@@ -253,13 +253,13 @@ export default function NosotrosPage() {
                 <p>
                   {locale === 'es' ? (
                     <>
-                      En <strong className="text-white">2013</strong>, abrimos nuestras puertas frente
+                      En <strong className="text-white">2014</strong>, abrimos nuestras puertas frente
                       a la catedral de Santa Ana con una idea simple: crear un lugar donde el tiempo
                       bajara la velocidad, la conversacion fluyera y la comida se disfrutara sin prisa.
                     </>
                   ) : (
                     <>
-                      In <strong className="text-white">2013</strong>, we opened our doors facing
+                      In <strong className="text-white">2014</strong>, we opened our doors facing
                       the Santa Ana cathedral with a simple idea: create a place where time slows down,
                       conversation flows and food is enjoyed without rush.
                     </>
