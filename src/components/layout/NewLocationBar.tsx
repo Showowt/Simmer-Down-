@@ -10,12 +10,14 @@ interface OrderTypeOption {
   value: OrderType
   labelEs: string
   labelEn: string
+  shortEs: string
+  shortEn: string
 }
 
 const ORDER_TYPE_OPTIONS: OrderTypeOption[] = [
-  { value: 'takeout', labelEs: 'Para llevar', labelEn: 'Takeout' },
-  { value: 'delivery', labelEs: 'Domicilio', labelEn: 'Delivery' },
-  { value: 'dine_in', labelEs: 'Comer aquí', labelEn: 'Dine in' },
+  { value: 'takeout', labelEs: 'Para llevar', labelEn: 'Takeout', shortEs: 'Llevar', shortEn: 'Pickup' },
+  { value: 'delivery', labelEs: 'Domicilio', labelEn: 'Delivery', shortEs: 'Envío', shortEn: 'Deliver' },
+  { value: 'dine_in', labelEs: 'Comer aquí', labelEn: 'Dine in', shortEs: 'Aquí', shortEn: 'Dine in' },
 ]
 
 export default function NewLocationBar() {
@@ -29,6 +31,9 @@ export default function NewLocationBar() {
 
   const getLabel = (option: OrderTypeOption) =>
     language === 'es' ? option.labelEs : option.labelEn
+
+  const getShortLabel = (option: OrderTypeOption) =>
+    language === 'es' ? option.shortEs : option.shortEn
 
   return (
     <div className="sticky top-16 z-40 bg-[#1A1A1A] border-b border-white/10">
@@ -114,7 +119,8 @@ export default function NewLocationBar() {
                 }`}
                 aria-pressed={isActive}
               >
-                {getLabel(option)}
+                <span className="sm:hidden">{getShortLabel(option)}</span>
+                <span className="hidden sm:inline">{getLabel(option)}</span>
               </button>
             )
           })}
