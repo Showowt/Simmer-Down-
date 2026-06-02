@@ -111,30 +111,30 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 pt-28">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md text-center"
         >
-          <div className="bg-[#252320] border border-[#3D3936] p-8">
+          <div className="bg-[#1A1A1A] border border-white/10 p-8">
             <div className="w-20 h-20 bg-[#4CAF50]/10 flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-[#4CAF50]" />
             </div>
-            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-4">{t(translations.auth.accountCreated)}</h1>
-            <p className="text-[#B8B0A8] mb-6">
-              {t(translations.auth.checkEmail)} <strong className="text-[#FFF8F0]">{formData.email}</strong>.
+            <h1 className="text-2xl font-bold text-white mb-4">{t(translations.auth.accountCreated)}</h1>
+            <p className="text-white/60 mb-6">
+              {t(translations.auth.checkEmail)} <strong className="text-white">{formData.email}</strong>.
               {' '}{t(translations.auth.checkInbox)}
             </p>
-            <div className="bg-[#FF6B35]/10 border border-[#FF6B35]/20 p-4 mb-6">
-              <div className="flex items-center justify-center gap-2 text-[#FF6B35] font-medium">
+            <div className="bg-[#E85D04]/10 border border-[#E85D04]/20 p-4 mb-6">
+              <div className="flex items-center justify-center gap-2 text-[#E85D04] font-medium">
                 <Gift className="w-5 h-5" />
                 {t(translations.auth.welcomePoints)}
               </div>
             </div>
             <Link
               href="/auth/login"
-              className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
+              className="block w-full bg-[#E85D04] hover:bg-[#C2410C] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
             >
               {t(translations.auth.goToLogin)}
             </Link>
@@ -145,7 +145,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 py-28">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 py-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -155,11 +155,11 @@ export default function SignupPage() {
           <Link href="/" className="inline-block mb-4">
             <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={144} height={48} className="h-12 w-auto mx-auto" />
           </Link>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.joinSimmerLovers)}</h1>
-          <p className="text-[#6B6560] mt-2">{t(translations.auth.signupSubtitle)}</p>
+          <h1 className="text-2xl font-bold text-white">{t(translations.auth.joinSimmerLovers)}</h1>
+          <p className="text-white/40 mt-2">{t(translations.auth.signupSubtitle)}</p>
         </div>
 
-        <form onSubmit={handleSignup} className="bg-[#252320] border border-[#3D3936] p-8">
+        <form onSubmit={handleSignup} className="bg-[#1A1A1A] border border-white/10 p-8">
           {error && (
             <div className="mb-6 p-4 bg-[#C73E1D]/10 border border-[#C73E1D]/20 flex items-start gap-3 text-[#C73E1D]">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -169,47 +169,47 @@ export default function SignupPage() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.fullName)} *
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="name"
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="Tu nombre"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.emailLabel)} *
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="email"
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="tu@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.phoneOptional)}
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="phone"
                   type="tel"
@@ -217,31 +217,31 @@ export default function SignupPage() {
                   autoComplete="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="+503 XXXX-XXXX"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.password)} *
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-12 pr-12 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-12 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#B8B0A8] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
                   aria-label={showPassword ? t(translations.auth.hidePassword) : t(translations.auth.showPassword)}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -252,7 +252,7 @@ export default function SignupPage() {
               {formData.password && (
                 <div className="mt-2 space-y-1">
                   {passwordRequirements.map((req, i) => (
-                    <div key={i} className={`flex items-center gap-2 text-xs ${req.met ? 'text-[#4CAF50]' : 'text-[#6B6560]'}`}>
+                    <div key={i} className={`flex items-center gap-2 text-xs ${req.met ? 'text-[#4CAF50]' : 'text-white/40'}`}>
                       <Check className={`w-3 h-3 ${req.met ? 'opacity-100' : 'opacity-30'}`} />
                       {req.text}
                     </div>
@@ -262,18 +262,18 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.confirmPassword)} *
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="confirmPassword"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="••••••••"
                 />
               </div>
@@ -286,7 +286,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-6 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
+            className="w-full mt-6 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
           >
             {loading ? (
               <>
@@ -298,17 +298,17 @@ export default function SignupPage() {
             )}
           </button>
 
-          <p className="text-xs text-[#6B6560] mt-4 text-center">
+          <p className="text-xs text-white/40 mt-4 text-center">
             {t(translations.auth.byCreating)}{' '}
-            <Link href="/terms" className="text-[#FF6B35] hover:underline">{t(translations.footer.terms)}</Link>
+            <Link href="/terms" className="text-[#E85D04] hover:underline">{t(translations.footer.terms)}</Link>
             {' '}{t(translations.auth.and)}{' '}
-            <Link href="/privacy" className="text-[#FF6B35] hover:underline">{t(translations.footer.privacy)}</Link>
+            <Link href="/privacy" className="text-[#E85D04] hover:underline">{t(translations.footer.privacy)}</Link>
           </p>
         </form>
 
-        <p className="text-center text-[#6B6560] mt-6">
+        <p className="text-center text-white/40 mt-6">
           {t(translations.auth.alreadyHaveAccount)}{' '}
-          <Link href="/auth/login" className="text-[#FF6B35] hover:underline font-medium">
+          <Link href="/auth/login" className="text-[#E85D04] hover:underline font-medium">
             {t(translations.auth.loginBtn)}
           </Link>
         </p>

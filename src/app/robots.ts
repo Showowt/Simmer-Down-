@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/auth/callback', '/kitchen/'],
+        disallow: ['/admin/', '/api/', '/auth/callback', '/kitchen/', '/checkout/', '/cart/', '/orders/'],
       },
     ],
     sitemap: 'https://simmerdownsv.com/sitemap.xml',

@@ -49,7 +49,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 pt-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,11 +59,11 @@ function LoginForm() {
           <Link href="/" className="inline-block mb-4">
             <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={144} height={48} className="h-12 w-auto mx-auto" />
           </Link>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">{t(translations.auth.welcomeBack)}</h1>
-          <p className="text-[#6B6560] mt-2">{t(translations.auth.loginSubtitle)}</p>
+          <h1 className="text-2xl font-bold text-white">{t(translations.auth.welcomeBack)}</h1>
+          <p className="text-white/40 mt-2">{t(translations.auth.loginSubtitle)}</p>
         </div>
 
-        <form onSubmit={handleLogin} className="bg-[#252320] border border-[#3D3936] p-8">
+        <form onSubmit={handleLogin} className="bg-[#1A1A1A] border border-white/10 p-8">
           {error && (
             <div className="mb-6 p-4 bg-[#C73E1D]/10 border border-[#C73E1D]/20 flex items-center gap-3 text-[#C73E1D]">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -73,42 +73,42 @@ function LoginForm() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.emailLabel)}
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="tu@email.com"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-2">
                 {t(translations.auth.password)}
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                  className="w-full pl-12 pr-12 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#B8B0A8] transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors"
                   aria-label={showPassword ? t(translations.auth.hidePassword) : t(translations.auth.showPassword)}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -120,7 +120,7 @@ function LoginForm() {
           <div className="flex justify-end mt-2">
             <Link
               href="/auth/forgot-password"
-              className="text-sm text-[#FF6B35] hover:underline"
+              className="text-sm text-[#E85D04] hover:underline"
             >
               {t(translations.auth.forgotPassword)}
             </Link>
@@ -129,7 +129,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-6 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
+            className="w-full mt-6 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
           >
             {loading ? (
               <>
@@ -142,9 +142,9 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="text-center text-[#6B6560] mt-6">
+        <p className="text-center text-white/40 mt-6">
           {t(translations.auth.noAccount)}{' '}
-          <Link href="/auth/signup" className="text-[#FF6B35] hover:underline font-medium">
+          <Link href="/auth/signup" className="text-[#E85D04] hover:underline font-medium">
             {t(translations.auth.signupFree)}
           </Link>
         </p>
@@ -156,8 +156,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#FF6B35] border-t-transparent animate-spin" />
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#E85D04] border-t-transparent animate-spin" />
       </div>
     }>
       <LoginForm />

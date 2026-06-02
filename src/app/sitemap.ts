@@ -13,13 +13,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/menu`,
+      url: `${baseUrl}/carta`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.95,
     },
     {
-      url: `${baseUrl}/locations`,
+      url: `${baseUrl}/restaurantes`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
@@ -31,33 +31,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
 
-    // ─── Location-Specific Anchors (Local SEO) ─────────────────────────
+    // ─── Location Detail Pages (Local SEO) ─────────────────────────────
     {
-      url: `${baseUrl}/locations#santa-ana`,
+      url: `${baseUrl}/locations/santa-ana`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/locations#coatepeque`,
+      url: `${baseUrl}/locations/lago-coatepeque`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/locations#san-benito`,
+      url: `${baseUrl}/locations/san-benito`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/locations#juayua`,
+      url: `${baseUrl}/locations/simmer-garden`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/locations#surf-city`,
+      url: `${baseUrl}/locations/surf-city`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
@@ -77,7 +77,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.75,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/nosotros`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,

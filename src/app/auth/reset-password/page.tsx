@@ -55,25 +55,25 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 pt-28">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md text-center"
         >
-          <div className="bg-[#252320] border border-[#3D3936] p-8">
+          <div className="bg-[#1A1A1A] border border-white/10 p-8">
             <div className="w-20 h-20 bg-[#4CAF50]/10 flex items-center justify-center mx-auto mb-6">
               <Check className="w-10 h-10 text-[#4CAF50]" />
             </div>
-            <h1 className="text-2xl font-bold text-[#FFF8F0] mb-4">
+            <h1 className="text-2xl font-bold text-white mb-4">
               Contraseña Actualizada
             </h1>
-            <p className="text-[#B8B0A8] mb-6">
+            <p className="text-white/60 mb-6">
               Tu contraseña ha sido restablecida exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.
             </p>
             <Link
               href="/auth/login"
-              className="block w-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
+              className="block w-full bg-[#E85D04] hover:bg-[#C2410C] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
             >
               Iniciar Sesión
             </Link>
@@ -84,22 +84,22 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] flex items-center justify-center px-4 pt-28">
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4 pt-28">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 font-display text-2xl text-[#FFF8F0] mb-4">
-            <Flame className="w-8 h-8 text-[#FF6B35]" />
+          <Link href="/" className="inline-flex items-center gap-2 font-display text-2xl text-white mb-4">
+            <Flame className="w-8 h-8 text-[#E85D04]" />
             Simmer Down
           </Link>
-          <h1 className="text-2xl font-bold text-[#FFF8F0]">Nueva Contraseña</h1>
-          <p className="text-[#6B6560] mt-2">Ingresa tu nueva contraseña</p>
+          <h1 className="text-2xl font-bold text-white">Nueva Contraseña</h1>
+          <p className="text-white/40 mt-2">Ingresa tu nueva contraseña</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#252320] border border-[#3D3936] p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-[#1A1A1A] border border-white/10 p-8 space-y-6">
           {error && (
             <div className="p-4 bg-[#C73E1D]/10 border border-[#C73E1D]/20 flex items-center gap-3 text-[#C73E1D]">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -108,24 +108,24 @@ export default function ResetPasswordPage() {
           )}
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-2">
               Nueva Contraseña
             </label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                className="w-full pl-12 pr-12 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                 placeholder="Tu nueva contraseña"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6B6560] hover:text-[#B8B0A8]"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
                 aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -134,8 +134,8 @@ export default function ResetPasswordPage() {
 
             <div className="mt-3 space-y-1">
               {requirements.map((req) => (
-                <p key={req.label} className={`text-xs flex items-center gap-2 ${req.met ? 'text-[#4CAF50]' : 'text-[#6B6560]'}`}>
-                  <span className={`w-4 h-4 flex items-center justify-center border ${req.met ? 'border-[#4CAF50] bg-[#4CAF50]/20' : 'border-[#3D3936]'}`}>
+                <p key={req.label} className={`text-xs flex items-center gap-2 ${req.met ? 'text-[#4CAF50]' : 'text-white/40'}`}>
+                  <span className={`w-4 h-4 flex items-center justify-center border ${req.met ? 'border-[#4CAF50] bg-[#4CAF50]/20' : 'border-white/10'}`}>
                     {req.met && <Check className="w-3 h-3" />}
                   </span>
                   {req.label}
@@ -145,23 +145,23 @@ export default function ResetPasswordPage() {
           </div>
 
           <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-white/60 mb-2">
               Confirmar Contraseña
             </label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6B6560]" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <input
                 id="confirm-password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`w-full pl-12 pr-4 py-3 bg-[#3D3936] border text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none transition min-h-[48px] ${
+                className={`w-full pl-12 pr-4 py-3 bg-white/10 border text-white placeholder:text-white/40 focus:outline-none transition min-h-[48px] ${
                   confirmPassword.length > 0
                     ? passwordsMatch
                       ? 'border-[#4CAF50]'
                       : 'border-[#C73E1D]'
-                    : 'border-[#4A4642] focus:border-[#FF6B35]'
+                    : 'border-white/20 focus:border-[#E85D04]'
                 }`}
                 placeholder="Repite tu nueva contraseña"
               />
@@ -174,7 +174,7 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading || !allMet || !passwordsMatch}
-            className="w-full bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
+            className="w-full bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white py-4 font-semibold transition-colors flex items-center justify-center gap-2 min-h-[56px]"
           >
             {loading ? (
               <>
@@ -189,7 +189,7 @@ export default function ResetPasswordPage() {
 
         <Link
           href="/auth/login"
-          className="flex items-center justify-center gap-2 text-[#6B6560] hover:text-[#B8B0A8] mt-6 transition-colors"
+          className="flex items-center justify-center gap-2 text-white/40 hover:text-white/60 mt-6 transition-colors"
         >
           Volver a Iniciar Sesión
         </Link>
