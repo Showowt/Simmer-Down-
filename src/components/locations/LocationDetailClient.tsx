@@ -79,7 +79,7 @@ export default function LocationDetailClient({ location }: { location: Location 
       : `Hi! I'd like to place an order at ${location.name}.`
   )}`
 
-  const embedUrl = `https://www.google.com/maps?q=${location.coordinates.lat},${location.coordinates.lng}&z=15&output=embed`
+  const embedUrl = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3000!2d${location.coordinates.lng}!3d${location.coordinates.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssv!4v1`
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">

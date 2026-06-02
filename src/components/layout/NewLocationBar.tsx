@@ -102,7 +102,7 @@ export default function NewLocationBar() {
 
         {/* Right — Order type toggle */}
         <div
-          className="flex items-center bg-white/[0.06] rounded-lg p-0.5 shrink-0 overflow-x-auto no-scrollbar"
+          className="flex items-center gap-0.5 bg-white/[0.06] rounded-lg p-0.5 shrink-0 overflow-x-auto no-scrollbar"
           role="group"
           aria-label={language === 'es' ? 'Tipo de pedido' : 'Order type'}
         >
@@ -112,10 +112,10 @@ export default function NewLocationBar() {
               <button
                 key={option.value}
                 onClick={() => setOrderType(option.value)}
-                className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-[12px] font-semibold transition-all duration-200 whitespace-nowrap ${
+                className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-[12px] font-semibold transition-all duration-200 whitespace-nowrap ${
                   isActive
                     ? 'bg-[#E85D04] text-white shadow-sm'
-                    : 'text-white/50 hover:text-white/80'
+                    : 'text-white/40 hover:text-white/80'
                 }`}
                 aria-pressed={isActive}
               >
