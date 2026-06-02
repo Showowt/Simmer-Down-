@@ -68,7 +68,7 @@ export default function HomePage() {
         <div className="absolute inset-0">
           <Image
             src="/images/heroes/homepage-pizzas.jpg"
-            alt="Simmer Down — pizza artesanal de horno de leña"
+            alt="Simmer Down — pizza artesanal"
             fill
             priority
             className="object-cover object-center"

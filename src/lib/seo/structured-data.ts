@@ -51,7 +51,7 @@ interface FAQItem {
 
 const BASE_URL = 'https://simmerdownsv.com'
 const BRAND_NAME = 'Simmer Down'
-const BRAND_DESCRIPTION = 'La mejor pizza artesanal de horno de leña en El Salvador. 12 años, 5 ubicaciones. Restaurante gastro-musical líder en Santa Ana, San Salvador, Coatepeque, Juayúa y Surf City.'
+const BRAND_DESCRIPTION = 'La mejor pizza artesanal en El Salvador. 12 años, 5 ubicaciones. Restaurante gastro-musical líder en Santa Ana, San Salvador, Coatepeque, Juayúa y Surf City.'
 
 // ─── Location Database ───────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ export const LOCATIONS: LocationData[] = [
   {
     id: 'santa-ana',
     name: 'Simmer Down Santa Ana',
-    description: 'El restaurante original de Simmer Down. La mejor pizza artesanal de horno de leña frente a la catedral histórica de Santa Ana. 12 años de tradición gastronómica.',
+    description: 'El restaurante original de Simmer Down. La mejor pizza artesanal frente a la catedral histórica de Santa Ana. 12 años de tradición gastronómica.',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
     region: 'Santa Ana',
@@ -300,7 +300,7 @@ export function generateMenuSchema(items: MenuItemData[]) {
     '@type': 'Menu',
     '@id': `${BASE_URL}/menu#menu`,
     name: 'Menú Simmer Down',
-    description: 'Menú completo de pizzas artesanales de horno de leña, pastas, cortes, mariscos y cócteles',
+    description: 'Menú completo de pizzas artesanales, pastas, cortes, mariscos y cócteles',
     url: `${BASE_URL}/menu`,
     hasMenuSection: Array.from(sections.entries()).map(([category, sectionItems]) => ({
       '@type': 'MenuSection',
@@ -350,11 +350,11 @@ export function generateWebSiteSchema() {
 export const RESTAURANT_FAQS: FAQItem[] = [
   {
     question: '¿Cuál es la mejor pizza en El Salvador?',
-    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 12 años de tradición, más de 8,000 reseñas positivas y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas en horno de leña con ingredientes premium.',
+    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 12 años de tradición, más de 8,000 reseñas positivas y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas con ingredientes premium y masa artesanal.',
   },
   {
-    question: '¿Dónde puedo comer pizza artesanal de horno de leña en El Salvador?',
-    answer: 'Simmer Down ofrece pizza artesanal de horno de leña en 5 ubicaciones estratégicas de El Salvador: frente a la catedral de Santa Ana, con vista al Lago de Coatepeque, en la Zona Rosa de San Benito (San Salvador), en la Ruta de las Flores (Juayúa) y frente al mar en Surf City.',
+    question: '¿Dónde puedo comer pizza artesanal en El Salvador?',
+    answer: 'Simmer Down ofrece pizza artesanal en 5 ubicaciones estratégicas de El Salvador: frente a la catedral de Santa Ana, con vista al Lago de Coatepeque, en la Zona Rosa de San Benito (San Salvador), en la Ruta de las Flores (Juayúa) y frente al mar en Surf City.',
   },
   {
     question: '¿Simmer Down tiene reservaciones?',
@@ -366,7 +366,7 @@ export const RESTAURANT_FAQS: FAQItem[] = [
   },
   {
     question: '¿Qué tipo de comida sirve Simmer Down?',
-    answer: 'Simmer Down es un restaurante gastro-musical especializado en pizza artesanal de horno de leña, pastas frescas, cortes de carne premium, mariscos y cócteles de autor. También ofrecemos opciones vegetarianas y menú infantil.',
+    answer: 'Simmer Down es un restaurante gastro-musical especializado en pizza artesanal, pastas frescas, cortes de carne premium, mariscos y cócteles de autor. También ofrecemos opciones vegetarianas y menú infantil.',
   },
   {
     question: '¿Simmer Down tiene delivery o para llevar?',
@@ -386,9 +386,9 @@ export const RESTAURANT_FAQS: FAQItem[] = [
 
 export const SIGNATURE_MENU_ITEMS: MenuItemData[] = [
   { name: 'Pizza La Memoravel', description: 'Fajitas de res y pollo, cebolla marinada, salsa BBQ artesanal, ajonjolí tostado — la pizza más famosa de El Salvador', price: 13.99, category: 'Pizzas Artesanales', image: `${BASE_URL}/images/menu/pizza-memoravel.jpg` },
-  { name: 'Pizza Margherita Clásica', description: 'Salsa de tomate San Marzano, mozzarella fresca, albahaca — auténtica pizza italiana de horno de leña', price: 9.99, category: 'Pizzas Artesanales' },
+  { name: 'Pizza Margherita Clásica', description: 'Salsa de tomate San Marzano, mozzarella fresca, albahaca — auténtica pizza artesanal italiana', price: 9.99, category: 'Pizzas Artesanales' },
   { name: 'Pizza Cuatro Quesos', description: 'Mozzarella, gorgonzola, parmesano, queso de cabra — la combinación perfecta de quesos artesanales', price: 12.99, category: 'Pizzas Artesanales' },
-  { name: 'Pizza Pepperoni Artesanal', description: 'Pepperoni premium con mozzarella derretida y salsa de tomate casera en masa de horno de leña', price: 11.99, category: 'Pizzas Artesanales' },
+  { name: 'Pizza Pepperoni Artesanal', description: 'Pepperoni premium con mozzarella derretida y salsa de tomate casera en masa artesanal', price: 11.99, category: 'Pizzas Artesanales' },
   { name: 'Pizza Hawaiian Twist', description: 'Jamón ahumado, piña caramelizada, jalapeño y salsa teriyaki sobre masa artesanal', price: 12.99, category: 'Pizzas Artesanales' },
   { name: 'Pizza Vegetariana del Huerto', description: 'Hongos, pimientos, aceitunas, espinaca, tomate cherry y pesto fresco', price: 11.99, category: 'Pizzas Artesanales' },
   { name: 'Terramar al Maitre', description: 'Lomito de res con camarones jumbo, mantequilla maitre d\'hôtel, vegetales de temporada', price: 24.99, category: 'Cortes & Mariscos', image: `${BASE_URL}/images/menu/pro-IMG4591.jpg` },

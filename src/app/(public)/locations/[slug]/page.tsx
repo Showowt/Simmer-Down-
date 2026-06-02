@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       title: `${location.name} | Simmer Down`,
-      description: `${location.address}, ${location.city} — Pizza artesanal de horno de lena. Horarios, direcciones y menu.`,
+      description: `${location.address}, ${location.city} — Pizza artesanal. Horarios, direcciones y menu.`,
       images: [
         {
           url: location.heroImage || location.image,

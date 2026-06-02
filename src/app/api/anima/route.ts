@@ -122,7 +122,7 @@ function buildSystemPrompt(language: "es" | "en"): string {
 - 12 años de experiencia
 - 5 ubicaciones en El Salvador
 - +8,000 reseñas con calificación 4.9 estrellas
-- Especialidad: Pizza artesanal de horno de leña
+- Especialidad: Pizza artesanal
 - También: Pastas, cortes, mariscos, ensaladas
 - Programa de lealtad: SimmerLovers (puntos por cada compra)
 - Pedidos por WhatsApp: +503 7576-4655

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s | Simmer Down",
   },
   description:
-    "Pizza artesanal de horno de leña en El Salvador. 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito, Surf City, Simmer Garden. Ordena por WhatsApp.",
+    "Pizza artesanal en El Salvador. 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito, Surf City, Simmer Garden. Ordena por WhatsApp.",
   openGraph: {
     type: "website",
     locale: "es_SV",

@@ -321,8 +321,8 @@ export default function LocationDetailClient({ location }: { location: Location 
             </h3>
             <p className="text-white/50 text-sm mt-2 mb-6 leading-relaxed">
               {locale === 'es'
-                ? 'Pizza artesanal de horno de lena, pastas, ensaladas y mas.'
-                : 'Artisan wood-fired pizza, pastas, salads and more.'}
+                ? 'Pizza artesanal, pastas, ensaladas y mas.'
+                : 'Artisan pizza, pastas, salads and more.'}
             </p>
             <Link
               href="/carta"

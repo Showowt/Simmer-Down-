@@ -45,9 +45,9 @@ const VALUES = [
     titleEs: 'Horno de Lena',
     titleEn: 'Wood-Fired Oven',
     descEs:
-      'Cada pizza se cocina en nuestro horno de lena artesanal, alcanzando temperaturas perfectas para lograr una masa crujiente por fuera y suave por dentro.',
+      'Cada pizza se prepara con masa artesanal, alcanzando el punto perfecto para lograr una corteza crujiente por fuera y suave por dentro.',
     descEn:
-      'Every pizza is cooked in our artisan wood-fired oven, reaching perfect temperatures for a crust that is crispy outside and soft inside.',
+      'Every pizza is crafted with artisan dough, reaching the perfect point for a crust that is crispy outside and soft inside.',
     accent: '#E85D04',
   },
   {
@@ -267,8 +267,8 @@ export default function NosotrosPage() {
                 </p>
                 <p>
                   {locale === 'es'
-                    ? 'Nuestro horno de lena se convirtio en el corazon de todo. Pizzas artesanales, pastas, carnes, platos para compartir: cada receta respeta el ingrediente y celebra el sabor.'
-                    : 'Our wood-fired oven became the heart of everything. Artisan pizzas, pastas, meats, sharing plates: every recipe respects the ingredient and celebrates flavor.'}
+                    ? 'Nuestra cocina se convirtio en el corazon de todo. Pizzas artesanales, pastas, carnes, platos para compartir: cada receta respeta el ingrediente y celebra el sabor.'
+                    : 'Our kitchen became the heart of everything. Artisan pizzas, pastas, meats, sharing plates: every recipe respects the ingredient and celebrates flavor.'}
                 </p>
                 <p>
                   {locale === 'es'
@@ -511,8 +511,8 @@ export default function NosotrosPage() {
               <div className="space-y-5 text-white/65 text-base md:text-lg leading-relaxed">
                 <p>
                   {locale === 'es'
-                    ? 'Detras de cada pizza, cada plato y cada sonrisa hay un equipo que vive y respira Simmer Down. Desde nuestros pizzaiolos que dominan el arte del horno de lena, hasta los meseros que te hacen sentir en casa desde el primer momento.'
-                    : 'Behind every pizza, every dish and every smile is a team that lives and breathes Simmer Down. From our pizzaiolos who master the art of the wood-fired oven, to the servers who make you feel at home from the very first moment.'}
+                    ? 'Detras de cada pizza, cada plato y cada sonrisa hay un equipo que vive y respira Simmer Down. Desde nuestros pizzaiolos que dominan el arte de la pizza artesanal, hasta los meseros que te hacen sentir en casa desde el primer momento.'
+                    : 'Behind every pizza, every dish and every smile is a team that lives and breathes Simmer Down. From our pizzaiolos who master the art of artisan pizza, to the servers who make you feel at home from the very first moment.'}
                 </p>
                 <p>
                   {locale === 'es'
