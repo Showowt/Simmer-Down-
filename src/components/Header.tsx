@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ShoppingBag, User } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useCartStore } from '@/store/cart'
+import { useCartStore } from '@/lib/store'
 import { useAuth } from '@/hooks/useAuth'
 import { useI18n, translations } from '@/lib/i18n'
 import LanguageToggle from '@/components/LanguageToggle'
@@ -16,7 +16,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const itemCount = useCartStore((state) => state.getItemCount())
+  const itemCount = useCartStore((state) => state.itemCount)
   const { user, loading: authLoading } = useAuth()
   const { t } = useI18n()
 
@@ -89,7 +89,7 @@ export default function Header() {
 
               {/* Cart */}
               <Link
-                href="/cart"
+                href="/carrito"
                 className="relative flex items-center p-3 text-[#6B6560] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
                 aria-label={t(translations.nav.cart)}
               >

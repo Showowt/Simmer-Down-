@@ -28,7 +28,7 @@ export const translations = {
   home: {
     pizzasServed: { es: 'pizzas servidas', en: 'pizzas served' },
     tagline: { es: 'Restaurante y Destino Gastro-Musical', en: 'Restaurant & Gastro-Musical Destination' },
-    years: { es: '14 Años de Historia. 5 Ubicaciones.', en: '14 Years of History. 5 Locations.' },
+    years: { es: '12 Años de Historia. 5 Ubicaciones.', en: '12 Years of History. 5 Locations.' },
     subtitle: { es: 'Hay lugares que se visitan. Y hay lugares que se recuerdan.', en: 'There are places you visit. And there are places you remember.' },
     findLocation: { es: 'Encontrar Ubicación', en: 'Find Location' },
     woodFired: { es: 'Horno de Leña', en: 'Wood-Fired Oven' },

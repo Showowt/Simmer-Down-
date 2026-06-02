@@ -21,6 +21,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useI18n } from '@/lib/i18n'
 import Link from 'next/link'
 
 interface Profile {
@@ -58,6 +59,8 @@ const tierIcons = {
 
 export default function AccountPage() {
   const router = useRouter()
+  const { locale } = useI18n()
+  const isEn = locale === 'en'
   const [user, setUser] = useState<{ id: string; email: string } | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
@@ -159,20 +162,20 @@ export default function AccountPage() {
             <div className="w-16 h-16 bg-[#E85D04]/10 flex items-center justify-center mx-auto mb-6">
               <User className="w-8 h-8 text-[#E85D04]" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-3">Inicia sesión para continuar</h1>
+            <h1 className="text-2xl font-bold text-white mb-3">{isEn ? 'Sign in to continue' : 'Inicia sesión para continuar'}</h1>
             <p className="text-white/40 mb-6">
-              Necesitas una cuenta para acceder a tu perfil, puntos y pedidos.
+              {isEn ? 'You need an account to access your profile, points and orders.' : 'Necesitas una cuenta para acceder a tu perfil, puntos y pedidos.'}
             </p>
             <Link
               href="/auth/login"
               className="block w-full bg-[#E85D04] hover:bg-[#C2410C] text-white py-4 font-semibold transition-colors"
             >
-              Iniciar Sesión
+              {isEn ? 'Sign In' : 'Iniciar Sesión'}
             </Link>
             <p className="text-white/40 mt-4 text-sm">
-              ¿No tienes cuenta?{' '}
+              {isEn ? "Don't have an account?" : '¿No tienes cuenta?'}{' '}
               <Link href="/auth/signup" className="text-[#E85D04] hover:underline font-medium">
-                Regístrate gratis
+                {isEn ? 'Sign up free' : 'Regístrate gratis'}
               </Link>
             </p>
           </div>
@@ -205,8 +208,8 @@ export default function AccountPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-display text-3xl text-white">Mi Cuenta</h1>
-          <p className="text-white/40">Gestiona tu perfil y revisa tu historial</p>
+          <h1 className="font-display text-3xl text-white">{isEn ? 'My Account' : 'Mi Cuenta'}</h1>
+          <p className="text-white/40">{isEn ? 'Manage your profile and review your history' : 'Gestiona tu perfil y revisa tu historial'}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -219,14 +222,14 @@ export default function AccountPage() {
               className="bg-[#1A1A1A] border border-white/10 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xl text-white">Información Personal</h2>
+                <h2 className="font-display text-xl text-white">{isEn ? 'Personal Information' : 'Información Personal'}</h2>
                 {!editing ? (
                   <button
                     onClick={() => setEditing(true)}
                     className="flex items-center gap-2 text-[#E85D04] hover:text-[#C2410C] text-sm font-medium transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
-                    Editar
+                    {isEn ? 'Edit' : 'Editar'}
                   </button>
                 ) : (
                   <div className="flex gap-2">
@@ -236,14 +239,14 @@ export default function AccountPage() {
                       className="flex items-center gap-1 text-[#4CAF50] hover:text-[#45a049] text-sm font-medium transition-colors"
                     >
                       <Check className="w-4 h-4" />
-                      {saving ? 'Guardando...' : 'Guardar'}
+                      {saving ? (isEn ? 'Saving...' : 'Guardando...') : (isEn ? 'Save' : 'Guardar')}
                     </button>
                     <button
                       onClick={() => setEditing(false)}
                       className="flex items-center gap-1 text-white/40 hover:text-white/60 text-sm font-medium transition-colors"
                     >
                       <X className="w-4 h-4" />
-                      Cancelar
+                      {isEn ? 'Cancel' : 'Cancelar'}
                     </button>
                   </div>
                 )}
@@ -252,7 +255,7 @@ export default function AccountPage() {
               {editing ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-white/40 mb-1">Nombre</label>
+                    <label className="block text-sm text-white/40 mb-1">{isEn ? 'Name' : 'Nombre'}</label>
                     <input
                       type="text"
                       value={editForm.full_name}
@@ -261,7 +264,7 @@ export default function AccountPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-white/40 mb-1">Teléfono</label>
+                    <label className="block text-sm text-white/40 mb-1">{isEn ? 'Phone' : 'Teléfono'}</label>
                     <input
                       type="tel"
                       value={editForm.phone}
@@ -271,13 +274,13 @@ export default function AccountPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-white/40 mb-1">Dirección</label>
+                    <label className="block text-sm text-white/40 mb-1">{isEn ? 'Address' : 'Dirección'}</label>
                     <input
                       type="text"
                       value={editForm.address}
                       onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white focus:outline-none focus:border-[#E85D04] transition"
-                      placeholder="Tu dirección de entrega"
+                      placeholder={isEn ? 'Your delivery address' : 'Tu dirección de entrega'}
                     />
                   </div>
                 </div>
@@ -286,29 +289,29 @@ export default function AccountPage() {
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-white/40">Nombre</p>
-                      <p className="text-white">{profile?.full_name || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">{isEn ? 'Name' : 'Nombre'}</p>
+                      <p className="text-white">{profile?.full_name || (isEn ? 'Not specified' : 'No especificado')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-white/40">Correo</p>
+                      <p className="text-xs text-white/40">{isEn ? 'Email' : 'Correo'}</p>
                       <p className="text-white">{user?.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-white/40">Teléfono</p>
-                      <p className="text-white">{profile?.phone || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">{isEn ? 'Phone' : 'Teléfono'}</p>
+                      <p className="text-white">{profile?.phone || (isEn ? 'Not specified' : 'No especificado')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin className="w-5 h-5 text-white/40" />
                     <div>
-                      <p className="text-xs text-white/40">Dirección</p>
-                      <p className="text-white">{profile?.address || 'No especificado'}</p>
+                      <p className="text-xs text-white/40">{isEn ? 'Address' : 'Dirección'}</p>
+                      <p className="text-white">{profile?.address || (isEn ? 'Not specified' : 'No especificado')}</p>
                     </div>
                   </div>
                 </div>
@@ -323,12 +326,12 @@ export default function AccountPage() {
               className="bg-[#1A1A1A] border border-white/10 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xl text-white">Pedidos Recientes</h2>
+                <h2 className="font-display text-xl text-white">{isEn ? 'Recent Orders' : 'Pedidos Recientes'}</h2>
                 <Link
                   href="/orders"
                   className="text-[#E85D04] hover:text-[#C2410C] text-sm font-medium transition-colors"
                 >
-                  Ver todos
+                  {isEn ? 'View all' : 'Ver todos'}
                 </Link>
               </div>
 
@@ -364,12 +367,12 @@ export default function AccountPage() {
               ) : (
                 <div className="text-center py-8">
                   <ShoppingBag className="w-12 h-12 text-white/10 mx-auto mb-3" />
-                  <p className="text-white/40">Aún no tienes pedidos</p>
+                  <p className="text-white/40">{isEn ? 'No orders yet' : 'Aún no tienes pedidos'}</p>
                   <Link
-                    href="/menu"
+                    href="/carta"
                     className="inline-block mt-4 text-[#E85D04] hover:underline font-medium"
                   >
-                    Ver Menú
+                    {isEn ? 'View Menu' : 'Ver Menú'}
                   </Link>
                 </div>
               )}
@@ -421,26 +424,26 @@ export default function AccountPage() {
               transition={{ delay: 0.3 }}
               className="bg-[#1A1A1A] border border-white/10 p-6"
             >
-              <h3 className="font-display text-lg text-white mb-4">Estadísticas</h3>
+              <h3 className="font-display text-lg text-white mb-4">{isEn ? 'Stats' : 'Estadísticas'}</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-white/40 flex items-center gap-2">
                     <ShoppingBag className="w-4 h-4" />
-                    Total pedidos
+                    {isEn ? 'Total orders' : 'Total pedidos'}
                   </span>
                   <span className="text-white font-medium">{profile?.total_orders || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/40 flex items-center gap-2">
                     <Gift className="w-4 h-4" />
-                    Total gastado
+                    {isEn ? 'Total spent' : 'Total gastado'}
                   </span>
                   <span className="text-white font-medium">${(profile?.total_spent || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/40 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
-                    Miembro desde
+                    {isEn ? 'Member since' : 'Miembro desde'}
                   </span>
                   <span className="text-white font-medium">
                     {profile?.created_at
@@ -464,7 +467,7 @@ export default function AccountPage() {
               >
                 <span className="flex items-center gap-3 text-white">
                   <Gift className="w-5 h-5 text-[#E85D04]" />
-                  Ver Recompensas
+                  {isEn ? 'View Rewards' : 'Ver Recompensas'}
                 </span>
                 <ChevronRight className="w-4 h-4 text-white/40" />
               </Link>
@@ -475,7 +478,7 @@ export default function AccountPage() {
               >
                 <span className="flex items-center gap-3 text-[#C73E1D]">
                   <LogOut className="w-5 h-5" />
-                  Cerrar Sesión
+                  {isEn ? 'Sign Out' : 'Cerrar Sesión'}
                 </span>
               </button>
             </motion.div>

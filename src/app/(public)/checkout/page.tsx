@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ShoppingBag, MapPin, CreditCard } from 'lucide-react'
-import { useCartStore } from '@/store/cart'
+import { useCartStore, useTranslation } from '@/lib/store'
+import { formatPrice } from '@/lib/data'
 import CardPaymentForm from '@/components/checkout/CardPaymentForm'
 import ThreeDSecureModal from '@/components/checkout/ThreeDSecureModal'
 import PaymentResult from '@/components/checkout/PaymentResult'
@@ -43,6 +44,7 @@ interface PaymentResultData {
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const { t, language } = useTranslation()
   const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<CheckoutStep>('review')
   const [loading, setLoading] = useState(false)
@@ -53,15 +55,14 @@ export default function CheckoutPage() {
 
   const {
     items,
-    location,
+    selectedLocation: location,
     orderType,
     customerName,
     customerPhone,
     customerEmail,
-    getSubtotal,
-    getDeliveryFee,
-    getTax,
-    getTotal,
+    subtotal: cartSubtotal,
+    tax: cartTax,
+    total: cartTotal,
     clearCart,
   } = useCartStore()
 
@@ -79,7 +80,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          locationId: location?.id || items[0]?.category || 'santa-ana',
+          locationId: location?.id || items[0]?.categoryId || 'santa-ana',
           orderType: orderType === 'delivery' ? 'delivery' : 'pickup',
           customerName: customerName || 'Cliente Web',
           customerPhone: customerPhone || '0000-0000',
@@ -88,7 +89,7 @@ export default function CheckoutPage() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price,
+            price: item.basePrice || item.totalPrice || 0,
             description: item.description || '',
           })),
         }),
@@ -168,7 +169,7 @@ export default function CheckoutPage() {
     // User closed the 3DS modal — go back to payment form
     setPaymentData(null)
     setStep('payment')
-    setError('Verificacion cancelada. Puedes intentar de nuevo.')
+    setError(language === 'es' ? 'Verificación cancelada. Puedes intentar de nuevo.' : 'Verification cancelled. You can try again.')
   }, [])
 
   // ─── Retry ──────────────────────────────────────────────────
@@ -201,26 +202,26 @@ export default function CheckoutPage() {
             <ShoppingBag className="w-10 h-10 text-white/30" />
           </div>
           <h1 className="font-display text-3xl text-white uppercase">
-            Carrito vacio
+            {language === 'es' ? 'Carrito vacío' : 'Cart is empty'}
           </h1>
           <p className="text-white/50 mt-2">
-            Agrega productos antes de pagar
+            {language === 'es' ? 'Agrega productos antes de pagar' : 'Add items before checkout'}
           </p>
           <Link
             href="/carta"
             className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-[#E85D04] text-white rounded-xl font-semibold hover:bg-[#C2410C] transition"
           >
-            Ver Menu
+            {language === 'es' ? 'Ver Menú' : 'View Menu'}
           </Link>
         </div>
       </div>
     )
   }
 
-  const subtotal = getSubtotal()
-  const deliveryFee = getDeliveryFee()
-  const tax = getTax()
-  const total = getTotal()
+  const subtotal = cartSubtotal
+  const deliveryFee = orderType === 'delivery' ? (cartSubtotal >= 25 ? 0 : 3.99) : 0
+  const tax = cartTax
+  const total = cartTotal + deliveryFee
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] pt-36 pb-32 px-4">
@@ -236,13 +237,13 @@ export default function CheckoutPage() {
               href="/carrito"
               className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-3 transition"
             >
-              <ArrowLeft className="w-4 h-4" /> Volver al carrito
+              <ArrowLeft className="w-4 h-4" /> {language === 'es' ? 'Volver al carrito' : 'Back to cart'}
             </Link>
             <div className="flex items-center justify-between">
               <h1 className="font-display text-3xl text-white uppercase">
-                {step === 'review' && 'Confirmar Pedido'}
-                {step === 'payment' && 'Pagar'}
-                {step === '3ds' && 'Verificacion'}
+                {step === 'review' && (language === 'es' ? 'Confirmar Pedido' : 'Confirm Order')}
+                {step === 'payment' && (language === 'es' ? 'Pagar' : 'Payment')}
+                {step === '3ds' && (language === 'es' ? 'Verificación' : 'Verification')}
               </h1>
               {/* Step indicator */}
               <div className="flex items-center gap-1.5">
@@ -273,7 +274,7 @@ export default function CheckoutPage() {
             {/* Order Items Summary */}
             <div className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5">
               <h3 className="font-display text-lg text-white uppercase mb-4">
-                Tu Pedido
+                {language === 'es' ? 'Tu Pedido' : 'Your Order'}
               </h3>
               <div className="space-y-3">
                 {items.map(item => (
@@ -285,7 +286,7 @@ export default function CheckoutPage() {
                       <span className="text-white text-sm">{item.name}</span>
                     </div>
                     <span className="text-white/60 text-sm">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ${((item.totalPrice || item.basePrice * item.quantity)).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -309,17 +310,17 @@ export default function CheckoutPage() {
             <div className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-white/50">Subtotal</span>
+                  <span className="text-white/50">{language === 'es' ? 'Subtotal' : 'Subtotal'}</span>
                   <span className="text-white">${subtotal.toFixed(2)}</span>
                 </div>
                 {deliveryFee > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-white/50">Delivery</span>
+                    <span className="text-white/50">{language === 'es' ? 'Envío' : 'Delivery'}</span>
                     <span className="text-white">${deliveryFee.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-white/50">IVA (13%)</span>
+                  <span className="text-white/50">{language === 'es' ? 'IVA (13%)' : 'Tax (13%)'}</span>
                   <span className="text-white">${tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-white/10 pt-2 flex justify-between text-lg font-bold">
@@ -343,12 +344,12 @@ export default function CheckoutPage() {
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creando pedido...
+                  {language === 'es' ? 'Creando pedido...' : 'Creating order...'}
                 </>
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  Continuar al Pago &middot; ${total.toFixed(2)}
+                  {language === 'es' ? 'Continuar al Pago' : 'Continue to Payment'} &middot; ${total.toFixed(2)}
                 </>
               )}
             </button>
