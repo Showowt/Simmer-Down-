@@ -73,6 +73,52 @@ interface MenuItemCardProps {
 function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
   const { t } = useTranslation()
 
+  // Compact horizontal card for items without images (beverages, beers, etc.)
+  if (!item.image) {
+    return (
+      <button
+        onClick={() => onOpen(item)}
+        className="group bg-[#1A1A1A] rounded-xl border border-white/10 hover:border-[#E85D04]/50 transition-all duration-200 text-left w-full p-4 flex items-center gap-4"
+        aria-label={`Ver detalles de ${item.nameEs}`}
+      >
+        {/* Icon circle */}
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E85D04]/15 to-[#E85D04]/5 border border-[#E85D04]/20 flex items-center justify-center shrink-0 group-hover:from-[#E85D04]/25 group-hover:to-[#E85D04]/10 transition-all">
+          <span className="text-lg" aria-hidden="true">
+            {item.categoryId === 'hot-drinks' ? '☕' :
+             item.categoryId === 'drinks' ? '🍹' :
+             item.categoryId === 'local-beers' || item.categoryId === 'imported-beers' ? '🍺' :
+             item.categoryId === 'desserts' ? '🍰' :
+             item.categoryId === 'pizzas' || item.categoryId === 'specialty-pizzas' ? '🍕' :
+             '🍽️'}
+          </span>
+        </div>
+
+        {/* Name + description */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-1">
+            <p className="font-semibold text-sm text-white leading-snug truncate">{item.nameEs}</p>
+            {item.isVegetarian && <span className="text-[10px] shrink-0">🌱</span>}
+            {item.isSpicy && <span className="text-[10px] shrink-0">🌶️</span>}
+          </div>
+          {item.descriptionEs && (
+            <p className="text-[11px] text-white/40 mt-0.5 line-clamp-1">{item.descriptionEs}</p>
+          )}
+        </div>
+
+        {/* Price + add */}
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-[#E85D04] font-bold text-sm">
+            {formatPrice(item.basePrice)}
+          </span>
+          <span className="w-9 h-9 rounded-full bg-[#E85D04] flex items-center justify-center group-hover:bg-[#ff6a1f] transition-colors">
+            <Plus className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+          </span>
+        </div>
+      </button>
+    )
+  }
+
+  // Standard image card
   return (
     <button
       onClick={() => onOpen(item)}
@@ -81,24 +127,13 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
     >
       {/* Image */}
       <div className="relative aspect-[4/3] w-full bg-[#111] shrink-0">
-        {item.image ? (
-          <Image
-            src={item.image}
-            alt={item.nameEs}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1A1A1A] via-[#111] to-[#0A0A0A] overflow-hidden">
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E85D04]/20 to-transparent" />
-            <span className="text-[#E85D04]/60 font-display text-lg tracking-widest text-center px-3 leading-tight">{item.nameEs}</span>
-            {item.descriptionEs && (
-              <span className="text-white/20 text-[10px] mt-2 px-4 text-center line-clamp-2 leading-relaxed">{item.descriptionEs}</span>
-            )}
-          </div>
-        )}
+        <Image
+          src={item.image}
+          alt={item.nameEs}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        />
         <ItemBadges item={item} />
       </div>
 
@@ -658,12 +693,29 @@ export default function CartaPage() {
                   <div className="flex-1 h-px bg-white/6 ml-2" />
                 </div>
 
-                {/* Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                  {items.map((item) => (
-                    <MenuItemCard key={item.id} item={item} onOpen={openMenuItemSheet} />
-                  ))}
-                </div>
+                {/* Grid — image items in standard grid, no-image items span full width */}
+                {(() => {
+                  const withImages = items.filter(i => i.image)
+                  const withoutImages = items.filter(i => !i.image)
+                  return (
+                    <>
+                      {withImages.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                          {withImages.map((item) => (
+                            <MenuItemCard key={item.id} item={item} onOpen={openMenuItemSheet} />
+                          ))}
+                        </div>
+                      )}
+                      {withoutImages.length > 0 && (
+                        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ${withImages.length > 0 ? 'mt-4' : ''}`}>
+                          {withoutImages.map((item) => (
+                            <MenuItemCard key={item.id} item={item} onOpen={openMenuItemSheet} />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )
+                })()}
               </section>
             ))}
           </div>
