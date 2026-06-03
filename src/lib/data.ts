@@ -65,6 +65,7 @@ export interface MenuItem {
   isSpicy: boolean;
   isGlutenFree: boolean;
   isNew: boolean;
+  dineInOnly?: boolean;
   sizes?: MenuItemSize[];
   modifiers?: MenuItemModifier[];
 }
@@ -378,34 +379,34 @@ export const MENU_ITEMS: MenuItem[] = [
 
   // COLD DRINKS
   { id: 'frozen', categoryId: 'drinks', name: 'Frozen', nameEs: 'Frozen', description: 'Pineapple, Strawberry, Strawberry & Mint, Mint, Positive Vibration, Passion Fruit', descriptionEs: 'Piña, Fresa, Fresa & Hierba Buena, Hierba Buena, Positive Vibration, Maracuyá', basePrice: 3.75, image: '/images/menu/frozen-positive.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'lemonades', categoryId: 'drinks', name: 'Lemonades', nameEs: 'Limonadas', description: 'Strawberry, Strawberry & Mint, Passion Fruit, Mint, Traditional', descriptionEs: 'Fresa, Fresa con Hierba Buena, Maracuyá, Hierba Buena, Tradicional', basePrice: 3.25, image: '/images/menu/sangria.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'refrescos-naturales', categoryId: 'drinks', name: 'Natural Drinks', nameEs: 'Refrescos Naturales', description: 'Tamarind, Horchata, Peach Tea (100% natural)', descriptionEs: 'Tamarindo, Horchata, Té Durazno (100% natural)', basePrice: 2.95, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'agua', categoryId: 'drinks', name: 'Water', nameEs: 'Agua', description: '600ml bottled water', descriptionEs: 'Agua embotellada 600ml', basePrice: 1.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'sodas', categoryId: 'drinks', name: 'Sodas', nameEs: 'Sodas', description: 'Coca-Cola, Sprite, Fanta, Fresca, Kinley, Grape, Coca-Cola Zero', descriptionEs: 'Coca-Cola, Sprite, Fanta, Fresca, Kinley, Uva, Coca-Cola Zero', basePrice: 1.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'michelada', categoryId: 'drinks', name: 'Michelada', nameEs: 'Michelada', basePrice: 1.50, image: '/images/menu/michelada.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: true, isGlutenFree: true, isNew: false },
+  { id: 'lemonades', categoryId: 'drinks', name: 'Lemonades', nameEs: 'Limonadas', description: 'Strawberry, Strawberry & Mint, Passion Fruit, Mint, Traditional', descriptionEs: 'Fresa, Fresa con Hierba Buena, Maracuyá, Hierba Buena, Tradicional', basePrice: 3.25, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'refrescos-naturales', categoryId: 'drinks', name: 'Natural Drinks', nameEs: 'Refrescos Naturales', description: 'Tamarind, Horchata, Peach Tea (100% natural)', descriptionEs: 'Tamarindo, Horchata, Té Durazno (100% natural)', basePrice: 2.95, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'agua', categoryId: 'drinks', name: 'Water', nameEs: 'Agua', description: '600ml bottled water', descriptionEs: 'Agua embotellada 600ml', basePrice: 1.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'sodas', categoryId: 'drinks', name: 'Sodas', nameEs: 'Sodas', description: 'Coca-Cola, Sprite, Fanta, Fresca, Kinley, Grape, Coca-Cola Zero', descriptionEs: 'Coca-Cola, Sprite, Fanta, Fresca, Kinley, Uva, Coca-Cola Zero', basePrice: 1.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'michelada', categoryId: 'drinks', name: 'Michelada', nameEs: 'Michelada', basePrice: 1.50, image: '/images/menu/michelada.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: true, isGlutenFree: true, isNew: false, dineInOnly: true },
 
   // HOT DRINKS
-  { id: 'cappuccino', categoryId: 'hot-drinks', name: 'Cappuccino', nameEs: 'Cappuccino', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'cappuccino-vainilla', categoryId: 'hot-drinks', name: 'Vanilla Cappuccino', nameEs: 'Cappuccino Vainilla', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'latte', categoryId: 'hot-drinks', name: 'Latte', nameEs: 'Latte', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'latte-vainilla', categoryId: 'hot-drinks', name: 'Vanilla Latte', nameEs: 'Latte Vainilla', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'cafe-americano', categoryId: 'hot-drinks', name: 'Americano', nameEs: 'Café Americano', basePrice: 1.50, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'mokaccino', categoryId: 'hot-drinks', name: 'Mokaccino', nameEs: 'Mokaccino', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
-  { id: 'chocolate-caliente', categoryId: 'hot-drinks', name: 'Hot Chocolate', nameEs: 'Chocolate Caliente', basePrice: 2.99, image: '/images/menu/product-07.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'cappuccino', categoryId: 'hot-drinks', name: 'Cappuccino', nameEs: 'Cappuccino', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'cappuccino-vainilla', categoryId: 'hot-drinks', name: 'Vanilla Cappuccino', nameEs: 'Cappuccino Vainilla', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'latte', categoryId: 'hot-drinks', name: 'Latte', nameEs: 'Latte', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'latte-vainilla', categoryId: 'hot-drinks', name: 'Vanilla Latte', nameEs: 'Latte Vainilla', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'cafe-americano', categoryId: 'hot-drinks', name: 'Americano', nameEs: 'Café Americano', basePrice: 1.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'mokaccino', categoryId: 'hot-drinks', name: 'Mokaccino', nameEs: 'Mokaccino', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
+  { id: 'chocolate-caliente', categoryId: 'hot-drinks', name: 'Hot Chocolate', nameEs: 'Chocolate Caliente', basePrice: 2.99, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: true, isNew: false },
 
   // LOCAL BEERS
-  { id: 'heroica', categoryId: 'local-beers', name: 'Cerveza Artesanal Heroica', nameEs: 'Cerveza Artesanal Heroica', description: 'Craft beer from Cervecería Santaneca Puente Quemado', descriptionEs: 'Cervecería Santaneca Puente Quemado', basePrice: 5.00, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: true, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'regia-chola', categoryId: 'local-beers', name: 'Regia Chola', nameEs: 'Regia Chola', basePrice: 4.25, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'suprema', categoryId: 'local-beers', name: 'Suprema', nameEs: 'Suprema', basePrice: 2.50, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'pilsener', categoryId: 'local-beers', name: 'Pilsener', nameEs: 'Pilsener', basePrice: 2.25, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'golden', categoryId: 'local-beers', name: 'Golden', nameEs: 'Golden', basePrice: 2.25, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'golden-extra', categoryId: 'local-beers', name: 'Golden Extra', nameEs: 'Golden Extra', basePrice: 2.25, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
+  { id: 'heroica', categoryId: 'local-beers', name: 'Cerveza Artesanal Heroica', nameEs: 'Cerveza Artesanal Heroica', description: 'Craft beer from Cervecería Santaneca Puente Quemado', descriptionEs: 'Cervecería Santaneca Puente Quemado', basePrice: 5.00, isAvailable: true, isFeatured: true, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'regia-chola', categoryId: 'local-beers', name: 'Regia Chola', nameEs: 'Regia Chola', basePrice: 4.25, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'suprema', categoryId: 'local-beers', name: 'Suprema', nameEs: 'Suprema', basePrice: 2.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'pilsener', categoryId: 'local-beers', name: 'Pilsener', nameEs: 'Pilsener', basePrice: 2.25, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'golden', categoryId: 'local-beers', name: 'Golden', nameEs: 'Golden', basePrice: 2.25, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'golden-extra', categoryId: 'local-beers', name: 'Golden Extra', nameEs: 'Golden Extra', basePrice: 2.25, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
 
   // IMPORTED BEERS
-  { id: 'corona', categoryId: 'imported-beers', name: 'Corona', nameEs: 'Corona', basePrice: 3.50, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'heineken', categoryId: 'imported-beers', name: 'Heineken', nameEs: 'Heineken', basePrice: 3.50, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'michelob-ultra', categoryId: 'imported-beers', name: 'Michelob Ultra', nameEs: 'Michelob Ultra', basePrice: 3.50, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
-  { id: 'gallo', categoryId: 'imported-beers', name: 'Gallo', nameEs: 'Gallo', basePrice: 3.50, image: '/images/menu/cervezas.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false },
+  { id: 'corona', categoryId: 'imported-beers', name: 'Corona', nameEs: 'Corona', basePrice: 3.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'heineken', categoryId: 'imported-beers', name: 'Heineken', nameEs: 'Heineken', basePrice: 3.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'michelob-ultra', categoryId: 'imported-beers', name: 'Michelob Ultra', nameEs: 'Michelob Ultra', basePrice: 3.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
+  { id: 'gallo', categoryId: 'imported-beers', name: 'Gallo', nameEs: 'Gallo', basePrice: 3.50, isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, dineInOnly: true },
 ];
 
 // ============================================

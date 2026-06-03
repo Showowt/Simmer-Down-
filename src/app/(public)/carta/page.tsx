@@ -45,6 +45,11 @@ function useDebounce<T>(value: T, delay: number): T {
 function ItemBadges({ item }: { item: MenuItem }) {
   return (
     <div className="absolute top-2 left-2 flex flex-wrap gap-1 z-10">
+      {item.dineInOnly && (
+        <span className="bg-purple-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+          Solo en local
+        </span>
+      )}
       {item.isFeatured && (
         <span className="bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
           Destacado
@@ -95,8 +100,11 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
 
         {/* Name + description */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start gap-1">
+          <div className="flex items-start gap-1.5">
             <p className="font-semibold text-sm text-white leading-snug truncate">{item.nameEs}</p>
+            {item.dineInOnly && (
+              <span className="bg-purple-600/80 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none shrink-0 whitespace-nowrap">Solo en local</span>
+            )}
             {item.isVegetarian && <span className="text-[10px] shrink-0">🌱</span>}
             {item.isSpicy && <span className="text-[10px] shrink-0">🌶️</span>}
           </div>
@@ -165,7 +173,7 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
 function ItemDetailSheet() {
   const { t } = useTranslation()
   const { isMenuItemSheetOpen, selectedMenuItem, closeMenuItemSheet } = useUIStore()
-  const { addItem } = useCartStore()
+  const { addItem, orderType } = useCartStore()
 
   const [quantity, setQuantity] = useState(1)
   const [selectedSize, setSelectedSize] = useState<MenuItemSize | undefined>(undefined)
@@ -290,10 +298,22 @@ function ItemDetailSheet() {
                   Sin Gluten
                 </span>
               )}
+              {item.dineInOnly && (
+                <span className="bg-purple-600/20 text-purple-400 text-xs px-2 py-0.5 rounded-full">
+                  🍷 Solo en local
+                </span>
+              )}
             </div>
             <h2 className="font-display text-2xl text-white tracking-wide">{item.nameEs}</h2>
             {item.descriptionEs && (
               <p className="text-white/60 text-sm mt-1 leading-relaxed">{item.descriptionEs}</p>
+            )}
+            {item.dineInOnly && orderType !== 'dine_in' && (
+              <div className="mt-3 p-3 bg-purple-600/10 border border-purple-500/20 rounded-lg">
+                <p className="text-purple-300 text-xs">
+                  🍷 Este producto solo está disponible para consumo en el local. Cambia tu tipo de pedido a &quot;Comer aquí&quot; para agregarlo.
+                </p>
+              </div>
             )}
           </div>
 
@@ -384,13 +404,19 @@ function ItemDetailSheet() {
           </div>
 
           {/* ADD TO CART BUTTON */}
-          <button
-            onClick={handleAdd}
-            className="w-full bg-[#E85D04] hover:bg-[#ff6a1f] active:scale-[0.98] text-white font-bold rounded-xl h-14 flex items-center justify-between px-5 transition-all duration-150"
-          >
-            <span className="text-base">{t('menu.addToCart')}</span>
-            <span className="text-base">{formatPrice(total)}</span>
-          </button>
+          {item.dineInOnly && orderType !== 'dine_in' ? (
+            <div className="w-full bg-purple-600/20 border border-purple-500/30 text-purple-300 font-semibold rounded-xl h-14 flex items-center justify-center px-5 text-sm">
+              🍷 Solo disponible para consumo en local
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="w-full bg-[#E85D04] hover:bg-[#ff6a1f] active:scale-[0.98] text-white font-bold rounded-xl h-14 flex items-center justify-between px-5 transition-all duration-150"
+            >
+              <span className="text-base">{t('menu.addToCart')}</span>
+              <span className="text-base">{formatPrice(total)}</span>
+            </button>
+          )}
         </div>
       </div>
     </>
