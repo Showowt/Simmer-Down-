@@ -52,7 +52,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/auth/login"
-              className="block w-full bg-white/10 hover:bg-[#4A4642] text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
+              className="block w-full bg-white/10 hover:bg-white/20 text-white py-4 font-semibold transition-colors min-h-[56px] flex items-center justify-center"
             >
               Volver a Iniciar Sesión
             </Link>

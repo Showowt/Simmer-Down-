@@ -241,7 +241,7 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
         <button
           onClick={handlePrev}
           disabled={!canGoPrev}
-          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-white/10 disabled:cursor-not-allowed transition-colors"
           aria-label={t({ es: 'Mes anterior', en: 'Previous month' })}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -252,7 +252,7 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
         <button
           onClick={handleNext}
           disabled={!canGoNext}
-          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-white/10 disabled:cursor-not-allowed transition-colors"
           aria-label={t({ es: 'Mes siguiente', en: 'Next month' })}
         >
           <ChevronRight className="w-5 h-5" />
@@ -291,7 +291,7 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
               className={`
                 aspect-square flex items-center justify-center text-sm font-medium transition-all relative
                 ${disabled
-                  ? 'text-[#3D3936] cursor-not-allowed'
+                  ? 'text-white/10 cursor-not-allowed'
                   : selected
                     ? 'bg-[#E85D04] text-white'
                     : todayMark
@@ -576,7 +576,7 @@ export default function ReservationsPage() {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <button
                       onClick={handleReset}
-                      className="flex items-center gap-2 bg-white/10 hover:bg-[#4A4642] text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
+                      className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
                     >
                       {t(b.makeAnother)}
                     </button>
@@ -621,7 +621,7 @@ export default function ReservationsPage() {
                           p-4 border rounded-xl text-left transition-all min-h-[56px]
                           ${selectedLocationId === loc.id
                             ? 'border-[#E85D04] bg-[#E85D04]/10 text-white'
-                            : 'border-white/10 bg-[#0A0A0A] text-white/60 hover:border-[#6B6560] hover:text-white'
+                            : 'border-white/10 bg-[#0A0A0A] text-white/60 hover:border-white/40 hover:text-white'
                           }
                         `}
                         aria-pressed={selectedLocationId === loc.id}
@@ -692,7 +692,7 @@ export default function ReservationsPage() {
                                 py-2.5 px-2 text-sm font-medium rounded-lg transition-all text-center
                                 ${selectedTime === slot
                                   ? 'bg-[#E85D04] text-white'
-                                  : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
+                                  : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-white/40 hover:text-white'
                                 }
                               `}
                               aria-pressed={selectedTime === slot}
@@ -735,7 +735,7 @@ export default function ReservationsPage() {
                           w-14 h-14 rounded-xl flex items-center justify-center text-lg font-medium transition-all
                           ${guestCount === num
                             ? 'bg-[#E85D04] text-white'
-                            : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
+                            : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-white/40 hover:text-white'
                           }
                         `}
                         aria-label={`${num} ${num === 1 ? t(b.person) : t(b.people)}`}

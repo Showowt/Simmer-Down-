@@ -77,8 +77,8 @@ export function LocationCard({ location, index }: LocationCardProps) {
           </div>
           {/* Rating Badge */}
           <div className="absolute top-4 left-4">
-            <span className="inline-flex items-center gap-1.5 bg-[#1F1D1A]/80 backdrop-blur-sm text-white text-sm px-3 py-2">
-              <Star className="w-3.5 h-3.5 text-[#C9A84C] fill-[#C9A84C]" />
+            <span className="inline-flex items-center gap-1.5 bg-[#111111]/80 backdrop-blur-sm text-white text-sm px-3 py-2">
+              <Star className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
               {location.rating}
             </span>
           </div>
@@ -87,15 +87,15 @@ export function LocationCard({ location, index }: LocationCardProps) {
         {/* Content */}
         <div className={index % 2 === 1 ? "lg:order-1" : ""}>
           <div className="mb-6">
-            <p className="text-[#6B6560] text-sm uppercase tracking-[0.2em] mb-2">
+            <p className="text-white/40 text-sm uppercase tracking-[0.2em] mb-2">
               {location.vibe}
             </p>
-            <h2 className="font-display text-3xl md:text-4xl text-[#FFF8F0] tracking-tight">
+            <h2 className="font-display text-3xl md:text-4xl text-white tracking-tight">
               {location.name}
             </h2>
           </div>
 
-          <p className="text-[#B8B0A8] mb-6 text-lg leading-relaxed">
+          <p className="text-white/60 mb-6 text-lg leading-relaxed">
             {location.description}
           </p>
 
@@ -104,7 +104,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
             {location.features.map((feature) => (
               <span
                 key={feature}
-                className="bg-[#252320] border border-[#3D3936] text-[#B8B0A8] px-4 py-2 text-sm"
+                className="bg-[#1A1A1A] border border-white/10 text-white/60 px-4 py-2 text-sm"
               >
                 {feature}
               </span>
@@ -112,26 +112,26 @@ export function LocationCard({ location, index }: LocationCardProps) {
           </div>
 
           {/* Details */}
-          <div className="space-y-4 mb-8 bg-[#252320] border border-[#3D3936] p-6">
+          <div className="space-y-4 mb-8 bg-[#1A1A1A] border border-white/10 p-6">
             <div className="flex items-start gap-4">
-              <MapPin className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+              <MapPin className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-[#FFF8F0]">{location.address}</p>
-                <p className="text-[#6B6560] text-sm">{location.city}</p>
+                <p className="text-white">{location.address}</p>
+                <p className="text-white/40 text-sm">{location.city}</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <Clock className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+              <Clock className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-[#FFF8F0]">{location.hours.weekday}</p>
-                <p className="text-[#6B6560] text-sm">{location.hours.weekend}</p>
+                <p className="text-white">{location.hours.weekday}</p>
+                <p className="text-white/40 text-sm">{location.hours.weekend}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Phone className="w-5 h-5 text-[#C9A84C] flex-shrink-0" />
+              <Phone className="w-5 h-5 text-[#FBBF24] flex-shrink-0" />
               <a
                 href={`tel:${location.phone.replace(/\s/g, "")}`}
-                className="text-[#FFF8F0] hover:text-[#C9A84C] transition-colors"
+                className="text-white hover:text-[#FBBF24] transition-colors"
               >
                 {location.phone}
               </a>
@@ -142,7 +142,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/reservations"
-              className="inline-flex items-center justify-center gap-2 bg-[#FFF8F0] text-[#1F1D1A] hover:bg-white px-6 py-3.5 text-sm uppercase tracking-[0.1em] font-semibold transition-all min-h-[48px]"
+              className="inline-flex items-center justify-center gap-2 bg-white text-[#111111] hover:bg-white px-6 py-3.5 text-sm uppercase tracking-[0.1em] font-semibold transition-all min-h-[48px]"
             >
               {t(translations.locations.reserveTable)}
             </Link>
@@ -150,14 +150,14 @@ export function LocationCard({ location, index }: LocationCardProps) {
               href={location.mapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#3D3936] text-[#FFF8F0] px-6 py-3.5 text-sm font-semibold border border-[#3D3936] transition-all min-h-[48px]"
+              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-white/10 text-white px-6 py-3.5 text-sm font-semibold border border-white/10 transition-all min-h-[48px]"
             >
               <Navigation className="w-4 h-4" />
               {t(translations.locations.directions)}
             </a>
             <a
               href={`tel:${location.phone.replace(/\s/g, "")}`}
-              className="inline-flex items-center justify-center gap-2 bg-[#252320] hover:bg-[#3D3936] text-[#FFF8F0] px-6 py-3.5 text-sm font-semibold border border-[#3D3936] transition-all min-h-[48px]"
+              className="inline-flex items-center justify-center gap-2 bg-[#1A1A1A] hover:bg-white/10 text-white px-6 py-3.5 text-sm font-semibold border border-white/10 transition-all min-h-[48px]"
             >
               <Phone className="w-4 h-4" />
               {t(translations.locations.callNow)}

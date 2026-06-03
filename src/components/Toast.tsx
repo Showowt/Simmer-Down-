@@ -51,10 +51,10 @@ export default function ToastContainer() {
             exit={{ opacity: 0, x: 100, scale: 0.9 }}
             className={`flex items-center gap-3 px-4 py-3 ${
               toast.type === 'success'
-                ? 'bg-[#252320] border border-[#4CAF50]/30'
+                ? 'bg-[#1A1A1A] border border-[#4CAF50]/30'
                 : toast.type === 'error'
-                ? 'bg-[#252320] border border-[#C73E1D]/30'
-                : 'bg-[#252320] border border-[#FF6B35]/30'
+                ? 'bg-[#1A1A1A] border border-[#C73E1D]/30'
+                : 'bg-[#1A1A1A] border border-[#E85D04]/30'
             }`}
             role="alert"
             aria-live="polite"
@@ -65,7 +65,7 @@ export default function ToastContainer() {
                   ? 'bg-[#4CAF50]/20 text-[#4CAF50]'
                   : toast.type === 'error'
                   ? 'bg-[#C73E1D]/20 text-[#C73E1D]'
-                  : 'bg-[#FF6B35]/20 text-[#FF6B35]'
+                  : 'bg-[#E85D04]/20 text-[#E85D04]'
               }`}
             >
               {toast.type === 'success' ? (
@@ -76,10 +76,10 @@ export default function ToastContainer() {
                 <ShoppingBag className="w-4 h-4" />
               )}
             </div>
-            <span className="text-[#FFF8F0] text-sm font-medium">{toast.message}</span>
+            <span className="text-white text-sm font-medium">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
+              className="ml-2 text-white/40 hover:text-white transition-colors"
               aria-label="Dismiss"
             >
               <X className="w-4 h-4" />

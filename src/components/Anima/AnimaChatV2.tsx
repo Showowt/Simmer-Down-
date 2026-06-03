@@ -426,7 +426,7 @@ export default function AnimaChatV2() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={openChat}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-6 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#FF6B35] hover:bg-[#E55A2B] text-white flex items-center justify-center shadow-md shadow-[#FF6B35]/20 transition-all group"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-6 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#E85D04] hover:bg-[#C2410C] text-white flex items-center justify-center shadow-md shadow-[#E85D04]/20 transition-all group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Hablar con ANIMA"
@@ -444,38 +444,38 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-80 hidden lg:block bg-[#252320] border border-[#3D3936] shadow-2xl rounded-xl"
+            className="fixed bottom-6 right-6 z-50 w-80 hidden lg:block bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-xl"
           >
-            <div className="flex items-center justify-between p-4 border-b border-[#3D3936]">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FF6B35] flex items-center justify-center animate-pulse">
+                <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center animate-pulse">
                   <Flame className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[#FFF8F0] text-sm">ANIMA</h3>
+                  <h3 className="font-semibold text-white text-sm">ANIMA</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-[#4CAF50] animate-pulse" />
                     {locale === 'en' ? 'Online' : 'En línea'}
                   </p>
                 </div>
               </div>
-              <button onClick={dismissProactive} className="p-1.5 text-[#6B6560] hover:text-[#FFF8F0]">
+              <button onClick={dismissProactive} className="p-1.5 text-white/40 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-[#FFF8F0] text-sm mb-4">{getProactiveMessage()}</p>
+              <p className="text-white text-sm mb-4">{getProactiveMessage()}</p>
               <div className="flex gap-2">
                 <button
                   onClick={openChat}
-                  className="flex-1 bg-[#FF6B35] hover:bg-[#E55A2B] text-white py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#E85D04] hover:bg-[#C2410C] text-white py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                 >
                   {locale === 'en' ? "Yes, let's chat" : 'Sí, platiquemos'}
                   <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={dismissProactive}
-                  className="px-4 bg-[#3D3936] hover:bg-[#4A4642] text-[#B8B0A8] py-3 text-sm"
+                  className="px-4 bg-white/10 hover:bg-white/20 text-white/60 py-3 text-sm"
                 >
                   {locale === 'en' ? 'Not now' : 'Ahora no'}
                 </button>
@@ -492,34 +492,34 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#1F1D1A] border border-[#3D3936] flex flex-col shadow-2xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#111111] border border-white/10 flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-[#3D3936] bg-[#252320]">
+            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1A1A1A]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FF6B35] flex items-center justify-center">
+                <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center">
                   <Flame className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[#FFF8F0]">ANIMA</h3>
+                  <h3 className="font-semibold text-white">ANIMA</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-2 h-2 bg-[#4CAF50] animate-pulse" />
                     {locale === 'en' ? 'The Soul of Simmer Down' : 'El alma de Simmer Down'}
                   </p>
                 </div>
               </div>
-              <button onClick={closeChat} className="p-2 text-[#6B6560] hover:text-[#FFF8F0]">
+              <button onClick={closeChat} className="p-2 text-white/40 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Quick Actions Bar */}
-            <div className="flex gap-1 p-2 border-b border-[#3D3936] bg-[#252320] overflow-x-auto">
+            <div className="flex gap-1 p-2 border-b border-white/10 bg-[#1A1A1A] overflow-x-auto">
               {quickActions.map((action) => (
                 <button
                   key={action.action}
                   onClick={() => handleQuickAction(action.action)}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] text-xs font-medium transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-[#E85D04] text-white text-xs font-medium transition-colors whitespace-nowrap"
                 >
                   <action.icon className="w-3.5 h-3.5" />
                   {action.label}
@@ -538,26 +538,26 @@ export default function AnimaChatV2() {
                 >
                   <div className={`max-w-[85%] ${
                     message.role === 'user'
-                      ? 'bg-[#FF6B35] text-white'
-                      : 'bg-[#252320] text-[#FFF8F0] border border-[#3D3936]'
+                      ? 'bg-[#E85D04] text-white'
+                      : 'bg-[#1A1A1A] text-white border border-white/10'
                   } p-3 text-sm`}>
                     <p className="whitespace-pre-line">{message.content}</p>
 
                     {/* Suggested Menu Items */}
                     {message.suggestedItems && message.suggestedItems.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-[#3D3936] space-y-2">
+                      <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
                         {message.suggestedItems.map((item) => (
                           <div
                             key={item.id}
-                            className="flex items-center justify-between p-2 bg-[#1F1D1A] border border-[#3D3936]"
+                            className="flex items-center justify-between p-2 bg-[#111111] border border-white/10"
                           >
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-[#FFF8F0] text-sm truncate">{item.name}</p>
+                              <p className="font-medium text-white text-sm truncate">{item.name}</p>
                               <p className="text-[#4CAF50] text-xs">${item.price.toFixed(2)}</p>
                             </div>
                             <button
                               onClick={() => handleAddToCart(item)}
-                              className="ml-2 p-2 bg-[#FF6B35] hover:bg-[#E55A2B] text-white"
+                              className="ml-2 p-2 bg-[#E85D04] hover:bg-[#C2410C] text-white"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
@@ -568,12 +568,12 @@ export default function AnimaChatV2() {
 
                     {/* Action Buttons */}
                     {message.actions && message.actions.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#3D3936]">
+                      <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-white/10">
                         {message.actions.slice(0, 4).map((action) => (
                           <button
                             key={action}
                             onClick={() => handleQuickAction(action)}
-                            className="px-2.5 py-1.5 bg-[#3D3936] hover:bg-[#FF6B35] text-[#FFF8F0] text-xs transition-colors capitalize"
+                            className="px-2.5 py-1.5 bg-white/10 hover:bg-[#E85D04] text-white text-xs transition-colors capitalize"
                           >
                             {actionLabels[action]?.[locale] || action.replace(/_/g, ' ')}
                           </button>
@@ -587,10 +587,10 @@ export default function AnimaChatV2() {
               {/* Typing Indicator */}
               {isTyping && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                  <div className="bg-[#252320] border border-[#3D3936] p-3 flex gap-1.5">
-                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-[#FF6B35] animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="bg-[#1A1A1A] border border-white/10 p-3 flex gap-1.5">
+                    <span className="w-2 h-2 bg-[#E85D04] animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-2 h-2 bg-[#E85D04] animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-2 h-2 bg-[#E85D04] animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </motion.div>
               )}
@@ -599,7 +599,7 @@ export default function AnimaChatV2() {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-[#3D3936] bg-[#252320]">
+            <div className="p-4 border-t border-white/10 bg-[#1A1A1A]">
               <form onSubmit={(e) => { e.preventDefault(); handleSend() }} className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -607,13 +607,13 @@ export default function AnimaChatV2() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={locale === 'en' ? 'Type a message...' : 'Escribe un mensaje...'}
-                  className="flex-1 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] text-sm"
+                  className="flex-1 px-4 py-3 bg-[#111111] border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] text-sm"
                 />
                 {hasSpeechRecognition && (
                   <button
                     type="button"
                     onClick={toggleVoice}
-                    className={`px-3 ${isListening ? 'bg-red-500' : 'bg-[#3D3936]'} hover:bg-[#4A4642] text-white transition-colors`}
+                    className={`px-3 ${isListening ? 'bg-red-500' : 'bg-white/10'} hover:bg-white/20 text-white transition-colors`}
                   >
                     {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                   </button>
@@ -621,7 +621,7 @@ export default function AnimaChatV2() {
                 <button
                   type="submit"
                   disabled={!input.trim()}
-                  className="px-4 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white transition-colors"
+                  className="px-4 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white transition-colors"
                 >
                   <Send className="w-5 h-5" />
                 </button>

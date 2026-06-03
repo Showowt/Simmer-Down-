@@ -132,7 +132,7 @@ const FALLBACK_TIERS: TierConfig[] = [
     points_multiplier: 1.25,
     perks: [],
     perks_es: ["1.25x puntos", "Delivery gratis", "Acceso anticipado al menú"],
-    color_hex: "#B8B0A8",
+    color_hex: "white/60",
   },
   {
     tier: "gold",
@@ -142,7 +142,7 @@ const FALLBACK_TIERS: TierConfig[] = [
     points_multiplier: 1.5,
     perks: [],
     perks_es: ["1.5x puntos", "Pickup prioritario", "Toppings premium gratis", "Invitación mensual a degustación"],
-    color_hex: "#C9A84C",
+    color_hex: "#FBBF24",
   },
   {
     tier: "platinum",

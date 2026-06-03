@@ -75,19 +75,19 @@ export default function WhatsAppButton({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="relative bg-[#252320] border border-[#3D3936] p-4 max-w-[200px]"
+                className="relative bg-[#1A1A1A] border border-white/10 p-4 max-w-[200px]"
               >
                 <button
                   onClick={handleDismiss}
-                  className="absolute top-2 right-2 text-[#6B6560] hover:text-[#FFF8F0] transition-colors"
+                  className="absolute top-2 right-2 text-white/40 hover:text-white transition-colors"
                   aria-label={t(translations.common.close)}
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <p className="text-[#FFF8F0] text-sm font-medium mb-1">
+                <p className="text-white text-sm font-medium mb-1">
                   {t(translations.common.whatsappHelp)}
                 </p>
-                <p className="text-[#6B6560] text-xs">
+                <p className="text-white/40 text-xs">
                   {t(translations.common.whatsappChat)}
                 </p>
               </motion.div>
@@ -97,7 +97,7 @@ export default function WhatsAppButton({
           {/* WhatsApp Button */}
           <button
             onClick={handleClick}
-            className="w-14 h-14 bg-[#25D366] hover:bg-[#20BD5A] text-white flex items-center justify-center transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-[#2D2A26]"
+            className="w-14 h-14 bg-[#25D366] hover:bg-[#20BD5A] text-white flex items-center justify-center transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
             aria-label={t(translations.common.contactWhatsapp)}
           >
             <MessageCircle className="w-7 h-7" />

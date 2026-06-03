@@ -9,7 +9,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLocale}
-      className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#B8B0A8] hover:text-[#FFF8F0] transition-colors min-w-[44px] min-h-[44px]"
+      className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white/60 hover:text-white transition-colors min-w-[44px] min-h-[44px]"
       aria-label={locale === 'es' ? 'Switch to English' : 'Cambiar a Espanol'}
       title={locale === 'es' ? 'Switch to English' : 'Cambiar a Espanol'}
     >

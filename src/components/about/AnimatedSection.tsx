@@ -80,11 +80,11 @@ export function AnimatedValue({
       viewport={{ once: true }}
       className="text-center"
     >
-      <div className="w-16 h-16 bg-[#FF6B35]/10 flex items-center justify-center mx-auto mb-6">
+      <div className="w-16 h-16 bg-[#E85D04]/10 flex items-center justify-center mx-auto mb-6">
         {icon}
       </div>
-      <h3 className="font-display text-xl text-[#FFF8F0] mb-3">{title}</h3>
-      <p className="text-[#B8B0A8]">{description}</p>
+      <h3 className="font-display text-xl text-white mb-3">{title}</h3>
+      <p className="text-white/60">{description}</p>
     </motion.div>
   );
 }
@@ -119,9 +119,9 @@ export function AnimatedTeamMember({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
-      <h3 className="font-display text-xl text-[#FFF8F0] mb-1">{name}</h3>
-      <p className="text-[#C9A84C] text-sm font-medium mb-3">{role}</p>
-      <p className="text-[#B8B0A8]">{bio}</p>
+      <h3 className="font-display text-xl text-white mb-1">{name}</h3>
+      <p className="text-[#FBBF24] text-sm font-medium mb-3">{role}</p>
+      <p className="text-white/60">{bio}</p>
     </motion.div>
   );
 }
@@ -147,12 +147,12 @@ export function AnimatedMilestone({
       viewport={{ once: true }}
       className="flex items-start gap-6"
     >
-      <div className="w-6 h-6 bg-[#FF6B35] flex items-center justify-center flex-shrink-0 relative z-10">
+      <div className="w-6 h-6 bg-[#E85D04] flex items-center justify-center flex-shrink-0 relative z-10">
         {icon}
       </div>
       <div className="pt-0.5">
-        <span className="font-display italic text-xl text-[#C9A84C]">{year}</span>
-        <p className="text-[#FFF8F0] text-lg">{event}</p>
+        <span className="font-display italic text-xl text-[#FBBF24]">{year}</span>
+        <p className="text-white text-lg">{event}</p>
       </div>
     </motion.div>
   );

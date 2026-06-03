@@ -194,7 +194,7 @@ export function EventsList() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-8 items-center bg-[#111111] border border-[white/10] overflow-hidden"
+              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-8 items-center bg-[#111111] border border-white/10 overflow-hidden"
             >
               <div className="relative aspect-[3/4] lg:aspect-auto lg:h-[640px] overflow-hidden">
                 {event.image_url ? (
@@ -217,13 +217,13 @@ export function EventsList() {
                   <Star className="w-3.5 h-3.5" />
                   {locale === 'es' ? 'Evento Destacado' : 'Featured Event'}
                 </span>
-                <h2 className="font-display text-3xl md:text-5xl text-[white] mb-4 leading-tight">
+                <h2 className="font-display text-3xl md:text-5xl text-white mb-4 leading-tight">
                   {locale === 'es' ? (event.title_es || event.title) : event.title}
                 </h2>
-                <p className="text-lg text-[white/60] mb-6">
+                <p className="text-lg text-white/60 mb-6">
                   {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}
                 </p>
-                <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 text-[white/60]">
+                <div className="flex flex-wrap gap-x-6 gap-y-3 mb-8 text-white/60">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-[#FBBF24]" />
                     <span className="capitalize">{formatEventDate(event.starts_at, event.recurrence, locale)}</span>
@@ -261,7 +261,7 @@ export function EventsList() {
       {upcoming.length > 0 && (
         <section className="py-16">
           <div className="max-w-6xl mx-auto px-6">
-            <h2 className="font-display text-3xl text-[white] mb-12">
+            <h2 className="font-display text-3xl text-white mb-12">
               {locale === 'es' ? 'Próximos Eventos' : 'Upcoming Events'}
             </h2>
 
@@ -273,7 +273,7 @@ export function EventsList() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
                   viewport={{ once: true }}
-                  className="group bg-[#1A1A1A] border border-[white/10] overflow-hidden hover:border-[#E85D04]/50 transition-all"
+                  className="group bg-[#1A1A1A] border border-white/10 overflow-hidden hover:border-[#E85D04]/50 transition-all"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden">
                     {event.image_url ? (
@@ -289,7 +289,7 @@ export function EventsList() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/70 via-transparent to-transparent" />
                     <div className="absolute top-3 left-3">
-                      <span className="bg-[#0A0A0A]/80 backdrop-blur-sm text-[white] text-xs font-semibold px-3 py-1">
+                      <span className="bg-[#0A0A0A]/80 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1">
                         {firstCategoryTag(event.tags, locale)}
                       </span>
                     </div>
@@ -303,26 +303,26 @@ export function EventsList() {
                   </div>
 
                   <div className="p-6">
-                    <h3 className="font-display text-xl text-[white] mb-2 line-clamp-2">
+                    <h3 className="font-display text-xl text-white mb-2 line-clamp-2">
                       {locale === 'es' ? (event.title_es || event.title) : event.title}
                     </h3>
-                    <p className="text-[white/60] text-sm mb-4 line-clamp-2">
+                    <p className="text-white/60 text-sm mb-4 line-clamp-2">
                       {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}
                     </p>
 
                     <div className="space-y-2 mb-6 text-sm">
-                      <div className="flex items-center gap-2 text-[white/40]">
+                      <div className="flex items-center gap-2 text-white/40">
                         <Calendar className="w-4 h-4 text-[#FBBF24]" />
                         <span className="capitalize">
                           {formatEventDate(event.starts_at, event.recurrence, locale)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-[white/40]">
+                      <div className="flex items-center gap-2 text-white/40">
                         <Clock className="w-4 h-4 text-[#FBBF24]" />
                         {formatEventTime(event.starts_at, locale)}
                       </div>
                       {event.custom_venue && (
-                        <div className="flex items-center gap-2 text-[white/40]">
+                        <div className="flex items-center gap-2 text-white/40">
                           <MapPin className="w-4 h-4 text-[#FBBF24]" />
                           {event.custom_venue}
                         </div>
@@ -331,7 +331,7 @@ export function EventsList() {
 
                     <Link
                       href="/contact"
-                      className="block text-center bg-[white/10] hover:bg-[#E85D04] text-[white] py-3 font-semibold transition-colors min-h-[48px]"
+                      className="block text-center bg-white/10 hover:bg-[#E85D04] text-white py-3 font-semibold transition-colors min-h-[48px]"
                     >
                       {locale === 'es' ? 'Reservar' : 'Reserve'}
                     </Link>
@@ -360,7 +360,7 @@ export function PrivateEventsSection({
   const { t, locale } = useI18n();
 
   return (
-    <section className="py-24 bg-[#1A1A1A] border-t border-[white/10]">
+    <section className="py-24 bg-[#1A1A1A] border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -368,13 +368,13 @@ export function PrivateEventsSection({
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <p className="font-display italic text-2xl text-[white/40] mb-4">
+            <p className="font-display italic text-2xl text-white/40 mb-4">
               {locale === 'es' ? 'Eventos Privados' : 'Private Events'}
             </p>
-            <h2 className="font-display text-4xl md:text-5xl text-[white] mb-6">
+            <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
               {locale === 'es' ? 'Tu Evento Con Nosotros' : 'Your Event With Us'}
             </h2>
-            <p className="text-lg text-[white/60] mb-8">
+            <p className="text-lg text-white/60 mb-8">
               {locale === 'es'
                 ? '¿Buscas el lugar perfecto para tu próxima celebración? Ofrecemos espacios para eventos privados, menús personalizados y servicio de catering para hacer tu evento inolvidable.'
                 : 'Looking for the perfect place for your next celebration? We offer spaces for private events, custom menus and catering service to make your event unforgettable.'}
@@ -387,10 +387,10 @@ export function PrivateEventsSection({
                     {type.icon}
                   </div>
                   <div>
-                    <h3 className="text-[white] font-semibold mb-1">
+                    <h3 className="text-white font-semibold mb-1">
                       {type.title}
                     </h3>
-                    <p className="text-[white/40] text-sm">{type.description}</p>
+                    <p className="text-white/40 text-sm">{type.description}</p>
                   </div>
                 </div>
               ))}
