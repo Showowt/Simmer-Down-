@@ -768,62 +768,53 @@ export default function ReservationsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="res-name" className="block text-sm font-medium text-white/50 mb-3">
+                      <label htmlFor="res-name" className="block text-sm font-medium text-white/50 mb-2">
                         {t(b.name)} *
                       </label>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                        <input
-                          id="res-name"
-                          type="text"
-                          required
-                          value={name}
-                          onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.name; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition min-h-[52px] ${validationErrors.name ? '!border-red-400' : ''}`}
-                          placeholder={t({ es: 'Tu nombre', en: 'Your name' })}
-                        />
-                      </div>
-                      {validationErrors.name && <p className="text-sm text-red-400 mt-1">{validationErrors.name}</p>}
+                      <input
+                        id="res-name"
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.name; return next }) }}
+                        className={`w-full px-4 py-4 bg-[#111] border rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/30 transition ${validationErrors.name ? 'border-red-400' : 'border-white/15'}`}
+                        placeholder={t({ es: 'Tu nombre', en: 'Your name' })}
+                      />
+                      {validationErrors.name && <p className="text-sm text-red-400 mt-2">{validationErrors.name}</p>}
                     </div>
 
                     {/* Phone */}
                     <div>
-                      <label htmlFor="res-phone" className="block text-sm font-medium text-white/50 mb-3">
+                      <label htmlFor="res-phone" className="block text-sm font-medium text-white/50 mb-2">
                         {t(b.phone)} *
                       </label>
-                      <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                        <input
-                          id="res-phone"
-                          type="tel"
-                          required
-                          inputMode="tel"
-                          autoComplete="tel"
-                          value={phone}
-                          onChange={(e) => { setPhone(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.phone; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition min-h-[52px] ${validationErrors.phone ? '!border-red-400' : 'border-white/20'}`}
-                          placeholder="+503 XXXX-XXXX"
-                        />
-                      </div>
-                      {validationErrors.phone && <p className="text-sm text-red-400 mt-1">{validationErrors.phone}</p>}
+                      <input
+                        id="res-phone"
+                        type="tel"
+                        required
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={phone}
+                        onChange={(e) => { setPhone(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.phone; return next }) }}
+                        className={`w-full px-4 py-4 bg-[#111] border rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/30 transition ${validationErrors.phone ? 'border-red-400' : 'border-white/15'}`}
+                        placeholder="+503 XXXX-XXXX"
+                      />
+                      {validationErrors.phone && <p className="text-sm text-red-400 mt-2">{validationErrors.phone}</p>}
                     </div>
 
                     {/* Email (optional) */}
                     <div className="md:col-span-2">
-                      <label htmlFor="res-email" className="block text-sm font-medium text-white/50 mb-3">
+                      <label htmlFor="res-email" className="block text-sm font-medium text-white/50 mb-2">
                         {t(b.email)}
                       </label>
-                      <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                        <input
-                          id="res-email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
-                          placeholder={t({ es: 'tu@email.com', en: 'you@email.com' })}
-                        />
-                      </div>
+                      <input
+                        id="res-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-4 py-4 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/30 transition"
+                        placeholder={t({ es: 'tu@email.com', en: 'you@email.com' })}
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -845,7 +836,7 @@ export default function ReservationsPage() {
                     rows={4}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition resize-none"
+                    className="w-full px-4 py-4 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/30 transition resize-none"
                     placeholder={t(b.specialRequestsPlaceholder)}
                   />
                 </motion.div>
@@ -855,7 +846,7 @@ export default function ReservationsPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[red-400]/10 border !border-red-400/30 p-4 text-center"
+                    className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center"
                   >
                     <p className="text-red-400 text-sm">{submitError}</p>
                   </motion.div>
