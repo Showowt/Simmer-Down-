@@ -235,9 +235,9 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
   }
 
   return (
-    <div className="bg-[#1A1A1A] border border-white/10 p-4 sm:p-6">
+    <div className="bg-[#111] border border-white/10 rounded-2xl p-5 sm:p-6">
       {/* Month navigation */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <button
           onClick={handlePrev}
           disabled={!canGoPrev}
@@ -504,7 +504,7 @@ export default function ReservationsPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-[#1A1A1A] border border-white/10 p-8 md:p-12"
+                className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-8 md:p-12"
               >
                 <div className="text-center">
                   <motion.div
@@ -605,7 +605,7 @@ export default function ReservationsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <MapPin className="w-5 h-5 text-[#FBBF24]" />
@@ -618,7 +618,7 @@ export default function ReservationsPage() {
                         type="button"
                         onClick={() => { handleLocationChange(loc.id); setValidationErrors((prev) => { const next = { ...prev }; delete next.location; return next }) }}
                         className={`
-                          p-4 border text-left transition-all min-h-[56px]
+                          p-4 border rounded-xl text-left transition-all min-h-[56px]
                           ${selectedLocationId === loc.id
                             ? 'border-[#E85D04] bg-[#E85D04]/10 text-white'
                             : 'border-white/10 bg-[#0A0A0A] text-white/60 hover:border-[#6B6560] hover:text-white'
@@ -637,7 +637,7 @@ export default function ReservationsPage() {
                     ))}
                   </div>
                   {validationErrors.location && (
-                    <p className="text-sm text-[red-400] mt-3">{validationErrors.location}</p>
+                    <p className="text-sm text-red-400 mt-3">{validationErrors.location}</p>
                   )}
                 </motion.div>
 
@@ -647,7 +647,7 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 }}
                   viewport={{ once: true }}
-                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <Calendar className="w-5 h-5 text-[#FBBF24]" />
@@ -689,7 +689,7 @@ export default function ReservationsPage() {
                               type="button"
                               onClick={() => { setSelectedTime(slot); setValidationErrors((prev) => { const next = { ...prev }; delete next.time; return next }) }}
                               className={`
-                                py-2.5 px-2 text-sm font-medium transition-all text-center
+                                py-2.5 px-2 text-sm font-medium rounded-lg transition-all text-center
                                 ${selectedTime === slot
                                   ? 'bg-[#E85D04] text-white'
                                   : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
@@ -706,8 +706,8 @@ export default function ReservationsPage() {
                   </div>
                   {(validationErrors.date || validationErrors.time) && (
                     <div className="mt-3 space-y-1">
-                      {validationErrors.date && <p className="text-sm text-[red-400]">{validationErrors.date}</p>}
-                      {validationErrors.time && <p className="text-sm text-[red-400]">{validationErrors.time}</p>}
+                      {validationErrors.date && <p className="text-sm text-red-400">{validationErrors.date}</p>}
+                      {validationErrors.time && <p className="text-sm text-red-400">{validationErrors.time}</p>}
                     </div>
                   )}
                 </motion.div>
@@ -718,7 +718,7 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <Users className="w-5 h-5 text-[#FBBF24]" />
@@ -732,7 +732,7 @@ export default function ReservationsPage() {
                         type="button"
                         onClick={() => setGuestCount(num)}
                         className={`
-                          w-14 h-14 flex items-center justify-center text-lg font-medium transition-all
+                          w-14 h-14 rounded-xl flex items-center justify-center text-lg font-medium transition-all
                           ${guestCount === num
                             ? 'bg-[#E85D04] text-white'
                             : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
@@ -758,7 +758,7 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
                   viewport={{ once: true }}
-                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <User className="w-5 h-5 text-[#FBBF24]" />
@@ -768,7 +768,7 @@ export default function ReservationsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="res-name" className="block text-sm font-medium text-white/60 mb-2">
+                      <label htmlFor="res-name" className="block text-sm font-medium text-white/50 mb-3">
                         {t(b.name)} *
                       </label>
                       <div className="relative">
@@ -779,16 +779,16 @@ export default function ReservationsPage() {
                           required
                           value={name}
                           onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.name; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-white/10 border text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px] ${validationErrors.name ? 'border-[red-400]' : 'border-white/20'}`}
+                          className={`w-full pl-11 pr-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition min-h-[52px] ${validationErrors.name ? '!border-red-400' : ''}`}
                           placeholder={t({ es: 'Tu nombre', en: 'Your name' })}
                         />
                       </div>
-                      {validationErrors.name && <p className="text-sm text-[red-400] mt-1">{validationErrors.name}</p>}
+                      {validationErrors.name && <p className="text-sm text-red-400 mt-1">{validationErrors.name}</p>}
                     </div>
 
                     {/* Phone */}
                     <div>
-                      <label htmlFor="res-phone" className="block text-sm font-medium text-white/60 mb-2">
+                      <label htmlFor="res-phone" className="block text-sm font-medium text-white/50 mb-3">
                         {t(b.phone)} *
                       </label>
                       <div className="relative">
@@ -801,16 +801,16 @@ export default function ReservationsPage() {
                           autoComplete="tel"
                           value={phone}
                           onChange={(e) => { setPhone(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.phone; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-white/10 border text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px] ${validationErrors.phone ? 'border-[red-400]' : 'border-white/20'}`}
+                          className={`w-full pl-11 pr-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition min-h-[52px] ${validationErrors.phone ? '!border-red-400' : 'border-white/20'}`}
                           placeholder="+503 XXXX-XXXX"
                         />
                       </div>
-                      {validationErrors.phone && <p className="text-sm text-[red-400] mt-1">{validationErrors.phone}</p>}
+                      {validationErrors.phone && <p className="text-sm text-red-400 mt-1">{validationErrors.phone}</p>}
                     </div>
 
                     {/* Email (optional) */}
                     <div className="md:col-span-2">
-                      <label htmlFor="res-email" className="block text-sm font-medium text-white/60 mb-2">
+                      <label htmlFor="res-email" className="block text-sm font-medium text-white/50 mb-3">
                         {t(b.email)}
                       </label>
                       <div className="relative">
@@ -834,7 +834,7 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   viewport={{ once: true }}
-                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
                     <FileText className="w-5 h-5 text-[#FBBF24]" />
@@ -845,7 +845,7 @@ export default function ReservationsPage() {
                     rows={4}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition resize-none"
+                    className="w-full px-4 py-3 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] transition resize-none"
                     placeholder={t(b.specialRequestsPlaceholder)}
                   />
                 </motion.div>
@@ -855,9 +855,9 @@ export default function ReservationsPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[red-400]/10 border border-[red-400]/30 p-4 text-center"
+                    className="bg-[red-400]/10 border !border-red-400/30 p-4 text-center"
                   >
-                    <p className="text-[red-400] text-sm">{submitError}</p>
+                    <p className="text-red-400 text-sm">{submitError}</p>
                   </motion.div>
                 )}
 
@@ -871,7 +871,7 @@ export default function ReservationsPage() {
                   <button
                     type="submit"
                     disabled={loading || !selectedLocationId || !selectedDate || !selectedTime || !name || !phone}
-                    className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white py-4 text-lg font-semibold transition-colors min-h-[56px]"
+                    className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/30 text-white py-4 rounded-xl text-lg font-semibold transition-colors min-h-[56px]"
                   >
                     {loading ? (
                       <>
