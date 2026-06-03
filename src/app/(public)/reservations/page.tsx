@@ -235,24 +235,24 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
   }
 
   return (
-    <div className="bg-[#252320] border border-[#3D3936] p-4 sm:p-6">
+    <div className="bg-[#1A1A1A] border border-white/10 p-4 sm:p-6">
       {/* Month navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={handlePrev}
           disabled={!canGoPrev}
-          className="w-10 h-10 flex items-center justify-center text-[#B8B0A8] hover:text-[#FF6B35] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
           aria-label={t({ es: 'Mes anterior', en: 'Previous month' })}
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h3 className="text-lg font-semibold text-[#FFF8F0]">
+        <h3 className="text-lg font-semibold text-white">
           {monthNames[viewMonth]} {viewYear}
         </h3>
         <button
           onClick={handleNext}
           disabled={!canGoNext}
-          className="w-10 h-10 flex items-center justify-center text-[#B8B0A8] hover:text-[#FF6B35] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
+          className="w-10 h-10 flex items-center justify-center text-white/60 hover:text-[#E85D04] disabled:text-[#3D3936] disabled:cursor-not-allowed transition-colors"
           aria-label={t({ es: 'Mes siguiente', en: 'Next month' })}
         >
           <ChevronRight className="w-5 h-5" />
@@ -262,7 +262,7 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
       {/* Day headers */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {dayNames.map((name) => (
-          <div key={name} className="text-center text-xs font-medium text-[#6B6560] py-2">
+          <div key={name} className="text-center text-xs font-medium text-white/40 py-2">
             {name}
           </div>
         ))}
@@ -293,16 +293,16 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
                 ${disabled
                   ? 'text-[#3D3936] cursor-not-allowed'
                   : selected
-                    ? 'bg-[#FF6B35] text-white'
+                    ? 'bg-[#E85D04] text-white'
                     : todayMark
-                      ? 'bg-[#3D3936] text-[#FFF8F0] hover:bg-[#FF6B35]/20 hover:text-[#FF6B35]'
-                      : 'text-[#B8B0A8] hover:bg-[#3D3936] hover:text-[#FFF8F0]'
+                      ? 'bg-white/10 text-white hover:bg-[#E85D04]/20 hover:text-[#E85D04]'
+                      : 'text-white/60 hover:bg-white/10 hover:text-white'
                 }
               `}
             >
               {day}
               {todayMark && !selected && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF6B35] rounded-full" />
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#E85D04] rounded-full" />
               )}
             </button>
           )
@@ -310,16 +310,16 @@ function CalendarPicker({ selectedDate, onSelectDate, location, locale, t }: Cal
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#3D3936]">
+      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/10">
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-[#FF6B35] inline-block" />
-          <span className="text-xs text-[#6B6560]">{t({ es: 'Seleccionado', en: 'Selected' })}</span>
+          <span className="w-3 h-3 bg-[#E85D04] inline-block" />
+          <span className="text-xs text-white/40">{t({ es: 'Seleccionado', en: 'Selected' })}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-[#3D3936] inline-block relative">
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF6B35] rounded-full" />
+          <span className="w-3 h-3 bg-white/10 inline-block relative">
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#E85D04] rounded-full" />
           </span>
-          <span className="text-xs text-[#6B6560]">{t({ es: 'Hoy', en: 'Today' })}</span>
+          <span className="text-xs text-white/40">{t({ es: 'Hoy', en: 'Today' })}</span>
         </div>
       </div>
     </div>
@@ -471,7 +471,7 @@ export default function ReservationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2D2A26] pt-32">
+    <div className="min-h-screen bg-[#0A0A0A] pt-32">
       {/* Hero */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -480,13 +480,13 @@ export default function ReservationsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-[#6B6560] font-semibold uppercase tracking-wider text-sm mb-4 block">
+            <span className="text-white/40 font-semibold uppercase tracking-wider text-sm mb-4 block">
               {t(b.subtitle)}
             </span>
-            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-[#FFF8F0] mb-6">
+            <h1 className="font-display text-3xl md:text-4xl tracking-tight text-white mb-6">
               {t(b.heading)}
             </h1>
-            <p className="text-xl text-[#B8B0A8]">
+            <p className="text-xl text-white/60">
               {t(b.description)}
             </p>
           </motion.div>
@@ -504,7 +504,7 @@ export default function ReservationsPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="bg-[#252320] border border-[#3D3936] p-8 md:p-12"
+                className="bg-[#1A1A1A] border border-white/10 p-8 md:p-12"
               >
                 <div className="text-center">
                   <motion.div
@@ -516,58 +516,58 @@ export default function ReservationsPage() {
                     <Check className="w-10 h-10 text-[#4CAF50]" />
                   </motion.div>
 
-                  <h2 className="font-display text-3xl md:text-4xl font-bold text-[#FFF8F0] mb-3">
+                  <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-3">
                     {t(b.confirmed)}
                   </h2>
-                  <p className="text-[#B8B0A8] text-lg mb-10">
+                  <p className="text-white/60 text-lg mb-10">
                     {t(b.confirmedDesc)}
                   </p>
 
                   {/* Reservation details card */}
-                  <div className="bg-[#2D2A26] border border-[#3D3936] p-6 md:p-8 text-left max-w-md mx-auto mb-10">
-                    <h3 className="text-sm font-semibold text-[#6B6560] uppercase tracking-wider mb-6">
+                  <div className="bg-[#0A0A0A] border border-white/10 p-6 md:p-8 text-left max-w-md mx-auto mb-10">
+                    <h3 className="text-sm font-semibold text-white/40 uppercase tracking-wider mb-6">
                       {t(b.details)}
                     </h3>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                        <MapPin className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-[#6B6560] text-sm">{t(b.location)}</p>
-                          <p className="text-[#FFF8F0] font-medium">
+                          <p className="text-white/40 text-sm">{t(b.location)}</p>
+                          <p className="text-white font-medium">
                             {selectedLocation?.name}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Calendar className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                        <Calendar className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-[#6B6560] text-sm">{t(b.date)}</p>
-                          <p className="text-[#FFF8F0] font-medium capitalize">
+                          <p className="text-white/40 text-sm">{t(b.date)}</p>
+                          <p className="text-white font-medium capitalize">
                             {selectedDate && formatDate(selectedDate, locale)}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Clock className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                        <Clock className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-[#6B6560] text-sm">{t(b.time)}</p>
-                          <p className="text-[#FFF8F0] font-medium">{selectedTime}</p>
+                          <p className="text-white/40 text-sm">{t(b.time)}</p>
+                          <p className="text-white font-medium">{selectedTime}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                        <Users className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-[#6B6560] text-sm">{t(b.guests)}</p>
-                          <p className="text-[#FFF8F0] font-medium">
+                          <p className="text-white/40 text-sm">{t(b.guests)}</p>
+                          <p className="text-white font-medium">
                             {guestCount} {guestCount === 1 ? t(b.person) : t(b.people)}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <User className="w-5 h-5 text-[#C9A84C] mt-0.5 flex-shrink-0" />
+                        <User className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-[#6B6560] text-sm">{t(b.name)}</p>
-                          <p className="text-[#FFF8F0] font-medium">{name}</p>
+                          <p className="text-white/40 text-sm">{t(b.name)}</p>
+                          <p className="text-white font-medium">{name}</p>
                         </div>
                       </div>
                     </div>
@@ -576,13 +576,13 @@ export default function ReservationsPage() {
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <button
                       onClick={handleReset}
-                      className="flex items-center gap-2 bg-[#3D3936] hover:bg-[#4A4642] text-[#FFF8F0] px-8 py-4 font-semibold transition-colors min-h-[56px]"
+                      className="flex items-center gap-2 bg-white/10 hover:bg-[#4A4642] text-white px-8 py-4 font-semibold transition-colors min-h-[56px]"
                     >
                       {t(b.makeAnother)}
                     </button>
                     <Link
                       href="/"
-                      className="flex items-center gap-2 text-[#B8B0A8] hover:text-[#FF6B35] px-8 py-4 font-semibold transition-colors min-h-[56px]"
+                      className="flex items-center gap-2 text-white/60 hover:text-[#E85D04] px-8 py-4 font-semibold transition-colors min-h-[56px]"
                     >
                       {t(b.backHome)}
                       <ArrowRight className="w-5 h-5" />
@@ -605,11 +605,11 @@ export default function ReservationsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <MapPin className="w-5 h-5 text-[#C9A84C]" />
-                    <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.location)}</h2>
+                    <MapPin className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">{t(b.location)}</h2>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {locations.map((loc) => (
@@ -620,15 +620,15 @@ export default function ReservationsPage() {
                         className={`
                           p-4 border text-left transition-all min-h-[56px]
                           ${selectedLocationId === loc.id
-                            ? 'border-[#FF6B35] bg-[#FF6B35]/10 text-[#FFF8F0]'
-                            : 'border-[#3D3936] bg-[#2D2A26] text-[#B8B0A8] hover:border-[#6B6560] hover:text-[#FFF8F0]'
+                            ? 'border-[#E85D04] bg-[#E85D04]/10 text-white'
+                            : 'border-white/10 bg-[#0A0A0A] text-white/60 hover:border-[#6B6560] hover:text-white'
                           }
                         `}
                         aria-pressed={selectedLocationId === loc.id}
                       >
                         <span className="font-medium block">{loc.name}</span>
                         {loc.closedDays.length > 0 && (
-                          <span className="text-xs text-[#6B6560] mt-1 block">
+                          <span className="text-xs text-white/40 mt-1 block">
                             {locale === 'es' ? 'Dias cerrados: ' : 'Closed days: '}
                             {loc.closedDays.map((d) => (locale === 'es' ? DAY_NAMES_ES : DAY_NAMES_EN)[d]).join(', ')}
                           </span>
@@ -637,7 +637,7 @@ export default function ReservationsPage() {
                     ))}
                   </div>
                   {validationErrors.location && (
-                    <p className="text-sm text-[#C73E1D] mt-3">{validationErrors.location}</p>
+                    <p className="text-sm text-[red-400] mt-3">{validationErrors.location}</p>
                   )}
                 </motion.div>
 
@@ -647,11 +647,11 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 }}
                   viewport={{ once: true }}
-                  className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <Calendar className="w-5 h-5 text-[#C9A84C]" />
-                    <h2 className="text-lg font-semibold text-[#FFF8F0]">
+                    <Calendar className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">
                       {t(b.date)} & {t(b.time)}
                     </h2>
                   </div>
@@ -667,18 +667,18 @@ export default function ReservationsPage() {
                     />
 
                     {/* Time slots */}
-                    <div className="bg-[#252320] border border-[#3D3936] p-4 sm:p-6">
+                    <div className="bg-[#1A1A1A] border border-white/10 p-4 sm:p-6">
                       <div className="flex items-center gap-2 mb-4">
-                        <Clock className="w-4 h-4 text-[#C9A84C]" />
-                        <h3 className="text-sm font-semibold text-[#FFF8F0]">{t(b.selectTime)}</h3>
+                        <Clock className="w-4 h-4 text-[#FBBF24]" />
+                        <h3 className="text-sm font-semibold text-white">{t(b.selectTime)}</h3>
                       </div>
 
                       {!selectedDate ? (
-                        <p className="text-[#6B6560] text-sm py-8 text-center">
+                        <p className="text-white/40 text-sm py-8 text-center">
                           {t(b.selectDateFirst)}
                         </p>
                       ) : timeSlots.length === 0 ? (
-                        <p className="text-[#6B6560] text-sm py-8 text-center">
+                        <p className="text-white/40 text-sm py-8 text-center">
                           {t(b.noTimesAvailable)}
                         </p>
                       ) : (
@@ -691,8 +691,8 @@ export default function ReservationsPage() {
                               className={`
                                 py-2.5 px-2 text-sm font-medium transition-all text-center
                                 ${selectedTime === slot
-                                  ? 'bg-[#FF6B35] text-white'
-                                  : 'bg-[#2D2A26] border border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560] hover:text-[#FFF8F0]'
+                                  ? 'bg-[#E85D04] text-white'
+                                  : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
                                 }
                               `}
                               aria-pressed={selectedTime === slot}
@@ -706,8 +706,8 @@ export default function ReservationsPage() {
                   </div>
                   {(validationErrors.date || validationErrors.time) && (
                     <div className="mt-3 space-y-1">
-                      {validationErrors.date && <p className="text-sm text-[#C73E1D]">{validationErrors.date}</p>}
-                      {validationErrors.time && <p className="text-sm text-[#C73E1D]">{validationErrors.time}</p>}
+                      {validationErrors.date && <p className="text-sm text-[red-400]">{validationErrors.date}</p>}
+                      {validationErrors.time && <p className="text-sm text-[red-400]">{validationErrors.time}</p>}
                     </div>
                   )}
                 </motion.div>
@@ -718,11 +718,11 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   viewport={{ once: true }}
-                  className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <Users className="w-5 h-5 text-[#C9A84C]" />
-                    <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.guestCount)}</h2>
+                    <Users className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">{t(b.guestCount)}</h2>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -734,8 +734,8 @@ export default function ReservationsPage() {
                         className={`
                           w-14 h-14 flex items-center justify-center text-lg font-medium transition-all
                           ${guestCount === num
-                            ? 'bg-[#FF6B35] text-white'
-                            : 'bg-[#2D2A26] border border-[#3D3936] text-[#B8B0A8] hover:border-[#6B6560] hover:text-[#FFF8F0]'
+                            ? 'bg-[#E85D04] text-white'
+                            : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-[#6B6560] hover:text-white'
                           }
                         `}
                         aria-label={`${num} ${num === 1 ? t(b.person) : t(b.people)}`}
@@ -746,7 +746,7 @@ export default function ReservationsPage() {
                     ))}
                   </div>
 
-                  <p className="text-[#6B6560] text-sm mt-4 flex items-center gap-2">
+                  <p className="text-white/40 text-sm mt-4 flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     {t(b.largeParty)}
                   </p>
@@ -758,41 +758,41 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
                   viewport={{ once: true }}
-                  className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <User className="w-5 h-5 text-[#C9A84C]" />
-                    <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.contactInfo)}</h2>
+                    <User className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">{t(b.contactInfo)}</h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label htmlFor="res-name" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                      <label htmlFor="res-name" className="block text-sm font-medium text-white/60 mb-2">
                         {t(b.name)} *
                       </label>
                       <div className="relative">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6560]" />
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                         <input
                           id="res-name"
                           type="text"
                           required
                           value={name}
                           onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.name; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-[#3D3936] border text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px] ${validationErrors.name ? 'border-[#C73E1D]' : 'border-[#4A4642]'}`}
+                          className={`w-full pl-11 pr-4 py-3 bg-white/10 border text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px] ${validationErrors.name ? 'border-[red-400]' : 'border-white/20'}`}
                           placeholder={t({ es: 'Tu nombre', en: 'Your name' })}
                         />
                       </div>
-                      {validationErrors.name && <p className="text-sm text-[#C73E1D] mt-1">{validationErrors.name}</p>}
+                      {validationErrors.name && <p className="text-sm text-[red-400] mt-1">{validationErrors.name}</p>}
                     </div>
 
                     {/* Phone */}
                     <div>
-                      <label htmlFor="res-phone" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                      <label htmlFor="res-phone" className="block text-sm font-medium text-white/60 mb-2">
                         {t(b.phone)} *
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6560]" />
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                         <input
                           id="res-phone"
                           type="tel"
@@ -801,26 +801,26 @@ export default function ReservationsPage() {
                           autoComplete="tel"
                           value={phone}
                           onChange={(e) => { setPhone(e.target.value); setValidationErrors((prev) => { const next = { ...prev }; delete next.phone; return next }) }}
-                          className={`w-full pl-11 pr-4 py-3 bg-[#3D3936] border text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px] ${validationErrors.phone ? 'border-[#C73E1D]' : 'border-[#4A4642]'}`}
+                          className={`w-full pl-11 pr-4 py-3 bg-white/10 border text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px] ${validationErrors.phone ? 'border-[red-400]' : 'border-white/20'}`}
                           placeholder="+503 XXXX-XXXX"
                         />
                       </div>
-                      {validationErrors.phone && <p className="text-sm text-[#C73E1D] mt-1">{validationErrors.phone}</p>}
+                      {validationErrors.phone && <p className="text-sm text-[red-400] mt-1">{validationErrors.phone}</p>}
                     </div>
 
                     {/* Email (optional) */}
                     <div className="md:col-span-2">
-                      <label htmlFor="res-email" className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                      <label htmlFor="res-email" className="block text-sm font-medium text-white/60 mb-2">
                         {t(b.email)}
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B6560]" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                         <input
                           id="res-email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition min-h-[48px]"
+                          className="w-full pl-11 pr-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition min-h-[48px]"
                           placeholder={t({ es: 'tu@email.com', en: 'you@email.com' })}
                         />
                       </div>
@@ -834,18 +834,18 @@ export default function ReservationsPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   viewport={{ once: true }}
-                  className="bg-[#252320] border border-[#3D3936] p-6 md:p-8"
+                  className="bg-[#1A1A1A] border border-white/10 p-6 md:p-8"
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <FileText className="w-5 h-5 text-[#C9A84C]" />
-                    <h2 className="text-lg font-semibold text-[#FFF8F0]">{t(b.specialRequests)}</h2>
+                    <FileText className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">{t(b.specialRequests)}</h2>
                   </div>
                   <textarea
                     id="res-notes"
                     rows={4}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#3D3936] border border-[#4A4642] text-[#FFF8F0] placeholder:text-[#6B6560] focus:outline-none focus:border-[#FF6B35] transition resize-none"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] transition resize-none"
                     placeholder={t(b.specialRequestsPlaceholder)}
                   />
                 </motion.div>
@@ -855,9 +855,9 @@ export default function ReservationsPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#C73E1D]/10 border border-[#C73E1D]/30 p-4 text-center"
+                    className="bg-[red-400]/10 border border-[red-400]/30 p-4 text-center"
                   >
-                    <p className="text-[#C73E1D] text-sm">{submitError}</p>
+                    <p className="text-[red-400] text-sm">{submitError}</p>
                   </motion.div>
                 )}
 
@@ -871,7 +871,7 @@ export default function ReservationsPage() {
                   <button
                     type="submit"
                     disabled={loading || !selectedLocationId || !selectedDate || !selectedTime || !name || !phone}
-                    className="w-full flex items-center justify-center gap-3 bg-[#FF6B35] hover:bg-[#E55A2B] disabled:bg-[#3D3936] disabled:text-[#6B6560] text-white py-4 text-lg font-semibold transition-colors min-h-[56px]"
+                    className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/40 text-white py-4 text-lg font-semibold transition-colors min-h-[56px]"
                   >
                     {loading ? (
                       <>
