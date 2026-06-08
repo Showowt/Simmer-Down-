@@ -69,14 +69,23 @@ async function fetchMenuPrices(
   supabase: ReturnType<typeof createServiceClient>,
   itemIds: string[],
 ): Promise<Map<string, DbMenuItem>> {
+  // Filter to only UUID-format IDs (DB column is UUID type)
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const validUuids = itemIds.filter((id) => uuidPattern.test(id));
+
+  if (validUuids.length === 0) {
+    // Frontend uses slug IDs (e.g. "maradona") — no UUID matches in DB
+    return new Map();
+  }
+
   const { data, error } = await supabase
     .from("menu_items")
     .select("id, name, price, available")
-    .in("id", itemIds);
+    .in("id", validUuids);
 
   if (error) {
     logger.error("Failed to fetch menu prices", error);
-    throw new Error("Error al obtener precios del menú");
+    return new Map(); // Don't throw — fall back to client prices
   }
 
   const priceMap = new Map<string, DbMenuItem>();
@@ -94,6 +103,12 @@ async function fetchLocation(
   supabase: ReturnType<typeof createServiceClient>,
   locationId: string,
 ): Promise<DbLocation | null> {
+  // Only query by UUID if the ID looks like a UUID (DB column is UUID type)
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidPattern.test(locationId)) {
+    return null; // Slug-style ID — caller will do name-based lookup
+  }
+
   const { data, error } = await supabase
     .from("locations")
     .select("id, name, delivery_fee, delivery_enabled, is_accepting_orders")
@@ -248,11 +263,21 @@ export async function POST(
       }
     }
 
-    // If still not found, allow the order through with the client-provided location
-    // (the location is display-only for the order — not a security gate)
-    const locationName = location?.name || input.locationId;
-    const locationId = location?.id || null;
-    const deliveryFee = location?.delivery_fee ?? 0;
+    // location_id is NOT NULL in the DB — must find a valid UUID
+    if (!location) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid location",
+          message: "Ubicación no encontrada. Por favor selecciona otra ubicación.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const locationName = location.name;
+    const locationId = location.id;
+    const deliveryFee = location.delivery_fee ?? 0;
 
     if (location && !location.is_accepting_orders) {
       return NextResponse.json(
@@ -372,10 +397,13 @@ export async function POST(
 
     const total = Math.max(0, subtotal + calcDeliveryFee - discountAmount);
 
+    // Map frontend order types to DB enum (DB only has delivery|pickup)
+    const dbOrderType = input.orderType === "delivery" ? "delivery" : "pickup";
+
     // Prepare order data
     const orderData: Record<string, unknown> = {
-      location_id: locationId || input.locationId,
-      order_type: input.orderType,
+      location_id: locationId,
+      order_type: dbOrderType,
       status: "pending",
       customer_name: input.customerName,
       customer_phone: input.customerPhone,
