@@ -41,7 +41,7 @@ type OrderItem = z.infer<typeof orderItemSchema>;
 export const createOrderSchema = z
   .object({
     locationId: z.string().min(1, "Ubicación requerida"),
-    orderType: z.enum(["delivery", "pickup"]),
+    orderType: z.enum(["delivery", "pickup", "takeout", "dine_in"]),
     customerName: z
       .string()
       .min(2, "El nombre debe tener al menos 2 caracteres")

@@ -11,7 +11,7 @@
 
 interface OrderForNotification {
   order_number: string;
-  order_type: "delivery" | "pickup";
+  order_type: "delivery" | "pickup" | "takeout" | "dine_in";
   customer_name: string;
   customer_phone: string;
   customer_notes?: string | null;

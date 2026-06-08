@@ -81,7 +81,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           locationId: location?.id || items[0]?.categoryId || 'santa-ana',
-          orderType: orderType === 'delivery' ? 'delivery' : 'pickup',
+          orderType: orderType || 'takeout',
           customerName: customerName || 'Cliente Web',
           customerPhone: customerPhone || '0000-0000',
           customerEmail: customerEmail || '',
