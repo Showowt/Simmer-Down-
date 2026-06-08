@@ -187,6 +187,25 @@ export async function POST(
     COUNTRY_ALPHA_TO_NUMERIC[billing.countryCode.toUpperCase()] ||
     billing.countryCode;
 
+  // ── PowerTranz field sanitization (per Ramon Romero / FAC spec) ──
+  // Strip accented chars: á→a, é→e, ñ→n, etc.
+  const stripAccents = (s: string) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // Strip symbols not allowed: +, &, :, ;, *, and others. Keep . and -
+  const stripSymbols = (s: string) =>
+    s.replace(/[+&:;*=@#$%^!~`<>{}[\]|\\]/g, "");
+  // Phone: digits only, no +, spaces, or dashes
+  const cleanPhone = (s: string) => s.replace(/\D/g, "");
+  // Sanitize a text field
+  const clean = (s: string) => stripSymbols(stripAccents(s));
+
+  // Line1 max 30 chars, overflow to Line2 (max 50)
+  const fullAddress = clean(billing.line1);
+  const line1 = fullAddress.slice(0, 30);
+  const line2Overflow = fullAddress.length > 30 ? fullAddress.slice(30, 80) : "";
+  const line2Raw = billing.line2 ? clean(billing.line2) : "";
+  const line2 = (line2Overflow + (line2Raw ? " " + line2Raw : "")).trim().slice(0, 50) || undefined;
+
   const saleRequest: SaleRequest = {
     TransactionIdentifier: transactionIdentifier,
     TotalAmount: Math.round(amount * 100) / 100,
@@ -196,19 +215,17 @@ export async function POST(
       CardPan: card.pan,
       CardCvv: card.cvv,
       CardExpiration: card.exp,
-      CardholderName: card.holder,
+      CardholderName: clean(card.holder),
     },
     OrderIdentifier: orderId,
     AddressMatch: false,
     BillingAddress: {
-      Line1: billing.line1,
-      Line2: billing.line2 || undefined,
-      City: billing.city,
-      State: billing.state || undefined,
-      PostalCode: billing.postalCode,
+      Line1: line1,
+      Line2: line2,
+      City: clean(billing.city).slice(0, 30),
       CountryCode: numericCountry,
       EmailAddress: billing.email || order.customer_email,
-      PhoneNumber: billing.phone,
+      PhoneNumber: cleanPhone(billing.phone),
     },
     ExtendedData: {
       ThreeDSecure: { ChallengeWindowSize: 4, ChallengeIndicator: "01" },
