@@ -155,6 +155,8 @@ export default function CardPaymentForm({
     if (line1.trim().length < 3) errors.line1 = 'Direccion requerida'
     if (city.trim().length < 2) errors.city = 'Ciudad requerida'
     if (postalCode.trim().length < 2) errors.postalCode = 'Codigo postal requerido'
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email.trim())) errors.email = 'Correo electronico requerido'
+    if (phone.trim().length < 7) errors.phone = 'Telefono requerido'
 
     if (Object.keys(errors).some(k => errors[k])) {
       setFieldErrors(errors)
@@ -178,8 +180,8 @@ export default function CardPaymentForm({
         state: null,
         postalCode: postalCode.trim(),
         countryCode: 'SV',
-        email: email.trim() || null,
-        phone: phone.trim() || null,
+        email: email.trim(),
+        phone: phone.trim(),
       },
     }
   }
@@ -387,31 +389,45 @@ export default function CardPaymentForm({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-white/50 mb-1.5">
-              Correo <span className="text-white/20">(opcional)</span>
+              Correo electronico *
             </label>
             <input
               type="email"
               autoComplete="email"
+              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setFieldErrors(prev => ({ ...prev, email: '' }))
+              }}
               placeholder="correo@ejemplo.com"
               className={inputClass('email')}
               disabled={loading}
             />
+            {fieldErrors.email && (
+              <p className="text-xs text-red-400 mt-1">{fieldErrors.email}</p>
+            )}
           </div>
           <div>
             <label className="block text-xs text-white/50 mb-1.5">
-              Telefono <span className="text-white/20">(opcional)</span>
+              Telefono *
             </label>
             <input
               type="tel"
               autoComplete="tel"
+              required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value)
+                setFieldErrors(prev => ({ ...prev, phone: '' }))
+              }}
               placeholder="+503 7000-0000"
               className={inputClass('phone')}
               disabled={loading}
             />
+            {fieldErrors.phone && (
+              <p className="text-xs text-red-400 mt-1">{fieldErrors.phone}</p>
+            )}
           </div>
         </div>
       </div>

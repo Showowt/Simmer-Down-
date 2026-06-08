@@ -207,8 +207,8 @@ export async function POST(
       State: billing.state || undefined,
       PostalCode: billing.postalCode,
       CountryCode: numericCountry,
-      EmailAddress: billing.email || order.customer_email || undefined,
-      PhoneNumber: billing.phone || undefined,
+      EmailAddress: billing.email || order.customer_email,
+      PhoneNumber: billing.phone,
     },
     ExtendedData: {
       ThreeDSecure: { ChallengeWindowSize: 4, ChallengeIndicator: "01" },

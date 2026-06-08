@@ -75,8 +75,8 @@ export const billingAddressSchema = z.object({
   state: z.string().max(60).optional().nullable(),
   postalCode: z.string().min(2).max(15),
   countryCode: z.string().length(2).default("SV"),
-  email: z.string().email().optional().nullable().or(z.literal("")),
-  phone: z.string().max(20).optional().nullable(),
+  email: z.string().email("Correo electrónico requerido para el pago"),
+  phone: z.string().min(7, "Teléfono requerido para el pago").max(20),
 });
 
 export const cardPaymentSchema = z.object({
