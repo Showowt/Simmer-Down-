@@ -228,7 +228,7 @@ export async function POST(
       PhoneNumber: cleanPhone(billing.phone),
     },
     ExtendedData: {
-      ThreeDSecure: { ChallengeWindowSize: 4, ChallengeIndicator: "01" },
+      ThreeDSecure: { ChallengeWindowSize: 4, ChallengeIndicator: "04" },
       MerchantResponseUrl: `${appUrl}/api/payments/callback`,
     },
   };
