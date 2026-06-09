@@ -73,7 +73,7 @@ export const billingAddressSchema = z.object({
   line2: z.string().max(120).optional().nullable(),
   city: z.string().min(2).max(60),
   state: z.string().max(60).optional().nullable(),
-  postalCode: z.string().min(2).max(15),
+  postalCode: z.string().max(15).optional().default(""),
   countryCode: z.string().length(2).default("SV"),
   email: z.string().email("Correo electrónico requerido para el pago"),
   phone: z.string().min(7, "Teléfono requerido para el pago").max(20),

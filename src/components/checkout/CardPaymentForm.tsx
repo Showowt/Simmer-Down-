@@ -154,7 +154,6 @@ export default function CardPaymentForm({
     // Billing validation
     if (line1.trim().length < 3) errors.line1 = 'Direccion requerida'
     if (city.trim().length < 2) errors.city = 'Ciudad requerida'
-    if (postalCode.trim().length < 2) errors.postalCode = 'Codigo postal requerido'
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email.trim())) errors.email = 'Correo electronico requerido'
     if (phone.trim().length < 7) errors.phone = 'Telefono requerido'
 
@@ -174,14 +173,14 @@ export default function CardPaymentForm({
         holder: holder.trim(),
       },
       billing: {
-        line1: line1.trim(),
-        line2: null,
+        line1: line1.trim().slice(0, 30),
+        line2: line1.trim().length > 30 ? line1.trim().slice(30, 80) : null,
         city: city.trim(),
         state: null,
-        postalCode: postalCode.trim(),
+        postalCode: '',
         countryCode: 'SV',
         email: email.trim(),
-        phone: phone.trim(),
+        phone: phone.trim().replace(/\D/g, ''),
       },
     }
   }
@@ -347,43 +346,23 @@ export default function CardPaymentForm({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-white/50 mb-1.5">Ciudad</label>
-            <input
-              type="text"
-              autoComplete="address-level2"
-              value={city}
-              onChange={(e) => {
-                setCity(e.target.value)
-                setFieldErrors(prev => ({ ...prev, city: '' }))
-              }}
-              placeholder="San Salvador"
-              className={inputClass('city')}
-              disabled={loading}
-            />
-            {fieldErrors.city && (
-              <p className="text-xs text-red-400 mt-1">{fieldErrors.city}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs text-white/50 mb-1.5">Codigo Postal</label>
-            <input
-              type="text"
-              autoComplete="postal-code"
-              value={postalCode}
-              onChange={(e) => {
-                setPostalCode(e.target.value)
-                setFieldErrors(prev => ({ ...prev, postalCode: '' }))
-              }}
-              placeholder="00000"
-              className={inputClass('postalCode')}
-              disabled={loading}
-            />
-            {fieldErrors.postalCode && (
-              <p className="text-xs text-red-400 mt-1">{fieldErrors.postalCode}</p>
-            )}
-          </div>
+        <div>
+          <label className="block text-xs text-white/50 mb-1.5">Ciudad</label>
+          <input
+            type="text"
+            autoComplete="address-level2"
+            value={city}
+            onChange={(e) => {
+              setCity(e.target.value)
+              setFieldErrors(prev => ({ ...prev, city: '' }))
+            }}
+            placeholder="Santa Ana"
+            className={inputClass('city')}
+            disabled={loading}
+          />
+          {fieldErrors.city && (
+            <p className="text-xs text-red-400 mt-1">{fieldErrors.city}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
