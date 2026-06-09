@@ -177,7 +177,8 @@ export default function CheckoutPage() {
     setPaymentData(null)
     setResultData(null)
     setError(null)
-    setStep('payment')
+    setOrderData(null)
+    setStep('review')
   }, [])
 
   // ─── Loading / empty states ─────────────────────────────────

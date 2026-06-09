@@ -157,8 +157,10 @@ export default function CardPaymentForm({
     if (!email.trim() || !/\S+@\S+\.\S+/.test(email.trim())) errors.email = 'Correo electronico requerido'
     if (phone.trim().length < 7) errors.phone = 'Telefono requerido'
 
-    if (Object.keys(errors).some(k => errors[k])) {
+    const hasErrors = Object.keys(errors).some(k => errors[k])
+    if (hasErrors) {
       setFieldErrors(errors)
+      console.error('[CardPaymentForm] Validation failed:', errors)
       return null
     }
 
@@ -187,6 +189,7 @@ export default function CardPaymentForm({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
+    setFieldErrors({})
     const data = validate()
     if (data) onSubmit(data)
   }
