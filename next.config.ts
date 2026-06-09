@@ -11,7 +11,7 @@ const baseCsp = [
   "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com",
-  "frame-src https://staging.ptranz.com https://gateway.ptranz.com https://www.google.com https://maps.google.com",
+  "frame-src https: http:",
   "form-action 'self' https://staging.ptranz.com https://gateway.ptranz.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
