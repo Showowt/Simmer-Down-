@@ -27,7 +27,7 @@ export class PowertranzError extends Error {
 }
 
 function requireEnv(name: string): string {
-  const v = process.env[name];
+  const v = process.env[name]?.trim();
   if (!v) {
     throw new Error(
       `Missing required env var: ${name}. Check .env.local or Vercel project settings.`,

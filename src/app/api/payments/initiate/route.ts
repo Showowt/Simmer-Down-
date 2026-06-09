@@ -134,7 +134,7 @@ export async function POST(
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "").trim();
   if (!appUrl) {
     logger.error("NEXT_PUBLIC_APP_URL is not set");
     return NextResponse.json(
@@ -209,7 +209,7 @@ export async function POST(
   const saleRequest: SaleRequest = {
     TransactionIdentifier: transactionIdentifier,
     TotalAmount: Math.round(amount * 100) / 100,
-    CurrencyCode: process.env.FAC_CURRENCY_CODE || "840",
+    CurrencyCode: (process.env.FAC_CURRENCY_CODE || "840").trim(),
     ThreeDSecure: true,
     Source: {
       CardPan: card.pan,
