@@ -102,14 +102,14 @@ export const metadata: Metadata = {
     alternateLocale: 'en_US',
     url: 'https://simmerdownsv.com',
     siteName: 'Simmer Down — La Mejor Pizza de El Salvador',
-    title: 'Simmer Down | La Mejor Pizza Artesanal de Horno de Leña en El Salvador',
+    title: 'Simmer Down | La Mejor Pizza Artesanal en El Salvador',
     description: 'La pizza #1 de El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas ⭐ 4.9. Ingredientes premium, masa artesanal. Santa Ana, Coatepeque, San Benito, Juayúa, Surf City.',
     images: [
       {
         url: 'https://simmerdownsv.com/og/home.jpg',
         width: 1200,
         height: 630,
-        alt: 'Simmer Down - La Mejor Pizza Artesanal de Horno de Leña en El Salvador — 5 Ubicaciones',
+        alt: 'Simmer Down - La Mejor Pizza Artesanal en El Salvador — 5 Ubicaciones',
         type: 'image/jpeg',
       }
     ],
@@ -122,7 +122,7 @@ export const metadata: Metadata = {
     description: 'Pizza artesanal. 12 años, 5 ubicaciones, +8,000 reseñas. Santa Ana, Coatepeque, San Salvador, Juayúa, Surf City.',
     images: {
       url: 'https://simmerdownsv.com/og/home.jpg',
-      alt: 'Simmer Down — Pizza Artesanal de Horno de Leña',
+      alt: 'Simmer Down — Pizza Artesanal',
     },
   },
   robots: {

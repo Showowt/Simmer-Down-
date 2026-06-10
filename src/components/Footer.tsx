@@ -9,9 +9,9 @@ export default function Footer() {
   const { t, locale } = useI18n()
 
   const navigationLinks = [
-    { label: t(translations.footer.menuSection), href: '/menu' },
+    { label: t(translations.footer.menuSection), href: '/carta' },
     { label: t(translations.footer.reservations), href: '/reservations' },
-    { label: t(translations.footer.locationsSection), href: '/locations' },
+    { label: t(translations.footer.locationsSection), href: '/restaurantes' },
     { label: t(translations.footer.ourStory), href: '/nosotros' },
     { label: t(translations.footer.events), href: '/events' },
     { label: t(translations.footer.simmerLovers), href: '/simmerlovers' },

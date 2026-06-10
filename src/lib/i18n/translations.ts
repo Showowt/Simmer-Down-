@@ -31,10 +31,10 @@ export const translations = {
     years: { es: '12 Años de Historia. 5 Ubicaciones.', en: '12 Years of History. 5 Locations.' },
     subtitle: { es: 'Hay lugares que se visitan. Y hay lugares que se recuerdan.', en: 'There are places you visit. And there are places you remember.' },
     findLocation: { es: 'Encontrar Ubicación', en: 'Find Location' },
-    woodFired: { es: 'Horno de Leña', en: 'Wood-Fired Oven' },
+    woodFired: { es: 'Masa Artesanal', en: 'Artisan Dough' },
     liveMusic: { es: 'Música en Vivo', en: 'Live Music' },
     reviews: { es: 'de 2,500+ Reseñas', en: 'from 2,500+ Reviews' },
-    fromOven: { es: 'Desde el horno', en: 'From the oven' },
+    fromOven: { es: 'Desde la cocina', en: 'From our kitchen' },
     specialties: { es: 'Nuestras Especialidades', en: 'Our Specialties' },
     surpriseMe: { es: 'Sorpréndeme', en: 'Surprise Me' },
     iKnow: { es: 'Sé lo que quiero', en: 'I Know What I Want' },
@@ -92,7 +92,7 @@ export const translations = {
 
   // ─── Menu ───
   menu: {
-    fromOven: { es: 'Desde el horno', en: 'From the oven' },
+    fromOven: { es: 'Desde la cocina', en: 'From our kitchen' },
     ourMenu: { es: 'Nuestro Menú', en: 'Our Menu' },
     menuDesc: { es: 'Pizzas artesanales, mariscos frescos, pastas de la casa y más.', en: 'Artisan pizzas, fresh seafood, house pastas and more.' },
     allLocations: { es: 'Todas las ubicaciones', en: 'All locations' },

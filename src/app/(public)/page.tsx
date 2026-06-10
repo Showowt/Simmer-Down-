@@ -201,7 +201,7 @@ export default function HomePage() {
           >
             <div>
               <p className="text-[#E85D04] text-xs font-semibold uppercase tracking-[0.2em] mb-2">
-                {locale === 'es' ? 'Desde el horno' : 'From the oven'}
+                {locale === 'es' ? 'Desde la cocina' : 'From our kitchen'}
               </p>
               <h2
                 className="font-display text-white leading-tight"

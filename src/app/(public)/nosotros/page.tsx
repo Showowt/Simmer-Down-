@@ -42,8 +42,8 @@ const fadeIn: Variants = {
 const VALUES = [
   {
     icon: Flame,
-    titleEs: 'Horno de Lena',
-    titleEn: 'Wood-Fired Oven',
+    titleEs: 'Masa Artesanal',
+    titleEn: 'Artisan Dough',
     descEs:
       'Cada pizza se prepara con masa artesanal, alcanzando el punto perfecto para lograr una corteza crujiente por fuera y suave por dentro.',
     descEn:

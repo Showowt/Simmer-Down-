@@ -36,10 +36,10 @@ const TABS: Tab[] = [
   },
   {
     id: 'reservar',
-    href: '/reservar',
+    href: '/reservations',
     label: 'Reservar',
     Icon: CalendarDays,
-    matchPrefixes: ['/reservar'],
+    matchPrefixes: ['/reservations'],
   },
   {
     id: 'ubicaciones',
