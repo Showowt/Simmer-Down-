@@ -77,7 +77,7 @@ export function LocationCard({ location, index }: LocationCardProps) {
           </div>
           {/* Rating Badge */}
           <div className="absolute top-4 left-4">
-            <span className="inline-flex items-center gap-1.5 bg-[#111111]/80 backdrop-blur-sm text-white text-sm px-3 py-2">
+            <span className="inline-flex items-center gap-1.5 bg-[#111]/80 backdrop-blur-sm text-white text-sm px-3 py-2">
               <Star className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
               {location.rating}
             </span>

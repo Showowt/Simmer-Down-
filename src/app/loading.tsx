@@ -6,10 +6,10 @@ export default function RootLoading() {
       <div className="text-center">
         {/* Animated Spinner */}
         <div className="relative w-16 h-16 mx-auto mb-6">
-          <div className="absolute inset-0 border-4 border-[#3D3936]" />
-          <div className="absolute inset-0 border-4 border-transparent border-t-[#FF6B35] animate-spin" />
+          <div className="absolute inset-0 border-4 border-[white/10]" />
+          <div className="absolute inset-0 border-4 border-transparent border-t-[#E85D04] animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Flame className="w-6 h-6 text-[#FF6B35] animate-pulse" />
+            <Flame className="w-6 h-6 text-[#E85D04] animate-pulse" />
           </div>
         </div>
 

@@ -292,8 +292,8 @@ function OrderTracker() {
         )}
 
         {error && (
-          <div className="bg-[#C73E1D]/10 border border-[#C73E1D]/20 p-6 text-center">
-            <p className="text-[#C73E1D]">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/20 p-6 text-center">
+            <p className="text-red-500">{error}</p>
           </div>
         )}
 
@@ -513,7 +513,7 @@ function OrderTracker() {
                           ? "text-[#4CAF50]"
                           : order.payment_status === "failed" ||
                               order.payment_status === "voided"
-                            ? "text-[#C73E1D]"
+                            ? "text-red-500"
                             : "text-[#FBBF24]"
                       }`}
                     >
@@ -558,7 +558,7 @@ function OrderTracker() {
                   )}
                   {order.payment_error_message &&
                     order.payment_status === "failed" && (
-                      <div className="p-3 bg-[#C73E1D]/10 border border-[#C73E1D]/30 text-white text-xs">
+                      <div className="p-3 bg-red-500/10 border border-red-500/30 text-white text-xs">
                         {order.payment_error_message}
                       </div>
                     )}

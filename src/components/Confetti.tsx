@@ -18,7 +18,7 @@ interface ConfettiProps {
   duration?: number
 }
 
-const colors = ['#FF6B35', '#FFF8F0', '#4CAF50', '#FFD700', '#FF69B4', '#00CED1']
+const colors = ['#E85D04', '#FFF8F0', '#4CAF50', '#FFD700', '#FF69B4', '#00CED1']
 
 export default function Confetti({ active, duration = 3000 }: ConfettiProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)

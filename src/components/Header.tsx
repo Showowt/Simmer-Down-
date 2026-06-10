@@ -41,8 +41,8 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-[#111111]/98 backdrop-blur-md border-b border-white/10/40'
-            : 'bg-[#111111]/95 backdrop-blur-sm'
+            ? 'bg-[#111]/98 backdrop-blur-md border-b border-white/10/40'
+            : 'bg-[#111]/95 backdrop-blur-sm'
         }`}
       >
         <nav className="max-w-6xl mx-auto px-6">
@@ -124,7 +124,7 @@ export default function Header() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-40 md:hidden"
           >
-            <div className="absolute inset-0 bg-[#111111]/98 backdrop-blur-md" onClick={() => setIsOpen(false)} />
+            <div className="absolute inset-0 bg-[#111]/98 backdrop-blur-md" onClick={() => setIsOpen(false)} />
             <motion.nav
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}

@@ -219,8 +219,8 @@ export default function PrintButton({
   }, [order, items, locationName]);
 
   const baseClasses = iconOnly
-    ? "p-2 hover:bg-[#3D3936] transition"
-    : "flex items-center gap-2 px-4 py-2 bg-[#252320] border border-[#3D3936] hover:bg-[#3D3936] transition text-[#B8B0A8] hover:text-[#FFF8F0] text-sm font-medium";
+    ? "p-2 hover:bg-[white/10] transition"
+    : "flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] border border-[white/10] hover:bg-[white/10] transition text-[#B8B0A8] hover:text-[#FFF8F0] text-sm font-medium";
 
   return (
     <button

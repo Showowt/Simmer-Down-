@@ -474,9 +474,9 @@ export default function AccountPage() {
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-between p-4 bg-[#1A1A1A] border border-white/10 hover:border-[#C73E1D]/30 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-[#1A1A1A] border border-white/10 hover:border-red-500/30 transition-colors"
               >
-                <span className="flex items-center gap-3 text-[#C73E1D]">
+                <span className="flex items-center gap-3 text-red-500">
                   <LogOut className="w-5 h-5" />
                   {isEn ? 'Sign Out' : 'Cerrar Sesión'}
                 </span>

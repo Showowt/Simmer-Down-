@@ -194,7 +194,7 @@ export function EventsList() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-8 items-center bg-[#111111] border border-white/10 overflow-hidden"
+              className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-8 items-center bg-[#111] border border-white/10 overflow-hidden"
             >
               <div className="relative aspect-[3/4] lg:aspect-auto lg:h-[640px] overflow-hidden">
                 {event.image_url ? (
@@ -285,7 +285,7 @@ export function EventsList() {
                         className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-[#111111]" />
+                      <div className="absolute inset-0 bg-[#111]" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/70 via-transparent to-transparent" />
                     <div className="absolute top-3 left-3">

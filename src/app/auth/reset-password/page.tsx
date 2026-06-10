@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
 
         <form onSubmit={handleSubmit} className="bg-[#1A1A1A] border border-white/10 p-8 space-y-6">
           {error && (
-            <div className="p-4 bg-[#C73E1D]/10 border border-[#C73E1D]/20 flex items-center gap-3 text-[#C73E1D]">
+            <div className="p-4 bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -160,14 +160,14 @@ export default function ResetPasswordPage() {
                   confirmPassword.length > 0
                     ? passwordsMatch
                       ? 'border-[#4CAF50]'
-                      : 'border-[#C73E1D]'
+                      : 'border-red-500'
                     : 'border-white/20 focus:border-[#E85D04]'
                 }`}
                 placeholder="Repite tu nueva contraseña"
               />
             </div>
             {confirmPassword.length > 0 && !passwordsMatch && (
-              <p className="text-xs text-[#C73E1D] mt-1">Las contraseñas no coinciden</p>
+              <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
             )}
           </div>
 

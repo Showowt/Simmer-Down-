@@ -176,7 +176,7 @@ export default function RootLayout({
           {/* Skip Link for Accessibility */}
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 bg-[#FF6B35] text-white px-6 py-3 z-[9999] font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 bg-[#E85D04] text-white px-6 py-3 z-[9999] font-semibold focus:outline-none focus:ring-2 focus:ring-white"
           >
             Saltar al contenido principal
           </a>

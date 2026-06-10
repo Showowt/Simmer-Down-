@@ -492,7 +492,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#111111] border border-white/10 flex flex-col shadow-2xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#111] border border-white/10 flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1A1A1A]">
@@ -549,7 +549,7 @@ export default function AnimaChatV2() {
                         {message.suggestedItems.map((item) => (
                           <div
                             key={item.id}
-                            className="flex items-center justify-between p-2 bg-[#111111] border border-white/10"
+                            className="flex items-center justify-between p-2 bg-[#111] border border-white/10"
                           >
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-white text-sm truncate">{item.name}</p>
@@ -607,7 +607,7 @@ export default function AnimaChatV2() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={locale === 'en' ? 'Type a message...' : 'Escribe un mensaje...'}
-                  className="flex-1 px-4 py-3 bg-[#111111] border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] text-sm"
+                  className="flex-1 px-4 py-3 bg-[#111] border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-[#E85D04] text-sm"
                 />
                 {hasSpeechRecognition && (
                   <button

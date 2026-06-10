@@ -758,7 +758,7 @@ function RewardsGrid({
                       : "border-white/10"
                   }`}
                 >
-                  <div className="relative aspect-[16/10] bg-[#111111] overflow-hidden">
+                  <div className="relative aspect-[16/10] bg-[#111] overflow-hidden">
                     {reward.image_url ? (
                       <Image
                         src={reward.image_url}

@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
 
         <form onSubmit={handleSubmit} className="bg-[#1A1A1A] border border-white/10 p-8">
           {error && (
-            <div className="mb-6 p-4 bg-[#C73E1D]/10 border border-[#C73E1D]/20 flex items-center gap-3 text-[#C73E1D]">
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>

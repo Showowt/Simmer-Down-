@@ -53,7 +53,7 @@ export default function ToastContainer() {
               toast.type === 'success'
                 ? 'bg-[#1A1A1A] border border-[#4CAF50]/30'
                 : toast.type === 'error'
-                ? 'bg-[#1A1A1A] border border-[#C73E1D]/30'
+                ? 'bg-[#1A1A1A] border border-red-500/30'
                 : 'bg-[#1A1A1A] border border-[#E85D04]/30'
             }`}
             role="alert"
@@ -64,7 +64,7 @@ export default function ToastContainer() {
                 toast.type === 'success'
                   ? 'bg-[#4CAF50]/20 text-[#4CAF50]'
                   : toast.type === 'error'
-                  ? 'bg-[#C73E1D]/20 text-[#C73E1D]'
+                  ? 'bg-red-500/20 text-red-500'
                   : 'bg-[#E85D04]/20 text-[#E85D04]'
               }`}
             >
