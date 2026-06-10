@@ -66,8 +66,7 @@ export async function POST(
           name,
           email,
           phone: phone || null,
-          reason,
-          message,
+          message: reason ? `[${reason}] ${message}` : message,
           status: "new",
         },
       ]);

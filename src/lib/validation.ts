@@ -126,7 +126,7 @@ const animaContextSchema = z.object({
     .array(
       z.object({
         name: z.string(),
-        quantity: z.number().min(1),
+        quantity: z.number().int().min(1).max(99),
         price: z.number().min(0),
       }),
     )
