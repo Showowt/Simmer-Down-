@@ -1,0 +1,61 @@
+# SIMMER DOWN — ROUTE MAP
+# Status verified 2026-06-10 against production
+
+# PUBLIC PAGES
+200 /                           Homepage
+200 /carta                      Menu (canonical)
+200 /restaurantes               Locations list (canonical)
+200 /nosotros                   About (canonical)
+200 /events                     Events & live music
+200 /simmerlovers               Loyalty program
+200 /reservations               Reservations (canonical)
+200 /contact                    Contact
+200 /carrito                    Cart (canonical)
+200 /checkout                   Checkout + payment
+200 /account                    User account (requires auth)
+200 /orders                     Order tracking
+200 /privacy                    Privacy policy
+200 /terms                      Terms & conditions
+
+# LOCATION DETAIL PAGES
+200 /locations/santa-ana
+200 /locations/lago-coatepeque
+200 /locations/san-benito
+200 /locations/surf-city
+200 /locations/simmer-garden
+
+# AUTH
+200 /auth/login
+200 /auth/signup
+200 /auth/forgot-password
+200 /auth/reset-password
+
+# REDIRECTS (EN → canonical)
+308 /menu       → /carta
+308 /locations  → /restaurantes
+308 /about      → /nosotros
+308 /reservar   → /reservations
+308 /cart       → /carrito (server component redirect)
+
+# ADMIN (auth-gated)
+307 /admin      → /auth/login (when unauthenticated)
+
+# KITCHEN (pin-gated)
+200 /kitchen    → redirects to /kitchen/login
+
+# API ROUTES
+200 /api/menu              GET  — menu data
+200 /api/locations         GET  — location data
+200 /api/anima             GET  — health check; POST — chatbot
+200 /api/sophia            POST — rule-based chatbot
+200 /api/contact           POST — contact form
+200 /api/reservations      POST — reservation
+200 /api/orders/create     POST — order creation
+200 /api/payments/initiate POST — PowerTranz sale
+200 /api/payments/callback POST — 3DS callback
+200 /api/payments/status   POST — payment status check
+200 /api/payments/void     POST — void authorization
+
+# SEO
+200 /sitemap.xml
+200 /robots.txt

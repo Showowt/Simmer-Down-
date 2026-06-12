@@ -106,8 +106,22 @@ export const useCartStore = create<CartState>()(
       setOrderNotes: (notes) => set({ orderNotes: notes }),
     }),
     {
-      name: 'simmerdown-cart-v2',
+      name: 'simmerdown-cart-v3',
+      version: 3,
       partialize: (state) => ({ items: state.items, selectedLocation: state.selectedLocation, customerName: state.customerName, customerPhone: state.customerPhone, orderType: state.orderType }),
+      migrate: () => ({
+        items: [],
+        selectedLocation: null,
+        customerName: '',
+        customerPhone: '',
+        customerEmail: '',
+        orderType: 'takeout' as const,
+        orderNotes: '',
+        itemCount: 0,
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+      }),
     }
   )
 )
