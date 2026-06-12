@@ -16,6 +16,7 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
+import { sendWhatsApp } from "@/lib/twilio/client";
 
 interface ReservationResponse {
   success: boolean;
@@ -117,6 +118,27 @@ export async function POST(
         error: dbErr instanceof Error ? dbErr.message : String(dbErr),
       });
     }
+
+    // Send WhatsApp notification to staff (non-blocking)
+    const staffPhone = process.env.STAFF_NOTIFICATION_WHATSAPP || "+50376804434";
+    const reservationMsg = [
+      `🗓️ *NUEVA RESERVACION*`,
+      ``,
+      `📍 Ubicacion: ${location_id}`,
+      `📅 Fecha: ${date}`,
+      `🕐 Hora: ${time}`,
+      `👥 Personas: ${guest_count}`,
+      `👤 Nombre: ${customer_name}`,
+      `📱 Telefono: ${customer_phone}`,
+      customer_email ? `✉️ Email: ${customer_email}` : '',
+      special_requests ? `📝 Notas: ${special_requests}` : '',
+    ].filter(Boolean).join('\n');
+
+    sendWhatsApp(staffPhone, reservationMsg).catch((err) => {
+      logger.warn("Reservation WhatsApp notification failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
 
     const duration = Date.now() - startTime;
     logger.api.response(endpoint, 200, duration, {
