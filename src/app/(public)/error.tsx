@@ -36,10 +36,11 @@ export default function PublicError({
           de nuevo.
         </p>
 
-        {/* Error Digest (for debugging) */}
-        {error.digest && (
-          <p className="text-xs text-white/40 mb-6 font-mono">
-            Error ID: {error.digest}
+        {/* Error details (for debugging) */}
+        {(error.digest || error.message) && (
+          <p className="text-xs text-white/20 mb-6 font-mono max-w-sm mx-auto break-all">
+            {error.digest && `ID: ${error.digest}`}
+            {error.message && ` | ${error.message.slice(0, 200)}`}
           </p>
         )}
 
