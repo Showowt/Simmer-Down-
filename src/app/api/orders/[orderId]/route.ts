@@ -15,6 +15,7 @@ import {
   getClientIp,
   rateLimitResponse,
 } from "@/lib/rate-limit";
+import { notifyOrderStatusChange, notifyOrderCancelled } from "@/lib/telegram";
 
 // ═══════════════════════════════════════════════════════════════
 // Constants
@@ -294,7 +295,7 @@ export async function PUT(
     // Fetch existing order to check ownership & current status
     const { data: existingOrder, error: fetchError } = await supabase
       .from("orders")
-      .select("id, customer_id, status, order_number")
+      .select("id, customer_id, status, order_number, customer_name, customer_phone, total_amount")
       .eq("id", orderId)
       .maybeSingle();
 
@@ -398,6 +399,31 @@ export async function PUT(
         },
         { status: 500 },
       );
+    }
+
+    // Send Telegram notifications for status changes (non-blocking)
+    if (parsed.data.status) {
+      const notifyParams = {
+        orderNumber: existingOrder.order_number,
+        customerName: updated.customer_name || "Cliente",
+        total: Number(updated.total_amount || 0),
+      };
+
+      if (parsed.data.status === "cancelled" && !isStaff) {
+        // Customer-initiated cancellation
+        notifyOrderCancelled({
+          ...notifyParams,
+          customerPhone: existingOrder.customer_phone || "",
+          locationName: undefined,
+        }).catch(() => {});
+      } else {
+        // Staff status update (or staff cancellation)
+        notifyOrderStatusChange({
+          ...notifyParams,
+          newStatus: parsed.data.status,
+          updatedBy: isStaff ? "Staff" : "Cliente",
+        }).catch(() => {});
+      }
     }
 
     const duration = Date.now() - startTime;

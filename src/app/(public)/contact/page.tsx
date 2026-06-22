@@ -10,13 +10,11 @@ import {
   Send,
   MessageSquare,
   ChevronDown,
-  AlertCircle,
   Instagram,
   Facebook,
   MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { useI18n, translations } from "@/lib/i18n";
 
 export default function ContactPage() {
@@ -84,31 +82,28 @@ export default function ContactPage() {
     setError("");
 
     try {
-      const supabase = createClient();
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          reason: formData.reason,
+          message: formData.message,
+        }),
+      });
 
-      const { error: dbError } = await supabase
-        .from("contact_submissions")
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone || null,
-            reason: formData.reason,
-            message: formData.message,
-            status: "new",
-          },
-        ]);
+      const json = await res.json();
 
-      if (dbError) {
-        // If table doesn't exist, still show success (graceful degradation)
-        console.warn("[Contact] DB insert failed:", dbError.message);
+      if (json.success === true) {
+        setSubmitted(true);
+      } else {
+        setError(json.error || json.message || "Error al enviar el mensaje");
       }
-
-      setSubmitted(true);
     } catch (err) {
-      console.error("Contact form error:", err);
-      // Still show success to user - we don't want to block contact attempts
-      setSubmitted(true);
+      console.error("[ContactPage]", err);
+      setError("Error al enviar el mensaje");
     } finally {
       setLoading(false);
     }
@@ -183,10 +178,10 @@ export default function ContactPage() {
                         +503 6990-4674 (Simmer Garden)
                       </a>
                       <a
-                        href="tel:+50375764655"
+                        href="tel:+50375360735"
                         className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
-                        +503 7576-4655 (Surf City)
+                        +503 7536-0735 (Surf City)
                       </a>
                       <p className="text-white/40 text-sm mt-1">
                         {t(translations.contact.whatsappAvailable)}

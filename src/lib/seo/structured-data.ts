@@ -134,7 +134,7 @@ export const LOCATIONS: LocationData[] = [
     address: 'Hotel Casa Santa Emilia, Conchalio 2',
     city: 'La Libertad',
     region: 'La Libertad',
-    phone: '+50376804434',
+    phone: '+50375360735',
     latitude: 13.4833,
     longitude: -89.3833,
     rating: 4.8,

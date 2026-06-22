@@ -640,7 +640,7 @@ export default function NosotrosPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 flex-shrink-0">
             <a
-              href="https://wa.me/50375764655?text=Hola%2C%20quiero%20hacer%20un%20pedido%20%F0%9F%8D%95"
+              href="https://wa.me/50376804434?text=Hola%2C%20quiero%20hacer%20un%20pedido%20%F0%9F%8D%95"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm px-8 py-4 rounded-full transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.4)] hover:scale-[1.03] active:scale-[0.97] uppercase tracking-wide"

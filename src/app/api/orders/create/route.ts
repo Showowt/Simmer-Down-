@@ -21,6 +21,7 @@ import {
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
 import { sendWhatsApp } from "@/lib/twilio/client";
+import { sendTelegram } from "@/lib/telegram";
 import { formatOrderWhatsApp } from "@/lib/notifications/order-notify";
 
 // ═══════════════════════════════════════════════════════════════
@@ -176,17 +177,23 @@ async function sendOrderNotification(
       locationName,
     );
 
-    // Send to primary staff contact
+    // Send to Telegram (primary notification channel)
+    const telegramResult = await sendTelegram(message);
+    if (telegramResult.success) {
+      logger.info("Order Telegram notification sent", { orderId, orderNumber });
+    }
+
+    // Also send to WhatsApp if Twilio is configured
     const result = await sendWhatsApp(staffPhone, message);
     if (result.success) {
-      logger.info("Order notification sent", {
+      logger.info("Order WhatsApp notification sent", {
         orderId,
         orderNumber,
         to: staffPhone,
       });
     }
 
-    // Send to secondary contact if configured
+    // Send to secondary WhatsApp contact if configured
     const secondaryPhone = process.env.STAFF_NOTIFICATION_WHATSAPP_2;
     if (secondaryPhone) {
       await sendWhatsApp(secondaryPhone, message);

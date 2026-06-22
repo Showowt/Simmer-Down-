@@ -18,6 +18,7 @@ import { ptPayment, PowertranzError } from "@/lib/powertranz/client";
 import { stripCardFields } from "@/lib/powertranz/sanitize";
 import type { SaleResponse } from "@/lib/powertranz/types";
 import { sendWhatsApp } from "@/lib/twilio/client";
+import { sendTelegram, notifyPaymentFailed } from "@/lib/telegram";
 import { formatPaymentConfirmWhatsApp } from "@/lib/notifications/order-notify";
 
 function hmacSign(payload: string): string {
@@ -123,6 +124,10 @@ async function sendPaymentNotification(
       card_last_four: cardLastFour,
     });
 
+    // Telegram (primary)
+    await sendTelegram(message);
+
+    // WhatsApp (if Twilio configured)
     const result = await sendWhatsApp(staffPhone, message);
     if (result.success) {
       logger.info("Payment notification sent", {
@@ -132,6 +137,38 @@ async function sendPaymentNotification(
     }
   } catch (err) {
     logger.warn("sendPaymentNotification error", {
+      orderId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Payment Failed Notification (non-blocking)
+// ═══════════════════════════════════════════════════════════════
+
+async function sendPaymentFailedNotification(
+  orderId: string,
+  reason: string,
+  supabase: ReturnType<typeof createServiceClient>,
+): Promise<void> {
+  try {
+    const { data: order } = await supabase
+      .from("orders")
+      .select("order_number, total_amount, customer_name")
+      .eq("id", orderId)
+      .single();
+
+    if (!order) return;
+
+    await notifyPaymentFailed({
+      orderNumber: order.order_number,
+      customerName: order.customer_name || "Cliente",
+      total: Number(order.total_amount || 0),
+      reason,
+    });
+  } catch (err) {
+    logger.warn("sendPaymentFailedNotification error", {
       orderId,
       error: err instanceof Error ? err.message : String(err),
     });
@@ -212,6 +249,9 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", payment.id);
 
+    // Notify team of failed payment
+    sendPaymentFailedNotification(payment.order_id, msg, supabase).catch(() => {});
+
     return new NextResponse(
       buildBreakoutHtml({
         orderId: payment.order_id,
@@ -251,6 +291,13 @@ export async function POST(request: NextRequest) {
         spi_token: null,
       })
       .eq("id", payment.id);
+
+    // Notify team of capture failure
+    sendPaymentFailedNotification(
+      payment.order_id,
+      "Captura fallida tras autenticaci\u00F3n 3DS",
+      supabase,
+    ).catch(() => {});
 
     return new NextResponse(
       buildBreakoutHtml({
@@ -305,6 +352,13 @@ export async function POST(request: NextRequest) {
       payment.order_id,
       payResp.CardBrand ?? payment.card_brand,
       payment.card_last_four,
+      supabase,
+    ).catch(() => {});
+  } else {
+    // Payment declined — notify team not to prepare
+    sendPaymentFailedNotification(
+      payment.order_id,
+      payResp.ResponseMessage || "Tarjeta rechazada",
       supabase,
     ).catch(() => {});
   }

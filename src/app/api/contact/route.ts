@@ -16,6 +16,7 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
+import { notifyContactForm } from "@/lib/telegram";
 
 interface ContactResponse {
   success: boolean;
@@ -78,6 +79,19 @@ export async function POST(
         code: dbError.code,
       });
     }
+
+    // Send Telegram notification (non-blocking)
+    notifyContactForm({
+      name,
+      email,
+      phone: phone || undefined,
+      reason: reason || undefined,
+      message,
+    }).catch((err) => {
+      logger.warn("Contact Telegram notification failed", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    });
 
     const duration = Date.now() - startTime;
     logger.api.response(endpoint, 200, duration, { reason });

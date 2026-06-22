@@ -137,7 +137,7 @@ export const LOCATIONS: Location[] = [
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
     phone: '+503 2445-5999',
-    whatsapp: '+50375764655',
+    whatsapp: '+50376804434',
     email: 'santaana@simmerdown.sv',
     coordinates: { lat: 13.9942, lng: -89.5597 },
     hours: {
@@ -165,7 +165,7 @@ export const LOCATIONS: Location[] = [
     address: 'Calle Principal al Lago #119',
     city: 'Coatepeque',
     phone: '+503 6831-6907',
-    whatsapp: '+50375764655',
+    whatsapp: '+50368316907',
     email: 'lago@simmerdown.sv',
     coordinates: { lat: 13.8667, lng: -89.5500 },
     hours: {
@@ -193,7 +193,7 @@ export const LOCATIONS: Location[] = [
     address: 'Boulevard del Hipódromo',
     city: 'San Salvador',
     phone: '+503 7487-7792',
-    whatsapp: '+50375764655',
+    whatsapp: '+50374877792',
     email: 'sanbenito@simmerdown.sv',
     coordinates: { lat: 13.6929, lng: -89.2365 },
     hours: {
@@ -220,8 +220,8 @@ export const LOCATIONS: Location[] = [
     shortName: 'Surf City',
     address: 'Hotel Casa Santa Emilia',
     city: 'La Libertad',
-    phone: '+503 7576-4655',
-    whatsapp: '+50375764655',
+    phone: '+503 7536-0735',
+    whatsapp: '+50375360735',
     email: 'surfcity@simmerdown.sv',
     coordinates: { lat: 13.4833, lng: -89.3333 },
     hours: {
@@ -249,7 +249,7 @@ export const LOCATIONS: Location[] = [
     address: 'Kilómetro 91.5, San José La Majada',
     city: 'Juayúa, Sonsonate',
     phone: '+503 6990-4674',
-    whatsapp: '+50375764655',
+    whatsapp: '+50369904674',
     email: 'garden@simmerdown.sv',
     coordinates: { lat: 13.8467, lng: -89.7456 },
     hours: {

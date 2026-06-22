@@ -12,6 +12,7 @@ import {
   formatPrice,
   isLocationOpen,
 } from '@/lib/data'
+import EventsSection from '@/components/events/EventsSection'
 
 // ─── Animation variants ────────────────────────────────────────────────────
 
@@ -461,6 +462,11 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
+          4b. DYNAMIC EVENTS — Renders only if upcoming events exist
+      ══════════════════════════════════════════════════ */}
+      <EventsSection />
+
+      {/* ══════════════════════════════════════════════════
           5. TESTIMONIALS — Customer reviews
       ══════════════════════════════════════════════════ */}
       <section aria-label="Testimonios" className="py-16 md:py-24 px-6 bg-[#0A0A0A]">
@@ -661,7 +667,7 @@ export default function HomePage() {
           </div>
 
           <a
-            href="https://wa.me/50375764655?text=Hola%2C%20quiero%20hacer%20un%20pedido%20%F0%9F%8D%95"
+            href="https://wa.me/50376804434?text=Hola%2C%20quiero%20hacer%20un%20pedido%20%F0%9F%8D%95"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-shrink-0 inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm md:text-base px-8 py-4 rounded-full transition-all hover:shadow-[0_0_30px_rgba(37,211,102,0.4)] hover:scale-[1.03] active:scale-[0.97] uppercase tracking-wide"

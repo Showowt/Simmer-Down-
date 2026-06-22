@@ -24,17 +24,27 @@ export interface WhatsAppLocation {
 
 /**
  * WhatsApp numbers per location.
- * Format: country code + number, digits only (e.g. "50375764655")
- * Primary order line: +503 7576-4655 (handles all reservations & orders)
+ * Format: country code + number, digits only (e.g. "50376804434")
+ * CLIENT-CONFIRMED numbers — authoritative as of 2026-06-15.
  */
-export const ORDER_WHATSAPP = '50375764655'
+export const LOCATION_WHATSAPP: Record<string, string> = {
+  'santa-ana': '50376804434',
+  'coatepeque': '50368316907',
+  'lago-coatepeque': '50368316907',
+  'san-benito': '50374877792',
+  'simmer-garden': '50369904674',
+  'surf-city': '50375360735',
+}
+
+/** Default fallback — Santa Ana (flagship) */
+export const DEFAULT_WHATSAPP = '50376804434'
 
 export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
   {
     id: 'santa-ana',
     name: 'Santa Ana',
     slug: 'santa-ana',
-    whatsapp: ORDER_WHATSAPP,
+    whatsapp: LOCATION_WHATSAPP['santa-ana'],
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
   },
@@ -42,7 +52,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'coatepeque',
     name: 'Lago de Coatepeque',
     slug: 'coatepeque',
-    whatsapp: ORDER_WHATSAPP,
+    whatsapp: LOCATION_WHATSAPP['coatepeque'],
     address: 'Calle Principal al Lago #119',
     city: 'Coatepeque',
   },
@@ -50,7 +60,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'san-benito',
     name: 'San Benito',
     slug: 'san-benito',
-    whatsapp: ORDER_WHATSAPP,
+    whatsapp: LOCATION_WHATSAPP['san-benito'],
     address: 'Boulevard del Hipódromo',
     city: 'San Salvador',
   },
@@ -58,7 +68,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'simmer-garden',
     name: 'Simmer Garden',
     slug: 'juayua',
-    whatsapp: ORDER_WHATSAPP,
+    whatsapp: LOCATION_WHATSAPP['simmer-garden'],
     address: 'Kilómetro 91.5, San José La Majada',
     city: 'Juayúa, Sonsonate',
   },
@@ -66,7 +76,7 @@ export const WHATSAPP_LOCATIONS: WhatsAppLocation[] = [
     id: 'surf-city',
     name: 'Surf City',
     slug: 'surf-city',
-    whatsapp: ORDER_WHATSAPP,
+    whatsapp: LOCATION_WHATSAPP['surf-city'],
     address: 'Hotel Casa Santa Emilia',
     city: 'La Libertad',
   },

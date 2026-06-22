@@ -16,7 +16,7 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
-import { sendWhatsApp } from "@/lib/twilio/client";
+import { sendTelegram, resolveLocationName } from "@/lib/telegram";
 
 interface ReservationResponse {
   success: boolean;
@@ -119,23 +119,31 @@ export async function POST(
       });
     }
 
-    // Send WhatsApp notification to staff (non-blocking)
-    const staffPhone = process.env.STAFF_NOTIFICATION_WHATSAPP || "+50376804434";
+    // Send Telegram notification to staff (non-blocking)
+    const locName = resolveLocationName(location_id);
+    const adminUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
+      : "https://simmerdownsv.com/admin/orders";
+
     const reservationMsg = [
-      `🗓️ *NUEVA RESERVACION*`,
+      `\uD83D\uDDD3\uFE0F *NUEVA RESERVACION*`,
       ``,
-      `📍 Ubicacion: ${location_id}`,
-      `📅 Fecha: ${date}`,
-      `🕐 Hora: ${time}`,
-      `👥 Personas: ${guest_count}`,
-      `👤 Nombre: ${customer_name}`,
-      `📱 Telefono: ${customer_phone}`,
-      customer_email ? `✉️ Email: ${customer_email}` : '',
-      special_requests ? `📝 Notas: ${special_requests}` : '',
+      `\uD83D\uDCCD Ubicaci\u00F3n: ${locName}`,
+      `\uD83D\uDCC5 Fecha: ${date}`,
+      `\uD83D\uDD50 Hora: ${time}`,
+      `\uD83D\uDC65 Personas: ${guest_count}`,
+      ``,
+      `\uD83D\uDC64 Nombre: ${customer_name}`,
+      `\uD83D\uDCDE Tel\u00E9fono: ${customer_phone}`,
+      customer_email ? `\u2709\uFE0F Email: ${customer_email}` : '',
+      special_requests ? `\n\uD83D\uDCDD Notas especiales: ${special_requests}` : '',
+      ``,
+      `\u2705 Estado: Confirmada`,
+      `\uD83C\uDF10 ${adminUrl}`,
     ].filter(Boolean).join('\n');
 
-    sendWhatsApp(staffPhone, reservationMsg).catch((err) => {
-      logger.warn("Reservation WhatsApp notification failed", {
+    sendTelegram(reservationMsg).catch((err) => {
+      logger.warn("Reservation Telegram notification failed", {
         error: err instanceof Error ? err.message : String(err),
       });
     });
