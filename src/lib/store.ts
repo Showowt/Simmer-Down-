@@ -122,6 +122,24 @@ export const useCartStore = create<CartState>()(
         tax: 0,
         total: 0,
       }),
+      // Derived fields (itemCount/subtotal/tax/total) are intentionally excluded
+      // from partialize. Recompute them from the restored items so the cart badge,
+      // floating bar, and checkout totals are correct on the first render after a
+      // page reload — otherwise they stay at their initial 0 (D001/D002).
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<CartState>
+        const items = p.items ?? []
+        const { subtotal, tax, total } = calculateCartTotal(items)
+        return {
+          ...current,
+          ...p,
+          items,
+          itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
+          subtotal,
+          tax,
+          total,
+        }
+      },
     }
   )
 )
