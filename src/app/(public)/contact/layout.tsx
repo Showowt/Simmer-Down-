@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Contacto — Teléfono, WhatsApp y Direcciones",
   description:
-    "Contacta a Simmer Down. Reservaciones, eventos privados, catering y consultas. Santa Ana: +503 2445-5999. San Benito: +503 7487-7792. Coatepeque: +503 6831-6907. WhatsApp disponible.",
+    "Contacta a Simmer Down. Reservaciones, eventos privados, catering y consultas. Santa Ana: +503 2455-4899. San Benito: +503 7487-7792. Coatepeque: +503 6831-6907. WhatsApp disponible.",
   keywords: [
     "contacto Simmer Down",
     "teléfono Simmer Down",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Contacto Simmer Down | WhatsApp + Teléfono",
-    description: "Reservaciones y eventos. +503 2445-5999 | WhatsApp disponible.",
+    description: "Reservaciones y eventos. +503 2455-4899 | WhatsApp disponible.",
     images: ["/og/contact.jpg"],
   },
 };

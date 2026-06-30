@@ -508,7 +508,7 @@ export default function AdminLocationsPage() {
                               })
                             }
                             className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                            placeholder="+503 2445-5999"
+                            placeholder="+503 2455-4899"
                           />
                         </div>
 

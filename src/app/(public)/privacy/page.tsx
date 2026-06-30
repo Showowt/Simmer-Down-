@@ -162,7 +162,7 @@ export default function PrivacyPage() {
                 </p>
                 <ul className="list-none space-y-2">
                   <li>Email: <a href="mailto:info@simmerdownsv.com" className="text-[#E85D04] hover:underline">info@simmerdownsv.com</a></li>
-                  <li>{isEs ? 'Tel\u00e9fono' : 'Phone'}: <a href="tel:+50324455999" className="text-[#E85D04] hover:underline">+503 2445-5999</a></li>
+                  <li>{isEs ? 'Tel\u00e9fono' : 'Phone'}: <a href="tel:+50324554899" className="text-[#E85D04] hover:underline">+503 2455-4899</a></li>
                 </ul>
               </section>
             </div>

@@ -154,10 +154,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-white/40 text-sm">{t(translations.contact.phones)}</p>
                       <a
-                        href="tel:+50324455999"
+                        href="tel:+50324554899"
                         className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
-                        +503 2445-5999 (Santa Ana)
+                        +503 2455-4899 (Santa Ana)
                       </a>
                       <a
                         href="tel:+50368316907"
@@ -285,7 +285,7 @@ export default function ContactPage() {
                     <Facebook className="w-5 h-5" />
                   </a>
                   <a
-                    href="https://wa.me/50324455999"
+                    href="https://wa.me/50376804434"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 flex items-center justify-center bg-white/10 text-white/60 hover:bg-[#25D366] hover:text-white transition-colors"

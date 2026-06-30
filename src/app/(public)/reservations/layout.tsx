@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Reservaciones — Reserva tu Mesa',
   description:
-    'Reserva tu mesa en Simmer Down, la mejor pizzería de El Salvador. 5 ubicaciones disponibles: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Reserva en línea o llama al +503 2445-5999.',
+    'Reserva tu mesa en Simmer Down, la mejor pizzería de El Salvador. 5 ubicaciones disponibles: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Reserva en línea o llama al +503 2455-4899.',
   keywords: [
     'reservaciones restaurante El Salvador',
     'reservar mesa pizza El Salvador',
