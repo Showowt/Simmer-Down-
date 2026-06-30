@@ -136,10 +136,15 @@
    RESET & BASE
 ======================================== */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Wrapped in @layer base so Tailwind v4 utility classes (px-*, mx-auto, py-*)
+   override it. Unlayered, this reset beat every spacing utility site-wide,
+   which removed all horizontal margins/padding (hero, header, cards, banners). */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html {
