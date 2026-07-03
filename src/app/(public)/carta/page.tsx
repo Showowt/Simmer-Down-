@@ -524,6 +524,10 @@ export default function CartaPage() {
   const [activeFilters, setActiveFilters] = useState<Set<DietaryFilter>>(new Set())
   const searchQuery = useDebounce(searchInput, 280)
 
+  // ── Alcohol categories hidden from online ordering ───────
+  const ALCOHOL_CATEGORIES = new Set(['local-beers', 'imported-beers'])
+  const onlineCategories = useMemo(() => MENU_CATEGORIES.filter((c) => !ALCOHOL_CATEGORIES.has(c.id)), [])
+
   // ── Derived items ────────────────────────────────────────
   const displayItems = useMemo(() => {
     let base =
@@ -532,6 +536,9 @@ export default function CartaPage() {
         : selectedCategory === 'all'
         ? MENU_ITEMS.filter((i) => i.isAvailable)
         : getItemsByCategory(selectedCategory)
+
+    // Remove alcohol — can only be ordered in person
+    base = base.filter((i) => !i.dineInOnly && !ALCOHOL_CATEGORIES.has(i.categoryId))
 
     // Dietary filters (all must match if multiple active)
     if (activeFilters.has('vegetarian')) base = base.filter((i) => i.isVegetarian)
@@ -549,7 +556,7 @@ export default function CartaPage() {
     if (isSearching || isSingleCategory) return null
 
     const result: Array<{ category: (typeof MENU_CATEGORIES)[number]; items: MenuItem[] }> = []
-    for (const cat of MENU_CATEGORIES) {
+    for (const cat of onlineCategories) {
       const items = displayItems.filter((i) => i.categoryId === cat.id)
       if (items.length > 0) result.push({ category: cat, items })
     }
@@ -622,7 +629,7 @@ export default function CartaPage() {
             >
               {t('menu.all')}
             </button>
-            {MENU_CATEGORIES.map((cat) => (
+            {onlineCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat.id)}
