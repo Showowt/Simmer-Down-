@@ -265,7 +265,7 @@ export const LOCATIONS: Location[] = [
     },
     features: ['dine-in', 'takeout', 'garden-seating', 'live-music-weekends', 'parking'],
     image: '/images/locations/gallery-garden/garden-4.jpg',
-    heroImage: '/images/locations/simmer-garden-hero.jpg',
+    heroImage: '/images/locations/drive-garden/garden-drive-04.jpg',
     menuPdfEs: '1rcqsVH-n4goxYO4zAj0_WQTLl1RilIM9',
     menuPdfEn: '1pg46Ez52QEpoxBOd4q2yzGcfjLP6bfq1',
   },

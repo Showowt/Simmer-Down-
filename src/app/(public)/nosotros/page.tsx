@@ -149,7 +149,7 @@ export default function NosotrosPage() {
         {/* Background image */}
         <div className="absolute inset-0">
           <Image
-            src="/images/locations/santa-ana-interior.jpg"
+            src="/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg"
             alt="Interior Simmer Down — restaurante artesanal"
             fill
             priority
@@ -320,7 +320,7 @@ export default function NosotrosPage() {
               </div>
               <div className="relative aspect-[3/4] rounded-xl overflow-hidden mt-8">
                 <Image
-                  src="/images/locations/santa-ana-interior.jpg"
+                  src="/images/locations/gallery-santa-ana/santa-ana-interior-2.jpg"
                   alt="Interior del restaurante Simmer Down"
                   fill
                   className="object-cover"

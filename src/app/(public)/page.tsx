@@ -40,9 +40,9 @@ const fadeIn: Variants = {
 const LOCATION_COVER: Record<string, string> = {
   'santa-ana': '/images/locations/santa-ana-fachada.png',
   'lago-coatepeque': '/images/locations/coatepeque-dock-wide.jpg',
-  'san-benito': '/images/locations/san-benito-cover.jpg',
-  'surf-city': '/images/locations/surf-city-cover.jpg',
-  'simmer-garden': '/images/locations/simmer-garden-cover.jpg',
+  'san-benito': '/images/locations/gallery-san-benito/san-benito-1.jpg',
+  'surf-city': '/images/locations/surf-city-exterior.jpg',
+  'simmer-garden': '/images/locations/drive-garden/garden-drive-04.jpg',
 }
 
 // ─── Pre-computed featured items (stable reference) ───────────────────────
