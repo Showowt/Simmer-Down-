@@ -251,34 +251,34 @@ export default function NosotrosPage() {
 
               <div className="space-y-5 text-white/65 text-base md:text-lg leading-relaxed">
                 <p>
-                  {locale === 'es' ? (
-                    <>
-                      En <strong className="text-white">2014</strong>, abrimos nuestras puertas frente
-                      a la catedral de Santa Ana con una idea simple: crear un lugar donde el tiempo
-                      bajara la velocidad, la conversacion fluyera y la comida se disfrutara sin prisa.
-                    </>
-                  ) : (
-                    <>
-                      In <strong className="text-white">2014</strong>, we opened our doors facing
-                      the Santa Ana cathedral with a simple idea: create a place where time slows down,
-                      conversation flows and food is enjoyed without rush.
-                    </>
-                  )}
+                  {locale === 'es'
+                    ? 'Nacimos en Santa Ana, frente a su historica catedral, como un punto de encuentro donde el tiempo se desacelera, las conversaciones cobran valor y cada visita se transforma en memoria.'
+                    : 'We were born in Santa Ana, facing its historic cathedral, as a meeting point where time slows down, conversations gain meaning and every visit becomes a memory.'}
                 </p>
                 <p>
                   {locale === 'es'
-                    ? 'Nuestra cocina se convirtio en el corazon de todo. Pizzas artesanales, pastas, carnes, platos para compartir: cada receta respeta el ingrediente y celebra el sabor.'
-                    : 'Our kitchen became the heart of everything. Artisan pizzas, pastas, meats, sharing plates: every recipe respects the ingredient and celebrates flavor.'}
+                    ? 'Lo que comenzo como un restaurante, pronto se convirtio en parte de la historia de quienes celebran, se reencuentran, descubren y comparten. Porque Simmer Down no solo acompana momentos especiales: los convierte en experiencias que permanecen.'
+                    : 'What started as a restaurant quickly became part of the story of those who celebrate, reunite, discover and share. Because Simmer Down does not just accompany special moments: it turns them into lasting experiences.'}
                 </p>
                 <p>
                   {locale === 'es'
-                    ? 'Hoy somos 5 ubicaciones en El Salvador. Cada restaurante es unico, pero todos comparten la misma esencia: fuego, sabor y comunidad.'
-                    : 'Today we are 5 locations across El Salvador. Each restaurant is unique, but they all share the same essence: fire, flavor and community.'}
+                    ? 'Durante 12 anos, hemos evolucionado sin perder nuestra esencia, creciendo desde nuestras raices hasta convertirnos en destinos unicos que conectan el encanto del Lago de Coatepeque, la energia de Surf City y cada espacio donde nuestra historia sigue viva.'
+                    : 'Over 12 years, we have evolved without losing our essence, growing from our roots into unique destinations connecting the charm of Lake Coatepeque, the energy of Surf City and every space where our story lives on.'}
+                </p>
+                <p>
+                  {locale === 'es'
+                    ? 'Nuestra cocina honra lo artesanal, el fuego lento y el poder de ingredientes que cuentan su propia historia. Pizzas iconicas, pastas memorables, cortes excepcionales y experiencias pensadas para despertar emociones, crear conexion y dejar huella.'
+                    : 'Our kitchen honors the artisanal, slow fire and the power of ingredients that tell their own story. Iconic pizzas, memorable pastas, exceptional cuts and experiences designed to awaken emotions, create connection and leave a mark.'}
                 </p>
                 <p className="italic text-white/80 border-l-2 border-[#E85D04] pl-4">
                   {locale === 'es'
-                    ? 'Simmer Down no es solo lo que servimos en la mesa. Es el ambiente. Es la musica. Es la vista. Es la sensacion de estar exactamente donde debes estar.'
-                    : 'Simmer Down is not just what we serve at the table. It is the atmosphere. It is the music. It is the view. It is the feeling of being exactly where you should be.'}
+                    ? 'Pero Simmer Down siempre ha sido mas que lo que sucede en la mesa. Es el ambiente. Es la musica. Es la vista. Es la energia de cada espacio. Es esa sensacion unica de llegar al lugar correcto... y querer volver.'
+                    : 'But Simmer Down has always been more than what happens at the table. It is the atmosphere. It is the music. It is the view. It is the energy of every space. It is that unique feeling of arriving at the right place... and wanting to come back.'}
+                </p>
+                <p className="font-semibold text-white text-lg">
+                  {locale === 'es'
+                    ? '12 anos creando mas que platillos: creando recuerdos inolvidables en la memoria de El Salvador.'
+                    : '12 years creating more than dishes: creating unforgettable memories in the heart of El Salvador.'}
                 </p>
               </div>
             </motion.div>
