@@ -39,8 +39,8 @@ interface Location {
 const locations: Location[] = [
   { id: 'santa-ana', name: 'Santa Ana', hours: { weekday: '11:00-21:00', weekend: '11:00-22:00' }, closedDays: [] },
   { id: 'coatepeque', name: 'Lago de Coatepeque', hours: { weekday: '11:00-20:00', weekend: '11:00-21:00' }, closedDays: [] },
-  { id: 'san-benito', name: 'San Benito', hours: { daily: '11:00-23:00' }, closedDays: [] },
-  { id: 'juayua', name: 'Simmer Garden (Juayua)', hours: { weekend: '11:00-20:00' }, closedDays: [1, 2, 3, 4] },
+  { id: 'san-benito', name: 'San Benito', hours: { weekday: '16:00-22:00', weekend: '12:00-01:00' }, closedDays: [] },
+  { id: 'juayua', name: 'Simmer Garden (Juayua)', hours: { daily: '11:00-20:00' }, closedDays: [] },
   { id: 'surf-city', name: 'Surf City', hours: { weekday: '12:00-20:00', weekend: '12:00-20:00' }, closedDays: [1, 2] },
 ]
 
@@ -726,7 +726,7 @@ export default function ReservationsPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((num) => (
                       <button
                         key={num}
                         type="button"

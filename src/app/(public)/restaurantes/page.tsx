@@ -24,6 +24,46 @@ const featureLabels: Record<string, Record<string, string>> = {
   'valet-parking': { es: 'Valet', en: 'Valet' },
 }
 
+function getCompactHours(location: typeof LOCATIONS[0], lang: string): string[] {
+  const h = location.hours
+  const mon = h.monday || h.weekday
+  const thu = h.thursday || h.weekday
+  const fri = h.friday || h.weekend
+  const allSame = mon === fri && mon === thu && mon === (h.sunday || h.weekend)
+
+  if (allSame && mon) {
+    return [`${lang === 'es' ? 'L-D' : 'Mon-Sun'}: ${mon}`]
+  }
+
+  // Check if Mon-Wed differ from Thu
+  const monWed = h.monday || h.weekday
+  const thursday = h.thursday || h.weekday
+  const isClosed = (s: string | undefined) => !s || s.toLowerCase() === 'cerrado' || s.toLowerCase() === 'closed'
+
+  if (isClosed(monWed) && !isClosed(h.wednesday || h.weekday)) {
+    // Mon-Tue closed, Wed-Sun open (Surf City pattern)
+    return [
+      `${lang === 'es' ? 'L-M' : 'Mon-Tue'}: ${lang === 'es' ? 'Cerrado' : 'Closed'}`,
+      `${lang === 'es' ? 'M-D' : 'Wed-Sun'}: ${h.wednesday || h.weekday}`,
+    ]
+  }
+
+  if (monWed !== thursday) {
+    // San Benito pattern: Mon-Wed differ from Thu, differ from Fri-Sun
+    return [
+      `${lang === 'es' ? 'L-M' : 'Mon-Wed'}: ${monWed}`,
+      `${lang === 'es' ? 'J' : 'Thu'}: ${thursday}`,
+      `${lang === 'es' ? 'V-D' : 'Fri-Sun'}: ${fri}`,
+    ]
+  }
+
+  // Default: weekday/weekend split
+  return [
+    `${lang === 'es' ? 'L-J' : 'Mon-Thu'}: ${h.weekday}`,
+    `${lang === 'es' ? 'V-D' : 'Fri-Sun'}: ${h.weekend}`,
+  ]
+}
+
 export default function LocationsPage() {
   const { t, language } = useTranslation()
 
@@ -80,11 +120,14 @@ export default function LocationsPage() {
                   </p>
 
                   {/* Hours */}
-                  <div className="mt-4 flex items-center gap-2 text-sm text-white/40">
-                    <Clock className="w-4 h-4" />
-                    <span>{language === 'es' ? 'L-J' : 'Mon-Thu'}: {location.hours.weekday}</span>
-                    <span className="text-white/20">|</span>
-                    <span>{language === 'es' ? 'V-D' : 'Fri-Sun'}: {location.hours.weekend}</span>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-white/40 flex-wrap">
+                    <Clock className="w-4 h-4 flex-shrink-0" />
+                    {getCompactHours(location, language).map((segment, si, arr) => (
+                      <span key={si} className="flex items-center gap-2">
+                        <span>{segment}</span>
+                        {si < arr.length - 1 && <span className="text-white/20">|</span>}
+                      </span>
+                    ))}
                   </div>
 
                   {/* Features */}

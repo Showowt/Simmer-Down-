@@ -25,7 +25,7 @@ export default function Header() {
     { href: '/menu', label: t(translations.nav.menu) },
     { href: '/reservations', label: t(translations.nav.reservations) },
     { href: '/locations', label: t(translations.nav.locations) },
-    { href: '/about', label: t(translations.nav.about) },
+    { href: '/nosotros', label: t(translations.nav.about) },
   ]
 
   useEffect(() => { queueMicrotask(() => setMounted(true)) }, [])

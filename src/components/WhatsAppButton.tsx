@@ -66,7 +66,7 @@ export default function WhatsAppButton({
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          className="fixed bottom-6 left-6 z-30 hidden lg:flex items-end gap-3"
+          className="fixed bottom-6 right-6 z-[9999] hidden lg:flex items-end gap-3 pointer-events-auto"
         >
           {/* Tooltip Bubble */}
           <AnimatePresence>
