@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
-import { useMenuImageOverrides } from '@/lib/use-menu-image-overrides'
+import { useMenuOverrides, mergeMenuItem } from '@/lib/use-menu-image-overrides'
 import {
   MENU_CATEGORIES,
   MENU_ITEMS,
@@ -520,7 +520,7 @@ export default function CartaPage() {
   const { openMenuItemSheet } = useUIStore()
 
   // ── Local state ──────────────────────────────────────────
-  const imageOverrides = useMenuImageOverrides()
+  const menuOverrides = useMenuOverrides()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchInput, setSearchInput] = useState('')
   const [activeFilters, setActiveFilters] = useState<Set<DietaryFilter>>(new Set())
@@ -536,7 +536,7 @@ export default function CartaPage() {
       searchQuery.trim().length > 0
         ? searchMenuItems(searchQuery)
         : selectedCategory === 'all'
-        ? MENU_ITEMS.filter((i) => i.isAvailable)
+        ? MENU_ITEMS
         : getItemsByCategory(selectedCategory)
 
     // Remove alcohol — can only be ordered in person
@@ -547,9 +547,12 @@ export default function CartaPage() {
     if (activeFilters.has('spicy')) base = base.filter((i) => i.isSpicy)
     if (activeFilters.has('gluten-free')) base = base.filter((i) => i.isGlutenFree)
 
-    // Uploaded photo overrides win over static images
-    return base.map((i) => (imageOverrides[i.id] ? { ...i, image: imageOverrides[i.id] } : i))
-  }, [searchQuery, selectedCategory, activeFilters, imageOverrides])
+    // Admin overrides (photos, price, availability, names) win over static,
+    // then availability filters AFTER the merge so toggles take effect.
+    return base
+      .map((i) => mergeMenuItem(i, menuOverrides))
+      .filter((i) => i.isAvailable)
+  }, [searchQuery, selectedCategory, activeFilters, menuOverrides])
 
   // ── Grouped by category (only when not searching) ────────
   const grouped = useMemo(() => {

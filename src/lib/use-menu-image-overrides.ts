@@ -1,36 +1,61 @@
 "use client";
 
 /**
- * Client hook: fetch the menu image override map once and merge it over
- * static item images. Fails silent — static images remain the fallback.
+ * Client hooks: fetch the menu override maps (photos + price/availability/text)
+ * once and merge them over static items. Fails silent — static data remains
+ * the fallback.
  */
 
 import { useEffect, useState } from "react";
-import type { MenuImageOverrides } from "@/lib/menu-images";
+import type { MenuItem } from "@/lib/data";
+import {
+  applyItemOverride,
+  type MenuImageOverrides,
+  type MenuItemOverrides,
+  type MenuOverridesPayload,
+} from "@/lib/menu-images";
 
-let cached: MenuImageOverrides | null = null;
+let cached: MenuOverridesPayload | null = null;
 
-export function useMenuImageOverrides(): MenuImageOverrides {
-  const [overrides, setOverrides] = useState<MenuImageOverrides>(cached || {});
+const EMPTY: MenuOverridesPayload = { overrides: {}, items: {} };
+
+export function useMenuOverrides(): MenuOverridesPayload {
+  const [payload, setPayload] = useState<MenuOverridesPayload>(cached || EMPTY);
 
   useEffect(() => {
     if (cached) return;
     let cancelled = false;
     fetch("/api/menu/images")
-      .then((r) => (r.ok ? r.json() : { overrides: {} }))
-      .then((data: { overrides: MenuImageOverrides }) => {
-        cached = data.overrides || {};
-        if (!cancelled) setOverrides(cached);
+      .then((r) => (r.ok ? r.json() : EMPTY))
+      .then((data: Partial<MenuOverridesPayload>) => {
+        cached = {
+          overrides: data.overrides || {},
+          items: data.items || {},
+        };
+        if (!cancelled) setPayload(cached);
       })
       .catch((err) => {
-        console.error("[useMenuImageOverrides]", err);
+        console.error("[useMenuOverrides]", err);
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return overrides;
+  return payload;
+}
+
+/** Back-compat: image-only map. */
+export function useMenuImageOverrides(): MenuImageOverrides {
+  return useMenuOverrides().overrides;
+}
+
+/** Merge photo + basics overrides over a static item. */
+export function mergeMenuItem(
+  item: MenuItem,
+  payload: MenuOverridesPayload,
+): MenuItem {
+  return applyItemOverride(item, payload.items, payload.overrides);
 }
 
 /** Effective image for an item: uploaded override wins over static. */

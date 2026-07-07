@@ -25,7 +25,7 @@ import { createClient } from "@/lib/supabase/client";
 const navItems = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Pedidos", icon: ShoppingBag },
-  { href: "/admin/menu", label: "Menú", icon: UtensilsCrossed },
+  { href: "/admin/carta", label: "Carta y Precios", icon: UtensilsCrossed },
   { href: "/admin/fotos", label: "Fotos", icon: Camera },
   { href: "/admin/specials", label: "Especiales", icon: Tag },
   { href: "/admin/events", label: "Eventos", icon: Calendar },

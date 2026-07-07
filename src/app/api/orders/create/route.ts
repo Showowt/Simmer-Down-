@@ -23,6 +23,7 @@ import logger from "@/lib/logger";
 import { sendWhatsApp } from "@/lib/twilio/client";
 import { sendTelegram } from "@/lib/telegram";
 import { formatOrderWhatsApp } from "@/lib/notifications/order-notify";
+import { MENU_ITEMS } from "@/lib/data";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -95,6 +96,70 @@ async function fetchMenuPrices(
   }
 
   return priceMap;
+}
+
+/**
+ * Server-side price/availability enforcement against the static catalog
+ * plus admin overrides (menu_item_overrides). The client computes unit
+ * price as base + size modifier + extras, so we validate the price is
+ * within [effectiveBase, effectiveBase + maxSize + allExtras].
+ */
+interface ItemOverrideRow {
+  price: number | null;
+  is_available: boolean | null;
+}
+
+async function fetchItemOverrides(
+  supabase: ReturnType<typeof createServiceClient>,
+  itemIds: string[],
+): Promise<Map<string, ItemOverrideRow>> {
+  if (itemIds.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("menu_item_overrides")
+    .select("item_id, price, is_available")
+    .in("item_id", itemIds);
+  if (error) {
+    logger.error("Failed to fetch item overrides", error);
+    return new Map();
+  }
+  const map = new Map<string, ItemOverrideRow>();
+  for (const row of data || []) {
+    map.set(row.item_id, {
+      price: row.price != null ? Number(row.price) : null,
+      is_available: row.is_available,
+    });
+  }
+  return map;
+}
+
+function validateAgainstCatalog(
+  clientItem: { id: string; price: number },
+  overrides: Map<string, ItemOverrideRow>,
+): { ok: true } | { ok: false; reason: "unavailable" | "price"; expectedBase: number } {
+  const staticItem = MENU_ITEMS.find((i) => i.id === clientItem.id);
+  if (!staticItem) {
+    // Unknown to the static catalog — legacy fallback behavior applies
+    return { ok: true };
+  }
+
+  const o = overrides.get(clientItem.id);
+  const available = o?.is_available ?? staticItem.isAvailable;
+  const base = o?.price ?? staticItem.basePrice;
+  if (!available) return { ok: false, reason: "unavailable", expectedBase: base };
+
+  const maxSize = Math.max(
+    0,
+    ...(staticItem.sizes || []).map((s) => s.priceModifier || 0),
+  );
+  const allExtras = (staticItem.modifiers || []).reduce(
+    (sum, m) => sum + Math.max(0, m.price || 0),
+    0,
+  );
+
+  if (clientItem.price < base - 0.01 || clientItem.price > base + maxSize + allExtras + 0.01) {
+    return { ok: false, reason: "price", expectedBase: base };
+  }
+  return { ok: true };
 }
 
 /**
@@ -312,8 +377,11 @@ export async function POST(
     // Extract item IDs for database lookup
     const itemIds = input.items.map((item) => item.id);
 
-    // Fetch REAL prices from database
-    const menuPrices = await fetchMenuPrices(supabase, itemIds);
+    // Fetch REAL prices from database + admin catalog overrides
+    const [menuPrices, itemOverrides] = await Promise.all([
+      fetchMenuPrices(supabase, itemIds),
+      fetchItemOverrides(supabase, itemIds),
+    ]);
 
     // Validate all items exist and calculate server-side totals
     let subtotal = 0;
@@ -349,6 +417,35 @@ export async function POST(
             message: `"${dbItem.name}" no está disponible en este momento`,
           },
           { status: 400 },
+        );
+      }
+
+      // Enforce static catalog + admin overrides (price bounds, availability)
+      const catalogCheck = validateAgainstCatalog(clientItem, itemOverrides);
+      if (!catalogCheck.ok) {
+        if (catalogCheck.reason === "unavailable") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Item unavailable",
+              message: `"${clientItem.name}" no está disponible en este momento`,
+            },
+            { status: 400 },
+          );
+        }
+        logger.warn("Order item price outside catalog bounds", {
+          itemId: clientItem.id,
+          clientPrice: clientItem.price,
+          expectedBase: catalogCheck.expectedBase,
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Price mismatch",
+            message:
+              "Los precios del menú cambiaron. Por favor actualiza la página y vuelve a intentar.",
+          },
+          { status: 409 },
         );
       }
 

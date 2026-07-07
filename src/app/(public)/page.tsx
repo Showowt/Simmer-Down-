@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import { MapPin, ChevronRight, MessageCircle, Star, Flame, Leaf } from 'lucide-react'
 import { useTranslation, useCartStore } from '@/lib/store'
-import { useMenuImageOverrides } from '@/lib/use-menu-image-overrides'
+import { useMenuOverrides, mergeMenuItem } from '@/lib/use-menu-image-overrides'
 import {
   LOCATIONS,
   MENU_CATEGORIES,
@@ -56,13 +56,13 @@ const FEATURED_ITEMS = getFeaturedItems()
 export default function HomePage() {
   const { t, language: locale } = useTranslation()
   const addItem = useCartStore((s) => s.addItem)
-  const imageOverrides = useMenuImageOverrides()
+  const menuOverrides = useMenuOverrides()
   const featuredItems = useMemo(
     () =>
-      FEATURED_ITEMS.map((i) =>
-        imageOverrides[i.id] ? { ...i, image: imageOverrides[i.id] } : i,
+      FEATURED_ITEMS.map((i) => mergeMenuItem(i, menuOverrides)).filter(
+        (i) => i.isAvailable && i.isFeatured,
       ),
-    [imageOverrides],
+    [menuOverrides],
   )
 
   return (
