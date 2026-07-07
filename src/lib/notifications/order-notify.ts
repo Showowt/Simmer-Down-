@@ -40,6 +40,15 @@ interface PaymentForNotification {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════
+
+/** Escape characters that break Telegram Markdown v1 parsing */
+function escapeMd(text: string): string {
+  return text.replace(/[_*`\[\]]/g, "");
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Formatters
 // ═══════════════════════════════════════════════════════════════
 
@@ -54,11 +63,11 @@ export function formatOrderWhatsApp(
   const orderTypeLabel =
     order.order_type === "delivery" ? "Delivery" : "Para recoger";
 
-  // Build items list
+  // Build items list — escape item names to prevent Markdown parse failures
   const itemLines = items
     .map(
       (item) =>
-        `\u2022 ${item.quantity}x ${item.item_name} \u2014 $${item.line_total.toFixed(2)}`,
+        `\u2022 ${item.quantity}x ${escapeMd(item.item_name)} \u2014 $${item.line_total.toFixed(2)}`,
     )
     .join("\n");
 

@@ -128,7 +128,7 @@ function formatDuration(ms: number): string {
 }
 
 function escapeMarkdown(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
+  return text.replace(/[_*`\[\]]/g, "");
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -235,7 +235,7 @@ async function handlePedidos(chatId: string): Promise<void> {
       for (const o of pending.slice(0, 10)) {
         const locName = o.location_id ? (locationMap[o.location_id] || "?") : "?";
         lines.push(
-          `  #${o.order_number || o.id.slice(0, 8)} - ${o.customer_name} - $${Number(o.total_amount).toFixed(2)} (${locName})`,
+          `  #${o.order_number || o.id.slice(0, 8)} - ${escapeMarkdown(String(o.customer_name || ""))} - $${Number(o.total_amount).toFixed(2)} (${escapeMarkdown(locName)})`,
         );
       }
       if (pending.length > 10) {
@@ -299,7 +299,7 @@ async function handleReservas(chatId: string): Promise<void> {
       for (const r of items) {
         const locId = (r.location_id as string) || "";
         lines.push(
-          `  ${r.time} | ${r.customer_name} | ${r.guest_count} pers. | ${locId}`,
+          `  ${r.time} | ${escapeMarkdown(String(r.customer_name || ""))} | ${r.guest_count} pers. | ${escapeMarkdown(String(locId))}`,
         );
       }
       lines.push("");
@@ -1029,11 +1029,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       from: message.from?.username || message.from?.first_name || "unknown",
     });
 
-    // Route to handler — don't await to respond quickly
-    // (Telegram expects a response within ~60s but we respond immediately)
-    routeCommand(command, args, chatId).catch((err) => {
+    // Route to handler — await to ensure errors are caught and logged
+    try {
+      await routeCommand(command, args, chatId);
+    } catch (err) {
       logger.error("[TelegramBot] Command handler error", err, { command });
-    });
+      // Try to notify the chat that something went wrong
+      await sendTelegram(`Error al procesar el comando ${command}. Intenta de nuevo.`, chatId).catch(() => {});
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

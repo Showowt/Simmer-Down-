@@ -35,6 +35,7 @@ export async function sendTelegram(
   }
 
   try {
+    // Try with Markdown first
     const res = await fetch(`${API_BASE}${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,6 +50,30 @@ export async function sendTelegram(
     const data = await res.json();
 
     if (!data.ok) {
+      // If Markdown parsing failed, retry WITHOUT parse_mode (plain text)
+      if (data.error_code === 400 && data.description?.includes("parse")) {
+        logger.warn("Telegram Markdown parse failed, retrying as plain text", {
+          error: data.description,
+        });
+        const plainRes = await fetch(`${API_BASE}${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: targetChat,
+            text: message.replace(/[*_`\[\]]/g, ""),
+            disable_web_page_preview: true,
+          }),
+        });
+        const plainData = await plainRes.json();
+        if (plainData.ok) {
+          return { success: true, messageId: plainData.result?.message_id };
+        }
+        logger.warn("Telegram plain text send also failed", {
+          error: plainData.description,
+        });
+        return { success: false, error: plainData.description };
+      }
+
       logger.warn("Telegram send failed", {
         error: data.description,
         errorCode: data.error_code,
