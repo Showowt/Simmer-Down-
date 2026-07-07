@@ -1,10 +1,12 @@
 'use client'
 
+import { useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import { MapPin, ChevronRight, MessageCircle, Star, Flame, Leaf } from 'lucide-react'
 import { useTranslation, useCartStore } from '@/lib/store'
+import { useMenuImageOverrides } from '@/lib/use-menu-image-overrides'
 import {
   LOCATIONS,
   MENU_CATEGORIES,
@@ -54,6 +56,14 @@ const FEATURED_ITEMS = getFeaturedItems()
 export default function HomePage() {
   const { t, language: locale } = useTranslation()
   const addItem = useCartStore((s) => s.addItem)
+  const imageOverrides = useMenuImageOverrides()
+  const featuredItems = useMemo(
+    () =>
+      FEATURED_ITEMS.map((i) =>
+        imageOverrides[i.id] ? { ...i, image: imageOverrides[i.id] } : i,
+      ),
+    [imageOverrides],
+  )
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden pb-24 lg:pb-0">
@@ -228,7 +238,7 @@ export default function HomePage() {
             viewport={{ once: true, margin: '-60px' }}
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            {FEATURED_ITEMS.slice(0, 8).map((item) => (
+            {featuredItems.slice(0, 8).map((item) => (
               <motion.div
                 key={item.id}
                 variants={fadeUp}

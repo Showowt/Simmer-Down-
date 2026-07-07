@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
+import { useMenuImageOverrides } from '@/lib/use-menu-image-overrides'
 import {
   MENU_CATEGORIES,
   MENU_ITEMS,
@@ -519,6 +520,7 @@ export default function CartaPage() {
   const { openMenuItemSheet } = useUIStore()
 
   // ── Local state ──────────────────────────────────────────
+  const imageOverrides = useMenuImageOverrides()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchInput, setSearchInput] = useState('')
   const [activeFilters, setActiveFilters] = useState<Set<DietaryFilter>>(new Set())
@@ -545,8 +547,9 @@ export default function CartaPage() {
     if (activeFilters.has('spicy')) base = base.filter((i) => i.isSpicy)
     if (activeFilters.has('gluten-free')) base = base.filter((i) => i.isGlutenFree)
 
-    return base
-  }, [searchQuery, selectedCategory, activeFilters])
+    // Uploaded photo overrides win over static images
+    return base.map((i) => (imageOverrides[i.id] ? { ...i, image: imageOverrides[i.id] } : i))
+  }, [searchQuery, selectedCategory, activeFilters, imageOverrides])
 
   // ── Grouped by category (only when not searching) ────────
   const grouped = useMemo(() => {

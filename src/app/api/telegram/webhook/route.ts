@@ -19,6 +19,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendTelegram } from "@/lib/telegram";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { MENU_ITEMS } from "@/lib/data";
+import { matchMenuItems } from "@/lib/menu-images";
 import logger from "@/lib/logger";
 
 // ═══════════════════════════════════════════════════════════════
@@ -39,12 +41,22 @@ interface TelegramChat {
   title?: string;
 }
 
+interface TelegramPhotoSize {
+  file_id: string;
+  file_unique_id: string;
+  width: number;
+  height: number;
+  file_size?: number;
+}
+
 interface TelegramMessage {
   message_id: number;
   from?: TelegramUser;
   chat: TelegramChat;
   date: number;
   text?: string;
+  caption?: string;
+  photo?: TelegramPhotoSize[];
   entities?: Array<{
     type: string;
     offset: number;
@@ -691,6 +703,151 @@ function handleMenu(chatId: string): Promise<void> {
   ).then(() => undefined);
 }
 
+// ═══════════════════════════════════════════════════════════════
+// /foto — photo upload: assign a dish photo to a menu item
+// ═══════════════════════════════════════════════════════════════
+
+const TELEGRAM_FILE_MAX_BYTES = 10 * 1024 * 1024;
+
+async function handleFotosList(chatId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from("menu_image_overrides")
+      .select("item_id");
+    const overridden = new Set((data || []).map((r: { item_id: string }) => r.item_id));
+
+    const missing = MENU_ITEMS.filter((i) => !i.image && !overridden.has(i.id));
+    if (missing.length === 0) {
+      await sendTelegram("Todos los platillos tienen foto. 🎉", chatId);
+      return;
+    }
+    const lines = [
+      `*PLATILLOS SIN FOTO (${missing.length})*`,
+      "",
+      ...missing.map((i) => `• ${i.nameEs} — \`${i.id}\``),
+      "",
+      "Para subir: envia la foto con el texto:",
+      "`/foto nombre-del-platillo`",
+    ];
+    await sendTelegram(lines.join("\n"), chatId);
+  } catch (err) {
+    logger.error("[TelegramBot] handleFotosList error", err);
+    await sendTelegram("Error al consultar fotos faltantes.", chatId);
+  }
+}
+
+async function handleFotoUpload(
+  photo: TelegramPhotoSize[],
+  caption: string,
+  chatId: string,
+): Promise<void> {
+  try {
+    const query = caption.replace(/^\/foto(@\S+)?\s*/i, "").trim();
+    if (!query) {
+      await sendTelegram(
+        "Falta el nombre del platillo.\nEnvia la foto con el texto: `/foto casanova` o `/foto leche-tigra`\nUsa /fotos para ver la lista.",
+        chatId,
+      );
+      return;
+    }
+
+    const matches = matchMenuItems(query);
+    if (matches.length === 0) {
+      await sendTelegram(
+        `No encontre ningun platillo para "${query}".\nUsa /fotos para ver los nombres validos.`,
+        chatId,
+      );
+      return;
+    }
+    if (matches.length > 1) {
+      await sendTelegram(
+        `"${query}" coincide con varios platillos:\n${matches
+          .slice(0, 6)
+          .map((m) => `• ${m.nameEs} — \`${m.id}\``)
+          .join("\n")}\n\nRepite con el id exacto.`,
+        chatId,
+      );
+      return;
+    }
+    const item = matches[0];
+
+    // Largest photo size Telegram provides
+    const best = photo.reduce((a, b) =>
+      (b.file_size || 0) > (a.file_size || 0) ? b : a,
+    );
+    if ((best.file_size || 0) > TELEGRAM_FILE_MAX_BYTES) {
+      await sendTelegram("La foto es demasiado grande (max 10MB).", chatId);
+      return;
+    }
+
+    const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+    if (!token) {
+      await sendTelegram("Bot no configurado para descargas.", chatId);
+      return;
+    }
+
+    // Resolve file path, then download
+    const fileRes = await fetch(
+      `https://api.telegram.org/bot${token}/getFile?file_id=${encodeURIComponent(best.file_id)}`,
+    );
+    const fileData = await fileRes.json();
+    if (!fileData.ok || !fileData.result?.file_path) {
+      await sendTelegram("No pude descargar la foto de Telegram.", chatId);
+      return;
+    }
+    const dl = await fetch(
+      `https://api.telegram.org/file/bot${token}/${fileData.result.file_path}`,
+    );
+    if (!dl.ok) {
+      await sendTelegram("Fallo la descarga de la foto.", chatId);
+      return;
+    }
+    const bytes = Buffer.from(await dl.arrayBuffer());
+
+    // Upload to Supabase storage
+    const supabase = createServiceClient();
+    const path = `menu-overrides/${item.id}-${Date.now()}.jpg`;
+    const { error: upErr } = await supabase.storage
+      .from("menu-images")
+      .upload(path, bytes, { contentType: "image/jpeg", upsert: false });
+    if (upErr) {
+      logger.error("[TelegramBot] Storage upload failed", upErr);
+      await sendTelegram("Error al guardar la foto en el servidor.", chatId);
+      return;
+    }
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("menu-images").getPublicUrl(path);
+
+    // Point the menu item at the new photo
+    const { error: dbErr } = await supabase
+      .from("menu_image_overrides")
+      .upsert(
+        {
+          item_id: item.id,
+          image_url: publicUrl,
+          updated_by: "telegram",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "item_id" },
+      );
+    if (dbErr) {
+      logger.error("[TelegramBot] Override upsert failed", dbErr);
+      await sendTelegram("Foto subida pero no pude asignarla al platillo.", chatId);
+      return;
+    }
+
+    await sendTelegram(
+      `✅ Foto asignada a *${item.nameEs}*.\nVisible en ${SITE_URL}/carta en ~1 minuto.`,
+      chatId,
+    );
+  } catch (err) {
+    logger.error("[TelegramBot] handleFotoUpload error", err);
+    await sendTelegram("Error interno al procesar la foto.", chatId);
+  }
+}
+
 function handleAyuda(chatId: string): Promise<void> {
   const lines = [
     "*COMANDOS DISPONIBLES*",
@@ -705,6 +862,8 @@ function handleAyuda(chatId: string): Promise<void> {
     "/evento TITULO | UBICACION | FECHA HORA | DESC",
     "  Ej: /evento Jazz Night | san-benito | 2026-06-20 19:00 | Musica en vivo",
     "/menu - Link al menu",
+    "/fotos - Platillos sin foto",
+    "/foto - Subir foto de platillo (adjunta imagen + `/foto nombre`)",
     "/ayuda - Esta lista de comandos",
     "",
     `Ubicaciones validas: ${Object.keys(LOCATION_SLUGS).join(", ")}`,
@@ -743,6 +902,15 @@ async function routeCommand(
       break;
     case "/menu":
       await handleMenu(chatId);
+      break;
+    case "/fotos":
+      await handleFotosList(chatId);
+      break;
+    case "/foto":
+      await sendTelegram(
+        "Para subir una foto: adjunta la imagen y escribe `/foto nombre-del-platillo` como descripcion de la foto.\nUsa /fotos para ver platillos sin foto.",
+        chatId,
+      );
       break;
     case "/ayuda":
     case "/help":
@@ -793,9 +961,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: false }, { status: 400 });
     }
 
-    // Only process messages
+    // Only process messages (text commands or photos with caption)
     const message = update.message;
-    if (!message || !message.text) {
+    if (!message || (!message.text && !message.photo)) {
       return NextResponse.json({ ok: true });
     }
 
@@ -822,8 +990,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ ok: true });
     }
 
+    // Photo message → /foto upload flow
+    if (message.photo && message.photo.length > 0) {
+      const caption = (message.caption || "").trim();
+      const photos = message.photo;
+      handleFotoUpload(photos, caption, chatId).catch((err) => {
+        logger.error("[TelegramBot] Photo handler error", err);
+      });
+      return NextResponse.json({ ok: true });
+    }
+
     // Extract command from message text
-    const text = message.text.trim();
+    const text = (message.text || "").trim();
 
     // Check for bot command entities
     const hasBotCommand = message.entities?.some(
