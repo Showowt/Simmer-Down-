@@ -17,6 +17,8 @@ import {
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
 import { sendTelegram, resolveLocationName } from "@/lib/telegram";
+import { sendWhatsApp } from "@/lib/twilio/client";
+import { LOCATIONS } from "@/lib/data";
 
 interface ReservationResponse {
   success: boolean;
@@ -147,6 +149,33 @@ export async function POST(
         error: err instanceof Error ? err.message : String(err),
       });
     });
+
+    // Send WhatsApp notification to the specific location
+    const locationData = LOCATIONS.find((l) => l.id === location_id);
+    if (locationData?.whatsapp) {
+      const whatsappMsg = [
+        `📅 *NUEVA RESERVACIÓN*`,
+        ``,
+        `📍 Ubicación: ${locName}`,
+        `📆 Fecha: ${date}`,
+        `🕐 Hora: ${time}`,
+        `👥 Personas: ${guest_count}`,
+        ``,
+        `👤 Nombre: ${customer_name}`,
+        `📞 Teléfono: ${customer_phone}`,
+        customer_email ? `✉️ Email: ${customer_email}` : '',
+        special_requests ? `\n📝 Notas: ${special_requests}` : '',
+        ``,
+        `✅ Estado: Confirmada`,
+      ].filter(Boolean).join('\n');
+
+      sendWhatsApp(locationData.whatsapp, whatsappMsg).catch((err) => {
+        logger.warn("Reservation WhatsApp notification failed", {
+          location: location_id,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
+    }
 
     const duration = Date.now() - startTime;
     logger.api.response(endpoint, 200, duration, {

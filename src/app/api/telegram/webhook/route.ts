@@ -994,9 +994,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (message.photo && message.photo.length > 0) {
       const caption = (message.caption || "").trim();
       const photos = message.photo;
-      handleFotoUpload(photos, caption, chatId).catch((err) => {
+      try {
+        await handleFotoUpload(photos, caption, chatId);
+      } catch (err) {
         logger.error("[TelegramBot] Photo handler error", err);
-      });
+        await sendTelegram("Error al procesar la foto. Intenta de nuevo.", chatId).catch(() => {});
+      }
       return NextResponse.json({ ok: true });
     }
 
