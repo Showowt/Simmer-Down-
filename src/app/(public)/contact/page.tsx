@@ -244,7 +244,7 @@ export default function ContactPage() {
                     {t(translations.contact.allLocations)}
                   </Link>
                   <Link
-                    href="/menu"
+                    href="/carta"
                     className="flex items-center gap-3 text-white/60 hover:text-[#E85D04] transition-colors"
                   >
                     <Clock className="w-5 h-5" />

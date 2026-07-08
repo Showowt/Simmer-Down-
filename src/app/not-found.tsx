@@ -42,7 +42,7 @@ export default function RootNotFound() {
               {locale === 'es' ? 'Volver al Inicio' : 'Back to Home'}
             </Link>
             <Link
-              href="/menu"
+              href="/carta"
               className="flex items-center justify-center gap-2 bg-[white/10] hover:bg-[#4A4642] text-[#FFF8F0] px-6 py-4 font-semibold transition-colors min-h-[56px]"
             >
               <Search className="w-5 h-5" />

@@ -176,7 +176,7 @@ function OrderTracker() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/menu"
+                href="/carta"
                 className="inline-flex items-center justify-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-4 font-semibold transition min-h-[56px]"
               >
                 {t({ es: "Volver al Menú", en: "Back to Menu" })}
@@ -228,7 +228,7 @@ function OrderTracker() {
               </p>
             </div>
             <Link
-              href="/menu"
+              href="/carta"
               className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-4 font-semibold transition min-h-[56px]"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -570,7 +570,7 @@ function OrderTracker() {
             <div className="flex flex-col gap-3">
               <div className="flex gap-3">
                 <Link
-                  href="/menu"
+                  href="/carta"
                   className="flex-1 bg-white/10 hover:bg-white/20 text-white py-4 font-medium text-center transition min-h-[56px] flex items-center justify-center"
                 >
                   {t({ es: "Volver al Menú", en: "Back to Menu" })}

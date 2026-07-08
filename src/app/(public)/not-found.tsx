@@ -64,7 +64,7 @@ export default function NotFound() {
             Volver al Inicio
           </Link>
           <Link
-            href="/menu"
+            href="/carta"
             className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-6 py-4 font-semibold transition-colors min-h-[56px]"
           >
             <Search className="w-5 h-5" />
