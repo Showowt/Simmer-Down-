@@ -696,11 +696,11 @@ async function handleEvento(chatId: string, args: string): Promise<void> {
   }
 }
 
-function handleMenu(chatId: string): Promise<void> {
-  return sendTelegram(
-    `*MENU SIMMER DOWN*\n\nVe nuestro menu completo aqui:\n${SITE_URL}/menu\n\nPide en linea:\n${SITE_URL}/carta`,
+async function handleMenu(chatId: string): Promise<void> {
+  await sendTelegram(
+    `MENU SIMMER DOWN\n\nVe nuestro menu completo aqui:\n${SITE_URL}/carta`,
     chatId,
-  ).then(() => undefined);
+  );
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1029,6 +1029,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     logger.info("[TelegramBot] Command received", {
       command,
       chatId,
+      allowedChatId: ALLOWED_CHAT_ID,
       from: message.from?.username || message.from?.first_name || "unknown",
     });
 
@@ -1036,9 +1037,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     try {
       await routeCommand(command, args, chatId);
     } catch (err) {
-      logger.error("[TelegramBot] Command handler error", err, { command });
+      logger.error("[TelegramBot] Command handler error", err, { command, chatId });
       // Try to notify the chat that something went wrong
-      await sendTelegram(`Error al procesar el comando ${command}. Intenta de nuevo.`, chatId).catch(() => {});
+      try {
+        await sendTelegram(`Error al procesar el comando ${command}. Intenta de nuevo.`, chatId);
+      } catch (notifyErr) {
+        logger.error("[TelegramBot] Failed to send error notification", notifyErr);
+      }
     }
 
     return NextResponse.json({ ok: true });
