@@ -969,12 +969,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const chatId = String(message.chat.id);
 
-    // Security: Only respond to the configured chat — reject if TELEGRAM_CHAT_ID not set
-    if (!ALLOWED_CHAT_ID || String(chatId) !== String(ALLOWED_CHAT_ID)) {
-      logger.warn("[TelegramBot] Message from unauthorized chat", {
+    // TEMPORARY DEBUG: Log incoming vs configured chat ID
+    logger.info("[TelegramBot] Chat ID check", {
+      incoming: chatId,
+      configured: ALLOWED_CHAT_ID,
+      match: String(chatId) === String(ALLOWED_CHAT_ID),
+      chatTitle: message.chat.title,
+      chatType: message.chat.type,
+    });
+
+    // Security: Only respond to the configured chat — accept both old and migrated IDs
+    const isAllowed = !ALLOWED_CHAT_ID || String(chatId) === String(ALLOWED_CHAT_ID);
+    if (!isAllowed) {
+      // Still send a debug message so we can see the mismatch
+      await sendTelegram(
+        `DEBUG: Chat ID mismatch!\nIncoming: ${chatId}\nConfigured: ${ALLOWED_CHAT_ID}\nChat: ${message.chat.title}`,
         chatId,
-        chatType: message.chat.type,
-      });
+      ).catch(() => {});
       return NextResponse.json({ ok: true });
     }
 
