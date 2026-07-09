@@ -1033,6 +1033,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       from: message.from?.username || message.from?.first_name || "unknown",
     });
 
+    // DEBUG: Echo immediately to verify sendTelegram works from webhook context
+    const echoResult = await sendTelegram(`Recibido: ${command}`, chatId);
+    logger.info("[TelegramBot] Echo result", { echoResult, command, chatId });
+
     // Route to handler — await to ensure errors are caught and logged
     try {
       await routeCommand(command, args, chatId);
