@@ -316,7 +316,7 @@ export default function AnimaChatV2() {
 
     // Special navigation actions
     if (action === 'menu' || action === 'view_menu') {
-      router.push('/menu')
+      router.push('/carta')
       return
     }
     if (action === 'orders') {
@@ -324,7 +324,7 @@ export default function AnimaChatV2() {
       return
     }
     if (action === 'locations') {
-      router.push('/locations')
+      router.push('/restaurantes')
       return
     }
     if (action === 'events') {

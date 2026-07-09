@@ -22,9 +22,9 @@ export default function Header() {
 
   // 4 primary nav items — refined, not crowded
   const navLinks = [
-    { href: '/menu', label: t(translations.nav.menu) },
+    { href: '/carta', label: t(translations.nav.menu) },
     { href: '/reservations', label: t(translations.nav.reservations) },
-    { href: '/locations', label: t(translations.nav.locations) },
+    { href: '/restaurantes', label: t(translations.nav.locations) },
     { href: '/nosotros', label: t(translations.nav.about) },
   ]
 

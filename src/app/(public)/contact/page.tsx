@@ -237,7 +237,7 @@ export default function ContactPage() {
                 </h3>
                 <div className="space-y-3">
                   <Link
-                    href="/locations"
+                    href="/restaurantes"
                     className="flex items-center gap-3 text-white/60 hover:text-[#E85D04] transition-colors"
                   >
                     <MapPin className="w-5 h-5" />
