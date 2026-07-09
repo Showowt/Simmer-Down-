@@ -27,6 +27,7 @@ interface LocationHours {
   weekday?: string
   weekend?: string
   daily?: string
+  thursday?: string
 }
 
 interface Location {
@@ -38,8 +39,8 @@ interface Location {
 
 const locations: Location[] = [
   { id: 'santa-ana', name: 'Santa Ana', hours: { weekday: '11:00-21:00', weekend: '11:00-22:00' }, closedDays: [] },
-  { id: 'coatepeque', name: 'Lago de Coatepeque', hours: { weekday: '11:00-20:00', weekend: '11:00-21:00' }, closedDays: [] },
-  { id: 'san-benito', name: 'San Benito', hours: { weekday: '16:00-22:00', weekend: '12:00-01:00' }, closedDays: [] },
+  { id: 'lago-coatepeque', name: 'Lago de Coatepeque', hours: { weekday: '11:00-20:00', weekend: '11:00-21:00' }, closedDays: [] },
+  { id: 'san-benito', name: 'San Benito', hours: { weekday: '16:00-22:00', thursday: '12:00-23:00', weekend: '12:00-01:00' }, closedDays: [] },
   { id: 'juayua', name: 'Simmer Garden (Juayua)', hours: { daily: '11:00-20:00' }, closedDays: [] },
   { id: 'surf-city', name: 'Surf City', hours: { weekday: '12:00-20:00', weekend: '12:00-20:00' }, closedDays: [1, 2] },
 ]
@@ -61,6 +62,8 @@ function getHoursForDate(location: Location, date: Date): string | null {
   const day = getDayOfWeek(date)
   if (location.closedDays.includes(day)) return null
   if (location.hours.daily) return location.hours.daily
+  // Thursday override (e.g. San Benito opens earlier on Thursdays)
+  if (day === 4 && location.hours.thursday) return location.hours.thursday
   if (isWeekend(date) && location.hours.weekend) return location.hours.weekend
   if (!isWeekend(date) && location.hours.weekday) return location.hours.weekday
   // Fallback: if only weekend hours exist and it's a weekday, location is closed
