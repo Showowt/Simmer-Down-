@@ -42,10 +42,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!token) return NextResponse.json({ error: "TELEGRAM_BOT_TOKEN not set" });
   if (!secret) return NextResponse.json({ error: "TELEGRAM_WEBHOOK_SECRET not set" });
 
-  // If ?test=true, send a test command response instead of registering webhook
   const url = new URL(request.url);
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+
+  // If ?msg=TEXT, send custom message to group
+  const customMsg = url.searchParams.get("msg");
+  if (customMsg && chatId) {
+    const msgRes = await fetch(`${API}${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: customMsg,
+        disable_web_page_preview: false,
+      }),
+    });
+    const msgData = await msgRes.json();
+    return NextResponse.json({ action: "sendMessage", result: msgData });
+  }
+
+  // If ?test=true, send a test command response
   if (url.searchParams.get("test") === "true") {
-    const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
     if (!chatId) return NextResponse.json({ error: "No TELEGRAM_CHAT_ID" });
     const testRes = await fetch(`${API}${token}/sendMessage`, {
       method: "POST",
