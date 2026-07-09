@@ -150,37 +150,42 @@ export async function POST(
       `\uD83C\uDF10 ${adminUrl}`,
     ].filter(Boolean).join('\n');
 
-    sendTelegram(reservationMsg).catch((err) => {
+    // AWAIT notifications — Vercel kills the function before fire-and-forget completes
+    try {
+      await sendTelegram(reservationMsg);
+    } catch (err) {
       logger.warn("Reservation Telegram notification failed", {
         error: err instanceof Error ? err.message : String(err),
       });
-    });
+    }
 
     // Send WhatsApp notification to the specific location
     const locationData = LOCATIONS.find((l) => l.id === location_id);
     if (locationData?.whatsapp) {
       const whatsappMsg = [
-        `📅 *NUEVA RESERVACIÓN*`,
+        `📅 NUEVA RESERVACION`,
         ``,
-        `📍 Ubicación: ${locName}`,
+        `📍 Ubicacion: ${locName}`,
         `📆 Fecha: ${date}`,
         `🕐 Hora: ${time}`,
         `👥 Personas: ${guest_count}`,
         ``,
         `👤 Nombre: ${customer_name}`,
-        `📞 Teléfono: ${customer_phone}`,
+        `📞 Telefono: ${customer_phone}`,
         customer_email ? `✉️ Email: ${customer_email}` : '',
         special_requests ? `\n📝 Notas: ${special_requests}` : '',
         ``,
         `✅ Estado: Confirmada`,
       ].filter(Boolean).join('\n');
 
-      sendWhatsApp(locationData.whatsapp, whatsappMsg).catch((err) => {
+      try {
+        await sendWhatsApp(locationData.whatsapp, whatsappMsg);
+      } catch (err) {
         logger.warn("Reservation WhatsApp notification failed", {
           location: location_id,
           error: err instanceof Error ? err.message : String(err),
         });
-      });
+      }
     }
 
     const duration = Date.now() - startTime;
