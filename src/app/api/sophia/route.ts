@@ -44,6 +44,8 @@ const GREETINGS = {
     "🔥 ¡Hola! Bienvenido a Simmer Down San Benito. Soy Sophia, ¿qué se te antoja hoy?",
   "la-majada":
     "🌿 ¡Bienvenido al jardín! Soy Sophia de Simmer Garden La Majada. ¡Escapa de la ciudad!",
+  "simmer-garden":
+    "🌿 ¡Bienvenido al jardín! Soy Sophia de Simmer Garden. ¡Escapa de la ciudad!",
   "lago-coatepeque":
     "🌊 ¡Hola! Bienvenido a Simmer Down Lago de Coatepeque. Soy Sophia, ¿listo para probar nuestros mariscos frescos?",
   "surf-city":

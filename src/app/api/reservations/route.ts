@@ -127,6 +127,12 @@ export async function POST(
       ? `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
       : "https://simmerdownsv.com/admin/orders";
 
+    // Strip Markdown-breaking chars from user input
+    const safeName = customer_name.replace(/[_*`\[\]]/g, "");
+    const safePhone = customer_phone.replace(/[_*`\[\]]/g, "");
+    const safeEmail = customer_email?.replace(/[_*`\[\]]/g, "") || "";
+    const safeNotes = special_requests?.replace(/[_*`\[\]]/g, "") || "";
+
     const reservationMsg = [
       `\uD83D\uDDD3\uFE0F *NUEVA RESERVACION*`,
       ``,
@@ -135,10 +141,10 @@ export async function POST(
       `\uD83D\uDD50 Hora: ${time}`,
       `\uD83D\uDC65 Personas: ${guest_count}`,
       ``,
-      `\uD83D\uDC64 Nombre: ${customer_name}`,
-      `\uD83D\uDCDE Tel\u00E9fono: ${customer_phone}`,
-      customer_email ? `\u2709\uFE0F Email: ${customer_email}` : '',
-      special_requests ? `\n\uD83D\uDCDD Notas especiales: ${special_requests}` : '',
+      `\uD83D\uDC64 Nombre: ${safeName}`,
+      `\uD83D\uDCDE Tel\u00E9fono: ${safePhone}`,
+      safeEmail ? `\u2709\uFE0F Email: ${safeEmail}` : '',
+      safeNotes ? `\n\uD83D\uDCDD Notas especiales: ${safeNotes}` : '',
       ``,
       `\u2705 Estado: Confirmada`,
       `\uD83C\uDF10 ${adminUrl}`,

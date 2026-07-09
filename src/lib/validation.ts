@@ -103,7 +103,7 @@ export const sophiaMessageSchema = z.object({
     .min(1, "El mensaje no puede estar vacío")
     .max(500, "El mensaje es demasiado largo (máximo 500 caracteres)"),
   locationId: z
-    .enum(["santa-ana", "san-benito", "la-majada", "lago-coatepeque"])
+    .enum(["santa-ana", "san-benito", "simmer-garden", "lago-coatepeque", "surf-city"])
     .optional()
     .nullable(),
 });
@@ -180,9 +180,9 @@ export type ContactFormInput = z.infer<typeof contactFormSchema>;
 
 const VALID_LOCATION_IDS = [
   "santa-ana",
-  "coatepeque",
+  "lago-coatepeque",
   "san-benito",
-  "juayua",
+  "simmer-garden",
   "surf-city",
 ] as const;
 

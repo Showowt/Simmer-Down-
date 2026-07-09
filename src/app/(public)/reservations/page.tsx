@@ -41,7 +41,7 @@ const locations: Location[] = [
   { id: 'santa-ana', name: 'Santa Ana', hours: { weekday: '11:00-21:00', weekend: '11:00-22:00' }, closedDays: [] },
   { id: 'lago-coatepeque', name: 'Lago de Coatepeque', hours: { weekday: '11:00-20:00', weekend: '11:00-21:00' }, closedDays: [] },
   { id: 'san-benito', name: 'San Benito', hours: { weekday: '16:00-22:00', thursday: '12:00-23:00', weekend: '12:00-01:00' }, closedDays: [] },
-  { id: 'juayua', name: 'Simmer Garden (Juayua)', hours: { daily: '11:00-20:00' }, closedDays: [] },
+  { id: 'simmer-garden', name: 'Simmer Garden (Juayua)', hours: { daily: '11:00-20:00' }, closedDays: [] },
   { id: 'surf-city', name: 'Surf City', hours: { weekday: '12:00-20:00', weekend: '12:00-20:00' }, closedDays: [1, 2] },
 ]
 

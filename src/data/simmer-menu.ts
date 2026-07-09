@@ -1,7 +1,7 @@
 // SIMMER DOWN — Complete Multi-Location Menu System
 // All locations: Santa Ana, San Benito, La Majada (Garden), Lago de Coatepeque
 
-export type LocationId = 'santa-ana' | 'san-benito' | 'la-majada' | 'lago-coatepeque' | 'surf-city'
+export type LocationId = 'santa-ana' | 'san-benito' | 'simmer-garden' | 'la-majada' | 'lago-coatepeque' | 'surf-city'
 
 export interface Location {
   id: LocationId
@@ -49,6 +49,14 @@ export const LOCATIONS: Record<LocationId, Location> = {
   },
   'la-majada': {
     id: 'la-majada',
+    name: 'Simmer Garden',
+    brand: 'simmer-garden',
+    tagline: '¡Escapa de la ciudad!',
+    whatsapp: '6990-4674',
+    features: ['Garden atmosphere', 'Hamburguesa Casanova', 'Expanded coffee menu', 'Mountain views']
+  },
+  'simmer-garden': {
+    id: 'simmer-garden',
     name: 'Simmer Garden',
     brand: 'simmer-garden',
     tagline: '¡Escapa de la ciudad!',
