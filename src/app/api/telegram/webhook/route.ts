@@ -73,7 +73,7 @@ interface TelegramUpdate {
 // Configuration
 // ═══════════════════════════════════════════════════════════════
 
-const ALLOWED_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const ALLOWED_CHAT_ID = process.env.TELEGRAM_CHAT_ID?.trim();
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://simmerdownsv.com";
 const BOT_START_TIME = Date.now();
@@ -969,23 +969,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const chatId = String(message.chat.id);
 
-    // TEMPORARY DEBUG: Log incoming vs configured chat ID
-    logger.info("[TelegramBot] Chat ID check", {
-      incoming: chatId,
-      configured: ALLOWED_CHAT_ID,
-      match: String(chatId) === String(ALLOWED_CHAT_ID),
-      chatTitle: message.chat.title,
-      chatType: message.chat.type,
-    });
-
-    // Security: Only respond to the configured chat — accept both old and migrated IDs
-    const isAllowed = !ALLOWED_CHAT_ID || String(chatId) === String(ALLOWED_CHAT_ID);
-    if (!isAllowed) {
-      // Still send a debug message so we can see the mismatch
-      await sendTelegram(
-        `DEBUG: Chat ID mismatch!\nIncoming: ${chatId}\nConfigured: ${ALLOWED_CHAT_ID}\nChat: ${message.chat.title}`,
+    // Security: Only respond to the configured chat
+    if (!ALLOWED_CHAT_ID || String(chatId) !== String(ALLOWED_CHAT_ID)) {
+      logger.warn("[TelegramBot] Message from unauthorized chat", {
         chatId,
-      ).catch(() => {});
+        chatType: message.chat.type,
+      });
       return NextResponse.json({ ok: true });
     }
 
@@ -1043,10 +1032,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       allowedChatId: ALLOWED_CHAT_ID,
       from: message.from?.username || message.from?.first_name || "unknown",
     });
-
-    // DEBUG: Echo immediately to verify sendTelegram works from webhook context
-    const echoResult = await sendTelegram(`Recibido: ${command}`, chatId);
-    logger.info("[TelegramBot] Echo result", { echoResult, command, chatId });
 
     // Route to handler — await to ensure errors are caught and logged
     try {
