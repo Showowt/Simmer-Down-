@@ -848,23 +848,277 @@ async function handleFotoUpload(
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// /eventos — list upcoming events
+// ═══════════════════════════════════════════════════════════════
+
+async function handleEventos(chatId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const today = getTodayStart();
+
+    const { data: events, error } = await supabase
+      .from("events")
+      .select("id, title, starts_at, custom_venue, location_id, is_published, is_featured")
+      .gte("starts_at", `${today}T00:00:00-06:00`)
+      .order("starts_at", { ascending: true })
+      .limit(15);
+
+    if (error) {
+      await sendTelegram("Error al consultar eventos.", chatId);
+      return;
+    }
+
+    const eventList = events || [];
+    if (eventList.length === 0) {
+      await sendTelegram("No hay eventos proximos programados.\n\nUsa /evento para crear uno.", chatId);
+      return;
+    }
+
+    const lines = [
+      `*PROXIMOS EVENTOS* (${eventList.length})`,
+      "",
+    ];
+
+    for (const ev of eventList) {
+      const date = new Date(ev.starts_at as string);
+      const dateStr = date.toLocaleDateString("es-SV", { timeZone: "America/El_Salvador", weekday: "short", month: "short", day: "numeric" });
+      const timeStr = date.toLocaleTimeString("es-SV", { timeZone: "America/El_Salvador", hour: "2-digit", minute: "2-digit" });
+      const venue = ev.custom_venue || (ev.location_id ? LOCATION_SLUGS[ev.location_id as string] || "" : "");
+      const status = ev.is_published ? (ev.is_featured ? "Destacado" : "Publicado") : "Borrador";
+
+      lines.push(`${ev.is_featured ? "\\u2B50" : "\\u2022"} ${escapeMarkdown(ev.title as string)}`);
+      lines.push(`  ${dateStr} ${timeStr} | ${escapeMarkdown(venue)} | ${status}`);
+      lines.push("");
+    }
+
+    lines.push(`Sitio web: ${SITE_URL}/events`);
+    await sendTelegram(lines.join("\n"), chatId);
+  } catch (err) {
+    logger.error("[TelegramBot] handleEventos error", err);
+    await sendTelegram("Error interno al consultar eventos.", chatId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// /horarios — show all location hours
+// ═══════════════════════════════════════════════════════════════
+
+async function handleHorarios(chatId: string): Promise<void> {
+  const locations = [
+    { name: "Santa Ana", hours: "Dom-Jue 11AM-9PM | Vie-Sab 11AM-10PM" },
+    { name: "Lago Coatepeque", hours: "Dom-Jue 11AM-8PM | Vie-Sab 11AM-9PM" },
+    { name: "San Benito", hours: "L-M 4-10PM | J 12-11PM | V-D 12PM-1AM" },
+    { name: "Surf City", hours: "L-M Cerrado | M-D 12-8PM" },
+    { name: "Simmer Garden", hours: "L-D 11AM-8PM" },
+  ];
+
+  const lines = [
+    "*HORARIOS DE TODAS LAS UBICACIONES*",
+    "",
+    ...locations.map((l) => `${l.name}\n  ${l.hours}`),
+    "",
+    `${SITE_URL}/restaurantes`,
+  ];
+
+  await sendTelegram(lines.join("\n"), chatId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// /cliente — look up customer by phone
+// ═══════════════════════════════════════════════════════════════
+
+async function handleCliente(chatId: string, args: string): Promise<void> {
+  try {
+    const phone = args.trim();
+    if (!phone || phone.length < 4) {
+      await sendTelegram("Uso: /cliente TELEFONO\nEjemplo: /cliente 76804434", chatId);
+      return;
+    }
+
+    const supabase = createServiceClient();
+
+    // Search orders by customer phone
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("id, order_number, customer_name, customer_phone, total_amount, status, created_at, location_id")
+      .ilike("customer_phone", `%${phone}%`)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    // Search reservations by customer phone
+    const { data: reservations } = await supabase
+      .from("reservations")
+      .select("id, customer_name, customer_phone, date, time, guest_count, location_id, status")
+      .ilike("customer_phone", `%${phone}%`)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    const orderList = orders || [];
+    const resList = reservations || [];
+
+    if (orderList.length === 0 && resList.length === 0) {
+      await sendTelegram(`No se encontro ningun cliente con telefono "${phone}".`, chatId);
+      return;
+    }
+
+    const name = orderList[0]?.customer_name || resList[0]?.customer_name || "Desconocido";
+
+    const lines = [
+      `*CLIENTE: ${escapeMarkdown(String(name))}*`,
+      `Telefono: ${phone}`,
+      "",
+    ];
+
+    if (orderList.length > 0) {
+      lines.push(`*Pedidos (${orderList.length}):*`);
+      for (const o of orderList) {
+        lines.push(`  #${o.order_number || String(o.id).slice(0, 8)} - $${Number(o.total_amount).toFixed(2)} - ${o.status}`);
+      }
+      lines.push("");
+    }
+
+    if (resList.length > 0) {
+      lines.push(`*Reservaciones (${resList.length}):*`);
+      for (const r of resList) {
+        lines.push(`  ${r.date} ${r.time} - ${r.guest_count} pers. - ${r.status}`);
+      }
+    }
+
+    await sendTelegram(lines.join("\n"), chatId);
+  } catch (err) {
+    logger.error("[TelegramBot] handleCliente error", err);
+    await sendTelegram("Error al buscar cliente.", chatId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// /borrar_evento — delete/unpublish an event
+// ═══════════════════════════════════════════════════════════════
+
+async function handleBorrarEvento(chatId: string, args: string): Promise<void> {
+  try {
+    const query = args.trim();
+    if (!query) {
+      await sendTelegram("Uso: /borrar_evento TITULO\nEjemplo: /borrar_evento Noche de Jazz", chatId);
+      return;
+    }
+
+    const supabase = createServiceClient();
+
+    const { data: events } = await supabase
+      .from("events")
+      .select("id, title, starts_at")
+      .ilike("title", `%${query}%`)
+      .limit(3);
+
+    if (!events || events.length === 0) {
+      await sendTelegram(`No se encontro evento con "${query}".`, chatId);
+      return;
+    }
+
+    if (events.length > 1) {
+      const lines = [
+        `Se encontraron ${events.length} eventos:`,
+        ...events.map((e) => `  - ${e.title} (${new Date(e.starts_at as string).toLocaleDateString("es-SV")})`),
+        "",
+        "Se mas especifico con el titulo.",
+      ];
+      await sendTelegram(lines.join("\n"), chatId);
+      return;
+    }
+
+    const event = events[0];
+    const { error } = await supabase
+      .from("events")
+      .update({ is_published: false })
+      .eq("id", event.id);
+
+    if (error) {
+      await sendTelegram(`Error al despublicar: ${error.message}`, chatId);
+      return;
+    }
+
+    await sendTelegram(`Evento "${event.title}" despublicado. Ya no aparece en el sitio web.`, chatId);
+  } catch (err) {
+    logger.error("[TelegramBot] handleBorrarEvento error", err);
+    await sendTelegram("Error al borrar evento.", chatId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// /destacar — toggle featured on an event
+// ═══════════════════════════════════════════════════════════════
+
+async function handleDestacar(chatId: string, args: string): Promise<void> {
+  try {
+    const query = args.trim();
+    if (!query) {
+      await sendTelegram("Uso: /destacar TITULO\nEjemplo: /destacar Noche de Jazz", chatId);
+      return;
+    }
+
+    const supabase = createServiceClient();
+
+    const { data: events } = await supabase
+      .from("events")
+      .select("id, title, is_featured")
+      .ilike("title", `%${query}%`)
+      .limit(1)
+      .maybeSingle();
+
+    if (!events) {
+      await sendTelegram(`No se encontro evento con "${query}".`, chatId);
+      return;
+    }
+
+    const newFeatured = !events.is_featured;
+    const { error } = await supabase
+      .from("events")
+      .update({ is_featured: newFeatured })
+      .eq("id", events.id);
+
+    if (error) {
+      await sendTelegram(`Error: ${error.message}`, chatId);
+      return;
+    }
+
+    await sendTelegram(
+      newFeatured
+        ? `Evento "${events.title}" marcado como DESTACADO en el sitio web.`
+        : `Evento "${events.title}" removido de destacados.`,
+      chatId,
+    );
+  } catch (err) {
+    logger.error("[TelegramBot] handleDestacar error", err);
+    await sendTelegram("Error al destacar evento.", chatId);
+  }
+}
+
 function handleAyuda(chatId: string): Promise<void> {
   const lines = [
     "*COMANDOS DISPONIBLES*",
     "",
-    "/pedidos - Resumen de pedidos del dia",
-    "/reservas - Reservaciones proximas (3 dias)",
-    "/ventas - Reporte de ventas del dia",
+    "*Operaciones:*",
+    "/pedidos - Pedidos del dia",
+    "/reservas - Reservaciones (3 dias)",
+    "/ventas - Reporte de ventas",
     "/estado - Estado del sistema",
-    "/promo CODIGO VALOR - Crear codigo promo",
-    "  Ej: /promo VERANO20 20 (20%)",
-    "  Ej: /promo AMIGO5 $5 ($5 fijo)",
+    "/cliente TELEFONO - Buscar cliente",
+    "/horarios - Horarios de todas las ubicaciones",
+    "",
+    "*Eventos:*",
     "/evento TITULO | UBICACION | FECHA HORA | DESC",
-    "  Ej: /evento Jazz Night | san-benito | 2026-06-20 19:00 | Musica en vivo",
-    "/menu - Link al menu",
+    "/eventos - Ver proximos eventos",
+    "/borrar_evento TITULO - Despublicar evento",
+    "/destacar TITULO - Destacar/quitar evento",
+    "",
+    "*Marketing:*",
+    "/promo CODIGO VALOR - Crear codigo promo",
     "/fotos - Platillos sin foto",
-    "/foto - Subir foto de platillo (adjunta imagen + `/foto nombre`)",
-    "/ayuda - Esta lista de comandos",
+    "/foto - Subir foto (adjunta imagen + /foto nombre)",
+    "/menu - Link al menu",
+    "/ayuda - Esta lista",
     "",
     `Ubicaciones validas: ${Object.keys(LOCATION_SLUGS).join(", ")}`,
   ];
@@ -902,6 +1156,21 @@ async function routeCommand(
       break;
     case "/menu":
       await handleMenu(chatId);
+      break;
+    case "/eventos":
+      await handleEventos(chatId);
+      break;
+    case "/borrar_evento":
+      await handleBorrarEvento(chatId, args);
+      break;
+    case "/destacar":
+      await handleDestacar(chatId, args);
+      break;
+    case "/horarios":
+      await handleHorarios(chatId);
+      break;
+    case "/cliente":
+      await handleCliente(chatId, args);
       break;
     case "/fotos":
       await handleFotosList(chatId);
