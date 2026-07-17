@@ -96,11 +96,12 @@ export default function AdminOrdersPage() {
       };
 
       if (status === "cancelled" && reason) {
-        updateData.notes = reason;
+        updateData.cancellation_reason = reason;
+        updateData.cancelled_at = new Date().toISOString();
       }
 
-      if (status === "delivered") {
-        updateData.delivered_at = new Date().toISOString();
+      if (status === "completed" || status === "delivered") {
+        updateData.completed_at = new Date().toISOString();
       }
 
       const { error } = await supabase
