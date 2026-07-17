@@ -16,13 +16,28 @@ import { createClient } from "@/lib/supabase/client";
 import { MenuItem } from "@/lib/types";
 import ImageUpload from "@/components/admin/ImageUpload";
 
-const categories = ["pizza", "sides", "drinks", "desserts"] as const;
+const categories = [
+  "pizzas",
+  "entradas",
+  "ensaladas",
+  "pastas",
+  "platos-fuertes",
+  "bebidas",
+  "postres",
+  "cervezas",
+  "menu-infantil",
+] as const;
 
 const categoryLabels: Record<string, string> = {
-  pizza: "Pizzas",
-  sides: "Acompañamientos",
-  drinks: "Bebidas",
-  desserts: "Postres",
+  pizzas: "Pizzas",
+  entradas: "Entradas",
+  ensaladas: "Ensaladas",
+  pastas: "Pastas",
+  "platos-fuertes": "Platos Fuertes",
+  bebidas: "Bebidas",
+  postres: "Postres",
+  cervezas: "Cervezas",
+  "menu-infantil": "Menú Infantil",
 };
 
 const emptyItem: Partial<MenuItem> = {
@@ -31,7 +46,7 @@ const emptyItem: Partial<MenuItem> = {
   price: 0,
   price_grand: undefined,
   image_url: null,
-  category: "pizza",
+  category: "pizzas",
   tags: [],
   available: true,
   availability_note: null,
@@ -612,7 +627,7 @@ export default function AdminMenuPage() {
                   Categoria
                 </label>
                 <select
-                  value={editingItem.category || "pizza"}
+                  value={editingItem.category || "pizzas"}
                   onChange={(e) =>
                     setEditingItem({
                       ...editingItem,

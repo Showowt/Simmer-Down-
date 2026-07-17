@@ -73,11 +73,11 @@ export default function AdminShell({
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#252320] border-r border-[#3D3936] transform transition-transform lg:transform-none ${
+          className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-[#252320] border-r border-[#3D3936] transform transition-transform lg:transform-none flex flex-col ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          <div className="p-6 border-b border-[#3D3936] hidden lg:block">
+          <div className="p-6 border-b border-[#3D3936] hidden lg:block flex-shrink-0">
             <Link href="/admin" className="flex items-center gap-2">
               <Flame className="w-7 h-7 text-[#FF6B35]" />
               <span className="font-bold text-xl text-[#FFF8F0]">
@@ -89,7 +89,7 @@ export default function AdminShell({
             </p>
           </div>
 
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -113,7 +113,7 @@ export default function AdminShell({
             })}
           </nav>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[#3D3936]">
+          <div className="flex-shrink-0 p-4 border-t border-[#3D3936]">
             <div className="px-4 py-2 mb-2">
               <p className="text-xs text-[#6B6560]">Conectado como</p>
               <p className="text-sm text-[#B8B0A8] truncate">{userEmail}</p>
