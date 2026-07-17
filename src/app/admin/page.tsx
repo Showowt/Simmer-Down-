@@ -9,7 +9,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   UtensilsCrossed,
-  Tag,
+  Calendar,
   MapPin,
   Settings,
 } from "lucide-react";
@@ -206,17 +206,17 @@ export default function AdminDashboard() {
           </p>
         </Link>
         <Link
-          href="/admin/specials"
+          href="/admin/events"
           className="bg-[#252320] border border-[#3D3936] p-4 hover:border-[#FF6B35] transition group"
         >
           <div className="w-10 h-10 bg-[#FFB800]/10 flex items-center justify-center mb-3">
-            <Tag className="w-5 h-5 text-[#FFB800]" />
+            <Calendar className="w-5 h-5 text-[#FFB800]" />
           </div>
           <p className="font-medium text-[#FFF8F0] group-hover:text-[#FF6B35] transition">
-            Promociones
+            Eventos
           </p>
           <p className="text-xs text-[#6B6560] mt-1">
-            Crear ofertas especiales
+            Gestionar Simmermanía
           </p>
         </Link>
         <Link
