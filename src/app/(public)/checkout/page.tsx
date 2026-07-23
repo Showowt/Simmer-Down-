@@ -75,6 +75,8 @@ export default function CheckoutPage() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
+  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [deliveryCity, setDeliveryCity] = useState('')
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -85,19 +87,28 @@ export default function CheckoutPage() {
     })
   }, [customerName, customerPhone, orderNotes])
 
+  const isDelivery = orderType === 'delivery'
+
   // El Salvador phone format — mirrors createOrderSchema so we fail fast with a
   // friendly message instead of a generic 400 from the API.
   const phoneIsValid = /^(\+?503)?[\s-]?\d{4}[\s-]?\d{4}$/.test(phone.trim())
-  const detailsValid = name.trim().length >= 2 && phoneIsValid
+  // For delivery, createOrderSchema requires an address of at least 5 chars —
+  // enforce it here so card delivery orders don't 400 at creation.
+  const addressValid = !isDelivery || deliveryAddress.trim().length >= 5
+  const detailsValid = name.trim().length >= 2 && phoneIsValid && addressValid
 
   // ─── Step 1: Create Order ───────────────────────────────────
   const handleCreateOrder = useCallback(async () => {
     // Guard: never create a card order without real customer details.
     if (!detailsValid) {
       setError(
-        language === 'es'
-          ? 'Ingresa tu nombre y un teléfono válido (formato XXXX-XXXX).'
-          : 'Enter your name and a valid phone (format XXXX-XXXX).',
+        isDelivery && deliveryAddress.trim().length < 5
+          ? language === 'es'
+            ? 'Ingresa una dirección de entrega válida.'
+            : 'Enter a valid delivery address.'
+          : language === 'es'
+            ? 'Ingresa tu nombre y un teléfono válido (formato XXXX-XXXX).'
+            : 'Enter your name and a valid phone (format XXXX-XXXX).',
       )
       return
     }
@@ -124,6 +135,8 @@ export default function CheckoutPage() {
           customerPhone: cleanPhone,
           customerEmail: customerEmail || '',
           notes: cleanNotes || undefined,
+          deliveryAddress: isDelivery ? deliveryAddress.trim() : undefined,
+          deliveryCity: isDelivery && deliveryCity.trim() ? deliveryCity.trim() : undefined,
           items: items.map(item => ({
             id: item.id,
             name: item.name,
@@ -153,7 +166,7 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false)
     }
-  }, [items, location, orderType, name, phone, notes, detailsValid, customerEmail, setCustomerInfo, setOrderNotes, language])
+  }, [items, location, orderType, name, phone, notes, deliveryAddress, deliveryCity, isDelivery, detailsValid, customerEmail, setCustomerInfo, setOrderNotes, language])
 
   // ─── Step 2: Initiate Payment ───────────────────────────────
   const handleCardSubmit = useCallback(async (formData: CardFormData) => {
@@ -369,6 +382,28 @@ export default function CheckoutPage() {
                     : 'border-white/10 focus:border-[#E85D04]'
                 }`}
               />
+              {isDelivery && (
+                <>
+                  <input
+                    type="text"
+                    value={deliveryAddress}
+                    onChange={e => setDeliveryAddress(e.target.value)}
+                    placeholder={language === 'es' ? 'Dirección de entrega * (calle, número, colonia)' : 'Delivery address * (street, number, area)'}
+                    className={`w-full h-12 px-4 bg-[#0A0A0A] border rounded-xl text-white placeholder:text-white/30 focus:outline-none transition ${
+                      deliveryAddress.trim().length > 0 && !addressValid
+                        ? 'border-red-500/50 focus:border-red-500'
+                        : 'border-white/10 focus:border-[#E85D04]'
+                    }`}
+                  />
+                  <input
+                    type="text"
+                    value={deliveryCity}
+                    onChange={e => setDeliveryCity(e.target.value)}
+                    placeholder={language === 'es' ? 'Ciudad (opcional)' : 'City (optional)'}
+                    className="w-full h-12 px-4 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-[#E85D04] focus:outline-none transition"
+                  />
+                </>
+              )}
               <textarea
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
