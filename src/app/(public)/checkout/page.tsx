@@ -60,18 +60,56 @@ export default function CheckoutPage() {
     customerName,
     customerPhone,
     customerEmail,
+    orderNotes,
     subtotal: cartSubtotal,
     tax: cartTax,
     total: cartTotal,
+    setCustomerInfo,
+    setOrderNotes,
     clearCart,
   } = useCartStore()
 
+  // Customer details captured on the review step. Pre-filled from the store
+  // (set on the cart page) but ALWAYS editable + required here, so a card order
+  // can never be created as "Cliente Web" — even when /checkout is reached directly.
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [notes, setNotes] = useState('')
+
   useEffect(() => {
-    queueMicrotask(() => setMounted(true))
-  }, [])
+    queueMicrotask(() => {
+      setMounted(true)
+      if (customerName) setName(customerName)
+      if (customerPhone) setPhone(customerPhone)
+      if (orderNotes) setNotes(orderNotes)
+    })
+  }, [customerName, customerPhone, orderNotes])
+
+  // El Salvador phone format — mirrors createOrderSchema so we fail fast with a
+  // friendly message instead of a generic 400 from the API.
+  const phoneIsValid = /^(\+?503)?[\s-]?\d{4}[\s-]?\d{4}$/.test(phone.trim())
+  const detailsValid = name.trim().length >= 2 && phoneIsValid
 
   // ─── Step 1: Create Order ───────────────────────────────────
   const handleCreateOrder = useCallback(async () => {
+    // Guard: never create a card order without real customer details.
+    if (!detailsValid) {
+      setError(
+        language === 'es'
+          ? 'Ingresa tu nombre y un teléfono válido (formato XXXX-XXXX).'
+          : 'Enter your name and a valid phone (format XXXX-XXXX).',
+      )
+      return
+    }
+
+    const cleanName = name.trim()
+    const cleanPhone = phone.trim()
+    const cleanNotes = notes.trim()
+
+    // Persist so staff notifications, admin, and a page reload all keep the data.
+    setCustomerInfo(cleanName, cleanPhone, customerEmail)
+    setOrderNotes(cleanNotes)
+
     setLoading(true)
     setError(null)
 
@@ -82,9 +120,10 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           locationId: location?.id || items[0]?.categoryId || 'santa-ana',
           orderType: orderType || 'takeout',
-          customerName: customerName || 'Cliente Web',
-          customerPhone: customerPhone || '0000-0000',
+          customerName: cleanName,
+          customerPhone: cleanPhone,
           customerEmail: customerEmail || '',
+          notes: cleanNotes || undefined,
           items: items.map(item => ({
             id: item.id,
             name: item.name,
@@ -114,7 +153,7 @@ export default function CheckoutPage() {
     } finally {
       setLoading(false)
     }
-  }, [items, location, orderType, customerName, customerPhone, customerEmail])
+  }, [items, location, orderType, name, phone, notes, detailsValid, customerEmail, setCustomerInfo, setOrderNotes, language])
 
   // ─── Step 2: Initiate Payment ───────────────────────────────
   const handleCardSubmit = useCallback(async (formData: CardFormData) => {
@@ -307,6 +346,38 @@ export default function CheckoutPage() {
               </div>
             )}
 
+            {/* Customer Info — required so staff know who the order is for */}
+            <div className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5 space-y-3">
+              <h3 className="font-display text-lg text-white uppercase">
+                {language === 'es' ? 'Tus Datos' : 'Your Info'}
+              </h3>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder={language === 'es' ? 'Tu nombre *' : 'Your name *'}
+                className="w-full h-12 px-4 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-[#E85D04] focus:outline-none transition"
+              />
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder={language === 'es' ? 'Teléfono * (XXXX-XXXX)' : 'Phone * (XXXX-XXXX)'}
+                className={`w-full h-12 px-4 bg-[#0A0A0A] border rounded-xl text-white placeholder:text-white/30 focus:outline-none transition ${
+                  phone.trim().length > 0 && !phoneIsValid
+                    ? 'border-red-500/50 focus:border-red-500'
+                    : 'border-white/10 focus:border-[#E85D04]'
+                }`}
+              />
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder={language === 'es' ? 'Notas especiales (opcional)' : 'Special notes (optional)'}
+                rows={2}
+                className="w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-[#E85D04] focus:outline-none transition resize-none"
+              />
+            </div>
+
             {/* Totals */}
             <div className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5">
               <div className="space-y-2 text-sm">
@@ -339,7 +410,7 @@ export default function CheckoutPage() {
 
             <button
               onClick={handleCreateOrder}
-              disabled={loading || items.length === 0}
+              disabled={loading || items.length === 0 || !detailsValid}
               className="w-full py-4 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-[#1A1A1A] disabled:text-white/30 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg disabled:shadow-none"
             >
               {loading ? (

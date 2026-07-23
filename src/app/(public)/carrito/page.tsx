@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, MapPin, CreditCard } from 'lucide-react'
@@ -10,6 +11,7 @@ import { LOCATIONS, formatPrice, generateWhatsAppOrderUrl } from '@/lib/data'
 
 export default function CartPage() {
   const { t, language } = useTranslation()
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const {
     items, itemCount, subtotal, tax, total,
@@ -46,6 +48,16 @@ export default function CartPage() {
     })
     window.open(url, '_blank')
     clearCart()
+  }
+
+  // Persist name/phone/notes into the store so the card checkout inherits them —
+  // otherwise the order is created as "Cliente Web" (the /checkout step still
+  // requires them, this just pre-fills so the customer doesn't re-type).
+  const handleCardCheckout = () => {
+    if (!name.trim() || !phone.trim()) return
+    useCartStore.getState().setCustomerInfo(name.trim(), phone.trim())
+    useCartStore.getState().setOrderNotes(notes.trim())
+    router.push('/checkout')
   }
 
   // Empty cart
@@ -200,13 +212,13 @@ export default function CartPage() {
         </div>
 
         {/* Card Payment Button */}
-        <Link href="/checkout">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-            className="w-full py-4 bg-[#E85D04] hover:bg-[#C2410C] text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg cursor-pointer">
-            <CreditCard className="w-6 h-6" />
-            {language === 'es' ? 'Pagar con Tarjeta' : 'Pay with Card'} &middot; {formatPrice(total)}
-          </motion.div>
-        </Link>
+        <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          onClick={handleCardCheckout}
+          disabled={!name.trim() || !phone.trim()}
+          className="w-full py-4 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-[#1A1A1A] disabled:text-white/30 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg disabled:shadow-none cursor-pointer disabled:cursor-not-allowed">
+          <CreditCard className="w-6 h-6" />
+          {language === 'es' ? 'Pagar con Tarjeta' : 'Pay with Card'} &middot; {formatPrice(total)}
+        </motion.button>
         <p className="text-center text-xs text-white/30 mt-3">
           {language === 'es' ? 'Visa, Mastercard y Amex — pago seguro por Credomatic' : 'Visa, Mastercard & Amex — secure payment via Credomatic'}
         </p>
