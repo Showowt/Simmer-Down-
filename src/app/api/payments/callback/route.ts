@@ -105,10 +105,13 @@ async function sendPaymentNotification(
     const staffPhone =
       process.env.STAFF_NOTIFICATION_WHATSAPP || "+50376804434";
 
-    // Fetch order details for the notification
+    // Fetch the FULL order so the confirmation is self-contained — staff must
+    // be able to fulfill straight from this message (see order-notify.ts).
     const { data: order, error: orderErr } = await supabase
       .from("orders")
-      .select("order_number, total_amount, customer_name")
+      .select(
+        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city",
+      )
       .eq("id", orderId)
       .single();
 
@@ -117,12 +120,48 @@ async function sendPaymentNotification(
       return;
     }
 
-    const message = formatPaymentConfirmWhatsApp({
-      order_number: order.order_number,
-      total_amount: order.total_amount,
-      card_brand: cardBrand,
-      card_last_four: cardLastFour,
-    });
+    // Fetch line items + location name in parallel.
+    const [itemsResult, locationResult] = await Promise.all([
+      supabase
+        .from("order_items")
+        .select("item_name, quantity, unit_price, line_total")
+        .eq("order_id", orderId),
+      supabase
+        .from("locations")
+        .select("name")
+        .eq("id", order.location_id)
+        .maybeSingle(),
+    ]);
+
+    const items = (itemsResult.data || []).map((it) => ({
+      item_name: it.item_name,
+      quantity: Number(it.quantity),
+      unit_price: Number(it.unit_price),
+      line_total: Number(it.line_total),
+    }));
+
+    const locationName = locationResult.data?.name || "Simmer Down";
+
+    const message = formatPaymentConfirmWhatsApp(
+      {
+        order_number: order.order_number,
+        order_type: order.order_type,
+        customer_name: order.customer_name || "Cliente",
+        customer_phone: order.customer_phone || "—",
+        customer_notes: order.customer_notes,
+        subtotal: Number(order.subtotal),
+        delivery_fee: Number(order.delivery_fee),
+        discount_amount:
+          order.discount_amount != null ? Number(order.discount_amount) : null,
+        discount_code: order.discount_code,
+        total_amount: Number(order.total_amount),
+        delivery_address_line1: order.delivery_address_line1,
+        delivery_city: order.delivery_city,
+      },
+      items,
+      locationName,
+      { card_brand: cardBrand, card_last_four: cardLastFour },
+    );
 
     // Telegram (primary)
     await sendTelegram(message);
@@ -346,9 +385,12 @@ export async function POST(request: NextRequest) {
       .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
       .eq("id", payment.order_id);
 
-    // Non-blocking payment confirmation notification
-    // Use CardBrand from processor response if available, fall back to stored value
-    sendPaymentNotification(
+    // Payment confirmation notification. AWAIT it — on Vercel the function can
+    // be frozen/killed the moment we return the breakout HTML, dropping any
+    // fire-and-forget send (same lesson as the reservations route). The helper
+    // swallows its own errors, so this never breaks the payment response.
+    // Use CardBrand from processor response if available, fall back to stored value.
+    await sendPaymentNotification(
       payment.order_id,
       payResp.CardBrand ?? payment.card_brand,
       payment.card_last_four,

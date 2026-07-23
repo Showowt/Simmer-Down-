@@ -31,9 +31,7 @@ interface OrderItemForNotification {
   line_total: number;
 }
 
-interface PaymentForNotification {
-  order_number: string;
-  total_amount: number;
+interface PaymentMethodInfo {
   payment_method?: string | null;
   card_brand?: string | null;
   card_last_four?: string | null;
@@ -121,26 +119,92 @@ export function formatOrderWhatsApp(
 }
 
 /**
- * Format a payment confirmation notification for WhatsApp.
+ * Format a payment confirmation notification for WhatsApp/Telegram.
+ *
+ * This is the operational "prepare now" trigger for staff: the order is paid.
+ * It MUST be self-contained \u2014 staff fulfill straight from this message without
+ * scrolling back to the earlier "NUEVO PEDIDO WEB" alert or opening the admin.
+ * Mirrors the full detail of {@link formatOrderWhatsApp} plus the payment info.
  */
 export function formatPaymentConfirmWhatsApp(
-  payment: PaymentForNotification,
+  order: OrderForNotification,
+  items: OrderItemForNotification[],
+  locationName: string,
+  payment: PaymentMethodInfo,
 ): string {
+  const orderTypeLabels: Record<OrderForNotification["order_type"], string> = {
+    delivery: "Delivery",
+    pickup: "Para recoger",
+    takeout: "Para llevar",
+    dine_in: "Comer aqu\u00ed",
+  };
+  const orderTypeLabel = orderTypeLabels[order.order_type] || order.order_type;
+
+  // Build items list \u2014 escape item names to prevent Markdown parse failures
+  const itemLines = items.length
+    ? items
+        .map(
+          (item) =>
+            `\u2022 ${item.quantity}x ${escapeMd(item.item_name)} \u2014 $${item.line_total.toFixed(2)}`,
+        )
+        .join("\n")
+    : `\u2022 (sin art\u00edculos registrados)`;
+
+  // Build address line for delivery
+  const addressLine =
+    order.order_type === "delivery" && order.delivery_address_line1
+      ? `\n\ud83d\udccd Direcci\u00f3n: ${escapeMd(order.delivery_address_line1)}${order.delivery_city ? `, ${escapeMd(order.delivery_city)}` : ""}`
+      : "";
+
+  // Build discount line
+  const discountLine =
+    order.discount_amount && order.discount_amount > 0
+      ? `\n\ud83c\udf81 Descuento${order.discount_code ? ` (${escapeMd(order.discount_code)})` : ""}: -$${order.discount_amount.toFixed(2)}`
+      : "";
+
+  // Build notes line
+  const notesLine =
+    order.customer_notes && order.customer_notes.trim()
+      ? `\n\n\ud83d\udcdd Notas: ${escapeMd(order.customer_notes)}`
+      : "";
+
   // Build payment method description
   let methodDescription = "Tarjeta";
   if (payment.card_brand && payment.card_last_four) {
-    methodDescription = `Tarjeta ${payment.card_brand} \u00b7\u00b7\u00b7\u00b7${payment.card_last_four}`;
+    methodDescription = `Tarjeta ${escapeMd(payment.card_brand)} \u00b7\u00b7\u00b7\u00b7${payment.card_last_four}`;
   } else if (payment.payment_method) {
-    methodDescription = payment.payment_method;
+    methodDescription = escapeMd(payment.payment_method);
   }
 
+  const adminUrl = process.env.NEXT_PUBLIC_APP_URL
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
+    : "https://simmerdownsv.com/admin/orders";
+
   return [
-    `\u2705 *PAGO CONFIRMADO*`,
+    `\u2705 *PAGO CONFIRMADO \u2014 PREPARAR PEDIDO*`,
     ``,
-    `Pedido #${payment.order_number} \u2014 $${payment.total_amount.toFixed(2)}`,
-    `M\u00e9todo: ${methodDescription}`,
-    `Estado: Pagado \u2705`,
+    `\ud83d\udccb Pedido: #${order.order_number}`,
+    `\ud83d\udccd Ubicaci\u00f3n: ${locationName}`,
+    `\ud83d\ude97 Tipo: ${orderTypeLabel}${addressLine}`,
     ``,
-    `El pedido pasa a preparaci\u00f3n.`,
-  ].join("\n");
+    `\ud83d\udc64 Cliente: ${escapeMd(order.customer_name)}`,
+    `\ud83d\udcde Tel\u00e9fono: ${escapeMd(order.customer_phone)}`,
+    ``,
+    `\ud83d\uded2 *Art\u00edculos:*`,
+    itemLines,
+    ``,
+    `\ud83d\udcb0 Subtotal: $${order.subtotal.toFixed(2)}`,
+    order.delivery_fee > 0
+      ? `\ud83d\ude9a Delivery: $${order.delivery_fee.toFixed(2)}`
+      : null,
+    discountLine || null,
+    `\ud83d\udcb3 M\u00e9todo de pago: ${methodDescription}`,
+    `\ud83d\udcb0 *Total: $${order.total_amount.toFixed(2)}*`,
+    `\u2705 Estado: Pagado`,
+    notesLine || null,
+    ``,
+    `\ud83c\udf10 Ver en admin: ${adminUrl}`,
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
 }
