@@ -102,6 +102,7 @@ export interface OrderDetails {
   notes?: string;
   subtotal: number;
   tax: number;
+  deliveryFee?: number;
   total: number;
 }
 
@@ -121,7 +122,10 @@ export interface ReservationDetails {
 // CONSTANTS
 // ============================================
 
-const TAX_RATE = 0.13;
+const TAX_RATE = 0.13; // IVA already included in menu prices — display-only breakdown
+// Flat delivery fee, all locations (client-confirmed 2026-07-29). Display value:
+// the authoritative charge is locations.delivery_fee in Supabase — keep in sync.
+export const DELIVERY_FEE = 1.00;
 // ORDER_WHATSAPP removed — unused (whatsapp-order.ts defines its own)
 
 // ============================================
@@ -418,7 +422,7 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'nav.home': 'Inicio', 'nav.menu': 'Menú', 'nav.locations': 'Ubicaciones', 'nav.reserve': 'Reservar', 'nav.about': 'Nosotros', 'nav.cart': 'Carrito',
     'hero.badge': 'EST. 2014 • EL SALVADOR', 'hero.title': 'PIZZA ARTESANAL', 'hero.titleAccent': 'SOLO BUENAS VIBRAS', 'hero.subtitle': 'Pizza artesanal elaborada con amor. Experimenta la mezcla perfecta de tradición y sabor local en nuestras 5 ubicaciones.', 'hero.viewMenu': 'Ver Menú', 'hero.findLocations': 'Encontrar Ubicaciones',
     'menu.title': 'Nuestro Menú', 'menu.subtitle': 'Ingredientes frescos, sabores auténticos', 'menu.search': 'Buscar en el menú...', 'menu.all': 'Todo', 'menu.vegetarian': 'Vegetariano', 'menu.spicy': 'Picante', 'menu.glutenFree': 'Sin Gluten', 'menu.noResults': 'No se encontraron resultados', 'menu.addToCart': 'Agregar', 'menu.selectSize': 'Seleccionar Tamaño', 'menu.addExtras': 'Agregar Extras', 'menu.specialNotes': 'Notas especiales', 'menu.notesPlaceholder': 'Ej: Sin cebolla, extra salsa...',
-    'cart.title': 'Tu Pedido', 'cart.empty': 'Tu carrito está vacío', 'cart.emptySubtitle': '¡Agrega algo delicioso para comenzar!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'IVA (13%)', 'cart.total': 'Total', 'cart.checkout': 'Ir al Checkout', 'cart.orderWhatsApp': 'Pedir por WhatsApp', 'cart.clear': 'Vaciar', 'cart.browseMenu': 'Ver Menú',
+    'cart.title': 'Tu Pedido', 'cart.empty': 'Tu carrito está vacío', 'cart.emptySubtitle': '¡Agrega algo delicioso para comenzar!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'IVA incluido', 'cart.delivery': 'Envío', 'cart.total': 'Total', 'cart.checkout': 'Ir al Checkout', 'cart.orderWhatsApp': 'Pedir por WhatsApp', 'cart.clear': 'Vaciar', 'cart.browseMenu': 'Ver Menú',
     'locations.title': 'Nuestras Ubicaciones', 'locations.subtitle': '5 restaurantes en El Salvador', 'locations.open': 'Abierto', 'locations.closed': 'Cerrado', 'locations.viewDetails': 'Ver Detalles', 'locations.directions': 'Cómo Llegar', 'locations.selectLocation': 'Seleccionar Ubicación', 'locations.selectSubtitle': 'Elige el restaurante más cercano',
     'reserve.title': 'Reservar Mesa', 'reserve.subtitle': 'Haz tu reservación en cualquiera de nuestras ubicaciones', 'reserve.selectLocation': 'Selecciona una ubicación', 'reserve.date': 'Fecha', 'reserve.time': 'Hora', 'reserve.partySize': 'Número de personas', 'reserve.name': 'Tu nombre', 'reserve.phone': 'Teléfono', 'reserve.submit': 'Confirmar Reservación',
     'whatsapp.title': '¿LISTO PARA ORDENAR?', 'whatsapp.subtitle': 'Haz tu pedido por WhatsApp de forma rápida y fácil', 'whatsapp.order': 'Ordenar por WhatsApp',
@@ -429,7 +433,7 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'nav.home': 'Home', 'nav.menu': 'Menu', 'nav.locations': 'Locations', 'nav.reserve': 'Reserve', 'nav.about': 'About', 'nav.cart': 'Cart',
     'hero.badge': 'EST. 2014 • EL SALVADOR', 'hero.title': 'HANDCRAFTED PIZZA', 'hero.titleAccent': 'GOOD VIBES ONLY', 'hero.subtitle': 'Artisan pizza crafted with love. Experience the perfect blend of tradition and local flavor across our 5 locations.', 'hero.viewMenu': 'View Menu', 'hero.findLocations': 'Find Locations',
     'menu.title': 'Our Menu', 'menu.subtitle': 'Fresh ingredients, authentic flavors', 'menu.search': 'Search menu...', 'menu.all': 'All', 'menu.vegetarian': 'Vegetarian', 'menu.spicy': 'Spicy', 'menu.glutenFree': 'Gluten-Free', 'menu.noResults': 'No results found', 'menu.addToCart': 'Add to Cart', 'menu.selectSize': 'Select Size', 'menu.addExtras': 'Add Extras', 'menu.specialNotes': 'Special notes', 'menu.notesPlaceholder': 'E.g.: No onions, extra sauce...',
-    'cart.title': 'Your Order', 'cart.empty': 'Your cart is empty', 'cart.emptySubtitle': 'Add something delicious to get started!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'Tax (13%)', 'cart.total': 'Total', 'cart.checkout': 'Go to Checkout', 'cart.orderWhatsApp': 'Order via WhatsApp', 'cart.clear': 'Clear', 'cart.browseMenu': 'Browse Menu',
+    'cart.title': 'Your Order', 'cart.empty': 'Your cart is empty', 'cart.emptySubtitle': 'Add something delicious to get started!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'VAT included', 'cart.delivery': 'Delivery', 'cart.total': 'Total', 'cart.checkout': 'Go to Checkout', 'cart.orderWhatsApp': 'Order via WhatsApp', 'cart.clear': 'Clear', 'cart.browseMenu': 'Browse Menu',
     'locations.title': 'Our Locations', 'locations.subtitle': '5 restaurants across El Salvador', 'locations.open': 'Open', 'locations.closed': 'Closed', 'locations.viewDetails': 'View Details', 'locations.directions': 'Get Directions', 'locations.selectLocation': 'Select Location', 'locations.selectSubtitle': 'Choose your nearest restaurant',
     'reserve.title': 'Reserve a Table', 'reserve.subtitle': 'Make a reservation at any of our locations', 'reserve.selectLocation': 'Select a location', 'reserve.date': 'Date', 'reserve.time': 'Time', 'reserve.partySize': 'Party size', 'reserve.name': 'Your name', 'reserve.phone': 'Phone', 'reserve.submit': 'Confirm Reservation',
     'whatsapp.title': 'READY TO ORDER?', 'whatsapp.subtitle': 'Place your order via WhatsApp quickly and easily', 'whatsapp.order': 'Order via WhatsApp',
@@ -463,8 +467,11 @@ export function calculateItemTotal(item: MenuItem, quantity: number, size?: Menu
 
 export function calculateCartTotal(items: CartItem[]): { subtotal: number; tax: number; total: number } {
   const subtotal = items.reduce((s, i) => s + i.totalPrice, 0);
-  const tax = subtotal * TAX_RATE;
-  return { subtotal, tax, total: subtotal + tax };
+  // Menu prices already INCLUDE 13% IVA (client-confirmed). `tax` is the IVA
+  // portion contained in the subtotal — informational only, never added on top.
+  // The server charge is subtotal + delivery fee (see /api/orders/create).
+  const tax = subtotal - subtotal / (1 + TAX_RATE);
+  return { subtotal, tax, total: subtotal };
 }
 
 export function isLocationOpen(location: Location): boolean {
@@ -501,7 +508,9 @@ export function generateWhatsAppOrderUrl(order: OrderDetails): string {
     if (item.notes) msg += `  └ Nota: ${item.notes}\n`;
     msg += `  ${formatPrice(item.totalPrice)}\n\n`;
   }
-  msg += `━━━━━━━━━━━━━━━━━━━━━\n*Subtotal:* ${formatPrice(order.subtotal)}\n*IVA (13%):* ${formatPrice(order.tax)}\n*TOTAL:* ${formatPrice(order.total)}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━\n*Subtotal:* ${formatPrice(order.subtotal)}\n`;
+  if (order.orderType === 'delivery' && order.deliveryFee) msg += `*Envío:* ${formatPrice(order.deliveryFee)}\n`;
+  msg += `*TOTAL:* ${formatPrice(order.total)}\n_IVA incluido en los precios_\n`;
   if (order.notes) msg += `\n📝 *Notas:* ${order.notes}\n`;
   msg += `\n━━━━━━━━━━━━━━━━━━━━━\n_Pedido desde simmerdownsv.com_`;
   const phone = order.location.whatsapp.replace(/\D/g, '');

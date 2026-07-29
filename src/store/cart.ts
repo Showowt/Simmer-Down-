@@ -3,10 +3,10 @@
  *
  * Features:
  * - Location-aware cart
- * - Delivery fee calculation ($3.99, free over $25)
+ * - Delivery fee calculation ($1.00 flat, all locations)
  * - Pickup/delivery/dine-in modes
  * - Promo codes & loyalty points
- * - Tax calculation (13% IVA)
+ * - IVA (13%) already included in prices — reported for display only, never added
  * - Persistent storage with migration
  * - Backward-compatible with existing MenuItem/CartItem types
  */
@@ -46,9 +46,8 @@ export interface DeliveryAddress {
 // CONSTANTS
 // ============================================================================
 
-const FREE_DELIVERY_THRESHOLD = 25.00
-const DELIVERY_FEE = 3.99
-const TAX_RATE = 0.13 // 13% IVA in El Salvador
+const DELIVERY_FEE = 1.00 // flat, all locations — mirrors locations.delivery_fee in DB
+const TAX_RATE = 0.13 // 13% IVA in El Salvador — already included in menu prices
 const POINTS_VALUE = 0.01 // $0.01 per point
 
 // ============================================================================
@@ -264,8 +263,6 @@ export const useCartStore = create<CartState & CartActions>()(
       getDeliveryFee: () => {
         const state = get()
         if (state.orderType !== 'delivery') return 0
-        const subtotal = get().getSubtotal()
-        if (subtotal >= FREE_DELIVERY_THRESHOLD) return 0
         return DELIVERY_FEE
       },
 
@@ -278,11 +275,12 @@ export const useCartStore = create<CartState & CartActions>()(
       },
 
       getTax: () => {
+        // IVA portion already contained in the (discounted) subtotal — informational
         const subtotal = get().getSubtotal()
         const promoDiscount = get().getPromoDiscount()
         const loyaltyDiscount = get().getLoyaltyDiscount()
         const taxableAmount = Math.max(0, subtotal - promoDiscount - loyaltyDiscount)
-        return taxableAmount * TAX_RATE
+        return taxableAmount - taxableAmount / (1 + TAX_RATE)
       },
 
       getTotal: () => {
@@ -290,8 +288,7 @@ export const useCartStore = create<CartState & CartActions>()(
         const deliveryFee = get().getDeliveryFee()
         const promoDiscount = get().getPromoDiscount()
         const loyaltyDiscount = get().getLoyaltyDiscount()
-        const tax = get().getTax()
-        return Math.max(0, subtotal + deliveryFee - promoDiscount - loyaltyDiscount + tax)
+        return Math.max(0, subtotal + deliveryFee - promoDiscount - loyaltyDiscount)
       },
 
       canCheckout: () => {

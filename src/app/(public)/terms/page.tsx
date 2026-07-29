@@ -84,7 +84,7 @@ export default function TermsPage() {
                       <li>Todos los precios incluyen IVA</li>
                       <li>Los pedidos est\u00e1n sujetos a disponibilidad</li>
                       <li>Aceptamos efectivo, tarjetas de cr\u00e9dito/d\u00e9bito y pagos m\u00f3viles</li>
-                      <li>El costo de delivery var\u00eda seg\u00fan la ubicaci\u00f3n</li>
+                      <li>Costo de delivery: $1.00 por pedido en todas las ubicaciones</li>
                     </>
                   ) : (
                     <>
@@ -92,7 +92,7 @@ export default function TermsPage() {
                       <li>All prices include VAT</li>
                       <li>Orders are subject to availability</li>
                       <li>We accept cash, credit/debit cards, and mobile payments</li>
-                      <li>Delivery fees vary by location</li>
+                      <li>Delivery fee: $1.00 per order at all locations</li>
                     </>
                   )}
                 </ul>
@@ -107,14 +107,14 @@ export default function TermsPage() {
                     <>
                       <li>Radio de entrega: 5km desde cada ubicaci\u00f3n</li>
                       <li>Tiempo estimado: 30-45 minutos (puede variar)</li>
-                      <li>Delivery gratis en pedidos mayores a $25</li>
+                      <li>Costo de delivery: $1.00 por pedido</li>
                       <li>No nos hacemos responsables por retrasos debido a condiciones clim\u00e1ticas o de tr\u00e1fico</li>
                     </>
                   ) : (
                     <>
                       <li>Delivery radius: 5km from each location</li>
                       <li>Estimated time: 30-45 minutes (may vary)</li>
-                      <li>Free delivery on orders over $25</li>
+                      <li>Delivery fee: $1.00 per order</li>
                       <li>We are not responsible for delays due to weather or traffic conditions</li>
                     </>
                   )}

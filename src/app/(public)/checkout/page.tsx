@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ShoppingBag, MapPin, CreditCard } from 'lucide-react'
 import { useCartStore, useTranslation } from '@/lib/store'
-import { formatPrice } from '@/lib/data'
+import { formatPrice, DELIVERY_FEE } from '@/lib/data'
 import CardPaymentForm from '@/components/checkout/CardPaymentForm'
 import ThreeDSecureModal from '@/components/checkout/ThreeDSecureModal'
 import PaymentResult from '@/components/checkout/PaymentResult'
@@ -139,10 +139,11 @@ export default function CheckoutPage() {
           deliveryCity: isDelivery && deliveryCity.trim() ? deliveryCity.trim() : undefined,
           items: items.map(item => ({
             id: item.id,
-            name: item.name,
+            // Spanish name goes to the order/kitchen/notifications — staff-facing
+            name: item.nameEs || item.name,
             quantity: item.quantity,
             price: item.basePrice || item.totalPrice || 0,
-            description: item.description || '',
+            description: item.descriptionEs || item.description || '',
           })),
         }),
       })
@@ -271,8 +272,10 @@ export default function CheckoutPage() {
     )
   }
 
+  // Prices include IVA (cartTotal === subtotal). The flat delivery fee is the
+  // only add-on — must mirror locations.delivery_fee, which the server charges.
   const subtotal = cartSubtotal
-  const deliveryFee = orderType === 'delivery' ? (cartSubtotal >= 25 ? 0 : 3.99) : 0
+  const deliveryFee = orderType === 'delivery' ? DELIVERY_FEE : 0
   const tax = cartTax
   const total = cartTotal + deliveryFee
 
@@ -336,7 +339,7 @@ export default function CheckoutPage() {
                       <span className="text-sm text-white/40 w-6 text-right">
                         {item.quantity}x
                       </span>
-                      <span className="text-white text-sm">{item.name}</span>
+                      <span className="text-white text-sm">{language === 'es' ? item.nameEs : item.name}</span>
                     </div>
                     <span className="text-white/60 text-sm">
                       ${((item.totalPrice || item.basePrice * item.quantity)).toFixed(2)}
@@ -426,14 +429,13 @@ export default function CheckoutPage() {
                     <span className="text-white">${deliveryFee.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-white/50">{language === 'es' ? 'IVA (13%)' : 'Tax (13%)'}</span>
-                  <span className="text-white">${tax.toFixed(2)}</span>
-                </div>
                 <div className="border-t border-white/10 pt-2 flex justify-between text-lg font-bold">
                   <span className="text-white">Total</span>
                   <span className="text-[#E85D04]">${total.toFixed(2)}</span>
                 </div>
+                <p className="text-xs text-white/30">
+                  {language === 'es' ? 'IVA incluido' : 'VAT included'}: ${tax.toFixed(2)}
+                </p>
               </div>
             </div>
 

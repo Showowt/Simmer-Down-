@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, MapPin, CreditCard } from 'lucide-react'
 import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
-import { LOCATIONS, formatPrice, generateWhatsAppOrderUrl } from '@/lib/data'
+import { LOCATIONS, formatPrice, generateWhatsAppOrderUrl, DELIVERY_FEE } from '@/lib/data'
 
 export default function CartPage() {
   const { t, language } = useTranslation()
@@ -35,6 +35,10 @@ export default function CartPage() {
 
   if (!mounted) return <div className="min-h-screen bg-[#0A0A0A] pt-36"><div className="max-w-2xl mx-auto px-4"><div className="animate-pulse space-y-4"><div className="h-8 bg-[#1A1A1A] rounded-xl w-1/3" /><div className="h-32 bg-[#1A1A1A] rounded-xl" /></div></div></div>
 
+  // Prices already include IVA — the fee is the only amount added on top.
+  const deliveryFee = orderType === 'delivery' ? DELIVERY_FEE : 0
+  const displayTotal = total + deliveryFee
+
   const handleWhatsAppOrder = () => {
     if (!selectedLocation) { setShowLocationPicker(true); return }
     if (!name.trim() || !phone.trim()) return
@@ -44,7 +48,7 @@ export default function CartPage() {
 
     const url = generateWhatsAppOrderUrl({
       items, location: selectedLocation, customerName: name, customerPhone: phone,
-      orderType, notes: notes || undefined, subtotal, tax, total,
+      orderType, notes: notes || undefined, subtotal, tax, deliveryFee, total: displayTotal,
     })
     window.open(url, '_blank')
     clearCart()
@@ -186,8 +190,11 @@ export default function CartPage() {
           className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5 mb-6">
           <div className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-white/50">{t('cart.subtotal')}</span><span className="text-white">{formatPrice(subtotal)}</span></div>
-            <div className="flex justify-between"><span className="text-white/50">{t('cart.tax')}</span><span className="text-white">{formatPrice(tax)}</span></div>
-            <div className="border-t border-white/10 pt-3 flex justify-between text-lg font-bold"><span className="text-white">{t('cart.total')}</span><span className="text-[#E85D04]">{formatPrice(total)}</span></div>
+            {deliveryFee > 0 && (
+              <div className="flex justify-between"><span className="text-white/50">{t('cart.delivery')}</span><span className="text-white">{formatPrice(deliveryFee)}</span></div>
+            )}
+            <div className="border-t border-white/10 pt-3 flex justify-between text-lg font-bold"><span className="text-white">{t('cart.total')}</span><span className="text-[#E85D04]">{formatPrice(displayTotal)}</span></div>
+            <p className="text-xs text-white/30">{t('cart.tax')}: {formatPrice(tax)}</p>
           </div>
         </motion.div>
 
@@ -197,7 +204,7 @@ export default function CartPage() {
           disabled={!name.trim() || !phone.trim() || !selectedLocation}
           className="w-full py-4 bg-[#25D366] hover:bg-[#20BD5A] disabled:bg-[#1A1A1A] disabled:text-white/30 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg disabled:shadow-none">
           <MessageCircle className="w-6 h-6" />
-          {t('cart.orderWhatsApp')} &middot; {formatPrice(total)}
+          {t('cart.orderWhatsApp')} &middot; {formatPrice(displayTotal)}
         </motion.button>
 
         <p className="text-center text-xs text-white/30 mt-3">
@@ -217,7 +224,7 @@ export default function CartPage() {
           disabled={!name.trim() || !phone.trim()}
           className="w-full py-4 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-[#1A1A1A] disabled:text-white/30 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-3 transition shadow-lg disabled:shadow-none cursor-pointer disabled:cursor-not-allowed">
           <CreditCard className="w-6 h-6" />
-          {language === 'es' ? 'Pagar con Tarjeta' : 'Pay with Card'} &middot; {formatPrice(total)}
+          {language === 'es' ? 'Pagar con Tarjeta' : 'Pay with Card'} &middot; {formatPrice(displayTotal)}
         </motion.button>
         <p className="text-center text-xs text-white/30 mt-3">
           {language === 'es' ? 'Visa, Mastercard y Amex — pago seguro por Credomatic' : 'Visa, Mastercard & Amex — secure payment via Credomatic'}
