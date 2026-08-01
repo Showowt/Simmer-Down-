@@ -18,6 +18,7 @@ const BodySchema = z.object({
   price: z.number().gt(0).lt(1000).nullable().optional(),
   isAvailable: z.boolean().nullable().optional(),
   isFeatured: z.boolean().nullable().optional(),
+  deliveryAvailable: z.boolean().nullable().optional(),
   nameEs: z.string().min(2).max(120).nullable().optional(),
   nameEn: z.string().min(2).max(120).nullable().optional(),
   descriptionEs: z.string().max(500).nullable().optional(),
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (b.price !== undefined) row.price = b.price;
     if (b.isAvailable !== undefined) row.is_available = b.isAvailable;
     if (b.isFeatured !== undefined) row.is_featured = b.isFeatured;
+    if (b.deliveryAvailable !== undefined)
+      row.delivery_available = b.deliveryAvailable;
     if (b.nameEs !== undefined) row.name_es = b.nameEs;
     if (b.nameEn !== undefined) row.name_en = b.nameEn;
     if (b.descriptionEs !== undefined) row.description_es = b.descriptionEs;

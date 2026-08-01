@@ -22,7 +22,7 @@ export async function GET(): Promise<NextResponse> {
       supabase
         .from("menu_item_overrides")
         .select(
-          "item_id, price, is_available, is_featured, name_es, name_en, description_es, description_en",
+          "item_id, price, is_available, is_featured, delivery_available, name_es, name_en, description_es, description_en",
         ),
     ]);
 

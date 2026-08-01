@@ -15,6 +15,7 @@ import {
   isLocationOpen,
 } from '@/lib/data'
 import EventsSection from '@/components/events/EventsSection'
+import SpecialsSection from '@/components/specials/SpecialsSection'
 
 // ─── Animation variants ────────────────────────────────────────────────────
 
@@ -175,6 +176,11 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════
+          1b. ESPECIALES — Active promotions (hidden when none)
+      ══════════════════════════════════════════════════ */}
+      <SpecialsSection />
 
       {/* ══════════════════════════════════════════════════
           2. CATEGORY CHIPS — Horizontal scroll row

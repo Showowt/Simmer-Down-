@@ -107,6 +107,7 @@ async function fetchMenuPrices(
 interface ItemOverrideRow {
   price: number | null;
   is_available: boolean | null;
+  delivery_available: boolean | null;
 }
 
 async function fetchItemOverrides(
@@ -116,7 +117,7 @@ async function fetchItemOverrides(
   if (itemIds.length === 0) return new Map();
   const { data, error } = await supabase
     .from("menu_item_overrides")
-    .select("item_id, price, is_available")
+    .select("item_id, price, is_available, delivery_available")
     .in("item_id", itemIds);
   if (error) {
     logger.error("Failed to fetch item overrides", error);
@@ -127,6 +128,7 @@ async function fetchItemOverrides(
     map.set(row.item_id, {
       price: row.price != null ? Number(row.price) : null,
       is_available: row.is_available,
+      delivery_available: row.delivery_available,
     });
   }
   return map;
@@ -135,7 +137,14 @@ async function fetchItemOverrides(
 function validateAgainstCatalog(
   clientItem: { id: string; price: number },
   overrides: Map<string, ItemOverrideRow>,
-): { ok: true } | { ok: false; reason: "unavailable" | "price"; expectedBase: number } {
+  orderType: string,
+): {
+  ok: true;
+} | {
+  ok: false;
+  reason: "unavailable" | "delivery" | "price";
+  expectedBase: number;
+} {
   const staticItem = MENU_ITEMS.find((i) => i.id === clientItem.id);
   if (!staticItem) {
     // Unknown to the static catalog — legacy fallback behavior applies
@@ -146,6 +155,17 @@ function validateAgainstCatalog(
   const available = o?.is_available ?? staticItem.isAvailable;
   const base = o?.price ?? staticItem.basePrice;
   if (!available) return { ok: false, reason: "unavailable", expectedBase: base };
+
+  // Dine-in-only items (alcohol) are never orderable online
+  if (staticItem.dineInOnly) {
+    return { ok: false, reason: "unavailable", expectedBase: base };
+  }
+
+  // Domicilio uses a shorter menu — enforce the dashboard flag server-side
+  const deliverable = o?.delivery_available ?? staticItem.deliveryAvailable;
+  if (orderType === "delivery" && deliverable === false) {
+    return { ok: false, reason: "delivery", expectedBase: base };
+  }
 
   const maxSize = Math.max(
     0,
@@ -421,7 +441,11 @@ export async function POST(
       }
 
       // Enforce static catalog + admin overrides (price bounds, availability)
-      const catalogCheck = validateAgainstCatalog(clientItem, itemOverrides);
+      const catalogCheck = validateAgainstCatalog(
+        clientItem,
+        itemOverrides,
+        input.orderType,
+      );
       if (!catalogCheck.ok) {
         if (catalogCheck.reason === "unavailable") {
           return NextResponse.json(
@@ -429,6 +453,16 @@ export async function POST(
               success: false,
               error: "Item unavailable",
               message: `"${clientItem.name}" no está disponible en este momento`,
+            },
+            { status: 400 },
+          );
+        }
+        if (catalogCheck.reason === "delivery") {
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Item not deliverable",
+              message: `"${clientItem.name}" no está disponible para pedidos a domicilio. Quítalo del carrito o elige Recoger.`,
             },
             { status: 400 },
           );

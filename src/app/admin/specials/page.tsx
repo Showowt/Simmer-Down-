@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Special, MenuItem } from "@/lib/types";
+import { formatSpecialDate, isSpecialLive } from "@/lib/specials";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 const discountTypes = [
@@ -246,17 +247,7 @@ export default function AdminSpecialsPage() {
     }
   };
 
-  const isSpecialActive = (special: Special): boolean => {
-    if (!special.active) return false;
-    const now = new Date();
-    const start = new Date(special.start_date);
-    const end = special.end_date ? new Date(special.end_date) : null;
-    if (now < start) return false;
-    if (end && now > end) return false;
-    if (special.days_of_week && !special.days_of_week.includes(now.getDay()))
-      return false;
-    return true;
-  };
+  const isSpecialActive = (special: Special): boolean => isSpecialLive(special);
 
   return (
     <div>
@@ -384,12 +375,9 @@ export default function AdminSpecialsPage() {
                 <div className="flex items-center gap-2 text-xs text-[#6B6560] mb-4">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    {new Date(special.start_date).toLocaleDateString("es", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {formatSpecialDate(special.start_date)}
                     {special.end_date &&
-                      ` - ${new Date(special.end_date).toLocaleDateString("es", { month: "short", day: "numeric" })}`}
+                      ` - ${formatSpecialDate(special.end_date)}`}
                   </span>
                   {special.days_of_week && (
                     <span className="ml-2">

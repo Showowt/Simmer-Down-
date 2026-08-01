@@ -518,6 +518,7 @@ type DietaryFilter = 'vegetarian' | 'spicy' | 'gluten-free'
 export default function CartaPage() {
   const { t } = useTranslation()
   const { openMenuItemSheet } = useUIStore()
+  const orderType = useCartStore((s) => s.orderType)
 
   // ── Local state ──────────────────────────────────────────
   const menuOverrides = useMenuOverrides()
@@ -549,10 +550,13 @@ export default function CartaPage() {
 
     // Admin overrides (photos, price, availability, names) win over static,
     // then availability filters AFTER the merge so toggles take effect.
+    // Domicilio uses a shorter menu: items flagged delivery_available=false
+    // in the dashboard disappear while the order type is delivery.
     return base
       .map((i) => mergeMenuItem(i, menuOverrides))
       .filter((i) => i.isAvailable)
-  }, [searchQuery, selectedCategory, activeFilters, menuOverrides])
+      .filter((i) => orderType !== 'delivery' || i.deliveryAvailable !== false)
+  }, [searchQuery, selectedCategory, activeFilters, menuOverrides, orderType])
 
   // ── Grouped by category (only when not searching) ────────
   const grouped = useMemo(() => {

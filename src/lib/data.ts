@@ -66,6 +66,8 @@ export interface MenuItem {
   isGlutenFree: boolean;
   isNew: boolean;
   dineInOnly?: boolean;
+  /** false = excluded from the domicilio menu (admin-controlled override). */
+  deliveryAvailable?: boolean;
   sizes?: MenuItemSize[];
   modifiers?: MenuItemModifier[];
 }

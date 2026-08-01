@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
   Pencil,
+  Bike,
 } from 'lucide-react'
 import { MENU_ITEMS, MENU_CATEGORIES, formatPrice } from '@/lib/data'
 import type { MenuItemOverride, MenuItemOverrides } from '@/lib/menu-images'
@@ -89,6 +90,7 @@ export default function AdminCartaPage() {
           if ('price' in body) cur.price = body.price as number | null
           if ('isAvailable' in body) cur.is_available = body.isAvailable as boolean | null
           if ('isFeatured' in body) cur.is_featured = body.isFeatured as boolean | null
+          if ('deliveryAvailable' in body) cur.delivery_available = body.deliveryAvailable as boolean | null
           if ('nameEs' in body) cur.name_es = body.nameEs as string | null
           if ('nameEn' in body) cur.name_en = body.nameEn as string | null
           if ('descriptionEs' in body) cur.description_es = body.descriptionEs as string | null
@@ -217,6 +219,7 @@ export default function AdminCartaPage() {
                 const price = o.price ?? item.basePrice
                 const available = o.is_available ?? item.isAvailable
                 const featured = o.is_featured ?? item.isFeatured
+                const deliverable = (o.delivery_available ?? item.deliveryAvailable) !== false
                 const nameEs = o.name_es ?? item.nameEs
                 const modified = Boolean(overrides[item.id] && Object.values(overrides[item.id]).some((v) => v != null))
                 const busy = savingId === item.id
@@ -248,6 +251,23 @@ export default function AdminCartaPage() {
                       >
                         {available ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         {available ? 'Visible' : 'Oculto'}
+                      </button>
+
+                      <button
+                        onClick={() => save(item.id, { deliveryAvailable: deliverable ? false : null })}
+                        title={
+                          deliverable
+                            ? 'Quitar del menú de domicilio'
+                            : 'Agregar al menú de domicilio'
+                        }
+                        className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                          deliverable
+                            ? 'border-sky-400/30 text-sky-300 hover:bg-sky-400/10'
+                            : 'border-white/15 text-white/40 hover:bg-white/5'
+                        }`}
+                      >
+                        <Bike className="w-3.5 h-3.5" />
+                        {deliverable ? 'Domicilio' : 'Sin domicilio'}
                       </button>
 
                       <button

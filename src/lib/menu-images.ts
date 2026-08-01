@@ -16,6 +16,7 @@ export interface MenuItemOverride {
   price?: number | null;
   is_available?: boolean | null;
   is_featured?: boolean | null;
+  delivery_available?: boolean | null;
   name_es?: string | null;
   name_en?: string | null;
   description_es?: string | null;
@@ -44,6 +45,9 @@ export function applyItemOverride(
     ...(o?.price != null ? { basePrice: o.price } : {}),
     ...(o?.is_available != null ? { isAvailable: o.is_available } : {}),
     ...(o?.is_featured != null ? { isFeatured: o.is_featured } : {}),
+    ...(o?.delivery_available != null
+      ? { deliveryAvailable: o.delivery_available }
+      : {}),
     ...(o?.name_es ? { nameEs: o.name_es } : {}),
     ...(o?.name_en ? { name: o.name_en } : {}),
     ...(o?.description_es ? { descriptionEs: o.description_es } : {}),
