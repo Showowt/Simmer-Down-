@@ -53,7 +53,7 @@ export default function SignupPage() {
       const supabase = createClient()
 
       // Sign up the user
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -67,34 +67,9 @@ export default function SignupPage() {
 
       if (signUpError) throw signUpError
 
-      // If user was created successfully, create their customer profile
-      if (data.user) {
-        // Try customers table first (production schema)
-        const { error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            auth_user_id: data.user.id,
-            email: formData.email,
-            first_name: formData.name.split(' ')[0],
-            last_name: formData.name.split(' ').slice(1).join(' ') || null,
-            phone: formData.phone || null,
-            loyalty_points_balance: 50, // Welcome bonus!
-            loyalty_tier: 'bronze',
-          })
-
-        // Fallback to profiles table if customers doesn't exist
-        if (customerError && customerError.message.includes('does not exist')) {
-          await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              full_name: formData.name,
-              phone: formData.phone,
-              loyalty_points: 50,
-              loyalty_tier: 'bronze',
-            })
-        }
-      }
+      // Customer row (with 50-point welcome bonus) is created by the
+      // on_auth_user_created DB trigger — a client-side insert here would be
+      // blocked by RLS because there is no session until email confirmation.
 
       setSuccess(true)
     } catch (err: unknown) {
