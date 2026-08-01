@@ -360,7 +360,7 @@ export function PrivateEventsSection({
   const { t, locale } = useI18n();
 
   return (
-    <section className="py-24 bg-[#1A1A1A] border-t border-white/10">
+    <section className="py-24 bg-[#1A1A1A] border-t border-white/10 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div
