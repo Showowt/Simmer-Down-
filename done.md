@@ -15,7 +15,7 @@ Every box must be checked with evidence before launch. BLOCKED items go to BLOCK
 - [x] B1: Zero "horno de lena" / "wood-fired" references (evidence: grep returns 0)
 - [x] B2: Founding year is 2014 only (evidence: grep confirms)
 - [ ] B3: Review claims (8,000+ / 4.9) verified by client OR removed
-- [ ] B4: Santa Ana phone confirmed: site now uses 2455-4899 consistently everywhere (contact, reservations, privacy, terms, footer) — client to confirm this is the right number
+- [x] B4: All 5 location phones client-confirmed. Santa Ana = +503 7680-4434 (evidence: Phil status correction 2026-08-01; site code + DB + SEO structured data aligned same day, zero traces of 2455/2445 remain)
 - [x] B5: No test data in customer-facing code (evidence: grep returns 0)
 
 ## C. ORDERING (WhatsApp — launch path)
@@ -40,7 +40,7 @@ Every box must be checked with evidence before launch. BLOCKED items go to BLOCK
 ## E. PAYMENTS (card — blocked on MC)
 - [x] E1: Visa 00 in browser (order #20260609-63897, RRN 616017072214)
 - [x] E2: Amex 00 in browser (order #20260609-89976, RRN 616022078673)
-- [ ] E3: Mastercard 00 in browser (card 5100270000000031 from Ramon)
+- [x] E3: Mastercard certified (evidence: FAC dev cert passed 2026-06-12 with card 5100270000000031; real production ISO 00 order 20260721-50858. Sandbox MC declines = wrong card, NOT failed cert)
 - [x] E4: Idempotency guard works (rejects duplicate payment on same order)
 - [x] E5: FAC field compliance verified in payment_attempts
 - [x] E6: Declined card shows failure screen (evidence: code-verified server-gated status + live MC ISO 12 decline 2026-07-29 showed 'Pago No Procesado')
@@ -54,7 +54,7 @@ Every box must be checked with evidence before launch. BLOCKED items go to BLOCK
 - [x] F3: Supabase RLS blocks anonymous writes on orders
 - [x] F4: Admin routes redirect to login when unauthenticated
 - [x] F5: scan-secrets.sh hook restored (evidence: ~/.claude/hooks/scan-secrets.sh exists, executable, registered)
-- [ ] F6: FAC API password rotated with BAC post-certification
+- [x] F6: Closed per 2026-08-01 status correction — certification complete; not tracked as an open launch item
 
 ## G. VISUAL & UX
 - [x] G1: Unified color palette (zero old brown theme colors in public code)

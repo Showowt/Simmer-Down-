@@ -63,7 +63,7 @@ export const LOCATIONS: LocationData[] = [
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
     region: 'Santa Ana',
-    phone: '+50324554899',
+    phone: '+50376804434',
     latitude: 13.9946,
     longitude: -89.5597,
     rating: 4.9,
@@ -175,7 +175,7 @@ export function generateOrganizationSchema() {
     contactPoint: [
       {
         '@type': 'ContactPoint',
-        telephone: '+503-2455-4899',
+        telephone: '+503-7680-4434',
         contactType: 'reservations',
         areaServed: 'SV',
         availableLanguage: ['Spanish', 'English'],
@@ -358,7 +358,7 @@ export const RESTAURANT_FAQS: FAQItem[] = [
   },
   {
     question: '¿Simmer Down tiene reservaciones?',
-    answer: 'Sí, Simmer Down acepta reservaciones en todas sus ubicaciones. Puedes reservar en línea en simmerdownsv.com/reservations o llamar directamente: Santa Ana +503 2455-4899, Coatepeque +503 6831-6907, San Benito +503 7487-7792.',
+    answer: 'Sí, Simmer Down acepta reservaciones en todas sus ubicaciones. Puedes reservar en línea en simmerdownsv.com/reservations o llamar directamente: Santa Ana +503 7680-4434, Coatepeque +503 6831-6907, San Benito +503 7487-7792.',
   },
   {
     question: '¿Cuáles son los horarios de Simmer Down?',

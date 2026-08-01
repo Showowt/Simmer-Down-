@@ -36,7 +36,7 @@ export const LOCATIONS: Record<LocationId, Location> = {
     name: 'Simmer Down Santa Ana',
     brand: 'simmer-down',
     tagline: 'El Origen',
-    whatsapp: '2455-4899',
+    whatsapp: '7680-4434',
     features: ['Classic menu', 'Original location', 'Cathedral view', 'Live music']
   },
   'san-benito': {

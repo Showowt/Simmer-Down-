@@ -154,10 +154,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-white/40 text-sm">{t(translations.contact.phones)}</p>
                       <a
-                        href="tel:+50324554899"
+                        href="tel:+50376804434"
                         className="text-white font-medium hover:text-[#E85D04] transition-colors block"
                       >
-                        +503 2455-4899 (Santa Ana)
+                        +503 7680-4434 (Santa Ana)
                       </a>
                       <a
                         href="tel:+50368316907"

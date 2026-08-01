@@ -140,7 +140,7 @@ export const LOCATIONS: Location[] = [
     shortName: 'Santa Ana',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
     city: 'Santa Ana',
-    phone: '+503 2455-4899',
+    phone: '+503 7680-4434',
     whatsapp: '+50376804434',
     email: 'santaana@simmerdown.sv',
     coordinates: { lat: 13.9942, lng: -89.5597 },

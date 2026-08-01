@@ -1,48 +1,33 @@
-# SIMMER DOWN — BLOCKED ITEMS
-Items that cannot be completed without human action or third-party response.
-Last swept: 2026-08-01 — everything Claude-actionable is done; only the items below remain.
+# SIMMER DOWN — OPEN ITEMS
+Corrected 2026-08-01 per Phil's status update. Previous versions of this file
+contained stale items — the facts below are authoritative.
 
-## OPEN — needs Phil / client / FAC
+## SETTLED FACTS (do not resurface)
+- **Mastercard IS certified.** FAC dev certification passed 2026-06-12 with card
+  5100270000000031, and a real production ISO 00 was achieved (order 20260721-50858).
+  A sandbox MC decline means wrong card, NOT failed certification.
+- **All 5 location phone numbers are client-confirmed.** Santa Ana = +503 7680-4434.
+  Site code + DB aligned to confirmed numbers on 2026-08-01 (old 2455-4899 /
+  2445-5999 removed everywhere).
+- **Delivery fee = $1.00 flat, all 5 locations, confirmed. IVA is included in
+  menu prices** (never added on top). Fixed and verified 2026-07-29.
 
-### BLK-001: Mastercard 3DS certification (gate E3)
-- **Status:** MC sandbox card 5100270000000031 completes 3DS (3D0) but DECLINES at capture with ISO 12 "Invalid transaction" — E3 cert never passed on FAC's side. Visa (E1) and Amex (E2) approve with ISO 00; client (Marlon, Grupo Kase) ran an approved Visa test 2026-07-29.
-- **Action:** Ramon/Giancarlo (PowerTranz) must resolve the MC test card on their side, then re-run the browser test.
-- **Owner:** Phil → Ramon/PowerTranz
+## OPEN — the only 3 items
 
-### BLK-004: Santa Ana phone confirmation (gate B4)
-- **Status:** Site now uses **2455-4899 consistently everywhere** (contact, reservations, privacy, terms, footer, SEO meta). The old 2445-5999 no longer appears in code.
-- **Action:** Client (Grupo KASE) confirms 2455-4899 is correct — or supplies the right number.
+### 1. Review claims (+8,000 reseñas / 4.9 estrellas)
+- **Where:** /nosotros page + SEO meta.
+- **Needs:** Client keep-or-remove decision. Same-day edit either way.
 - **Owner:** Phil → client
 
-### BLK-005: Review claims verification (gate B3)
-- **Status:** "+8,000 resenas" and "4.9 estrellas" on about page + meta.
-- **Action:** Client to confirm these numbers are accurate, or we remove them.
-- **Owner:** Phil → client
+### 2. Delivery-zone / geolocation limiting — NEW SCOPE (to be quoted)
+- **Requested by:** Casmorst. Not a launch blocker.
+- **Scope to quote:** per-location delivery zones (radius or polygon) enforced at
+  checkout + /api/orders, optional per-zone fees, admin UI to manage zones.
+- **Owner:** Phil quotes → client approves → build
 
-### BLK-013: Delivery radius / zone validation (product gap)
-- **Status:** Checkout accepts a delivery address ANYWHERE — no radius or zone check. Delivery is live at all 5 locations with $1.00 flat fee.
-- **Action:** Business decision needed: per-location delivery zones (and per-zone fees?). Then build validation into checkout + /api/orders.
-- **Owner:** Phil → client decision, then build
-
-## POST-CERTIFICATION / OPTIONAL
-
-### BLK-007: FAC API password rotation (gate F6)
-- **Action:** Request new password from BAC after MC certification completes, update FAC_POWERTRANZ_PASSWORD in Vercel (enter WITHOUT trailing newline), redeploy.
-- **Owner:** Phil → BAC/PowerTranz
-
-### BLK-008: Google Search Console
-- **Action:** Configure verification tag with Phil's Google account, submit sitemap.
-- **Owner:** Phil
-
-### BLK-003: Twilio WhatsApp staff notifications (optional)
-- **Status:** DOWNGRADED from critical — Telegram is the live, verified staff-notification channel (PAGO CONFIRMADO verified in prod 2026-07-29). Twilio WhatsApp to Marvin (+503 7680-4434) is coded and degrades gracefully; it activates the moment TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN / TWILIO_WHATSAPP_FROM are set in Vercel.
-- **Owner:** Phil (only if WhatsApp channel is wanted in addition to Telegram)
-
-## RESOLVED 2026-08-01 (verified, moved out of blocked)
-
-- **BLK-002** "Something went wrong" runtime error → fixed by fallback-first store merge; 13-route headless sweep shows zero console errors; live card E2E 2026-07-29.
-- **BLK-006** Vercel env trailing newlines → all 12 affected production vars re-entered clean via CLI, verified byte-identical, redeployed, smoke-tested (Supabase + payments APIs respond correctly).
-- **BLK-009** scan-secrets.sh hook → present at ~/.claude/hooks/scan-secrets.sh, executable, registered.
-- **BLK-010** Lighthouse → home 91 perf / 95 a11y, carta 91 / 95 (best-practices 100, SEO 100/92). Both gates >= 80.
-- **BLK-011** SimmerLovers signup → tested, found broken (D016), fixed with DB trigger, retested end-to-end: customers row with 50-point welcome bonus created. QA artifacts deleted.
-- **BLK-012** EN/ES toggle → tested, found split-brain (D017), unified on useUIStore; verified across pages with persistence.
+### 3. Real Visa PAGO CONFIRMADO screenshot at $10.99
+- **Goal:** capture the PAGO CONFIRMADO notification showing $10.99.
+- **Recipe:** 1× Lasaña Bolognesa ($9.99) → delivery → total $10.99 → pay with
+  the approved Visa (PAN held by Phil/Ramon, not in repo) → PAGO CONFIRMADO
+  lands in the ops Telegram → screenshot.
+- **Owner:** Phil (card entry required)
