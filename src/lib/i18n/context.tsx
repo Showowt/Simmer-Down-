@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useCallback, useEffect, type ReactNode } from 'react'
+import { useUIStore } from '@/lib/store'
 import { type Locale, translations, t as translate } from './translations'
 
 interface I18nContextValue {
@@ -12,24 +13,20 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
-const STORAGE_KEY = 'simmerdown-lang'
-
+// Single source of truth for language is useUIStore ('simmerdown-ui-v2') —
+// the header toggle writes there. This context is a thin adapter so that
+// useI18n consumers (Footer, EventsClient, auth pages, …) stay in sync with
+// the pages that read the store directly.
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === 'undefined') return 'es'
-    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
-    return (stored === 'en' || stored === 'es') ? stored : 'es'
-  })
+  const locale = useUIStore((s) => s.language)
+  const setLanguage = useUIStore((s) => s.setLanguage)
+  const toggleLanguage = useUIStore((s) => s.toggleLanguage)
 
-  const setLocale = useCallback((newLocale: Locale) => {
-    setLocaleState(newLocale)
-    localStorage.setItem(STORAGE_KEY, newLocale)
-    document.documentElement.lang = newLocale
-  }, [])
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
 
-  const toggleLocale = useCallback(() => {
-    setLocale(locale === 'es' ? 'en' : 'es')
-  }, [locale, setLocale])
+  const setLocale = useCallback((newLocale: Locale) => setLanguage(newLocale), [setLanguage])
 
   const t = useCallback(
     (obj: { es: string; en: string }) => translate(obj, locale),
@@ -37,7 +34,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, toggleLocale, t }}>
+    <I18nContext.Provider value={{ locale, setLocale, toggleLocale: toggleLanguage, t }}>
       {children}
     </I18nContext.Provider>
   )
