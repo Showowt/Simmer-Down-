@@ -105,6 +105,9 @@ export interface OrderDetails {
   subtotal: number;
   tax: number;
   deliveryFee?: number;
+  /** Auto-applied promo discount (e.g. 2x1 pizzas) — already subtracted from total. */
+  discount?: number;
+  discountLabel?: string;
   total: number;
 }
 
@@ -124,7 +127,7 @@ export interface ReservationDetails {
 // CONSTANTS
 // ============================================
 
-const TAX_RATE = 0.13; // IVA already included in menu prices — display-only breakdown
+export const TAX_RATE = 0.13; // IVA already included in menu prices — display-only breakdown
 // Flat delivery fee, all locations (client-confirmed 2026-07-29). Display value:
 // the authoritative charge is locations.delivery_fee in Supabase — keep in sync.
 export const DELIVERY_FEE = 1.00;
@@ -511,6 +514,7 @@ export function generateWhatsAppOrderUrl(order: OrderDetails): string {
     msg += `  ${formatPrice(item.totalPrice)}\n\n`;
   }
   msg += `━━━━━━━━━━━━━━━━━━━━━\n*Subtotal:* ${formatPrice(order.subtotal)}\n`;
+  if (order.discount && order.discount > 0) msg += `*${order.discountLabel || 'Descuento'}:* -${formatPrice(order.discount)}\n`;
   if (order.orderType === 'delivery' && order.deliveryFee) msg += `*Envío:* ${formatPrice(order.deliveryFee)}\n`;
   msg += `*TOTAL:* ${formatPrice(order.total)}\n_IVA incluido en los precios_\n`;
   if (order.notes) msg += `\n📝 *Notas:* ${order.notes}\n`;

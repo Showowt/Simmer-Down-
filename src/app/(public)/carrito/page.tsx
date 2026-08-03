@@ -6,15 +6,16 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, MessageCircle, MapPin, CreditCard } from 'lucide-react'
-import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
+import { useCartStore, useUIStore, useTranslation, cartLineKey } from '@/lib/store'
 import { LOCATIONS, formatPrice, generateWhatsAppOrderUrl, DELIVERY_FEE } from '@/lib/data'
+import { PROMO_2X1_DESCRIPTION } from '@/lib/promo'
 
 export default function CartPage() {
   const { t, language } = useTranslation()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const {
-    items, itemCount, subtotal, tax, total,
+    items, itemCount, subtotal, discount, tax, total,
     updateQuantity, removeItem, clearCart,
     selectedLocation, setSelectedLocation,
     customerName, customerPhone, orderType,
@@ -48,7 +49,10 @@ export default function CartPage() {
 
     const url = generateWhatsAppOrderUrl({
       items, location: selectedLocation, customerName: name, customerPhone: phone,
-      orderType, notes: notes || undefined, subtotal, tax, deliveryFee, total: displayTotal,
+      orderType, notes: notes || undefined, subtotal, tax, deliveryFee,
+      discount: discount > 0 ? discount : undefined,
+      discountLabel: discount > 0 ? PROMO_2X1_DESCRIPTION : undefined,
+      total: displayTotal,
     })
     window.open(url, '_blank')
     clearCart()
@@ -144,7 +148,7 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="space-y-3 mb-6">
           {items.map((item, i) => (
-            <motion.div key={item.id + (item.selectedSize?.id || '')} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            <motion.div key={cartLineKey(item)} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="bg-[#1A1A1A] rounded-xl border border-white/10 p-4 flex gap-4">
               {/* Image */}
               <div className="w-20 h-20 bg-[#0A0A0A] rounded-lg overflow-hidden flex-shrink-0">
@@ -158,13 +162,13 @@ export default function CartPage() {
                     <h3 className="text-white font-semibold text-sm">{language === 'es' ? item.nameEs : item.name}</h3>
                     {item.selectedSize && <p className="text-white/40 text-xs mt-0.5">{language === 'es' ? item.selectedSize.nameEs : item.selectedSize.name}</p>}
                   </div>
-                  <button onClick={() => removeItem(item.id)} className="p-1.5 text-white/30 hover:text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => removeItem(cartLineKey(item))} className="p-1.5 text-white/30 hover:text-red-400 transition"><Trash2 className="w-4 h-4" /></button>
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center gap-2 bg-[#0A0A0A] rounded-lg">
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition"><Minus className="w-4 h-4" /></button>
+                    <button onClick={() => updateQuantity(cartLineKey(item), item.quantity - 1)} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition"><Minus className="w-4 h-4" /></button>
                     <span className="text-white font-semibold text-sm w-6 text-center">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition"><Plus className="w-4 h-4" /></button>
+                    <button onClick={() => updateQuantity(cartLineKey(item), item.quantity + 1)} className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition"><Plus className="w-4 h-4" /></button>
                   </div>
                   <span className="text-[#E85D04] font-bold">{formatPrice(item.totalPrice)}</span>
                 </div>
@@ -190,6 +194,9 @@ export default function CartPage() {
           className="bg-[#1A1A1A] rounded-xl border border-white/10 p-5 mb-6">
           <div className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-white/50">{t('cart.subtotal')}</span><span className="text-white">{formatPrice(subtotal)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between"><span className="text-[#25D366] font-medium">{language === 'es' ? '🎁 Promo 2x1 Pizzas' : '🎁 2x1 Pizza Promo'}</span><span className="text-[#25D366] font-medium">-{formatPrice(discount)}</span></div>
+            )}
             {deliveryFee > 0 && (
               <div className="flex justify-between"><span className="text-white/50">{t('cart.delivery')}</span><span className="text-white">{formatPrice(deliveryFee)}</span></div>
             )}

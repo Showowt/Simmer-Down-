@@ -201,6 +201,16 @@ export default function AdminOrdersPage() {
             <td style="text-align: right;">$${(order.subtotal || 0).toFixed(2)}</td>
           </tr>
           ${
+            order.discount_amount && order.discount_amount > 0
+              ? `
+          <tr>
+            <td>Descuento${order.discount_code ? ` (${order.discount_code})` : ""}:</td>
+            <td style="text-align: right;">-$${order.discount_amount.toFixed(2)}</td>
+          </tr>
+          `
+              : ""
+          }
+          ${
             order.is_delivery
               ? `
           <tr>
@@ -729,6 +739,19 @@ export default function AdminOrdersPage() {
                       <span>Subtotal</span>
                       <span>${(selectedOrder.subtotal || 0).toFixed(2)}</span>
                     </div>
+                    {(selectedOrder.discount_amount ?? 0) > 0 && (
+                      <div className="flex justify-between text-sm text-[#4ADE80]">
+                        <span>
+                          Descuento
+                          {selectedOrder.discount_code
+                            ? ` (${selectedOrder.discount_code})`
+                            : ""}
+                        </span>
+                        <span>
+                          -${(selectedOrder.discount_amount ?? 0).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm text-[#6B6560]">
                       <span>Delivery</span>
                       <span>

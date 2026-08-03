@@ -29,6 +29,10 @@ const orderItemSchema = z.object({
   name: z.string().min(1, "Nombre de item requerido"),
   quantity: z.number().int().min(1).max(99, "Cantidad máxima es 99"),
   price: z.number().min(0), // We'll validate against DB prices
+  // Selected size id (e.g. "personal" | "large") — the 2x1 promo only applies
+  // to personal-size pizzas, so the server needs it (unit price alone can't
+  // distinguish personal+extras from a plain grande).
+  sizeId: z.string().max(40).optional().nullable(),
   description: z.string().optional(),
 });
 

@@ -8,16 +8,26 @@ import {
   type MenuItemSize,
   type MenuItemModifier,
   calculateItemTotal,
-  calculateCartTotal,
   getNearestLocation,
   getLocationDistances,
   TRANSLATIONS,
   LOCATIONS,
 } from '@/lib/data'
+import { calculateCartTotalsWithPromo } from '@/lib/promo'
 
 // ============================================
 // CART STORE
 // ============================================
+
+/**
+ * Stable identity for a cart LINE (item + size + modifiers). Matching by bare
+ * item.id corrupts carts holding the same pizza in two sizes: remove/qty
+ * operations hit both lines. Mirrors the merge criteria in addItem.
+ */
+export function cartLineKey(item: Pick<CartItem, 'id' | 'selectedSize' | 'selectedModifiers'>): string {
+  const mods = (item.selectedModifiers ?? []).map((m) => m.id).sort().join('+')
+  return `${item.id}|${item.selectedSize?.id ?? ''}|${mods}`
+}
 
 interface CartState {
   items: CartItem[]
@@ -29,12 +39,17 @@ interface CartState {
   orderNotes: string
   itemCount: number
   subtotal: number
+  /** Auto-applied promo discount (2x1 pizzas tradicionales) when the special is live. */
+  discount: number
+  /** Synced from /api/specials by <PromoSync/>; server re-validates on order create. */
+  promoLive: boolean
   tax: number
   total: number
   addItem: (item: MenuItem, quantity: number, size?: MenuItemSize, modifiers?: MenuItemModifier[], notes?: string) => void
-  updateQuantity: (itemId: string, quantity: number) => void
-  removeItem: (itemId: string) => void
+  updateQuantity: (lineKey: string, quantity: number) => void
+  removeItem: (lineKey: string) => void
   clearCart: () => void
+  setPromoLive: (live: boolean) => void
   setSelectedLocation: (location: Location) => void
   setCustomerInfo: (name: string, phone: string, email?: string) => void
   setOrderType: (type: 'dine_in' | 'takeout' | 'delivery') => void
@@ -53,6 +68,8 @@ export const useCartStore = create<CartState>()(
       orderNotes: '',
       itemCount: 0,
       subtotal: 0,
+      discount: 0,
+      promoLive: false,
       tax: 0,
       total: 0,
 
@@ -61,9 +78,8 @@ export const useCartStore = create<CartState>()(
         const cartItem: CartItem = { ...item, quantity, selectedSize: size, selectedModifiers: modifiers, notes, totalPrice }
 
         set((state) => {
-          const existingIndex = state.items.findIndex(
-            (i) => i.id === item.id && i.selectedSize?.id === size?.id && JSON.stringify(i.selectedModifiers?.map((m) => m.id).sort()) === JSON.stringify(modifiers?.map((m) => m.id).sort())
-          )
+          const newKey = cartLineKey(cartItem)
+          const existingIndex = state.items.findIndex((i) => cartLineKey(i) === newKey)
           let newItems: CartItem[]
           if (existingIndex >= 0) {
             newItems = [...state.items]
@@ -73,33 +89,41 @@ export const useCartStore = create<CartState>()(
           } else {
             newItems = [...state.items, cartItem]
           }
-          const { subtotal, tax, total } = calculateCartTotal(newItems)
-          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, tax, total }
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
 
-      updateQuantity: (itemId, quantity) => {
+      updateQuantity: (lineKey, quantity) => {
         set((state) => {
           if (quantity <= 0) {
-            const newItems = state.items.filter((i) => i.id !== itemId)
-            const { subtotal, tax, total } = calculateCartTotal(newItems)
-            return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, tax, total }
+            const newItems = state.items.filter((i) => cartLineKey(i) !== lineKey)
+            const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+            return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
           }
-          const newItems = state.items.map((item) => item.id === itemId ? { ...item, quantity, totalPrice: calculateItemTotal(item, quantity, item.selectedSize, item.selectedModifiers) } : item)
-          const { subtotal, tax, total } = calculateCartTotal(newItems)
-          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, tax, total }
+          const newItems = state.items.map((item) => cartLineKey(item) === lineKey ? { ...item, quantity, totalPrice: calculateItemTotal(item, quantity, item.selectedSize, item.selectedModifiers) } : item)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
 
-      removeItem: (itemId) => {
+      removeItem: (lineKey) => {
         set((state) => {
-          const newItems = state.items.filter((i) => i.id !== itemId)
-          const { subtotal, tax, total } = calculateCartTotal(newItems)
-          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, tax, total }
+          const newItems = state.items.filter((i) => cartLineKey(i) !== lineKey)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
 
-      clearCart: () => set({ items: [], itemCount: 0, subtotal: 0, tax: 0, total: 0 }),
+      clearCart: () => set({ items: [], itemCount: 0, subtotal: 0, discount: 0, tax: 0, total: 0 }),
+
+      setPromoLive: (live) => {
+        set((state) => {
+          if (state.promoLive === live) return state
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(state.items, live)
+          return { promoLive: live, subtotal, discount, tax, total }
+        })
+      },
       setSelectedLocation: (location) => set({ selectedLocation: location }),
       setCustomerInfo: (name, phone, email) => set({ customerName: name, customerPhone: phone, customerEmail: email || '' }),
       setOrderType: (type) => set({ orderType: type }),
@@ -119,6 +143,8 @@ export const useCartStore = create<CartState>()(
         orderNotes: '',
         itemCount: 0,
         subtotal: 0,
+        discount: 0,
+        promoLive: false,
         tax: 0,
         total: 0,
       }),
@@ -129,13 +155,16 @@ export const useCartStore = create<CartState>()(
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<CartState>
         const items = p.items ?? []
-        const { subtotal, tax, total } = calculateCartTotal(items)
+        // promoLive is never persisted — <PromoSync/> re-fetches and triggers a
+        // recompute right after hydration, so booting at false is safe.
+        const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(items, current.promoLive)
         return {
           ...current,
           ...p,
           items,
           itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
           subtotal,
+          discount,
           tax,
           total,
         }

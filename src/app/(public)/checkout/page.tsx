@@ -23,6 +23,7 @@ interface OrderData {
   orderNumber: string
   subtotal: number
   deliveryFee: number
+  discount: number
   total: number
 }
 
@@ -62,6 +63,7 @@ export default function CheckoutPage() {
     customerEmail,
     orderNotes,
     subtotal: cartSubtotal,
+    discount: cartDiscount,
     tax: cartTax,
     total: cartTotal,
     setCustomerInfo,
@@ -137,14 +139,31 @@ export default function CheckoutPage() {
           notes: cleanNotes || undefined,
           deliveryAddress: isDelivery ? deliveryAddress.trim() : undefined,
           deliveryCity: isDelivery && deliveryCity.trim() ? deliveryCity.trim() : undefined,
-          items: items.map(item => ({
-            id: item.id,
-            // Spanish name goes to the order/kitchen/notifications — staff-facing
-            name: item.nameEs || item.name,
-            quantity: item.quantity,
-            price: item.basePrice || item.totalPrice || 0,
-            description: item.descriptionEs || item.description || '',
-          })),
+          items: items.map(item => {
+            // REAL unit price: base + size + extras. Sending bare basePrice
+            // undercharged every Grande/extra-topping card order (server trusts
+            // this price for catalog items not in the DB).
+            const unitPrice = Math.round(
+              (item.basePrice
+                + (item.selectedSize?.priceModifier || 0)
+                + (item.selectedModifiers?.reduce((s, m) => s + m.price, 0) || 0)) * 100,
+            ) / 100
+            // Staff-facing name must carry size/toppings/notes — the kitchen
+            // preps straight from the Telegram item line.
+            const sizeLabel = item.selectedSize ? ` (${item.selectedSize.nameEs})` : ''
+            const modsLabel = item.selectedModifiers?.length
+              ? ` + ${item.selectedModifiers.map(m => m.nameEs).join(', ')}`
+              : ''
+            const noteLabel = item.notes ? ` — Nota: ${item.notes}` : ''
+            return {
+              id: item.id,
+              name: `${item.nameEs || item.name}${sizeLabel}${modsLabel}${noteLabel}`,
+              quantity: item.quantity,
+              price: unitPrice,
+              sizeId: item.selectedSize?.id,
+              description: item.descriptionEs || item.description || '',
+            }
+          }),
         }),
       })
 
@@ -159,6 +178,7 @@ export default function CheckoutPage() {
         orderNumber: data.order.orderNumber,
         subtotal: data.order.subtotal,
         deliveryFee: data.order.deliveryFee,
+        discount: data.order.discount ?? 0,
         total: data.order.total,
       })
       setStep('payment')
@@ -272,9 +292,12 @@ export default function CheckoutPage() {
     )
   }
 
-  // Prices include IVA (cartTotal === subtotal). The flat delivery fee is the
-  // only add-on — must mirror locations.delivery_fee, which the server charges.
+  // Prices include IVA (cartTotal === subtotal − discount). The flat delivery
+  // fee is the only add-on — mirrors locations.delivery_fee, which the server
+  // charges. The server recomputes the 2x1 discount authoritatively at order
+  // creation; the payment step then shows the server's total.
   const subtotal = cartSubtotal
+  const discount = cartDiscount
   const deliveryFee = orderType === 'delivery' ? DELIVERY_FEE : 0
   const tax = cartTax
   const total = cartTotal + deliveryFee
@@ -334,12 +357,17 @@ export default function CheckoutPage() {
               </h3>
               <div className="space-y-3">
                 {items.map(item => (
-                  <div key={item.id} className="flex items-center justify-between">
+                  <div key={`${item.id}|${item.selectedSize?.id ?? ''}|${(item.selectedModifiers ?? []).map(m => m.id).sort().join('+')}`} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-white/40 w-6 text-right">
                         {item.quantity}x
                       </span>
-                      <span className="text-white text-sm">{language === 'es' ? item.nameEs : item.name}</span>
+                      <span className="text-white text-sm">
+                        {language === 'es' ? item.nameEs : item.name}
+                        {item.selectedSize && (
+                          <span className="text-white/40"> ({language === 'es' ? item.selectedSize.nameEs : item.selectedSize.name})</span>
+                        )}
+                      </span>
                     </div>
                     <span className="text-white/60 text-sm">
                       ${((item.totalPrice || item.basePrice * item.quantity)).toFixed(2)}
@@ -423,6 +451,12 @@ export default function CheckoutPage() {
                   <span className="text-white/50">{language === 'es' ? 'Subtotal' : 'Subtotal'}</span>
                   <span className="text-white">${subtotal.toFixed(2)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-[#25D366] font-medium">{language === 'es' ? '🎁 Promo 2x1 Pizzas' : '🎁 2x1 Pizza Promo'}</span>
+                    <span className="text-[#25D366] font-medium">-${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 {deliveryFee > 0 && (
                   <div className="flex justify-between">
                     <span className="text-white/50">{language === 'es' ? 'Envío' : 'Delivery'}</span>
@@ -482,6 +516,11 @@ export default function CheckoutPage() {
                 <p className="text-[#E85D04] font-bold text-lg">
                   ${orderData.total.toFixed(2)}
                 </p>
+                {orderData.discount > 0 && (
+                  <p className="text-[#25D366] text-xs font-medium">
+                    {language === 'es' ? 'Promo 2x1' : '2x1 promo'}: -${orderData.discount.toFixed(2)}
+                  </p>
+                )}
               </div>
             </div>
 

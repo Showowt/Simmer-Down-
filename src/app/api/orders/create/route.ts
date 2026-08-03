@@ -24,6 +24,13 @@ import { sendWhatsApp } from "@/lib/twilio/client";
 import { sendTelegram } from "@/lib/telegram";
 import { formatOrderWhatsApp } from "@/lib/notifications/order-notify";
 import { MENU_ITEMS } from "@/lib/data";
+import { isSpecialLive } from "@/lib/specials";
+import {
+  PROMO_2X1_SPECIAL_ID,
+  PROMO_2X1_CODE,
+  PROMO_2X1_DESCRIPTION,
+  computeTwoForOneDiscount,
+} from "@/lib/promo";
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -51,6 +58,7 @@ interface OrderResponse {
     orderNumber: string;
     subtotal: number;
     deliveryFee: number;
+    discount: number;
     total: number;
     status: string;
     createdAt: string;
@@ -500,10 +508,42 @@ export async function POST(
     const calcDeliveryFee =
       input.orderType === "delivery" ? deliveryFee : 0;
 
-    // Validate promo code server-side if provided
+    // Auto-apply the 2x1 pizzas tradicionales promo when its special is live.
+    // Authoritative: the client shows the same discount for display, but THIS
+    // number is what gets stored and charged. Gated by the client-managed
+    // special row (dates/days/active in the admin Especiales tab).
     let discountAmount = 0;
     let discountCode: string | null = null;
     let discountDescription: string | null = null;
+
+    const { data: promoSpecial } = await supabase
+      .from("specials")
+      .select("active, start_date, end_date, days_of_week")
+      .eq("id", PROMO_2X1_SPECIAL_ID)
+      .maybeSingle();
+
+    if (promoSpecial && isSpecialLive(promoSpecial)) {
+      const promoDiscount = computeTwoForOneDiscount(
+        input.items.map((ci) => {
+          const staticItem = MENU_ITEMS.find((i) => i.id === ci.id);
+          const o = itemOverrides.get(ci.id);
+          return {
+            itemId: ci.id,
+            sizeId: ci.sizeId,
+            // Free units discount the BASE price (override-aware) — extras and
+            // size upgrades are never free.
+            unitBase: o?.price ?? staticItem?.basePrice ?? 0,
+            quantity: ci.quantity,
+          };
+        }),
+      );
+      if (promoDiscount > 0) {
+        discountAmount = promoDiscount;
+        discountCode = PROMO_2X1_CODE;
+        discountDescription = PROMO_2X1_DESCRIPTION;
+        logger.info("2x1 promo applied", { discount: promoDiscount });
+      }
+    }
 
     if (input.promoCode) {
       const { data: promo, error: promoError } = await supabase
@@ -521,18 +561,22 @@ export async function POST(
 
         if (!isExpired && !belowMinimum) {
           const discountValue = promo.discount_value ?? 0;
-          if (promo.discount_type === "percent") {
-            discountAmount = (subtotal * discountValue) / 100;
-          } else {
-            discountAmount = discountValue;
-          }
-          discountAmount = Math.min(discountAmount, subtotal);
-          discountCode = promo.code;
-          discountDescription = promo.description || `Descuento ${promo.discount_type === "percent" ? `${discountValue}%` : `$${discountValue.toFixed(2)}`}`;
+          const codeDiscount =
+            promo.discount_type === "percent"
+              ? (subtotal * discountValue) / 100
+              : discountValue;
+          const codeDescription = promo.description || `Descuento ${promo.discount_type === "percent" ? `${discountValue}%` : `$${discountValue.toFixed(2)}`}`;
+          // Additive with the auto 2x1 promo (never clobber it); cap below.
+          discountAmount += codeDiscount;
+          discountCode = discountCode ? `${discountCode}+${promo.code}` : promo.code;
+          discountDescription = discountDescription
+            ? `${discountDescription} · ${codeDescription}`
+            : codeDescription;
         }
       }
     }
 
+    discountAmount = Math.round(Math.min(discountAmount, subtotal) * 100) / 100;
     const total = Math.max(0, subtotal + calcDeliveryFee - discountAmount);
 
     // Map frontend order types to DB enum (DB only has delivery|pickup)
@@ -625,6 +669,7 @@ export async function POST(
         orderNumber: order.order_number,
         subtotal,
         deliveryFee: calcDeliveryFee,
+        discount: discountAmount,
         total,
         status: "pending",
         createdAt: order.created_at,

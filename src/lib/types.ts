@@ -117,6 +117,8 @@ export interface Order {
   tax_amount?: number | null;
   delivery_fee?: number | null;
   discount_amount?: number | null;
+  discount_code?: string | null;
+  discount_description?: string | null;
   tip_amount?: number | null;
   total_amount: number;
   customer_notes?: string | null;

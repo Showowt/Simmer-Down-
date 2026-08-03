@@ -5,6 +5,7 @@ import NewLocationBar from "@/components/layout/NewLocationBar";
 import LocationSheet from "@/components/layout/LocationSheet";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
+import PromoSync from "@/components/PromoSync";
 
 export const metadata: Metadata = {
   title: {
@@ -42,6 +43,7 @@ export default function PublicLayout({
       <LocationSheet />
       <WhatsAppButton />
       <NewBottomNav />
+      <PromoSync />
     </div>
   );
 }
