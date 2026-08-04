@@ -11,6 +11,8 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
+import { createApiClient } from "@/lib/supabase/api";
+import { isSpecialLive } from "@/lib/specials";
 import {
   MENU_ITEMS,
   MENU_CATEGORIES,
@@ -26,12 +28,42 @@ import {
 // prices, hours, specials, dietary info, promos.
 // ═══════════════════════════════════════════════════════════
 
+// Trimmed defensively — Vercel env values have shipped with trailing
+// newlines before (see BLK-006). Empty key = Anima disabled, launcher hidden.
+const ANTHROPIC_KEY = (process.env.ANTHROPIC_API_KEY ?? "").trim();
+const ANIMA_ENABLED = ANTHROPIC_KEY.length > 0;
+
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: ANTHROPIC_KEY,
 });
 
+/**
+ * Live promos from the client-managed specials table — never hardcoded, so
+ * Anima only ever mentions promotions that are actually running right now.
+ */
+async function buildPromoBlock(): Promise<string> {
+  const ivaLine = "- 💰 IVA: 13% incluido en todos los precios";
+  try {
+    const supabase = createApiClient();
+    const { data } = await supabase
+      .from("specials")
+      .select("title, description, active, start_date, end_date, days_of_week")
+      .eq("active", true);
+    const live = (data ?? []).filter((s) => isSpecialLive(s));
+    if (live.length === 0) {
+      return `\n## PROMOCIONES ACTUALES\n- No hay promociones activas hoy — revisa la sección de especiales del sitio\n${ivaLine}`;
+    }
+    const lines = live.map((s) =>
+      `- 🔥 ${s.title}${s.description ? `: ${s.description}` : ""} (activa HOY)`,
+    );
+    return `\n## PROMOCIONES ACTUALES (verificadas hoy)\n${lines.join("\n")}\n${ivaLine}`;
+  } catch {
+    return `\n## PROMOCIONES ACTUALES\n- Consulta la sección de especiales en el sitio\n${ivaLine}`;
+  }
+}
+
 // Build the complete business knowledge base for Claude
-function buildSystemPrompt(language: "es" | "en"): string {
+function buildSystemPrompt(language: "es" | "en", promoBlock: string): string {
   // ── LOCATIONS ──────────────────────────────────────────────
   const locationBlocks = LOCATIONS.map((loc) => {
     const open = isLocationOpen(loc);
@@ -107,13 +139,6 @@ function buildSystemPrompt(language: "es" | "en"): string {
 - Personal (8"): Precio base (regulares desde $5.75, especialidad desde $6.25)
 - Grande (16"): Regulares $14.99, Especialidad $17.99`;
 
-  // ── PROMOS ─────────────────────────────────────────────────
-  const promoBlock = `
-## PROMOCIONES ACTUALES
-- 🍺 2x1 Cervezas Artesanales: Viernes y Sábado 5-7pm
-- 🍕 Combo Familiar: 2 pizzas grandes + 1L refresco por $29.99 (Sáb-Dom)
-- 🥂 Happy Hour: 20% descuento en bebidas 3-5pm (Lun-Vie)
-- 💰 IVA: 13% incluido en todos los precios`;
 
   // ── ABOUT THE BUSINESS ─────────────────────────────────────
   const aboutBlock = `
@@ -125,9 +150,9 @@ function buildSystemPrompt(language: "es" | "en"): string {
 - Especialidad: Pizza artesanal
 - También: Pastas, cortes, mariscos, ensaladas
 - Programa de lealtad: SimmerLovers (puntos por cada compra)
-- Pedidos por WhatsApp: +503 7576-4655
+- Pedidos por WhatsApp: +503 7680-4434
 - Reservaciones disponibles en todas las ubicaciones
-- Delivery disponible en Santa Ana y San Benito
+- Delivery disponible en las 5 ubicaciones — tarifa plana $1.00, también pedidos con tarjeta en el sitio web
 - Mascotas bienvenidas en Simmer Garden (La Majada)
 - Música en vivo los fines de semana en ubicaciones selectas
 - Eventos privados: cumpleaños, corporativos, cenas privadas`;
@@ -169,7 +194,7 @@ ${promoBlock}
 7. Mariscos frescos son especialidad del Lago de Coatepeque y Surf City
 8. Simmer Garden (La Majada) abre solo Viernes-Domingo
 9. Surf City está cerrado Lunes y Martes
-10. Para pedidos, dirige al WhatsApp: +503 7576-4655
+10. Para pedidos, dirige al WhatsApp: +503 7680-4434
 11. Responde en ${language === "es" ? "español" : "inglés"}
 12. NUNCA inventes items, precios, o información que no está arriba`;
 
@@ -302,6 +327,24 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Not configured: answer with the graceful WhatsApp fallback instead of
+    // burning a doomed API call (the launcher hides itself via GET /api/anima).
+    if (!ANIMA_ENABLED) {
+      return NextResponse.json(
+        {
+          success: false,
+          response:
+            language === "en"
+              ? "I'm taking a quick break! You can order via WhatsApp at +503 7680-4434 or browse our menu. 🍕"
+              : "¡Estoy tomando un descanso! Puedes hacer tu pedido por WhatsApp al +503 7680-4434 o explorar nuestra carta. 🍕",
+          suggestedItems: [],
+          actions: ["menu", "recommendations"],
+          error: "not_configured",
+        },
+        { status: 503 },
+      );
+    }
+
     // Build context message for Claude
     let userContext = "";
     if (context.customerName) {
@@ -328,11 +371,15 @@ export async function POST(request: NextRequest) {
       : message;
 
     // Call Claude API
-    const systemPrompt = buildSystemPrompt(language);
+    const promoBlock = await buildPromoBlock();
+    const systemPrompt = buildSystemPrompt(language, promoBlock);
 
+    // claude-sonnet-5 defaults to adaptive thinking, which would consume the
+    // small chat budget — disabled keeps replies fast and within max_tokens.
     const claudeResponse = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 400,
+      model: "claude-sonnet-5",
+      max_tokens: 600,
+      thinking: { type: "disabled" },
       system: systemPrompt,
       messages: [{ role: "user", content: fullMessage }],
     });
@@ -379,7 +426,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         response:
-          "Disculpa, tuve un pequeño problema. ¿Puedes intentar de nuevo? También puedes hacer tu pedido por WhatsApp al +503 7576-4655.",
+          "Disculpa, tuve un pequeño problema. ¿Puedes intentar de nuevo? También puedes hacer tu pedido por WhatsApp al +503 7680-4434.",
         suggestedItems: [],
         actions: ["menu", "recommendations"],
         error: "Internal error",
@@ -392,10 +439,11 @@ export async function POST(request: NextRequest) {
 // Health check
 export async function GET() {
   return NextResponse.json({
-    status: "ANIMA v4.0 is awake",
+    status: ANIMA_ENABLED ? "ANIMA v4.0 is awake" : "ANIMA is sleeping (no API key)",
+    enabled: ANIMA_ENABLED,
     version: "4.0.0",
     personality: "The Soul of Simmer Down",
-    engine: "Claude Sonnet (claude-sonnet-4-20250514)",
+    engine: "Claude Sonnet (claude-sonnet-5)",
     features: [
       "claude-ai-powered",
       "full-menu-knowledge",

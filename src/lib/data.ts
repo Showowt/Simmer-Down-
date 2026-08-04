@@ -229,7 +229,7 @@ export const LOCATIONS: Location[] = [
     shortName: 'Surf City',
     address: 'Hotel Casa Santa Emilia, Playa Conchalio',
     city: 'Surf City, La Libertad',
-    phone: '+503 7576-4655',
+    phone: '+503 7536-0735',
     whatsapp: '+50375764655',
     email: 'surfcity@simmerdown.sv',
     coordinates: { lat: 13.4833, lng: -89.3333 },

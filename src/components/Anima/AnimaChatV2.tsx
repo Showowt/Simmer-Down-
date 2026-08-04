@@ -103,8 +103,20 @@ export default function AnimaChatV2() {
   const [isTyping, setIsTyping] = useState(false)
   const [showProactive, setShowProactive] = useState(false)
   const [isListening, setIsListening] = useState(false)
+  // null until the health check answers — the launcher never renders in a
+  // broken state when the API key isn't configured in this environment.
+  const [enabled, setEnabled] = useState<boolean | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/anima')
+      .then((r) => r.json())
+      .then((d) => { if (!cancelled) setEnabled(d?.enabled !== false) })
+      .catch(() => { if (!cancelled) setEnabled(false) })
+    return () => { cancelled = true }
+  }, [])
 
   // Speech recognition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -416,6 +428,9 @@ export default function AnimaChatV2() {
     return '¿Hambre? Te ayudo a encontrar tu pizza perfecta.'
   }
 
+  // Hidden until the health check confirms the AI backend is configured
+  if (!enabled) return null
+
   return (
     <>
       {/* Collapsed State - Floating Button */}
@@ -426,7 +441,7 @@ export default function AnimaChatV2() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={openChat}
-            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-50 lg:bottom-6 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#E85D04] hover:bg-[#C2410C] text-white flex items-center justify-center shadow-md shadow-[#E85D04]/20 transition-all group"
+            className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-[10000] lg:bottom-24 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#E85D04] hover:bg-[#C2410C] text-white flex items-center justify-center shadow-md shadow-[#E85D04]/20 transition-all group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             aria-label="Hablar con ANIMA"
@@ -444,7 +459,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-80 hidden lg:block bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-xl"
+            className="fixed bottom-24 right-6 z-[10000] w-80 hidden lg:block bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-xl"
           >
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-3">
@@ -492,7 +507,7 @@ export default function AnimaChatV2() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed inset-x-0 bottom-0 z-50 w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#111] border border-white/10 flex flex-col shadow-2xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-[10000] w-full h-[calc(100vh-4rem)] rounded-t-2xl lg:rounded-xl lg:inset-auto lg:bottom-6 lg:right-6 lg:w-[400px] lg:max-w-[calc(100vw-48px)] lg:h-[600px] lg:max-h-[calc(100vh-100px)] bg-[#111] border border-white/10 flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1A1A1A]">
