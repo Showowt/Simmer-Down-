@@ -70,6 +70,21 @@ export async function GET(request: NextRequest) {
         ? "processing_3ds"
         : paymentStatus;
 
+  // SimmerLovers points awarded by the on_order_confirmed_award_loyalty
+  // trigger — present only when the order's phone matched a member.
+  let loyalty: { pointsEarned: number; balance: number } | null = null;
+  if (externalStatus === "paid") {
+    const { data: earnTx } = await supabase
+      .from("loyalty_transactions")
+      .select("points, balance_after")
+      .eq("order_id", order.id)
+      .eq("transaction_type", "earned")
+      .maybeSingle();
+    if (earnTx && earnTx.points > 0) {
+      loyalty = { pointsEarned: earnTx.points, balance: earnTx.balance_after };
+    }
+  }
+
   // Strip sensitive fields from unauthenticated response.
   // authorizationCode, cardBrand, cardLast4 are only needed on the
   // authenticated order page — the 3DS modal only needs paymentStatus.
@@ -84,5 +99,6 @@ export async function GET(request: NextRequest) {
         externalStatus === "failed" ? (payment?.failure_reason ?? null) : null,
       total: Number(order.total_amount ?? 0),
     },
+    loyalty,
   });
 }

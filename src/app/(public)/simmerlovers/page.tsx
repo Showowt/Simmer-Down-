@@ -452,35 +452,32 @@ function MemberDashboard({
 
     setRedeeming(reward.id);
     try {
+      // Server-side redemption: validates points/tier/limits with the service
+      // role and writes the transaction atomically. The client never touches
+      // balance columns directly.
+      const res = await fetch("/api/loyalty/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reward_id: reward.id }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        throw new Error(result.message || result.error || "redeem_failed");
+      }
+
       const newBalance =
+        result.new_balance ??
         customer.loyalty_points_balance - reward.points_required;
+      const tx: LoyaltyTransaction = {
+        id: `local-${reward.id}-${newBalance}`,
+        transaction_type: "redeemed",
+        points: -(result.points_deducted ?? reward.points_required),
+        balance_after: newBalance,
+        description: reward.name_es || reward.name,
+        created_at: new Date().toISOString(),
+      };
 
-      // Deduct points on customers row
-      const { error: custErr } = await supabase
-        .from("customers")
-        .update({ loyalty_points_balance: newBalance })
-        .eq("id", customer.id);
-      if (custErr) throw custErr;
-
-      // Log redemption transaction
-      const { data: tx, error: txErr } = await supabase
-        .from("loyalty_transactions")
-        .insert({
-          customer_id: customer.id,
-          transaction_type: "redeem",
-          points: -reward.points_required,
-          balance_after: newBalance,
-          reward_id: reward.id,
-          description: reward.name_es || reward.name,
-        })
-        .select()
-        .single();
-      if (txErr) throw txErr;
-
-      onUpdate(
-        { ...customer, loyalty_points_balance: newBalance },
-        tx as LoyaltyTransaction,
-      );
+      onUpdate({ ...customer, loyalty_points_balance: newBalance }, tx);
       const rewardName = locale === 'es' ? (reward.name_es || reward.name) : reward.name;
       addToast(
         locale === 'es'

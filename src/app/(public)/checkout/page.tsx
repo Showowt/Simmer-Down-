@@ -53,6 +53,21 @@ export default function CheckoutPage() {
   const [orderData, setOrderData] = useState<OrderData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
   const [resultData, setResultData] = useState<PaymentResultData | null>(null)
+  const [loyaltyResult, setLoyaltyResult] = useState<{ pointsEarned: number; balance: number } | null>(null)
+
+  // SimmerLovers points are awarded by a DB trigger when the payment confirms;
+  // fetch them once for the success screen (null = phone not a member).
+  useEffect(() => {
+    if (step !== 'result' || resultData?.status !== 'paid' || !orderData?.id) return
+    let cancelled = false
+    fetch(`/api/payments/status?orderId=${orderData.id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && d?.success) setLoyaltyResult(d.loyalty ?? null)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [step, resultData, orderData])
 
   const {
     items,
@@ -555,6 +570,7 @@ export default function CheckoutPage() {
             authorizationCode={resultData.authorizationCode}
             message={resultData.message}
             onRetry={resultData.status === 'failed' ? handleRetry : undefined}
+            loyalty={loyaltyResult}
           />
         )}
       </div>

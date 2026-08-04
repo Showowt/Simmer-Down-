@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { CheckCircle, XCircle, RotateCcw, ShoppingBag } from 'lucide-react'
+import { CheckCircle, XCircle, RotateCcw, ShoppingBag, Flame, Receipt } from 'lucide-react'
 
 interface PaymentResultProps {
   status: 'paid' | 'failed'
@@ -11,6 +11,8 @@ interface PaymentResultProps {
   authorizationCode?: string | null
   message?: string
   onRetry?: () => void
+  /** SimmerLovers points awarded for this order (null = phone not registered). */
+  loyalty?: { pointsEarned: number; balance: number } | null
 }
 
 export default function PaymentResult({
@@ -20,6 +22,7 @@ export default function PaymentResult({
   authorizationCode,
   message,
   onRetry,
+  loyalty,
 }: PaymentResultProps) {
   if (status === 'paid') {
     return (
@@ -45,7 +48,7 @@ export default function PaymentResult({
         </p>
 
         {orderNumber && (
-          <div className="inline-block bg-[#1A1A1A] border border-white/10 rounded-xl px-6 py-4 mb-6">
+          <div className="inline-block bg-[#1A1A1A] border border-white/10 rounded-xl px-6 py-4 mb-4">
             <p className="text-xs text-white/40 mb-1">Numero de pedido</p>
             <p className="text-2xl font-bold text-[#E85D04] tracking-wider">
               #{orderNumber}
@@ -58,6 +61,26 @@ export default function PaymentResult({
           </div>
         )}
 
+        {loyalty ? (
+          <Link
+            href="/simmerlovers"
+            className="mx-auto mb-6 flex max-w-xs items-center justify-center gap-2 rounded-xl border border-[#E85D04]/40 bg-[#E85D04]/10 px-4 py-3 transition hover:bg-[#E85D04]/20"
+          >
+            <Flame className="h-5 w-5 shrink-0 text-[#E85D04]" />
+            <span className="text-sm text-white">
+              <span className="font-bold text-[#E85D04]">+{loyalty.pointsEarned} puntos</span>{' '}
+              SimmerLovers · Saldo: {loyalty.balance}
+            </span>
+          </Link>
+        ) : (
+          <Link
+            href="/simmerlovers"
+            className="mx-auto mb-6 block max-w-xs text-sm text-white/40 underline-offset-4 transition hover:text-white/70 hover:underline"
+          >
+            Unete a SimmerLovers y gana puntos con cada pedido 🔥
+          </Link>
+        )}
+
         <div className="space-y-3 max-w-xs mx-auto">
           {orderId && (
             <Link
@@ -67,6 +90,17 @@ export default function PaymentResult({
               <ShoppingBag className="w-5 h-5" />
               Ver mi pedido
             </Link>
+          )}
+          {orderId && (
+            <a
+              href={`/api/orders/${orderId}/receipt`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-[#1A1A1A] border border-white/10 hover:border-white/20 text-white/70 hover:text-white font-medium rounded-xl flex items-center justify-center gap-2 transition"
+            >
+              <Receipt className="w-5 h-5" />
+              Ver comprobante
+            </a>
           )}
           <Link
             href="/carta"
