@@ -310,7 +310,7 @@ export async function POST(request: NextRequest) {
       return validationErrorResponse(errors);
     }
 
-    const { message, context } = parseResult.data;
+    const { message, context, history } = parseResult.data;
     const language = detectLanguage(message, context.language);
 
     // Check for quick responses first (no API call needed)
@@ -381,7 +381,15 @@ export async function POST(request: NextRequest) {
       max_tokens: 600,
       thinking: { type: "disabled" },
       system: systemPrompt,
-      messages: [{ role: "user", content: fullMessage }],
+      messages: [
+        // Prior turns (must start with a user turn for the API)
+        ...(history ?? []).slice(
+          (history ?? []).findIndex((m) => m.role === "user") === -1
+            ? (history ?? []).length
+            : (history ?? []).findIndex((m) => m.role === "user"),
+        ),
+        { role: "user" as const, content: fullMessage },
+      ],
     });
 
     const responseText =

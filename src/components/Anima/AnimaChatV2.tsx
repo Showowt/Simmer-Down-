@@ -203,10 +203,16 @@ export default function AnimaChatV2() {
         language: locale,
       }
 
+      // Last few turns give ANIMA conversation memory ("¿y la segunda opción?")
+      const history = messages.slice(-6).map((m) => ({
+        role: m.role === 'anima' ? ('assistant' as const) : ('user' as const),
+        content: m.content.slice(0, 600),
+      }))
+
       const res = await fetch('/api/anima', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, context })
+        body: JSON.stringify({ message: userMessage, context, history })
       })
 
       if (!res.ok) {
@@ -234,7 +240,7 @@ export default function AnimaChatV2() {
         actions: ['menu', 'locations', 'help']
       }
     }
-  }, [customerName, loyaltyTier, visitCount, memory, cartItems, locale])
+  }, [customerName, loyaltyTier, visitCount, memory, cartItems, locale, messages])
 
   // Initialize greeting from API
   useEffect(() => {

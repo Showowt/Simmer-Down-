@@ -148,6 +148,17 @@ export const animaMessageSchema = z.object({
     .min(1, "El mensaje no puede estar vacío")
     .max(500, "El mensaje es demasiado largo (máximo 500 caracteres)"),
   context: animaContextSchema,
+  // Recent chat turns so follow-ups ("¿y la segunda opción?") make sense.
+  // Bounded hard: max 8 turns, 600 chars each.
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(600),
+      }),
+    )
+    .max(8)
+    .optional(),
 });
 
 export type AnimaMessageInput = z.infer<typeof animaMessageSchema>;
