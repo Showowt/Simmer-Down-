@@ -140,11 +140,11 @@ export async function GET(
   try {
     const supabase = createServiceClient();
 
-    // Fetch order (non-sensitive fields only)
+    // Fetch order (receipt-grade fields — the UUID is the capability token)
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .select(
-        "id, order_number, status, order_type, subtotal, delivery_fee, total_amount, created_at",
+        "id, order_number, status, order_type, subtotal, delivery_fee, discount_amount, total_amount, created_at, customer_name, delivery_address_line1, delivery_city",
       )
       .eq("id", orderId)
       .maybeSingle();
@@ -167,10 +167,10 @@ export async function GET(
       .eq("order_id", orderId)
       .order("created_at", { ascending: true });
 
-    // Fetch payment status (non-sensitive — no auth codes)
+    // Fetch payment status (no auth codes — card brand/last4 are receipt-grade)
     const { data: payment } = await supabase
       .from("payments")
-      .select("status")
+      .select("status, payment_method, card_brand, card_last_four")
       .eq("order_id", orderId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -199,10 +199,17 @@ export async function GET(
         order_type: order.order_type,
         subtotal: order.subtotal,
         delivery_fee: order.delivery_fee,
+        discount_amount: order.discount_amount,
         total_amount: order.total_amount,
         created_at: order.created_at,
+        customer_name: order.customer_name,
+        delivery_address_line1: order.delivery_address_line1,
+        delivery_city: order.delivery_city,
         items: items ?? [],
         payment_status: paymentStatus,
+        payment_method: payment?.payment_method ?? null,
+        card_brand: payment?.card_brand ?? null,
+        card_last4: payment?.card_last_four ?? null,
       },
     });
   } catch (error) {

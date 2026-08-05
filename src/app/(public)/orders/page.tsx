@@ -15,7 +15,6 @@ import {
   MessageCircle,
   PartyPopper,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
 import { orderStatusLabel } from "@/lib/order-status";
 import { useI18n } from "@/lib/i18n";
@@ -24,12 +23,43 @@ import dynamic from "next/dynamic";
 
 const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 
-const statusSteps = [
+// Steps mirror the REAL order_status lifecycle (the old ids "in_progress" /
+// "delivered" don't exist in the enum, so the tracker never advanced).
+const DELIVERY_STEPS = [
   { id: "pending", label: { es: "Recibido", en: "Received" }, icon: Clock },
-  { id: "in_progress", label: { es: "Preparando", en: "Preparing" }, icon: ChefHat },
-  { id: "ready", label: { es: "Listo", en: "Ready" }, icon: Package },
-  { id: "delivered", label: { es: "Entregado", en: "Delivered" }, icon: Truck },
+  { id: "confirmed", label: { es: "Confirmado", en: "Confirmed" }, icon: CheckCircle },
+  { id: "preparing", label: { es: "Preparando", en: "Preparing" }, icon: ChefHat },
+  { id: "out_for_delivery", label: { es: "En Camino", en: "On the Way" }, icon: Truck },
+  { id: "completed", label: { es: "Entregado", en: "Delivered" }, icon: Package },
 ];
+
+const PICKUP_STEPS = [
+  { id: "pending", label: { es: "Recibido", en: "Received" }, icon: Clock },
+  { id: "confirmed", label: { es: "Confirmado", en: "Confirmed" }, icon: CheckCircle },
+  { id: "preparing", label: { es: "Preparando", en: "Preparing" }, icon: ChefHat },
+  { id: "ready", label: { es: "Listo", en: "Ready" }, icon: Package },
+  { id: "completed", label: { es: "Completado", en: "Completed" }, icon: CheckCircle },
+];
+
+const ACTIVE_STATUSES = new Set([
+  "pending",
+  "confirmed",
+  "preparing",
+  "ready",
+  "out_for_delivery",
+]);
+
+function stepsFor(orderType: string | undefined) {
+  return orderType === "delivery" ? DELIVERY_STEPS : PICKUP_STEPS;
+}
+
+function stepIndexFor(steps: typeof DELIVERY_STEPS, status: string): number {
+  const direct = steps.findIndex((s) => s.id === status);
+  if (direct >= 0) return direct;
+  // "ready" on a delivery order sits between preparing and out_for_delivery
+  if (status === "ready") return steps.findIndex((s) => s.id === "preparing");
+  return 0;
+}
 
 function OrderTracker() {
   const searchParams = useSearchParams();
@@ -59,54 +89,45 @@ function OrderTracker() {
     }
   }, [orderId, orderNumber]);
 
-  const fetchOrder = async (id: string) => {
-    setLoading(true);
-    setError("");
+  // Fetches through the sanitized public API — the direct anon Supabase query
+  // this replaced was blocked by RLS, so tracking never worked for customers.
+  const fetchOrder = async (id: string, silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError("");
+    }
 
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), 5000)
-    );
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const supabase = createClient();
-      const result = await Promise.race([
-        supabase.from("orders").select("*").eq("id", id).single(),
-        timeout,
-      ]);
+      const res = await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+        signal: controller.signal,
+      });
+      const json = await res.json().catch(() => null);
 
-      if (result.error) {
-        const status = result.error.code;
-        if (status === "PGRST116" || status === "404" || status === "400") {
-          setError("Pedido no encontrado. Verifica tu ID e intenta de nuevo. / Order not found. Check your ID and try again.");
-        } else {
-          setError("Error al buscar tu pedido. Intenta de nuevo. / Error searching for your order. Try again.");
-        }
+      if (!res.ok || !json?.success) {
+        if (silent) return; // keep showing the last good state
+        setError(
+          res.status === 404 || res.status === 400
+            ? "Pedido no encontrado. Verifica tu ID e intenta de nuevo. / Order not found. Check your ID and try again."
+            : "Error al buscar tu pedido. Intenta de nuevo. / Error searching for your order. Try again.",
+        );
         setOrder(null);
         return;
       }
-      setOrder(result.data);
 
-      // Fetch order items from the order_items table
-      try {
-        const { data: items } = await supabase
-          .from("order_items")
-          .select("item_name, quantity, unit_price, line_total")
-          .eq("order_id", id);
-        if (items && items.length > 0) {
-          setOrderItems(items);
-        }
-      } catch {
-        // Non-critical — order still displays without line items
-      }
-    } catch (err) {
-      if (err instanceof Error && err.message === "timeout") {
-        setError("La solicitud tardó demasiado. Verifica tu conexión e intenta de nuevo. / Request timed out. Check your connection and try again.");
-      } else {
-        setError("Pedido no encontrado. Verifica tu ID e intenta de nuevo. / Order not found. Check your ID and try again.");
-      }
+      setOrder(json.data as unknown as Order);
+      setOrderItems(json.data.items ?? []);
+    } catch {
+      if (silent) return;
+      setError(
+        "La solicitud tardó demasiado. Verifica tu conexión e intenta de nuevo. / Request timed out. Check your connection and try again.",
+      );
       setOrder(null);
     } finally {
-      setLoading(false);
+      clearTimeout(timer);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -117,9 +138,23 @@ function OrderTracker() {
     }
   };
 
-  const currentStepIndex = order
-    ? statusSteps.findIndex((s) => s.id === order.status)
-    : -1;
+  const steps = stepsFor(order?.order_type as string | undefined);
+  const isCancelled =
+    order?.status === "cancelled" || order?.status === "refunded";
+  const currentStepIndex =
+    order && !isCancelled ? stepIndexFor(steps, order.status) : -1;
+
+  // Live tracking: silently re-fetch while the order is in an active state.
+  useEffect(() => {
+    if (!order || !ACTIVE_STATUSES.has(order.status)) return;
+    const iv = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchOrder(order.id, true);
+      }
+    }, 15000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.id, order?.status]);
 
   // Order items from the order_items join or legacy fields
   const [orderItems, setOrderItems] = useState<Array<{
@@ -366,18 +401,34 @@ function OrderTracker() {
               </div>
 
               {/* Progress Steps */}
+              {isCancelled ? (
+                <div className="border border-[#C73E1D]/30 bg-[#C73E1D]/10 p-4 text-center">
+                  <p className="font-medium text-[#FF6B6B]">
+                    {t({
+                      es: order?.status === "refunded" ? "Pedido reembolsado" : "Pedido cancelado",
+                      en: order?.status === "refunded" ? "Order refunded" : "Order cancelled",
+                    })}
+                  </p>
+                  <p className="text-sm text-white/50 mt-1">
+                    {t({
+                      es: "Si tienes dudas, escríbenos por WhatsApp al +503 7680-4434.",
+                      en: "Questions? Message us on WhatsApp at +503 7680-4434.",
+                    })}
+                  </p>
+                </div>
+              ) : (
               <div className="relative">
                 <div className="absolute top-5 left-0 right-0 h-1 bg-white/10">
                   <div
                     className="h-full bg-[#E85D04] transition-all duration-500"
                     style={{
-                      width: `${Math.max(0, (currentStepIndex / (statusSteps.length - 1)) * 100)}%`,
+                      width: `${Math.max(0, (currentStepIndex / (steps.length - 1)) * 100)}%`,
                     }}
                   />
                 </div>
 
                 <div className="relative flex justify-between">
-                  {statusSteps.map((step, index) => {
+                  {steps.map((step, index) => {
                     const Icon = step.icon;
                     const isActive = index <= currentStepIndex;
                     const isCurrent = index === currentStepIndex;
@@ -407,6 +458,7 @@ function OrderTracker() {
                   })}
                 </div>
               </div>
+              )}
             </div>
 
             {/* Order Details */}
