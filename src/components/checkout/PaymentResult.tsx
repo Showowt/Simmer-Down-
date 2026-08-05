@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { CheckCircle, XCircle, RotateCcw, ShoppingBag, Flame, Receipt } from 'lucide-react'
+import { CheckCircle, XCircle, RotateCcw, ShoppingBag, Flame, Receipt, MessageCircle } from 'lucide-react'
 
 interface PaymentResultProps {
   status: 'paid' | 'failed'
@@ -13,6 +13,7 @@ interface PaymentResultProps {
   onRetry?: () => void
   /** SimmerLovers points awarded for this order (null = phone not registered). */
   loyalty?: { pointsEarned: number; balance: number } | null
+  total?: number
 }
 
 export default function PaymentResult({
@@ -23,7 +24,17 @@ export default function PaymentResult({
   message,
   onRetry,
   loyalty,
+  total,
 }: PaymentResultProps) {
+  // El Salvador runs on WhatsApp, not email — one tap saves the receipt to any
+  // chat (including "message yourself"). No phone number = user picks the chat.
+  const waReceipt =
+    orderId &&
+    `https://wa.me/?text=${encodeURIComponent(
+      `🍕 *Simmer Down* — Pedido confirmado\nPedido: #${orderNumber ?? orderId.slice(0, 8)}${
+        typeof total === "number" ? `\nTotal: $${total.toFixed(2)}` : ""
+      }\nSeguimiento: https://simmerdownsv.com/orders?id=${orderId}`,
+    )}`
   if (status === 'paid') {
     return (
       <motion.div
@@ -90,6 +101,17 @@ export default function PaymentResult({
               <ShoppingBag className="w-5 h-5" />
               Ver mi pedido
             </Link>
+          )}
+          {waReceipt && (
+            <a
+              href={waReceipt}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 bg-[#25D366]/15 border border-[#25D366]/30 hover:bg-[#25D366]/25 text-[#25D366] font-semibold rounded-xl flex items-center justify-center gap-2 transition"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Guardar en WhatsApp
+            </a>
           )}
           {orderId && (
             <a

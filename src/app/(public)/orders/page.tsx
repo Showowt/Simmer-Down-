@@ -644,6 +644,15 @@ function OrderTracker() {
                 <MessageCircle className="w-5 h-5" />
                 {t({ es: "Chat por WhatsApp", en: "Chat on WhatsApp" })}
               </a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`🍕 *Simmer Down* — Pedido #${order.order_number || order.id.slice(0, 8)}\nSeguimiento: https://simmerdownsv.com/orders?id=${order.id}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full border border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10 py-4 font-medium text-center transition flex items-center justify-center gap-2 min-h-[56px]"
+              >
+                <MessageCircle className="w-5 h-5" />
+                {t({ es: "Guardar comprobante en WhatsApp", en: "Save receipt to WhatsApp" })}
+              </a>
             </div>
           </motion.div>
         )}

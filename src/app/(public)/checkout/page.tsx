@@ -571,6 +571,7 @@ export default function CheckoutPage() {
             message={resultData.message}
             onRetry={resultData.status === 'failed' ? handleRetry : undefined}
             loyalty={loyaltyResult}
+            total={orderData?.total}
           />
         )}
       </div>
