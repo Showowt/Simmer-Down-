@@ -14,6 +14,7 @@ import {
   Settings,
   Flame,
   Gift,
+  Ticket,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
@@ -41,6 +42,10 @@ interface DashboardData {
   byLocation: Array<{ id: string; name: string; orders: number; revenue: number }>;
   topItems: Array<{ name: string; qty: number; revenue: number }>;
   loyalty: { members: number; pointsToday: number; points7d: number };
+  tickets?: {
+    today: { revenue: number; count: number };
+    week: { revenue: number; count: number };
+  };
 }
 
 /** Real WoW delta vs the same weekday last week. Baseline 0 → no chip. */
@@ -331,7 +336,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Week + SimmerLovers + Promo tiles */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-[#252320] border border-[#3D3936] p-5">
           <p className="text-sm text-[#6B6560] mb-1">Últimos 7 días</p>
           <p className="text-xl font-bold text-[#FFF8F0] tabular-nums">
@@ -339,6 +344,20 @@ export default function AdminDashboard() {
           </p>
           <p className="text-xs text-[#6B6560] mt-1">
             {dash ? `${dash.week7.orders} pedidos · ticket $${dash.week7.avgTicket.toFixed(2)}` : ""}
+          </p>
+        </div>
+        <div className="bg-[#252320] border border-[#3D3936] p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Ticket className="w-4 h-4 text-[#FBBF24]" />
+            <p className="text-sm text-[#6B6560]">Boletos (7 días)</p>
+          </div>
+          <p className="text-xl font-bold text-[#FFF8F0] tabular-nums">
+            ${dash?.tickets ? dash.tickets.week.revenue.toFixed(2) : "0.00"}
+          </p>
+          <p className="text-xs text-[#6B6560] mt-1">
+            {dash?.tickets
+              ? `${dash.tickets.week.count} boletos · ${dash.tickets.today.count} hoy`
+              : "Sin ventas de boletos"}
           </p>
         </div>
         <div className="bg-[#252320] border border-[#3D3936] p-5">

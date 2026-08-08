@@ -41,6 +41,9 @@ interface DbEvent {
   max_capacity: number | null;
   current_rsvps: number;
   rsvp_enabled: boolean;
+  tickets_enabled: boolean;
+  ticket_price: number | null;
+  tickets_sold: number;
   is_featured: boolean;
   is_published: boolean;
   tags: string[] | null;
@@ -71,6 +74,9 @@ const emptyEvent: Partial<DbEvent> = {
   max_capacity: null,
   current_rsvps: 0,
   rsvp_enabled: false,
+  tickets_enabled: false,
+  ticket_price: null,
+  tickets_sold: 0,
   is_featured: false,
   is_published: true,
   tags: [],
@@ -203,6 +209,10 @@ export default function AdminEventsPage() {
           ? editing.max_capacity || null
           : null,
         rsvp_enabled: !!editing.rsvp_enabled,
+        tickets_enabled: !!editing.tickets_enabled,
+        ticket_price: editing.tickets_enabled
+          ? editing.ticket_price || null
+          : null,
         is_featured: !!editing.is_featured,
         is_published: editing.is_published !== false,
         tags: editing.tags || [],
@@ -864,6 +874,67 @@ export default function AdminEventsPage() {
                         <Users className="w-4 h-4" />
                         <span>
                           RSVPs actuales: {editing.current_rsvps || 0}
+                          {editing.has_capacity_limit &&
+                            editing.max_capacity &&
+                            ` / ${editing.max_capacity}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Ticket sales */}
+              <div className="border border-[#3D3936] p-4 space-y-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!editing.tickets_enabled}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        tickets_enabled: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 accent-[#FF6B35]"
+                  />
+                  <span className="text-sm font-medium text-[#B8B0A8]">
+                    🎫 Vender boletos en línea (pago con tarjeta)
+                  </span>
+                </label>
+
+                {editing.tickets_enabled && (
+                  <div className="space-y-4 pl-6">
+                    <div>
+                      <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                        Precio por boleto (USD)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={editing.ticket_price ?? ""}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            ticket_price: e.target.value
+                              ? parseFloat(e.target.value)
+                              : null,
+                          })
+                        }
+                        className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                        placeholder="3.00"
+                      />
+                    </div>
+                    <p className="text-xs text-[#6B6560]">
+                      El límite de capacidad de arriba controla cuántos boletos se
+                      pueden vender. Sin límite = venta ilimitada.
+                    </p>
+                    {!isNew && (
+                      <div className="flex items-center gap-2 text-sm text-[#4CAF50]">
+                        <Users className="w-4 h-4" />
+                        <span>
+                          Boletos vendidos: {editing.tickets_sold || 0}
                           {editing.has_capacity_limit &&
                             editing.max_capacity &&
                             ` / ${editing.max_capacity}`}

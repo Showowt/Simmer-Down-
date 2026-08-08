@@ -85,6 +85,18 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Ticket order → surface the issued QR token so the success screen can send
+  // the buyer straight to their boleto (issued by the confirm trigger).
+  let ticketToken: string | null = null;
+  if (externalStatus === "paid") {
+    const { data: tk } = await supabase
+      .from("event_tickets")
+      .select("qr_token")
+      .eq("order_id", order.id)
+      .maybeSingle();
+    ticketToken = tk?.qr_token ?? null;
+  }
+
   // Strip sensitive fields from unauthenticated response.
   // authorizationCode, cardBrand, cardLast4 are only needed on the
   // authenticated order page — the 3DS modal only needs paymentStatus.
@@ -100,5 +112,6 @@ export async function GET(request: NextRequest) {
       total: Number(order.total_amount ?? 0),
     },
     loyalty,
+    ticketToken,
   });
 }

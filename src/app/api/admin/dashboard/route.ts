@@ -32,6 +32,8 @@ interface OrderRow {
   location_id: string | null;
   order_type: string | null;
   created_at: string;
+  event_id: string | null;
+  ticket_quantity: number | null;
 }
 
 async function requireStaff(): Promise<{ id: string } | null> {
@@ -110,7 +112,7 @@ export async function GET() {
       supabase
         .from("orders")
         .select(
-          "id, status, total_amount, discount_amount, location_id, order_type, created_at",
+          "id, status, total_amount, discount_amount, location_id, order_type, created_at, event_id, ticket_quantity",
         )
         .gte("created_at", rangeStart.toISOString())
         .order("created_at", { ascending: false }),
@@ -140,12 +142,27 @@ export async function GET() {
     >();
     let pendingNow = 0;
 
+    const tickets = { today: { revenue: 0, count: 0 }, week: { revenue: 0, count: 0 } };
     for (const o of orders) {
       const { day, hour } = svParts(o.created_at);
       if (o.status === "pending") pendingNow += day === todayKey ? 1 : 0;
       if (!o.status || !REVENUE_STATUSES.has(o.status)) continue;
 
       const total = Number(o.total_amount ?? 0);
+
+      // Ticket orders are a separate revenue stream — count them apart, and
+      // never let them inflate food revenue / by-location / hourly.
+      if (o.event_id) {
+        const qty = Number(o.ticket_quantity ?? 1);
+        tickets.week.revenue += total;
+        tickets.week.count += qty;
+        if (day === todayKey) {
+          tickets.today.revenue += total;
+          tickets.today.count += qty;
+        }
+        continue;
+      }
+
       const discount = Number(o.discount_amount ?? 0);
       const agg = byDay.get(day) ?? {
         revenue: 0,
@@ -268,6 +285,7 @@ export async function GET() {
         pointsToday,
         points7d,
       },
+      tickets,
     });
   } catch (error) {
     logger.api.error("/api/admin/dashboard", error, {});

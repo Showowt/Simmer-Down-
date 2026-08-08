@@ -110,13 +110,34 @@ async function sendPaymentNotification(
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .select(
-        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city",
+        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city, event_id, ticket_quantity",
       )
       .eq("id", orderId)
       .single();
 
     if (orderErr || !order) {
       logger.warn("Payment notification: order not found", { orderId });
+      return;
+    }
+
+    // Ticket purchase → alert staff about a boleto sale, not a kitchen order.
+    // The trigger has already issued the ticket by the time we get here.
+    if (order.event_id) {
+      const [{ data: ev }, { data: tk }] = await Promise.all([
+        supabase.from("events").select("title, title_es, starts_at").eq("id", order.event_id).maybeSingle(),
+        supabase.from("event_tickets").select("qr_token").eq("order_id", orderId).maybeSingle(),
+      ]);
+      const eventName = ev?.title_es || ev?.title || "Evento";
+      const qty = order.ticket_quantity ?? 1;
+      const ticketMsg =
+        `🎫 *BOLETO VENDIDO — ${eventName}*\n\n` +
+        `Cantidad: ${qty}\n` +
+        `Total: $${Number(order.total_amount).toFixed(2)}\n` +
+        `Comprador: ${order.customer_name || "Cliente"} · ${order.customer_phone || "—"}\n` +
+        `Pedido: #${order.order_number}` +
+        (tk?.qr_token ? `\nBoleto: https://simmerdownsv.com/boletos/${tk.qr_token}` : "");
+      await sendTelegram(ticketMsg);
+      await sendWhatsApp(staffPhone, ticketMsg);
       return;
     }
 

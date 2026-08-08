@@ -33,6 +33,20 @@ interface DbEvent {
   max_capacity?: number | null;
   current_rsvps?: number | null;
   rsvp_deadline?: string | null;
+  tickets_enabled?: boolean;
+  ticket_price?: number | null;
+  tickets_sold?: number | null;
+}
+
+// Whether an event can be bought online right now, and how many are left.
+function ticketState(e: DbEvent): { onSale: boolean; soldOut: boolean; price: number } {
+  const price = e.ticket_price != null ? Number(e.ticket_price) : 0;
+  const onSale = !!e.tickets_enabled && price > 0 && !!e.slug;
+  const soldOut =
+    !!e.has_capacity_limit &&
+    e.max_capacity != null &&
+    (e.tickets_sold ?? 0) >= e.max_capacity;
+  return { onSale, soldOut, price };
 }
 
 // Fallback events (used only if the DB query returns zero rows).
@@ -252,13 +266,36 @@ export function EventsList() {
                     </div>
                   )}
                 </div>
-                <Link
-                  href="/contact"
-                  className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                >
-                  {locale === 'es' ? 'Reservar Tu Lugar' : 'Reserve Your Spot'}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
+                {(() => {
+                  const ts = ticketState(event);
+                  if (ts.onSale && ts.soldOut) {
+                    return (
+                      <span className="inline-flex items-center gap-2 bg-white/10 text-white/60 px-8 py-4 font-bold min-h-[56px]">
+                        {locale === 'es' ? 'Agotado' : 'Sold Out'}
+                      </span>
+                    );
+                  }
+                  if (ts.onSale) {
+                    return (
+                      <Link
+                        href={`/boletos/comprar/${event.slug}`}
+                        className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                      >
+                        {locale === 'es' ? `Comprar Boletos · $${ts.price.toFixed(2)}` : `Buy Tickets · $${ts.price.toFixed(2)}`}
+                        <ArrowRight className="w-5 h-5" />
+                      </Link>
+                    );
+                  }
+                  return (
+                    <Link
+                      href="/contact"
+                      className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                    >
+                      {locale === 'es' ? 'Reservar Tu Lugar' : 'Reserve Your Spot'}
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                  );
+                })()}
               </div>
             </motion.div>
           </div>
@@ -337,12 +374,34 @@ export function EventsList() {
                       )}
                     </div>
 
-                    <Link
-                      href="/contact"
-                      className="block text-center bg-white/10 hover:bg-[#E85D04] text-white py-3 font-semibold transition-colors min-h-[48px]"
-                    >
-                      {locale === 'es' ? 'Reservar' : 'Reserve'}
-                    </Link>
+                    {(() => {
+                      const ts = ticketState(event);
+                      if (ts.onSale && ts.soldOut) {
+                        return (
+                          <span className="block text-center bg-white/5 text-white/40 py-3 font-semibold min-h-[48px]">
+                            {locale === 'es' ? 'Agotado' : 'Sold Out'}
+                          </span>
+                        );
+                      }
+                      if (ts.onSale) {
+                        return (
+                          <Link
+                            href={`/boletos/comprar/${event.slug}`}
+                            className="block text-center bg-[#E85D04] hover:bg-[#C2410C] text-white py-3 font-semibold transition-colors min-h-[48px]"
+                          >
+                            {locale === 'es' ? `Comprar · $${ts.price.toFixed(2)}` : `Buy · $${ts.price.toFixed(2)}`}
+                          </Link>
+                        );
+                      }
+                      return (
+                        <Link
+                          href="/contact"
+                          className="block text-center bg-white/10 hover:bg-[#E85D04] text-white py-3 font-semibold transition-colors min-h-[48px]"
+                        >
+                          {locale === 'es' ? 'Reservar' : 'Reserve'}
+                        </Link>
+                      );
+                    })()}
                   </div>
                 </motion.div>
               ))}
