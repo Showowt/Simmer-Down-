@@ -14,6 +14,7 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: '/carta', labelKey: 'nav.menu' },
+  { href: '/events', labelKey: 'nav.events' },
   { href: '/restaurantes', labelKey: 'nav.locations' },
   { href: '/reservations', labelKey: 'nav.reserve' },
   { href: '/nosotros', labelKey: 'nav.about' },

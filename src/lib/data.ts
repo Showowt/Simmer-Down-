@@ -424,7 +424,7 @@ export const MENU_ITEMS: MenuItem[] = [
 
 export const TRANSLATIONS: Record<string, Record<string, string>> = {
   es: {
-    'nav.home': 'Inicio', 'nav.menu': 'Menú', 'nav.locations': 'Ubicaciones', 'nav.reserve': 'Reservar', 'nav.about': 'Nosotros', 'nav.cart': 'Carrito',
+    'nav.home': 'Inicio', 'nav.menu': 'Menú', 'nav.events': 'Eventos', 'nav.locations': 'Ubicaciones', 'nav.reserve': 'Reservar', 'nav.about': 'Nosotros', 'nav.cart': 'Carrito',
     'hero.badge': 'EST. 2014 • EL SALVADOR', 'hero.title': 'PIZZA ARTESANAL', 'hero.titleAccent': 'SOLO BUENAS VIBRAS', 'hero.subtitle': 'Pizza artesanal elaborada con amor. Experimenta la mezcla perfecta de tradición y sabor local en nuestras 5 ubicaciones.', 'hero.viewMenu': 'Ver Menú', 'hero.findLocations': 'Encontrar Ubicaciones',
     'menu.title': 'Nuestro Menú', 'menu.subtitle': 'Ingredientes frescos, sabores auténticos', 'menu.search': 'Buscar en el menú...', 'menu.all': 'Todo', 'menu.vegetarian': 'Vegetariano', 'menu.spicy': 'Picante', 'menu.glutenFree': 'Sin Gluten', 'menu.noResults': 'No se encontraron resultados', 'menu.addToCart': 'Agregar', 'menu.selectSize': 'Seleccionar Tamaño', 'menu.addExtras': 'Agregar Extras', 'menu.specialNotes': 'Notas especiales', 'menu.notesPlaceholder': 'Ej: Sin cebolla, extra salsa...',
     'cart.title': 'Tu Pedido', 'cart.empty': 'Tu carrito está vacío', 'cart.emptySubtitle': '¡Agrega algo delicioso para comenzar!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'IVA incluido', 'cart.delivery': 'Envío', 'cart.total': 'Total', 'cart.checkout': 'Ir al Checkout', 'cart.orderWhatsApp': 'Pedir por WhatsApp', 'cart.clear': 'Vaciar', 'cart.browseMenu': 'Ver Menú', 'cart.selectLocation': 'Elegir ubicación',
@@ -435,7 +435,7 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     'general.from': 'Desde', 'general.featured': 'Destacado', 'general.new': 'Nuevo',
   },
   en: {
-    'nav.home': 'Home', 'nav.menu': 'Menu', 'nav.locations': 'Locations', 'nav.reserve': 'Reserve', 'nav.about': 'About', 'nav.cart': 'Cart',
+    'nav.home': 'Home', 'nav.menu': 'Menu', 'nav.events': 'Events', 'nav.locations': 'Locations', 'nav.reserve': 'Reserve', 'nav.about': 'About', 'nav.cart': 'Cart',
     'hero.badge': 'EST. 2014 • EL SALVADOR', 'hero.title': 'HANDCRAFTED PIZZA', 'hero.titleAccent': 'GOOD VIBES ONLY', 'hero.subtitle': 'Artisan pizza crafted with love. Experience the perfect blend of tradition and local flavor across our 5 locations.', 'hero.viewMenu': 'View Menu', 'hero.findLocations': 'Find Locations',
     'menu.title': 'Our Menu', 'menu.subtitle': 'Fresh ingredients, authentic flavors', 'menu.search': 'Search menu...', 'menu.all': 'All', 'menu.vegetarian': 'Vegetarian', 'menu.spicy': 'Spicy', 'menu.glutenFree': 'Gluten-Free', 'menu.noResults': 'No results found', 'menu.addToCart': 'Add to Cart', 'menu.selectSize': 'Select Size', 'menu.addExtras': 'Add Extras', 'menu.specialNotes': 'Special notes', 'menu.notesPlaceholder': 'E.g.: No onions, extra sauce...',
     'cart.title': 'Your Order', 'cart.empty': 'Your cart is empty', 'cart.emptySubtitle': 'Add something delicious to get started!', 'cart.subtotal': 'Subtotal', 'cart.tax': 'VAT included', 'cart.delivery': 'Delivery', 'cart.total': 'Total', 'cart.checkout': 'Go to Checkout', 'cart.orderWhatsApp': 'Order via WhatsApp', 'cart.clear': 'Clear', 'cart.browseMenu': 'Browse Menu', 'cart.selectLocation': 'Choose location',

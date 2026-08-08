@@ -29,6 +29,10 @@ interface DbEvent {
   is_published?: boolean;
   tags?: string[] | null;
   rsvp_enabled?: boolean;
+  has_capacity_limit?: boolean;
+  max_capacity?: number | null;
+  current_rsvps?: number | null;
+  rsvp_deadline?: string | null;
 }
 
 // Fallback events (used only if the DB query returns zero rows).
@@ -164,8 +168,12 @@ export function EventsList() {
     fetchEvents();
   }, []);
 
-  const featured = events.filter((e) => e.is_featured);
-  const upcoming = events.filter((e) => !e.is_featured);
+  // Cap full-width hero posters to the 2 soonest featured events — the client
+  // marks most events "featured", and stacking 8 heroes reads as broken.
+  // Nothing is hidden: every remaining event falls into the grid below.
+  const featured = events.filter((e) => e.is_featured).slice(0, 2);
+  const heroIds = new Set(featured.map((e) => e.id));
+  const upcoming = events.filter((e) => !heroIds.has(e.id));
 
   if (loading) {
     return (

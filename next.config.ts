@@ -65,6 +65,7 @@ const nextConfig: NextConfig = {
       { source: '/locations', destination: '/restaurantes', permanent: true },
       { source: '/about', destination: '/nosotros', permanent: true },
       { source: '/reservar', destination: '/reservations', permanent: true },
+      { source: '/eventos', destination: '/events', permanent: true },
     ];
   },
   async headers() {
