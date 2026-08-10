@@ -67,13 +67,22 @@ function buildSystemPrompt(language: "es" | "en", promoBlock: string): string {
   // ── LOCATIONS ──────────────────────────────────────────────
   const locationBlocks = LOCATIONS.map((loc) => {
     const open = isLocationOpen(loc);
+    // Per-day hours straight from data.ts (single source of truth). "Cerrado" days
+    // are shown explicitly so Anima never has to guess which days a location opens.
+    const h = loc.hours;
     return `
 ### ${loc.name} (${loc.shortName})
 - Dirección: ${loc.address}, ${loc.city}
 - Teléfono: ${loc.phone}
 - WhatsApp: ${loc.whatsapp}
-- Horario entre semana: ${loc.hours.weekday}
-- Horario fin de semana: ${loc.hours.weekend}${loc.hours.sunday ? `\n- Domingo: ${loc.hours.sunday}` : ""}
+- Horario por día:
+  - Lunes: ${h.monday ?? h.weekday}
+  - Martes: ${h.tuesday ?? h.weekday}
+  - Miércoles: ${h.wednesday ?? h.weekday}
+  - Jueves: ${h.thursday ?? h.weekday}
+  - Viernes: ${h.friday ?? h.weekend}
+  - Sábado: ${h.saturday ?? h.weekend}
+  - Domingo: ${h.sunday ?? h.weekend}
 - Ahora mismo: ${open ? "ABIERTO" : "CERRADO"}
 - Características: ${loc.features.join(", ")}`;
   }).join("\n");
@@ -188,15 +197,13 @@ ${promoBlock}
 1. Siempre menciona PRECIOS REALES del menú — nunca inventes precios
 2. Si piden recomendación, sugiere 2-3 items con precio
 3. Si preguntan por ingredientes, usa las descripciones del menú
-4. Si preguntan por ubicación/horarios, da la información EXACTA
+4. Si preguntan por horarios o qué días abre/cierra una ubicación, usa EXCLUSIVAMENTE el "Horario por día" (Lunes…Domingo) listado arriba. "Cerrado" significa cerrado ese día. NUNCA asumas ni inventes días de apertura o cierre.
 5. Si piden algo que NO está en el menú, dilo honestamente
 6. Items exclusivos de ubicación: menciona dónde están disponibles
 7. Mariscos frescos son especialidad del Lago de Coatepeque y Surf City
-8. Simmer Garden (La Majada) abre solo Viernes-Domingo
-9. Surf City está cerrado Lunes y Martes
-10. Para pedidos, dirige al WhatsApp: +503 7680-4434
-11. Responde en ${language === "es" ? "español" : "inglés"}
-12. NUNCA inventes items, precios, o información que no está arriba`;
+8. Para pedidos, dirige al WhatsApp: +503 7680-4434
+9. Responde en ${language === "es" ? "español" : "inglés"}
+10. NUNCA inventes items, precios, o información que no está arriba`;
 
   return systemPrompt;
 }

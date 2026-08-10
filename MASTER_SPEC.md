@@ -456,6 +456,7 @@ This version deliberately does **NOT**:
 8. **Language single-source in useUIStore**, i18n context as adapter — prevents the split-brain toggle bug. *Rationale: one source of truth.*
 9. **Capacity gate at purchase-start + honor-on-oversell** — never take money for a sold-out show; the rare race still honors a paid ticket and flags staff. *Rationale: customer-first, venue absorbs edge.*
 10. **order_type='pickup' for ticket orders** — the enum lacks a ticket type; `event_id` is the real discriminator. *Rationale: don't fork the enum.*
+11. **Location HOURS single-source = `src/lib/data.ts` LOCATIONS.hours** — every displayed-hours surface (restaurantes, homepage, LocationSheet, LocationDetail, LocationsClient) plus ANIMA read from it; SEO `structured-data.ts`, Telegram `handleHorarios`, and reservations mirror it. ANIMA emits an explicit per-day block and must not assert open/closed days from hard-coded rules. DB `locations.operating_hours` gates order-acceptance only, never displayed text. *Rationale: one source of truth — closes the 2026-08-10 hours split-brain audit (F-01…F-05).*
 ```
 COMPLETENESS PASS
 ✓ every outcome noun → module (menu, order, payment, tracking, loyalty, ANIMA, events, tickets, admin, kitchen)

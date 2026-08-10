@@ -45,3 +45,34 @@ Public pages 200; canonical redirects (`/menu,/locations,/about,/reservar,/event
 - `menu_items.is_available` is actually column `available` — spec/DB naming note (SQL used the right column after correction).
 
 **Verification pass owner:** Claude (Executor mode). **Battery:** GREEN. **Money paths:** double-verified. **Next:** ADVERSARIAL AUDIT — completion of construction is not completion of the product.
+
+---
+
+## Adversarial Audit → Gap Closure · 2026-08-10 · Hours Data Integrity
+
+**Trigger.** Client screenshot: ANIMA told a customer *"Simmer Garden cierra los lunes."* Reconciliation audit pulled from every owned source (5 official menu PDFs, branded guide, call-prep, completion ledger, Google-export PDF, encrypted business docx) + live web/aggregators. **Finding: operating hours exist in NO owned document; the codebase hard-coded them in 5 places that had drifted apart (split-brain).** Contact/address/menu/social data verified accurate.
+
+### Findings by severity
+| ID | Sev | Finding | Status |
+|---|---|---|---|
+| F-01 | P0 | SEO JSON-LD (`structured-data.ts`, injected every page `<head>`) told Google: Surf City **open Mon+Tue** (really closed), San Benito Mon 11AM (really 4PM), Garden Fri–Sun (site = daily) | **CLOSED** |
+| F-02 | P0 | ANIMA hard-coded rule #8 "Garden solo Vie–Dom" overrode data.ts → "closed Monday" reply | **CLOSED** |
+| F-03 | P1 | ANIMA location block emitted only weekday/weekend/sunday — hid Surf City closed-days + San Benito Thursday | **CLOSED** |
+| F-04 | P2 | *(observed)* `structured-data.ts` keeps a 2nd copy of location data (addresses/coords/hours) — root cause of drift; full dedup deferred | **ACCEPTED — named** |
+| F-05 | P2 | *(accepted-risk)* Simmer Garden true schedule unconfirmed by any owned doc; set to data.ts value **open daily 11AM–8PM** (= what the live site already shows; 4 internal sources vs 2 drifted outliers). Owner must confirm — if Fri–Sun, it is now a ONE-LINE change in data.ts | **ACCEPTED — named** |
+
+### Closures with proof
+- **F-01** — `structured-data.ts`: San Benito/Garden/Surf City hour-blocks + FAQ string corrected to data.ts. PROOF: served JSON-LD on `GET /` → Surf City `['Wed','Thu','Fri','Sat','Sun'] 12:00–20:00` (Mon/Tue absent = closed), Garden all 7 days 11–20, San Benito Mon–Wed 16:00–22:00 / Thu 12–23 / Fri–Sun 12–01. Stale-claim greps → 0.
+- **F-02** — `anima/route.ts`: deleted rule #8 (+ redundant Surf City rule); added rule forcing use of per-day block. PROOF: `grep "abre solo Viernes-Domingo"` → 0.
+- **F-03** — `anima/route.ts`: location block now emits Lunes…Domingo from `data.ts`. PROOF: live `POST /api/anima` (Monday ctx) → *"Simmer Garden: sí abre los lunes, 11:00 AM a 8:00 PM. Surf City: los lunes está cerrado. Abre de miércoles a domingo."*
+
+### Constitution battery — GREEN
+`tsc --noEmit` exit 0 · `npm run build` ✓ Compiled successfully 10.6s · contamination 0 real (1 known FP "TODO el menú") · secret grep 0.
+
+### Files touched
+- `src/lib/seo/structured-data.ts` — 3 hour-blocks + 1 FAQ string
+- `src/app/api/anima/route.ts` — per-day location block + rules
+- `MASTER_SPEC.md` — decision #11 (hours single-source)
+
+### Next-round mandate
+100% of actionable findings were P0/P1 → per protocol, a **fresh-session adversarial audit** on data-consistency between `data.ts` and `structured-data.ts` (F-04 siblings: addresses, coords, phones, ratings/review counts) is recommended before considering the data layer clean.

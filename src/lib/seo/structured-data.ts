@@ -106,8 +106,10 @@ export const LOCATIONS: LocationData[] = [
     reviewCount: 1420,
     image: `${BASE_URL}/images/locations/gallery-san-benito/san-benito-1.jpg`,
     hours: [
-      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Sunday'], opens: '11:00', closes: '23:00' },
-      { days: ['Friday', 'Saturday'], opens: '11:00', closes: '00:00' },
+      // Source of truth: src/lib/data.ts LOCATIONS.san-benito. Zona Rosa nightlife — opens PM weekdays.
+      { days: ['Monday', 'Tuesday', 'Wednesday'], opens: '16:00', closes: '22:00' },
+      { days: ['Thursday'], opens: '12:00', closes: '23:00' },
+      { days: ['Friday', 'Saturday', 'Sunday'], opens: '12:00', closes: '01:00' },
     ],
   },
   {
@@ -124,7 +126,8 @@ export const LOCATIONS: LocationData[] = [
     reviewCount: 980,
     image: `${BASE_URL}/images/locations/gallery-garden/garden-4.jpg`,
     hours: [
-      { days: ['Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
+      // Source of truth: src/lib/data.ts LOCATIONS.simmer-garden (open daily). See CHANGELOG F-05 (owner to confirm).
+      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
     ],
   },
   {
@@ -141,8 +144,8 @@ export const LOCATIONS: LocationData[] = [
     reviewCount: 750,
     image: `${BASE_URL}/images/locations/surf-city-exterior.jpg`,
     hours: [
-      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Sunday'], opens: '11:00', closes: '21:00' },
-      { days: ['Friday', 'Saturday'], opens: '11:00', closes: '22:00' },
+      // Source of truth: src/lib/data.ts LOCATIONS.surf-city — CLOSED Monday & Tuesday.
+      { days: ['Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '12:00', closes: '20:00' },
     ],
   },
 ]
@@ -362,7 +365,7 @@ export const RESTAURANT_FAQS: FAQItem[] = [
   },
   {
     question: '¿Cuáles son los horarios de Simmer Down?',
-    answer: 'Santa Ana: Dom-Jue 11AM-9PM, Vie-Sáb 11AM-10PM. Lago de Coatepeque: Dom-Jue 11AM-8PM, Vie-Sáb 11AM-9PM. San Benito: Lun-Dom 11AM-11PM, Vie-Sáb hasta medianoche. Simmer Garden (Juayúa): Vie-Dom 11AM-8PM. Surf City: horario estándar.',
+    answer: 'Santa Ana: Dom-Jue 11AM-9PM, Vie-Sáb 11AM-10PM. Lago de Coatepeque: Dom-Jue 11AM-8PM, Vie-Sáb 11AM-9PM. San Benito: Lun-Mié 4PM-10PM, Jue 12PM-11PM, Vie-Dom 12PM-1AM. Simmer Garden (Juayúa): todos los días 11AM-8PM. Surf City: Mié-Dom 12PM-8PM (cerrado lunes y martes).',
   },
   {
     question: '¿Qué tipo de comida sirve Simmer Down?',
