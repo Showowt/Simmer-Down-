@@ -57,7 +57,12 @@ const fallbackEvents: DbEvent[] = [
     description:
       "Nuestra programación estelar mensual en Simmer Down San Benito: bandas en vivo, DJs, open mics, cine, rock, salsa, indie fest y más.",
     custom_venue: "Simmer Down San Benito",
-    starts_at: new Date().toISOString(),
+    // Stable, deterministic value — a live `new Date()` here rendered a
+    // different string on the server than on the client, causing a React #418
+    // hydration mismatch. `recurrence:"monthly"` makes the date show as
+    // "Cada mes" rather than this fixed timestamp.
+    starts_at: "2026-01-01T02:00:00.000Z",
+    recurrence: "monthly",
     image_url: "/images/events/simmermania-marzo.jpg",
     is_featured: true,
     is_published: true,
@@ -68,6 +73,12 @@ const fallbackEvents: DbEvent[] = [
 // ─────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────
+// El Salvador (UTC-6). ALWAYS format event dates/times in this zone — without
+// an explicit timeZone the server (UTC) and client (viewer-local) render
+// different strings → React #418 hydration mismatch, and times show wrong for
+// anyone outside SV.
+const EVENT_TZ = "America/El_Salvador";
+
 function formatEventDate(iso: string, recurrence?: string | null, locale?: string): string {
   const date = new Date(iso);
   if (isNaN(date.getTime())) return "";
@@ -80,12 +91,14 @@ function formatEventDate(iso: string, recurrence?: string | null, locale?: strin
   if (recurrence === "weekly") {
     return date.toLocaleDateString(dateLocale, {
       weekday: "long",
+      timeZone: EVENT_TZ,
     });
   }
   return date.toLocaleDateString(dateLocale, {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: EVENT_TZ,
   });
 }
 
@@ -98,6 +111,7 @@ function formatEventTime(iso: string, locale?: string): string {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
+      timeZone: EVENT_TZ,
     })
     .replace(" ", "");
 }

@@ -27,6 +27,10 @@ interface EventData {
 
 // ─── Date formatting ────────────────────────────────────────────────────────
 
+// El Salvador (UTC-6). Explicit timeZone keeps server (UTC) and client renders
+// identical (no hydration mismatch) and shows the real SV event time to everyone.
+const EVENT_TZ = 'America/El_Salvador'
+
 function formatEventDate(isoStr: string): string {
   const date = new Date(isoStr)
   if (isNaN(date.getTime())) return isoStr
@@ -34,6 +38,7 @@ function formatEventDate(isoStr: string): string {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
+    timeZone: EVENT_TZ,
   })
 }
 
@@ -44,6 +49,7 @@ function formatEventTime(isoStr: string): string {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
+    timeZone: EVENT_TZ,
   })
 }
 

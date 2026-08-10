@@ -215,8 +215,10 @@ export default function AnimaChatV2() {
         favoriteItems: memory.favoriteItems || [],
         dietaryPreferences: memory.dietaryPreferences || [],
         cartItems: cartItems.map(item => ({ name: item.nameEs || item.name, quantity: item.quantity, price: item.basePrice })),
-        currentTime: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-        dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+        // Restaurant time (El Salvador), not the visitor's — so ANIMA reasons
+        // about open/closed hours correctly for anyone, anywhere.
+        currentTime: new Date().toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit', timeZone: 'America/El_Salvador' }),
+        dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/El_Salvador' }),
         language: locale,
       }
 
