@@ -95,7 +95,7 @@ export default function NewBottomNav() {
               key={tab.id}
               href={tab.href}
               className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 -webkit-tap-highlight-color-transparent ${
-                active ? 'text-[#E85D04]' : 'text-white/40 hover:text-white/70'
+                active ? 'text-[#E85D04]' : 'text-white/60 hover:text-white'
               }`}
               aria-label={tab.label}
               aria-current={active ? 'page' : undefined}

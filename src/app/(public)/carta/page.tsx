@@ -130,7 +130,6 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
     <button
       onClick={() => onOpen(item)}
       className="group bg-[#1A1A1A] rounded-xl overflow-hidden border border-white/10 hover:border-[#E85D04]/50 transition-all duration-200 text-left w-full flex flex-col"
-      aria-label={`Ver detalles de ${item.nameEs}`}
     >
       {/* Image */}
       <div className="relative aspect-[4/3] w-full bg-[#111] shrink-0">
@@ -631,7 +630,7 @@ export default function CartaPage() {
               onClick={() => handleCategorySelect('all')}
               className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 ${
                 selectedCategory === 'all' && searchInput === ''
-                  ? 'bg-[#E85D04] text-white border-[#E85D04]'
+                  ? 'bg-[#C2410C] text-white border-[#C2410C]'
                   : 'bg-[#1A1A1A] border-white/10 text-white/60 hover:text-white hover:border-white/25'
               }`}
             >
@@ -643,7 +642,7 @@ export default function CartaPage() {
                 onClick={() => handleCategorySelect(cat.id)}
                 className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 flex items-center gap-1.5 ${
                   selectedCategory === cat.id && searchInput === ''
-                    ? 'bg-[#E85D04] text-white border-[#E85D04]'
+                    ? 'bg-[#C2410C] text-white border-[#C2410C]'
                     : 'bg-[#1A1A1A] border-white/10 text-white/60 hover:text-white hover:border-white/25'
                 }`}
               >
