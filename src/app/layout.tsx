@@ -141,9 +141,6 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
-  verification: {
-    google: 'pending-verification-code',
-  },
   other: {
     'geo.region': 'SV',
     'geo.placename': 'Santa Ana, El Salvador',

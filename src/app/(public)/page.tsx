@@ -16,6 +16,7 @@ import {
 } from '@/lib/data'
 import EventsSection from '@/components/events/EventsSection'
 import SpecialsSection from '@/components/specials/SpecialsSection'
+import GoogleReviews from '@/components/GoogleReviews'
 
 // ─── Animation variants ────────────────────────────────────────────────────
 
@@ -773,6 +774,9 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+
+      {/* Live Google reviews (self-hides until GOOGLE_PLACES_API_KEY is set) */}
+      <GoogleReviews />
 
       {/* MachineMind credit moved to Footer component */}
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import GoogleReviews from '@/components/GoogleReviews'
 import Image from 'next/image'
 import { motion, type Variants } from 'framer-motion'
 import {
@@ -658,6 +659,9 @@ export default function NosotrosPage() {
           </div>
         </motion.div>
       </section>
+
+      {/* ── Live Google reviews (self-hides until GOOGLE_PLACES_API_KEY is set) ── */}
+      <GoogleReviews />
 
       {/* ── MachineMind credit ── */}
       <div className="py-5 text-center bg-[#0A0A0A]">

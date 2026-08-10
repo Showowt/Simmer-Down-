@@ -98,3 +98,13 @@ Ran the 6-pass adversarial audit (0 P0, 0 P1, 2 P2, 9 P3), then fixed all. Batte
 | A-11 | P3 | soft-404s: notFound() pages return HTTP 200 under `force-dynamic` streaming | **ACCEPTED — named**: content correct (branded not-found renders), affects only unlinked garbage URLs, fix risk to working ticket/location pages > SEO value | documented |
 
 **Result: 10/11 fixed, 1 accepted-with-reasoning (A-11).** No P0/P1 existed; RLS boundary confirmed holding (all anon cross-tenant reads → []).
+
+---
+
+## Polish · 2026-08-10 · PWA hardening + Google reviews feed
+
+**PWA** — was half-scaffolded (manifest referenced but with defects). Fixed: generated a premium **maskable icon with proper safe zone** from the flame logo (Android was set to clip the 180px apple icon marked maskable), regenerated 192/512/apple-touch on the branded ember-glow bg; manifest colors corrected (`theme_color`/`background_color` #0A0A0A — was old brown #2D2A26, and theme mismatched the layout); added `id`/`scope`/`orientation`/`categories` and **3 app shortcuts** (Menú, Eventos, Mi Pedido). Removed a shipped **fake `google:'pending-verification-code'`** meta tag. PROOF: `/manifest.json` display=standalone, 4 icons, maskable=true, 3 shortcuts; all icons 200; verification tag gone. **No service worker by design** — a live ordering site must not aggressively cache dynamic menu/prices/events (stale-content hazard); installability doesn't require one.
+
+**Google reviews feed** — built full pipeline, credential-gated (same pattern as ANIMA): `/api/reviews` (Places Details, 6h cache, `{enabled:false}` when `GOOGLE_PLACES_API_KEY`+`GOOGLE_PLACE_ID` absent) + `GoogleReviews` component (rating, count, review cards, self-hides until live) mounted on home + nosotros. Branded initial-letter avatars (Google author photos are on googleusercontent.com which the hardened CSP img-src blocks — initials avoid broken images + CSP change). PROOF: live `/api/reviews`→`{enabled:false}`, home renders no reviews section (correctly hidden). **Activates the moment the client adds the API key + Place ID.**
+
+Battery: tsc 0 · build ✓ 5.0s. Env: added GOOGLE_PLACES_API_KEY, GOOGLE_PLACE_ID to .env.example.
