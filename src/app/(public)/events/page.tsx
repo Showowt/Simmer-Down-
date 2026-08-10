@@ -36,6 +36,19 @@ export default function EventsPage() {
     <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-0">
       {/* Hero */}
       <section className="py-16 md:py-24 relative overflow-hidden">
+        {/* Ambient SIMMER MANIA imago — faint brand crest behind the hero */}
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <Image
+            src="/logos/simmer-mania-imago.png"
+            alt=""
+            width={1080}
+            height={1080}
+            className="w-[540px] max-w-[92vw] opacity-[0.05] select-none"
+          />
+        </div>
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
             {/* SIMMER MANIA — flagship live-events program brand lockup */}
@@ -69,8 +82,21 @@ export default function EventsPage() {
       <PrivateEventsSection eventTypes={privateEventTypes} />
 
       {/* CTA */}
-      <section className="py-28 md:py-32 bg-[#1A1A1A] border-t border-white/10">
-        <div className="max-w-4xl mx-auto px-6 text-center">
+      <section className="py-28 md:py-32 bg-[#1A1A1A] border-t border-white/10 relative overflow-hidden">
+        {/* Ambient SIMMER MANIA imago — faint brand crest bookending the page */}
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center"
+          aria-hidden="true"
+        >
+          <Image
+            src="/logos/simmer-mania-imago.png"
+            alt=""
+            width={1080}
+            height={1080}
+            className="w-[520px] max-w-[90vw] opacity-[0.055] select-none"
+          />
+        </div>
+        <div className="max-w-4xl mx-auto px-6 text-center relative">
           <AnimatedCTA>
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
               {t(translations.events.dontMiss)}
