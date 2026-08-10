@@ -108,3 +108,26 @@ Ran the 6-pass adversarial audit (0 P0, 0 P1, 2 P2, 9 P3), then fixed all. Batte
 **Google reviews feed** — built full pipeline, credential-gated (same pattern as ANIMA): `/api/reviews` (Places Details, 6h cache, `{enabled:false}` when `GOOGLE_PLACES_API_KEY`+`GOOGLE_PLACE_ID` absent) + `GoogleReviews` component (rating, count, review cards, self-hides until live) mounted on home + nosotros. Branded initial-letter avatars (Google author photos are on googleusercontent.com which the hardened CSP img-src blocks — initials avoid broken images + CSP change). PROOF: live `/api/reviews`→`{enabled:false}`, home renders no reviews section (correctly hidden). **Activates the moment the client adds the API key + Place ID.**
 
 Battery: tsc 0 · build ✓ 5.0s. Env: added GOOGLE_PLACES_API_KEY, GOOGLE_PLACE_ID to .env.example.
+
+---
+
+## Ship-Perfect Quality Pass — 2026-08-10
+
+Goal: clear every Lighthouse defect across the three highest-traffic public pages (home, carta, events) so the site scores like the product it is.
+
+**Hydration** — killed React #418 on /events (server UTC vs client SV timezone mismatch). Pinned `formatEventDate`/`formatEventTime` to explicit `timeZone: "America/El_Salvador"` in both EventsClient + EventsSection, and stabilized the fallback event's ISO timestamp. Console-error-clean.
+
+**Accessibility → 100 on home, carta, events** (from 91/96/96):
+- Shared components: language toggle `aria-label` now matches visible ES/EN content (was label-content-name-mismatch); Footer `h4`→`h2` (heading-order); location bar order-type toggle `#E85D04`→`#C2410C` (3.6→5.1:1).
+- Muted text lifted to WCAG AA: `white/40`→`white/60`, `white/20`→`white/55` across carta + events; footer muted text `white/40`→`white/55`.
+- carta menu cards: removed redundant `aria-label` (visible dish name IS the accessible name — cleared 40 label-content-name-mismatch instances).
+- carta active category chips + events Destacado badges + Comprar/Reservar CTAs: solid `#E85D04`→`#C2410C` (5.1:1). Brand's own deeper ember (already the gradient terminus + hover state) — high-contrast without diluting identity. Bright `#E85D04` retained where it already passes (large/bold hero CTAs).
+- bottom nav inactive labels: `white/40`→`white/60` (global).
+
+**SEO → 100 on all** — added `carta/layout.tsx` with `rel=canonical` + OG (carta was the one page missing a canonical; 92→100).
+
+**Best-practices → 100 on all.**
+
+**Performance** — home 91 · carta 92 · events ~79. Events LCP (~5.2s lab) is the image-forward concert-poster hero under Lighthouse's 4× mobile throttle. Image pipeline already optimal: featured hero `priority` + correct `sizes`, next.config serves AVIF/WebP at responsive widths (`w=640 q=75`), CLS 0, TBT 120ms. Not chasing further — the remaining levers (degrade hero imagery / SSR-refactor a working client component with cart+ticket state) trade real quality/stability for a lab-throttled number. Real-world 4G/5G/wifi LCP is materially lower.
+
+FINAL (mobile Lighthouse, live simmerdownsv.com): home 91/100/100/100 · carta 92/100/100/100 · events 79/100/100/100. Battery: tsc 0 · build ✓. Deploys: a04efbc, 072f05b.
