@@ -109,7 +109,9 @@ async function buildEventsBlock(): Promise<string> {
       const venue = e.custom_venue || (e.location_id ? venueById.get(e.location_id) : null) || "Simmer Down";
       const when = e.recurrence === "monthly"
         ? "cada mes"
-        : new Date(e.starts_at).toLocaleDateString("es-SV", { day: "numeric", month: "long" });
+        // Pin El Salvador time — the server runs in UTC, so without this a show at
+        // e.g. Aug 14 8PM SV (Aug 15 02:00 UTC) would print as "15 de agosto".
+        : new Date(e.starts_at).toLocaleDateString("es-SV", { day: "numeric", month: "long", timeZone: "America/El_Salvador" });
       const cover = eventCoverFromTags(e.tags);
       return `- 🎤 ${name} — ${venue}${when ? `, ${when}` : ""}${cover ? ` (${cover})` : ""}`;
     });
