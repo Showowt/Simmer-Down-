@@ -31,7 +31,7 @@ export default function Footer() {
             >
               <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" width={120} height={40} className="h-10 w-auto" />
             </Link>
-            <p className="mt-5 text-sm text-white/40 leading-relaxed max-w-xs">
+            <p className="mt-5 text-sm text-white/55 leading-relaxed max-w-xs">
               {t(translations.footer.description)}
             </p>
             <div className="flex gap-5 mt-8">
@@ -39,7 +39,7 @@ export default function Footer() {
                 href="https://instagram.com/simmerdownsv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/40 hover:text-[#FBBF24] transition-colors duration-300"
+                className="text-white/55 hover:text-[#FBBF24] transition-colors duration-300"
                 aria-label={t(translations.footer.followInstagram)}
               >
                 <Instagram className="w-4 h-4" />
@@ -48,7 +48,7 @@ export default function Footer() {
                 href="https://facebook.com/simmerdownsv"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/40 hover:text-[#FBBF24] transition-colors duration-300"
+                className="text-white/55 hover:text-[#FBBF24] transition-colors duration-300"
                 aria-label={t(translations.footer.followFacebook)}
               >
                 <Facebook className="w-4 h-4" />
@@ -58,9 +58,9 @@ export default function Footer() {
 
           {/* Column 2: Navigation */}
           <div>
-            <h4 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
+            <h2 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
               {locale === 'es' ? 'Navegaci\u00f3n' : 'Navigation'}
-            </h4>
+            </h2>
             <ul className="space-y-3">
               {navigationLinks.map((link) => (
                 <li key={link.href + link.label}>
@@ -77,9 +77,9 @@ export default function Footer() {
 
           {/* Column 3: Contact */}
           <div>
-            <h4 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
+            <h2 className="text-xs font-medium text-white uppercase tracking-[0.15em] mb-6">
               {t(translations.footer.contactSection)}
-            </h4>
+            </h2>
             <ul className="space-y-4 text-sm">
               <li>
                 <a
@@ -97,7 +97,7 @@ export default function Footer() {
                   info@simmerdownsv.com
                 </a>
               </li>
-              <li className="text-white/40 pt-1">
+              <li className="text-white/55 pt-1">
                 5 {t(translations.footer.locationsInSV)}
               </li>
             </ul>
@@ -109,13 +109,13 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-6 pb-20 lg:pb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-white/20">
+          <p className="text-xs text-white/55">
             &copy; 2026 Simmer Down &middot;{' '}
             <a
               href="https://machinemind.co"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white/40 transition-colors"
+              className="hover:text-white/55 transition-colors"
             >
               Crafted by MachineMind
             </a>
@@ -123,14 +123,14 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link
               href="/privacy"
-              className="text-xs text-white/20 hover:text-white/40 transition-colors duration-300"
+              className="text-xs text-white/55 hover:text-white/55 transition-colors duration-300"
             >
               {t(translations.footer.privacy)}
             </Link>
             <span className="text-white/10 text-xs select-none">&middot;</span>
             <Link
               href="/terms"
-              className="text-xs text-white/20 hover:text-white/40 transition-colors duration-300"
+              className="text-xs text-white/55 hover:text-white/55 transition-colors duration-300"
             >
               {t(translations.footer.terms)}
             </Link>

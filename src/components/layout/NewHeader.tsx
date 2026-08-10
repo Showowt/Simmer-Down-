@@ -99,7 +99,7 @@ export default function NewHeader() {
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1.5 px-3 py-2 rounded-md text-white/60 hover:text-white hover:bg-white/[0.06] transition-all duration-200 text-[12px] font-semibold uppercase tracking-wider min-h-[44px]"
-              aria-label={`Cambiar idioma a ${language === 'es' ? 'English' : 'Español'}`}
+              aria-label={language === 'es' ? 'ES, cambiar idioma a inglés' : 'EN, switch language to Spanish'}
             >
               <Globe className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               {mounted ? (language === 'es' ? 'ES' : 'EN') : 'ES'}

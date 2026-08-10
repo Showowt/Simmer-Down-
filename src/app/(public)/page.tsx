@@ -269,7 +269,7 @@ export default function HomePage() {
                         {locale === 'es' ? item.nameEs : item.name}
                       </span>
                       {(item.descriptionEs || item.description) && (
-                        <span className="text-white/20 text-xs mt-2 px-5 text-center line-clamp-2 leading-relaxed">
+                        <span className="text-white/50 text-xs mt-2 px-5 text-center line-clamp-2 leading-relaxed">
                           {locale === 'es' ? item.descriptionEs : item.description}
                         </span>
                       )}
