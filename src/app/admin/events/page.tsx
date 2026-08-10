@@ -24,6 +24,11 @@ import ImageUpload from "@/components/admin/ImageUpload";
 // ─────────────────────────────────────────────
 // DB types matching the events schema
 // ─────────────────────────────────────────────
+interface TicketTier {
+  name: string;
+  price: number;
+}
+
 interface DbEvent {
   id: string;
   title: string;
@@ -44,6 +49,8 @@ interface DbEvent {
   tickets_enabled: boolean;
   ticket_price: number | null;
   tickets_sold: number;
+  external_tickets_url: string | null;
+  ticket_tiers: TicketTier[] | null;
   is_featured: boolean;
   is_published: boolean;
   tags: string[] | null;
@@ -77,6 +84,8 @@ const emptyEvent: Partial<DbEvent> = {
   tickets_enabled: false,
   ticket_price: null,
   tickets_sold: 0,
+  external_tickets_url: null,
+  ticket_tiers: [],
   is_featured: false,
   is_published: true,
   tags: [],
@@ -213,6 +222,11 @@ export default function AdminEventsPage() {
         ticket_price: editing.tickets_enabled
           ? editing.ticket_price || null
           : null,
+        external_tickets_url: editing.external_tickets_url?.trim() || null,
+        // Drop blank rows and coerce prices to numbers before persisting.
+        ticket_tiers: (editing.ticket_tiers || [])
+          .filter((t) => t && t.name?.trim())
+          .map((t) => ({ name: t.name.trim(), price: Number(t.price) || 0 })),
         is_featured: !!editing.is_featured,
         is_published: editing.is_published !== false,
         tags: editing.tags || [],
@@ -943,6 +957,99 @@ export default function AdminEventsPage() {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* External tickets / multiple price tiers (Option B) */}
+              <div className="border border-[#3D3936] p-4 space-y-4">
+                <p className="text-sm font-medium text-[#B8B0A8]">
+                  🎟️ Boletos externos / varios precios
+                </p>
+                <p className="text-xs text-[#6B6560]">
+                  Para shows vendidos en otra plataforma (Smart Ticket, etc.) o con
+                  varias categorías de precio. Se muestran en la página del evento con
+                  un botón que lleva al enlace externo — no procesa pagos en el sitio.
+                </p>
+                <div>
+                  <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                    URL para comprar boletos (externa)
+                  </label>
+                  <input
+                    type="url"
+                    value={editing.external_tickets_url ?? ""}
+                    onChange={(e) =>
+                      setEditing({ ...editing, external_tickets_url: e.target.value })
+                    }
+                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                    placeholder="https://smartticket.com.sv/..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-[#B8B0A8]">
+                    Precios / categorías de boletos
+                  </label>
+                  {(editing.ticket_tiers || []).map((tier, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={tier.name}
+                        onChange={(e) => {
+                          const next = [...(editing.ticket_tiers || [])];
+                          next[i] = { ...next[i], name: e.target.value };
+                          setEditing({ ...editing, ticket_tiers: next });
+                        }}
+                        className="flex-1 px-3 py-2 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                        placeholder="Ej: L-Gante RKT"
+                      />
+                      <span className="text-[#6B6560]">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={tier.price ?? ""}
+                        onChange={(e) => {
+                          const next = [...(editing.ticket_tiers || [])];
+                          next[i] = {
+                            ...next[i],
+                            price: e.target.value ? parseFloat(e.target.value) : 0,
+                          };
+                          setEditing({ ...editing, ticket_tiers: next });
+                        }}
+                        className="w-24 px-3 py-2 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                        placeholder="55.00"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditing({
+                            ...editing,
+                            ticket_tiers: (editing.ticket_tiers || []).filter(
+                              (_, idx) => idx !== i,
+                            ),
+                          })
+                        }
+                        className="p-2 text-[#C73E1D] hover:bg-[#C73E1D]/10"
+                        aria-label="Eliminar precio"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditing({
+                        ...editing,
+                        ticket_tiers: [
+                          ...(editing.ticket_tiers || []),
+                          { name: "", price: 0 },
+                        ],
+                      })
+                    }
+                    className="text-sm text-[#FF6B35] hover:text-[#FF8555] flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Agregar precio
+                  </button>
+                </div>
               </div>
 
               {/* Tags */}

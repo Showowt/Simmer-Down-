@@ -36,6 +36,8 @@ interface DbEvent {
   tickets_enabled?: boolean;
   ticket_price?: number | null;
   tickets_sold?: number | null;
+  external_tickets_url?: string | null;
+  ticket_tiers?: { name: string; price: number }[] | null;
 }
 
 // Whether an event can be bought online right now, and how many are left.
@@ -300,6 +302,49 @@ export function EventsList() {
                       </Link>
                     );
                   }
+                  const tiers = (event.ticket_tiers ?? []).filter((t) => t?.name);
+                  const ext = event.external_tickets_url?.trim();
+                  if (ext || tiers.length > 0) {
+                    return (
+                      <div className="space-y-5">
+                        {tiers.length > 0 && (
+                          <div className="max-w-md">
+                            <p className="text-white/40 text-xs uppercase tracking-[0.15em] mb-2">
+                              {locale === 'es' ? 'Precios de entradas' : 'Ticket prices'}
+                            </p>
+                            <ul className="space-y-1.5">
+                              {tiers.map((t, ti) => (
+                                <li key={ti} className="flex items-baseline gap-3">
+                                  <span className="text-white/80">{t.name}</span>
+                                  <span className="flex-1 border-b border-dotted border-white/15" />
+                                  <span className="text-[#FBBF24] font-semibold">${Number(t.price).toFixed(2)}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {ext ? (
+                          <a
+                            href={ext}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                          >
+                            {locale === 'es' ? 'Comprar Boletos' : 'Buy Tickets'}
+                            <ArrowRight className="w-5 h-5" />
+                          </a>
+                        ) : (
+                          <Link
+                            href="/contact"
+                            className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                          >
+                            {locale === 'es' ? 'Más Información' : 'More Info'}
+                            <ArrowRight className="w-5 h-5" />
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  }
                   return (
                     <Link
                       href="/contact"
@@ -405,6 +450,24 @@ export function EventsList() {
                           >
                             {locale === 'es' ? `Comprar · $${ts.price.toFixed(2)}` : `Buy · $${ts.price.toFixed(2)}`}
                           </Link>
+                        );
+                      }
+                      const gTiers = (event.ticket_tiers ?? []).filter((t) => t?.name);
+                      const gExt = event.external_tickets_url?.trim();
+                      if (gExt) {
+                        const from = gTiers.length
+                          ? Math.min(...gTiers.map((t) => Number(t.price) || 0))
+                          : null;
+                        return (
+                          <a
+                            href={gExt}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-center bg-[#C2410C] hover:bg-[#9A3412] text-white py-3 font-semibold transition-colors min-h-[48px]"
+                          >
+                            {locale === 'es' ? 'Comprar Boletos' : 'Buy Tickets'}
+                            {from != null ? ` · ${locale === 'es' ? 'desde' : 'from'} $${from.toFixed(2)}` : ''}
+                          </a>
                         );
                       }
                       return (
