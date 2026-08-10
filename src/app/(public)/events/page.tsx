@@ -37,7 +37,7 @@ export default function EventsPage() {
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
-            <p className="text-white/40 text-sm uppercase tracking-[0.2em] mb-4">
+            <p className="text-white/60 text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.events.uniqueExperiences)}
             </p>
             <h1 className="font-display text-3xl md:text-4xl tracking-tight text-white mb-6">

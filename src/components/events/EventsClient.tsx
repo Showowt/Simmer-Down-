@@ -249,7 +249,7 @@ export function EventsList() {
               </div>
 
               <div className="p-8 md:p-12">
-                <span className="inline-flex items-center gap-2 bg-[#E85D04] text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 mb-6">
+                <span className="inline-flex items-center gap-2 bg-[#C2410C] text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 mb-6">
                   <Star className="w-3.5 h-3.5" />
                   {locale === 'es' ? 'Evento Destacado' : 'Featured Event'}
                 </span>
@@ -293,7 +293,7 @@ export function EventsList() {
                     return (
                       <Link
                         href={`/boletos/comprar/${event.slug}`}
-                        className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                        className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
                       >
                         {locale === 'es' ? `Comprar Boletos · $${ts.price.toFixed(2)}` : `Buy Tickets · $${ts.price.toFixed(2)}`}
                         <ArrowRight className="w-5 h-5" />
@@ -303,7 +303,7 @@ export function EventsList() {
                   return (
                     <Link
                       href="/contact"
-                      className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+                      className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
                     >
                       {locale === 'es' ? 'Reservar Tu Lugar' : 'Reserve Your Spot'}
                       <ArrowRight className="w-5 h-5" />
@@ -354,7 +354,7 @@ export function EventsList() {
                     </div>
                     {deriveCoverPrice(event.tags, locale) && (
                       <div className="absolute top-3 right-3">
-                        <span className="bg-[#E85D04] text-white text-sm font-bold px-3 py-1">
+                        <span className="bg-[#C2410C] text-white text-sm font-bold px-3 py-1">
                           {deriveCoverPrice(event.tags, locale)}
                         </span>
                       </div>
@@ -370,18 +370,18 @@ export function EventsList() {
                     </p>
 
                     <div className="space-y-2 mb-6 text-sm">
-                      <div className="flex items-center gap-2 text-white/40">
+                      <div className="flex items-center gap-2 text-white/60">
                         <Calendar className="w-4 h-4 text-[#FBBF24]" />
                         <span className="capitalize">
                           {formatEventDate(event.starts_at, event.recurrence, locale)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-white/40">
+                      <div className="flex items-center gap-2 text-white/60">
                         <Clock className="w-4 h-4 text-[#FBBF24]" />
                         {formatEventTime(event.starts_at, locale)}
                       </div>
                       {event.custom_venue && (
-                        <div className="flex items-center gap-2 text-white/40">
+                        <div className="flex items-center gap-2 text-white/60">
                           <MapPin className="w-4 h-4 text-[#FBBF24]" />
                           {event.custom_venue}
                         </div>
@@ -392,7 +392,7 @@ export function EventsList() {
                       const ts = ticketState(event);
                       if (ts.onSale && ts.soldOut) {
                         return (
-                          <span className="block text-center bg-white/5 text-white/40 py-3 font-semibold min-h-[48px]">
+                          <span className="block text-center bg-white/5 text-white/60 py-3 font-semibold min-h-[48px]">
                             {locale === 'es' ? 'Agotado' : 'Sold Out'}
                           </span>
                         );
@@ -401,7 +401,7 @@ export function EventsList() {
                         return (
                           <Link
                             href={`/boletos/comprar/${event.slug}`}
-                            className="block text-center bg-[#E85D04] hover:bg-[#C2410C] text-white py-3 font-semibold transition-colors min-h-[48px]"
+                            className="block text-center bg-[#C2410C] hover:bg-[#9A3412] text-white py-3 font-semibold transition-colors min-h-[48px]"
                           >
                             {locale === 'es' ? `Comprar · $${ts.price.toFixed(2)}` : `Buy · $${ts.price.toFixed(2)}`}
                           </Link>
@@ -449,7 +449,7 @@ export function PrivateEventsSection({
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <p className="font-display italic text-2xl text-white/40 mb-4">
+            <p className="font-display italic text-2xl text-white/60 mb-4">
               {locale === 'es' ? 'Eventos Privados' : 'Private Events'}
             </p>
             <h2 className="font-display text-4xl md:text-5xl text-white mb-6">
@@ -471,7 +471,7 @@ export function PrivateEventsSection({
                     <h3 className="text-white font-semibold mb-1">
                       {type.title}
                     </h3>
-                    <p className="text-white/40 text-sm">{type.description}</p>
+                    <p className="text-white/60 text-sm">{type.description}</p>
                   </div>
                 </div>
               ))}
@@ -479,7 +479,7 @@ export function PrivateEventsSection({
 
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+              className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
             >
               {locale === 'es' ? 'Solicitar Información' : 'Request Information'}
               <ArrowRight className="w-5 h-5" />

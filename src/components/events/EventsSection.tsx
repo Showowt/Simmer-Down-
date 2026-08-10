@@ -189,13 +189,13 @@ export default function EventsSection() {
                 </h3>
 
                 {(event.description_es || event.description) && (
-                  <p className="text-white/45 text-xs leading-relaxed line-clamp-2">
+                  <p className="text-white/60 text-xs leading-relaxed line-clamp-2">
                     {event.description_es || event.description}
                   </p>
                 )}
 
                 {/* Meta row */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-white/40">
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-white/60">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3 text-[#FBBF24] flex-shrink-0" />
                     <span className="capitalize">{formatEventDate(event.starts_at)}</span>
@@ -219,7 +219,7 @@ export default function EventsSection() {
                     {event.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full"
+                        className="text-[10px] text-white/60 bg-white/5 px-2 py-0.5 rounded-full"
                       >
                         {tag}
                       </span>

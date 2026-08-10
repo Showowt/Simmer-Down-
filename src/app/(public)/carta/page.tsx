@@ -84,9 +84,7 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
     return (
       <button
         onClick={() => onOpen(item)}
-        className="group bg-[#1A1A1A] rounded-xl border border-white/10 hover:border-[#E85D04]/50 transition-all duration-200 text-left w-full p-4 flex items-center gap-4"
-        aria-label={`Ver detalles de ${item.nameEs}`}
-      >
+        className="group bg-[#1A1A1A] rounded-xl border border-white/10 hover:border-[#E85D04]/50 transition-all duration-200 text-left w-full p-4 flex items-center gap-4"      >
         {/* Icon circle */}
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E85D04]/15 to-[#E85D04]/5 border border-[#E85D04]/20 flex items-center justify-center shrink-0 group-hover:from-[#E85D04]/25 group-hover:to-[#E85D04]/10 transition-all">
           <span className="text-lg" aria-hidden="true">
@@ -110,7 +108,7 @@ function MenuItemCard({ item, onOpen }: MenuItemCardProps) {
             {item.isSpicy && <span className="text-[10px] shrink-0">🌶️</span>}
           </div>
           {item.descriptionEs && (
-            <p className="text-[11px] text-white/40 mt-0.5 line-clamp-1">{item.descriptionEs}</p>
+            <p className="text-[11px] text-white/60 mt-0.5 line-clamp-1">{item.descriptionEs}</p>
           )}
         </div>
 
@@ -435,7 +433,7 @@ interface ModifierGroupProps {
 function ModifierGroup({ label, mods, selected, onToggle }: ModifierGroupProps) {
   return (
     <div className="mb-4">
-      <p className="text-white/40 text-xs uppercase tracking-widest mb-2">{label}</p>
+      <p className="text-white/60 text-xs uppercase tracking-widest mb-2">{label}</p>
       <div className="space-y-2">
         {mods.map((mod) => {
           const isChecked = selected.some((m) => m.id === mod.id)
@@ -594,7 +592,7 @@ export default function CartaPage() {
         <h1 className="font-display text-4xl md:text-5xl text-white tracking-widest">
           NUESTRO MENÚ
         </h1>
-        <p className="text-white/40 text-sm mt-1 font-body">
+        <p className="text-white/60 text-sm mt-1 font-body">
           {t('menu.subtitle')}
         </p>
       </div>
@@ -618,7 +616,7 @@ export default function CartaPage() {
               {searchInput && (
                 <button
                   onClick={() => setSearchInput('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   aria-label="Limpiar búsqueda"
                 >
                   <X className="w-4 h-4" />
@@ -732,7 +730,7 @@ export default function CartaPage() {
                   >
                     {category.nameEs.toUpperCase()}
                   </h2>
-                  <span className="text-white/20 text-sm">{items.length}</span>
+                  <span className="text-white/55 text-sm">{items.length}</span>
                   <div className="flex-1 h-px bg-white/6 ml-2" />
                 </div>
 
