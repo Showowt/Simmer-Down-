@@ -2,6 +2,7 @@
 
 import { PartyPopper, Users, Utensils, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useI18n, translations } from "@/lib/i18n";
 import {
   EventsList,
@@ -37,7 +38,18 @@ export default function EventsPage() {
       <section className="py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
-            <p className="text-white/60 text-sm uppercase tracking-[0.2em] mb-4">
+            {/* SIMMER MANIA — flagship live-events program brand lockup */}
+            <div className="relative mx-auto mb-6 w-[min(78vw,440px)] aspect-[1080/327] drop-shadow-[0_4px_24px_rgba(232,93,4,0.25)]">
+              <Image
+                src="/logos/simmer-mania-wordmark.png"
+                alt="Simmer Manía"
+                fill
+                priority
+                sizes="(max-width: 768px) 78vw, 440px"
+                className="object-contain"
+              />
+            </div>
+            <p className="text-white/50 text-sm uppercase tracking-[0.2em] mb-4">
               {t(translations.events.uniqueExperiences)}
             </p>
             <h1 className="font-display text-3xl md:text-4xl tracking-tight text-white mb-6">
