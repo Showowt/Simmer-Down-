@@ -62,8 +62,66 @@ async function buildPromoBlock(): Promise<string> {
   }
 }
 
+/** Cover/pre-sale price encoded in event tags (cover-15 → "$15", preventa-10 → "Preventa $10"). */
+function eventCoverFromTags(tags?: string[] | null): string | null {
+  if (!tags) return null;
+  for (const tag of tags) {
+    if (tag.startsWith("cover-")) return `Cover $${tag.slice(6)}`;
+    if (tag.startsWith("preventa-")) return `Preventa $${tag.slice(9)}`;
+  }
+  return null;
+}
+
+/**
+ * Live published events from the client-managed events table — so Anima can
+ * actually answer "¿qué eventos/música en vivo hay?" instead of guessing.
+ * Simmer Down San Benito is the flagship live-concert venue (programa Simmer Manía).
+ */
+async function buildEventsBlock(): Promise<string> {
+  try {
+    const supabase = createApiClient();
+    // Venue name map (events reference locations by UUID; custom_venue is a free-text fallback).
+    const [{ data: events }, { data: locs }] = await Promise.all([
+      supabase
+        .from("events")
+        .select("title, title_es, description_es, description, custom_venue, location_id, starts_at, recurrence, is_featured, tags")
+        .eq("is_published", true)
+        .order("starts_at", { ascending: true }),
+      supabase.from("locations").select("id, name"),
+    ]);
+
+    const venueById = new Map<string, string>((locs ?? []).map((l) => [l.id as string, l.name as string]));
+    const now = Date.now();
+    const upcoming = (events ?? [])
+      .filter((e) => {
+        if (e.recurrence) return true;
+        const t = new Date(e.starts_at).getTime();
+        return !Number.isNaN(t) && t >= now - 12 * 3600 * 1000; // include today
+      })
+      .slice(0, 12);
+
+    if (upcoming.length === 0) {
+      return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía).\n- No hay eventos próximos publicados ahora mismo — revisa la sección de Eventos del sitio (simmerdownsv.com/events).`;
+    }
+
+    const lines = upcoming.map((e) => {
+      const name = e.title_es || e.title;
+      const venue = e.custom_venue || (e.location_id ? venueById.get(e.location_id) : null) || "Simmer Down";
+      const when = e.recurrence === "monthly"
+        ? "cada mes"
+        : new Date(e.starts_at).toLocaleDateString("es-SV", { day: "numeric", month: "long" });
+      const cover = eventCoverFromTags(e.tags);
+      return `- 🎤 ${name} — ${venue}${when ? `, ${when}` : ""}${cover ? ` (${cover})` : ""}`;
+    });
+
+    return `\n## EVENTOS Y MÚSICA EN VIVO (verificados hoy)\nSimmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Estos son los próximos eventos publicados:\n${lines.join("\n")}\nPara la lista completa y boletos: simmerdownsv.com/events`;
+  } catch {
+    return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Consulta simmerdownsv.com/events para la programación.`;
+  }
+}
+
 // Build the complete business knowledge base for Claude
-function buildSystemPrompt(language: "es" | "en", promoBlock: string): string {
+function buildSystemPrompt(language: "es" | "en", promoBlock: string, eventsBlock: string): string {
   // ── LOCATIONS ──────────────────────────────────────────────
   const locationBlocks = LOCATIONS.map((loc) => {
     const open = isLocationOpen(loc);
@@ -163,8 +221,8 @@ function buildSystemPrompt(language: "es" | "en", promoBlock: string): string {
 - Reservaciones disponibles en todas las ubicaciones
 - Delivery disponible en las 5 ubicaciones — tarifa plana $1.00, también pedidos con tarjeta en el sitio web
 - Mascotas bienvenidas en Simmer Garden (La Majada)
-- Música en vivo los fines de semana en ubicaciones selectas
-- Eventos privados: cumpleaños, corporativos, cenas privadas`;
+- Conciertos y música en vivo: Simmer Down San Benito es la SEDE PRINCIPAL de conciertos y eventos en vivo (programa "Simmer Manía"). También hay música en vivo los fines de semana en Simmer Garden. Los eventos concretos aparecen en la sección "EVENTOS Y MÚSICA EN VIVO" más abajo
+- Eventos privados: cumpleaños, corporativos, cenas privadas (disponibles en varias ubicaciones)`;
 
   const systemPrompt = `Eres ANIMA — El Alma de Simmer Down. Eres la asistente virtual inteligente del restaurante Simmer Down en El Salvador.
 
@@ -192,6 +250,7 @@ ${menuBlocks}
 ${modifierBlock}
 
 ${promoBlock}
+${eventsBlock}
 
 ## REGLAS DE RESPUESTA
 1. Siempre menciona PRECIOS REALES del menú — nunca inventes precios
@@ -201,9 +260,10 @@ ${promoBlock}
 5. Si piden algo que NO está en el menú, dilo honestamente
 6. Items exclusivos de ubicación: menciona dónde están disponibles
 7. Mariscos frescos son especialidad del Lago de Coatepeque y Surf City
-8. Para pedidos, dirige al WhatsApp: +503 7680-4434
-9. Responde en ${language === "es" ? "español" : "inglés"}
-10. NUNCA inventes items, precios, o información que no está arriba`;
+8. Si preguntan por eventos, conciertos o música en vivo, usa la sección "EVENTOS Y MÚSICA EN VIVO". Simmer Down San Benito es la SEDE PRINCIPAL de conciertos (programa Simmer Manía) — NUNCA digas que San Benito no tiene música en vivo. Menciona eventos concretos con su fecha si están listados
+9. Para pedidos, dirige al WhatsApp: +503 7680-4434
+10. Responde en ${language === "es" ? "español" : "inglés"}
+11. NUNCA inventes items, precios, o información que no está arriba`;
 
   return systemPrompt;
 }
@@ -378,8 +438,11 @@ export async function POST(request: NextRequest) {
       : message;
 
     // Call Claude API
-    const promoBlock = await buildPromoBlock();
-    const systemPrompt = buildSystemPrompt(language, promoBlock);
+    const [promoBlock, eventsBlock] = await Promise.all([
+      buildPromoBlock(),
+      buildEventsBlock(),
+    ]);
+    const systemPrompt = buildSystemPrompt(language, promoBlock, eventsBlock);
 
     // claude-sonnet-5 defaults to adaptive thinking, which would consume the
     // small chat budget — disabled keeps replies fast and within max_tokens.

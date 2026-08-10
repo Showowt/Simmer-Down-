@@ -30,6 +30,7 @@ interface Profile {
   phone: string | null
   address: string | null
   loyalty_points: number
+  lifetime_points: number
   loyalty_tier: string
   total_orders: number
   total_spent: number
@@ -45,16 +46,27 @@ interface Order {
   created_at: string
 }
 
+// SimmerLovers tiers — must match the customers.loyalty_tier enum + loyalty_tier_config.
 const tierColors = {
-  starter: 'bg-white/40',
-  flame: 'bg-[#E85D04]',
-  inferno: 'bg-[#C2410C]',
+  bronze: 'bg-gradient-to-br from-[#7c4a1e] to-[#4a2c12]',
+  silver: 'bg-gradient-to-br from-[#8a8f98] to-[#565b63]',
+  gold: 'bg-gradient-to-br from-[#C9A84C] to-[#8a6f22]',
+  platinum: 'bg-gradient-to-br from-[#6d7b8d] to-[#2f3742]',
 }
 
 const tierIcons = {
-  starter: Star,
-  flame: Flame,
-  inferno: Crown,
+  bronze: Flame,
+  silver: Star,
+  gold: Crown,
+  platinum: Crown,
+}
+
+// Tier progression is by LIFETIME points earned (never decreases on redemption).
+const TIER_META: Record<string, { min: number; next: number | null }> = {
+  bronze: { min: 0, next: 500 },
+  silver: { min: 500, next: 1500 },
+  gold: { min: 1500, next: 5000 },
+  platinum: { min: 5000, next: null },
 }
 
 export default function AccountPage() {
@@ -85,19 +97,35 @@ export default function AccountPage() {
 
       setUser({ id: user.id, email: user.email || '' })
 
-      // Get profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
+      // Loyalty + profile data lives in `customers` (keyed by auth_user_id),
+      // NOT `profiles` (which is admin-roles only). This is the SimmerLovers record.
+      const { data: customer } = await supabase
+        .from('customers')
+        .select(
+          'auth_user_id, first_name, last_name, phone, loyalty_points_balance, lifetime_points_earned, loyalty_tier, total_orders, total_spent, created_at',
+        )
+        .eq('auth_user_id', user.id)
         .single()
 
-      if (profileData) {
-        setProfile(profileData)
+      if (customer) {
+        const fullName = [customer.first_name, customer.last_name].filter(Boolean).join(' ').trim()
+        setProfile({
+          id: customer.auth_user_id,
+          full_name: fullName,
+          phone: customer.phone ?? null,
+          address: null,
+          loyalty_points: customer.loyalty_points_balance ?? 0,
+          lifetime_points: customer.lifetime_points_earned ?? 0,
+          loyalty_tier: customer.loyalty_tier ?? 'bronze',
+          total_orders: customer.total_orders ?? 0,
+          total_spent: Number(customer.total_spent ?? 0),
+          birthday: null,
+          created_at: customer.created_at,
+        })
         setEditForm({
-          full_name: profileData.full_name || '',
-          phone: profileData.phone || '',
-          address: profileData.address || '',
+          full_name: fullName,
+          phone: customer.phone || '',
+          address: '',
         })
       }
 
@@ -123,17 +151,20 @@ export default function AccountPage() {
     setSaving(true)
 
     const supabase = createClient()
+    const trimmed = editForm.full_name.trim()
+    const firstName = trimmed.split(' ')[0] || null
+    const lastName = trimmed.split(' ').slice(1).join(' ') || null
+    const updates: Record<string, unknown> = { first_name: firstName, last_name: lastName }
+    // phone is NOT NULL UNIQUE — only write it when the user actually provided one.
+    if (editForm.phone.trim()) updates.phone = editForm.phone.trim()
+
     const { error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: editForm.full_name,
-        phone: editForm.phone,
-        address: editForm.address,
-      })
-      .eq('id', user.id)
+      .from('customers')
+      .update(updates)
+      .eq('auth_user_id', user.id)
 
     if (!error) {
-      setProfile(prev => prev ? { ...prev, ...editForm } : null)
+      setProfile(prev => (prev ? { ...prev, full_name: trimmed, phone: editForm.phone || prev.phone } : null))
       setEditing(false)
     }
 
@@ -149,9 +180,16 @@ export default function AccountPage() {
 
   const getNextTierPoints = () => {
     if (!profile) return 0
-    if (profile.loyalty_tier === 'starter') return 500 - profile.loyalty_points
-    if (profile.loyalty_tier === 'flame') return 1500 - profile.loyalty_points
-    return 0
+    const meta = TIER_META[profile.loyalty_tier]
+    if (!meta || meta.next === null) return 0
+    return Math.max(0, meta.next - profile.lifetime_points)
+  }
+
+  const getTierProgress = () => {
+    if (!profile) return 0
+    const meta = TIER_META[profile.loyalty_tier]
+    if (!meta || meta.next === null) return 100
+    return Math.min(100, Math.max(0, ((profile.lifetime_points - meta.min) / (meta.next - meta.min)) * 100))
   }
 
   if (notAuthenticated) {
@@ -391,14 +429,14 @@ export default function AccountPage() {
               <div className="p-6">
                 <div className="flex items-center gap-2 text-white/80 text-sm mb-4">
                   <TierIcon className="w-4 h-4" />
-                  <span className="uppercase tracking-wider">{profile?.loyalty_tier || 'Starter'}</span>
+                  <span className="uppercase tracking-wider">{profile?.loyalty_tier || 'bronze'}</span>
                 </div>
                 <p className="text-white/60 text-sm">Puntos disponibles</p>
                 <p className="text-4xl font-bold text-white mb-4">
                   {profile?.loyalty_points || 0}
                 </p>
 
-                {profile?.loyalty_tier !== 'inferno' && (
+                {profile?.loyalty_tier !== 'platinum' && (
                   <div>
                     <div className="flex justify-between text-sm text-white/80 mb-1">
                       <span>Próximo nivel</span>
@@ -408,7 +446,7 @@ export default function AccountPage() {
                       <div
                         className="h-full bg-white transition-all"
                         style={{
-                          width: `${Math.min(100, ((profile?.loyalty_points || 0) / (profile?.loyalty_tier === 'starter' ? 500 : 1500)) * 100)}%`,
+                          width: `${getTierProgress()}%`,
                         }}
                       />
                     </div>
