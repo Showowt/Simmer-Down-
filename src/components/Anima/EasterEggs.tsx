@@ -201,7 +201,7 @@ export function EnhancedConsoleEasterEgg() {
         },
         historia: () => {
           console.log('%c📖 LA HISTORIA DE SIMMER DOWN', 'color: #f97316; font-size: 16px; font-weight: bold;')
-          console.log('%c2012: Todo comenzó en Santa Ana...', 'color: #a1a1aa;')
+          console.log('%c2014: Todo comenzó en Santa Ana...', 'color: #a1a1aa;')
           console.log('%c2015: Abrimos Coatepeque con vista al lago', 'color: #a1a1aa;')
           console.log('%c2018: San Benito se convirtió en el punto urbano', 'color: #a1a1aa;')
           console.log('%c2021: Simmer Garden en la Ruta de las Flores', 'color: #a1a1aa;')

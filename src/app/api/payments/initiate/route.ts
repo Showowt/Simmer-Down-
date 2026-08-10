@@ -111,7 +111,25 @@ export async function POST(
     );
   }
 
-  // Idempotency: reject if a processing payment already exists for this order.
+  // Reconcile abandoned attempts: a 'processing' payment older than the 3DS
+  // window (15 min) means the customer closed the tab before 3DS completed —
+  // capture is callback-gated so no charge occurred. Mark it failed so the
+  // customer isn't permanently locked out of paying for this order.
+  const STALE_MS = 15 * 60 * 1000;
+  await supabase
+    .from("payments")
+    .update({
+      status: "failed",
+      error_code: "abandoned",
+      failure_reason: "Intento de pago abandonado (3DS no completado).",
+      failed_at: new Date().toISOString(),
+      spi_token: null,
+    })
+    .eq("order_id", orderId)
+    .eq("status", "processing")
+    .lt("created_at", new Date(Date.now() - STALE_MS).toISOString());
+
+  // Idempotency: reject if a live (recent) processing or completed payment exists.
   const { data: existing } = await supabase
     .from("payments")
     .select("id, status")
@@ -128,7 +146,7 @@ export async function POST(
         message:
           row.status === "completed"
             ? "Este pedido ya fue pagado."
-            : "Ya hay un intento de pago en curso.",
+            : "Ya hay un intento de pago en curso. Espera un momento e intenta de nuevo.",
       },
       { status: 409 },
     );

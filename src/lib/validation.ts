@@ -97,22 +97,6 @@ export const createOrderSchema = z
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
-// ═══════════════════════════════════════════════════════════════
-// Sophia Chatbot Schema
-// ═══════════════════════════════════════════════════════════════
-
-export const sophiaMessageSchema = z.object({
-  message: z
-    .string()
-    .min(1, "El mensaje no puede estar vacío")
-    .max(500, "El mensaje es demasiado largo (máximo 500 caracteres)"),
-  locationId: z
-    .enum(["santa-ana", "san-benito", "simmer-garden", "lago-coatepeque", "surf-city"])
-    .optional()
-    .nullable(),
-});
-
-export type SophiaMessageInput = z.infer<typeof sophiaMessageSchema>;
 
 // ═══════════════════════════════════════════════════════════════
 // Anima Chatbot Schema

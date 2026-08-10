@@ -163,11 +163,7 @@ export function generateOrganizationSchema() {
     logo: `${BASE_URL}/logos/simmer-down-flame.svg`,
     image: `${BASE_URL}/og/home.jpg`,
     description: BRAND_DESCRIPTION,
-    foundingDate: '2012',
-    founder: {
-      '@type': 'Person',
-      name: 'Marvin Medina',
-    },
+    foundingDate: '2014',
     address: {
       '@type': 'PostalAddress',
       streetAddress: '1ra Calle Pte y Callejuela Sur Catedral',
@@ -189,11 +185,6 @@ export function generateOrganizationSchema() {
       'https://www.facebook.com/simmerdownsv/',
       'https://www.tiktok.com/@simmerdownsv',
     ],
-    numberOfEmployees: {
-      '@type': 'QuantitativeValue',
-      minValue: 50,
-      maxValue: 100,
-    },
     areaServed: {
       '@type': 'Country',
       name: 'El Salvador',

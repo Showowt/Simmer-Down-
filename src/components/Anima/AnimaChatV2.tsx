@@ -4,8 +4,25 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Flame, ChevronRight, Mic, MicOff, ShoppingCart, Plus, MapPin, Calendar, UtensilsCrossed } from 'lucide-react'
 import { useAnimaStore } from '@/store/anima'
-import { useCartStore } from '@/store/cart'
+import { useCartStore } from '@/lib/store'
+import { MENU_ITEMS } from '@/lib/data'
 import { useRouter } from 'next/navigation'
+
+// Minimal typed shim for the Web Speech API (not in TS lib.dom).
+type SpeechRecognitionLike = {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
+  onerror: (() => void) | null
+  onend: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+type SpeechWindow = Window & {
+  SpeechRecognition?: new () => SpeechRecognitionLike
+  webkitSpeechRecognition?: new () => SpeechRecognitionLike
+}
 import { useI18n } from '@/lib/i18n'
 
 interface MenuItem {
@@ -120,21 +137,21 @@ export default function AnimaChatV2() {
 
   // Speech recognition
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const [hasSpeechRecognition, setHasSpeechRecognition] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      const w = window as SpeechWindow
+      const SpeechRecognition = w.SpeechRecognition || w.webkitSpeechRecognition
+      if (!SpeechRecognition) return
       recognitionRef.current = new SpeechRecognition()
       queueMicrotask(() => setHasSpeechRecognition(true))
       recognitionRef.current.continuous = false
       recognitionRef.current.interimResults = false
       recognitionRef.current.lang = 'es-ES'
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript
         setInput(transcript)
         setIsListening(false)
@@ -197,7 +214,7 @@ export default function AnimaChatV2() {
         visitCount,
         favoriteItems: memory.favoriteItems || [],
         dietaryPreferences: memory.dietaryPreferences || [],
-        cartItems: cartItems.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
+        cartItems: cartItems.map(item => ({ name: item.nameEs || item.name, quantity: item.quantity, price: item.basePrice })),
         currentTime: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
         dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
         language: locale,
@@ -386,16 +403,12 @@ export default function AnimaChatV2() {
   }
 
   const handleAddToCart = (item: MenuItem) => {
-    addItem({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      image_url: null,
-      category: item.category as 'pizza' | 'sides' | 'drinks' | 'desserts',
-      available: true,
-      created_at: new Date().toISOString()
-    })
+    // ANIMA's suggested items carry the real catalog id — resolve the full
+    // MenuItem so it lands in the SAME cart the checkout reads (previously
+    // ANIMA wrote to a separate, diverged store that checkout never saw).
+    const full = MENU_ITEMS.find((m) => m.id === item.id)
+    if (!full) return
+    addItem(full, 1)
 
     const confirmContent = locale === 'en'
       ? `Done! ${item.name} added to your cart. Anything else?`

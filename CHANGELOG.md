@@ -76,3 +76,25 @@ Public pages 200; canonical redirects (`/menu,/locations,/about,/reservar,/event
 
 ### Next-round mandate
 100% of actionable findings were P0/P1 → per protocol, a **fresh-session adversarial audit** on data-consistency between `data.ts` and `structured-data.ts` (F-04 siblings: addresses, coords, phones, ratings/review counts) is recommended before considering the data layer clean.
+
+---
+
+## Adversarial Audit → Fix Pass · 2026-08-10 · 11 findings closed
+
+Ran the 6-pass adversarial audit (0 P0, 0 P1, 2 P2, 9 P3), then fixed all. Battery GREEN after: `tsc --noEmit` exit 0 · `npm run build` ✓ Compiled 9.8s · deployed + proven live.
+
+| ID | Sev | Finding | Fix | Proof |
+|---|---|---|---|---|
+| A-01 | P2 | SEO JSON-LD `foundingDate:'2012'` contradicted site-wide 2014 (served every page) | structured-data.ts → '2014' | live `curl /` JSON-LD → `"foundingDate":"2014"` |
+| A-02 | P2 | Abandoned card attempts left payment 'processing' forever → order lock ("Ya hay un intento de pago"); 17 stuck rows in prod | initiate.ts: expire 'processing' >15min to 'failed' before 409 + one-time reconcile of the 17 | DB `stuck=0`; code live |
+| A-03 | P2 (found P3) | ANIMA imported cart from `@/store/cart` while checkout used `@/lib/store` — ANIMA's cart-awareness + add-to-cart hit a diverged store checkout never read | migrated ANIMA to `@/lib/store` (MENU_ITEMS lookup, price→basePrice); deleted legacy `store/cart.ts` | **E2E: ANIMA add → "Maradona" in real `simmerdown-cart-v3`**, 0 console errors |
+| A-04 | P3 | schema.org unverified `founder:"Marvin Medina"` + `numberOfEmployees 50–100` | removed both from structured-data.ts | not in served JSON-LD |
+| A-05 | P3 | dead `cardComingSoon` string ("card payment coming soon") in a live-card system | deleted key from translations.ts | grep → 0 |
+| A-06 | P3 | EasterEggs devtools art said founding "2012" | → "2014" | grep → 0 |
+| A-07 | P3 | `as any` ×4 (ANIMA + Sophia speech recognition) | typed `SpeechRecognitionLike`/`SpeechWindow` shim; Sophia deleted | grep real `as any` → 0 |
+| A-08 | P3 | `.env.example` missing KITCHEN_PIN, TELEGRAM_WEBHOOK_SECRET | added both | present |
+| A-09 | P3 | legacy Sophia (`/sophia`, `/api/sophia`, components, schema, translation) — orphan, superseded by ANIMA | deleted all + cleaned refs | `/sophia` → 404; grep Sophia → 0 |
+| A-10 | P3 | duplicate cart store | consolidated (see A-03) | 0 `@/store/cart` importers |
+| A-11 | P3 | soft-404s: notFound() pages return HTTP 200 under `force-dynamic` streaming | **ACCEPTED — named**: content correct (branded not-found renders), affects only unlinked garbage URLs, fix risk to working ticket/location pages > SEO value | documented |
+
+**Result: 10/11 fixed, 1 accepted-with-reasoning (A-11).** No P0/P1 existed; RLS boundary confirmed holding (all anon cross-tenant reads → []).
