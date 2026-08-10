@@ -114,8 +114,8 @@ export default function NewLocationBar() {
                 onClick={() => setOrderType(option.value)}
                 className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-md text-[11px] sm:text-[12px] font-semibold transition-all duration-200 whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#E85D04] text-white shadow-sm'
-                    : 'text-white/40 hover:text-white/80'
+                    ? 'bg-[#C2410C] text-white shadow-sm'
+                    : 'text-white/60 hover:text-white'
                 }`}
                 aria-pressed={isActive}
               >
