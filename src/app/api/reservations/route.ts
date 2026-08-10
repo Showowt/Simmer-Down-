@@ -124,8 +124,8 @@ export async function POST(
     // Send Telegram notification to staff (non-blocking)
     const locName = resolveLocationName(location_id);
     const adminUrl = process.env.NEXT_PUBLIC_APP_URL
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/admin/orders`
-      : "https://simmerdownsv.com/admin/orders";
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/admin/reservations`
+      : "https://simmerdownsv.com/admin/reservations";
 
     // Strip Markdown-breaking chars from user input
     const safeName = customer_name.replace(/[_*`\[\]]/g, "");
