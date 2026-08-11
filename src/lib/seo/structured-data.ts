@@ -126,8 +126,8 @@ export const LOCATIONS: LocationData[] = [
     reviewCount: 980,
     image: `${BASE_URL}/images/locations/gallery-garden/garden-4.jpg`,
     hours: [
-      // Client-confirmed 2026-08-10 (F-05 resolved): Simmer Garden opens Friday–Sunday only.
-      { days: ['Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
+      // Client-confirmed 2026-08-10 (operator): Simmer Garden is open every day, never closes.
+      { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
     ],
   },
   {
@@ -356,7 +356,7 @@ export const RESTAURANT_FAQS: FAQItem[] = [
   },
   {
     question: '¿Cuáles son los horarios de Simmer Down?',
-    answer: 'Santa Ana: Dom-Jue 11AM-9PM, Vie-Sáb 11AM-10PM. Lago de Coatepeque: Dom-Jue 11AM-8PM, Vie-Sáb 11AM-9PM. San Benito: Lun-Mié 4PM-10PM, Jue 12PM-11PM, Vie-Dom 12PM-1AM. Simmer Garden (Juayúa): Vie-Dom 11AM-8PM (cerrado lunes a jueves). Surf City: Mié-Dom 12PM-8PM (cerrado lunes y martes).',
+    answer: 'Santa Ana: Dom-Jue 11AM-9PM, Vie-Sáb 11AM-10PM. Lago de Coatepeque: Dom-Jue 11AM-8PM, Vie-Sáb 11AM-9PM. San Benito: Lun-Mié 4PM-10PM, Jue 12PM-11PM, Vie-Dom 12PM-1AM. Simmer Garden (Juayúa): todos los días 11AM-8PM. Surf City: Mié-Dom 12PM-8PM (cerrado lunes y martes).',
   },
   {
     question: '¿Qué tipo de comida sirve Simmer Down?',

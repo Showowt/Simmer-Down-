@@ -262,13 +262,13 @@ export const LOCATIONS: Location[] = [
     email: 'garden@simmerdown.sv',
     coordinates: { lat: 13.8467, lng: -89.7456 },
     hours: {
-      // Client-confirmed 2026-08-10: Simmer Garden opens Friday–Sunday only.
-      weekday: 'Cerrado',
+      // Client-confirmed 2026-08-10 (operator): Simmer Garden is open EVERY day, never closes.
+      weekday: '11:00 AM - 8:00 PM',
       weekend: '11:00 AM - 8:00 PM',
-      monday: 'Cerrado',
-      tuesday: 'Cerrado',
-      wednesday: 'Cerrado',
-      thursday: 'Cerrado',
+      monday: '11:00 AM - 8:00 PM',
+      tuesday: '11:00 AM - 8:00 PM',
+      wednesday: '11:00 AM - 8:00 PM',
+      thursday: '11:00 AM - 8:00 PM',
       friday: '11:00 AM - 8:00 PM',
       saturday: '11:00 AM - 8:00 PM',
       sunday: '11:00 AM - 8:00 PM',

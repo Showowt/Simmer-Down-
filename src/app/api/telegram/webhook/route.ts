@@ -910,7 +910,7 @@ async function handleHorarios(chatId: string): Promise<void> {
     { name: "Lago Coatepeque", hours: "Dom-Jue 11AM-8PM | Vie-Sab 11AM-9PM" },
     { name: "San Benito", hours: "L-M 4-10PM | J 12-11PM | V-D 12PM-1AM" },
     { name: "Surf City", hours: "L-M Cerrado | M-D 12-8PM" },
-    { name: "Simmer Garden", hours: "V-D 11AM-8PM (cerrado L-J)" },
+    { name: "Simmer Garden", hours: "L-D 11AM-8PM" },
   ];
 
   const lines = [

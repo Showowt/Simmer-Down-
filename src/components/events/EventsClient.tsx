@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { LOCATIONS } from "@/lib/data";
 import { useI18n, translations } from "@/lib/i18n";
 
 // ─────────────────────────────────────────────
@@ -49,6 +50,24 @@ function ticketState(e: DbEvent): { onSale: boolean; soldOut: boolean; price: nu
     e.max_capacity != null &&
     (e.tickets_sold ?? 0) >= e.max_capacity;
   return { onSale, soldOut, price };
+}
+
+// Event-specific reservation via WhatsApp — pre-fills the show name/date/venue and
+// routes to that venue's WhatsApp (falls back to the main line) so the request is
+// never a generic "contact us".
+function eventReservationUrl(event: DbEvent, whenLabel: string, locale?: string): string {
+  const name = (locale === "en" ? event.title : event.title_es || event.title) || "un evento";
+  const venue = event.custom_venue || "Simmer Down";
+  const v = venue.toLowerCase();
+  const loc = LOCATIONS.find(
+    (l) => v.includes(l.shortName.toLowerCase()) || v.includes(l.name.toLowerCase()),
+  );
+  const phone = (loc?.whatsapp || "+50376804434").replace(/\D/g, "");
+  const msg =
+    locale === "en"
+      ? `Hi! I'd like to reserve for the event: ${name} — ${venue}${whenLabel ? ` (${whenLabel})` : ""}. Could you share more info?`
+      : `¡Hola! Quisiera reservar para el evento: ${name} — ${venue}${whenLabel ? ` (${whenLabel})` : ""}. ¿Me pueden dar más información?`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 
 // Fallback events (used only if the DB query returns zero rows).
@@ -334,25 +353,29 @@ export function EventsList() {
                             <ArrowRight className="w-5 h-5" />
                           </a>
                         ) : (
-                          <Link
-                            href="/contact"
+                          <a
+                            href={eventReservationUrl(event, formatEventDate(event.starts_at, event.recurrence, locale), locale)}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
                           >
                             {locale === 'es' ? 'Más Información' : 'More Info'}
                             <ArrowRight className="w-5 h-5" />
-                          </Link>
+                          </a>
                         )}
                       </div>
                     );
                   }
                   return (
-                    <Link
-                      href="/contact"
+                    <a
+                      href={eventReservationUrl(event, formatEventDate(event.starts_at, event.recurrence, locale), locale)}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
                     >
                       {locale === 'es' ? 'Reservar Tu Lugar' : 'Reserve Your Spot'}
                       <ArrowRight className="w-5 h-5" />
-                    </Link>
+                    </a>
                   );
                 })()}
               </div>
@@ -471,12 +494,14 @@ export function EventsList() {
                         );
                       }
                       return (
-                        <Link
-                          href="/contact"
+                        <a
+                          href={eventReservationUrl(event, formatEventDate(event.starts_at, event.recurrence, locale), locale)}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="block text-center bg-white/10 hover:bg-[#E85D04] text-white py-3 font-semibold transition-colors min-h-[48px]"
                         >
                           {locale === 'es' ? 'Reservar' : 'Reserve'}
-                        </Link>
+                        </a>
                       );
                     })()}
                   </div>
