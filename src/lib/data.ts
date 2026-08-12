@@ -338,10 +338,10 @@ export const PIZZA_MODIFIERS: MenuItemModifier[] = [
 // ============================================
 
 export const MENU_ITEMS: MenuItem[] = [
-  // COMBOS — dedicated bundle products. SCAFFOLD: hidden (isAvailable:false)
-  // until the client confirms exactly what's included. To go live: set
-  // isAvailable:true and fill description/descriptionEs with the real contents.
-  { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: 'Combo — contents to be confirmed', descriptionEs: 'Combo SimmerLover — contenido por confirmar', basePrice: 21.99, isAvailable: false, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true },
+  // COMBOS — dedicated bundle products. Contents per client (Martin, 2026-08-12):
+  // Combo SimmerLover = 2 large traditional pizzas ($14.99 ea) + Coca-Cola 1.25 L
+  // for $21.99. Fixed-price single product; customer states the 2 flavors in notes.
+  { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: '2 large traditional pizzas + Coca-Cola 1.25 L. Choose your 2 flavors in the notes.', descriptionEs: '2 pizzas grandes tradicionales + Coca-Cola 1.25 L. Indica los 2 sabores en las notas.', basePrice: 21.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true },
   // PIZZAS
   { id: 'fungi', categoryId: 'pizzas', name: 'Fungi', nameEs: 'Fungi', description: 'Vegetarian Pizza with Onions and Mushrooms in Chimichurri Sauce', descriptionEs: 'Pizza Vegetariana con Cebollas y Hongos en Salsa Chimichurri', basePrice: 5.75, image: '/images/menu/funghi-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
   { id: 'pineapple-pizza', categoryId: 'pizzas', name: 'With Pineapple', nameEs: 'Con Piña', description: 'Pizza with Pineapple, Pepperoni, Bacon and House Basil Pesto', descriptionEs: 'Pizza con Piña, Pepperoni, Tocino y Pesto de Albahaca de la Casa', basePrice: 5.75, image: '/images/menu/con-pina-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
