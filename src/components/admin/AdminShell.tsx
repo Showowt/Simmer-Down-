@@ -20,6 +20,7 @@ import {
   Tag,
   Settings,
   Camera,
+  KeyRound,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -120,6 +121,14 @@ export default function AdminShell({
               <p className="text-xs text-[#6B6560]">Conectado como</p>
               <p className="text-sm text-[#B8B0A8] truncate">{userEmail}</p>
             </div>
+            <Link
+              href="/auth/reset-password"
+              onClick={() => setSidebarOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 w-full text-[#B8B0A8] hover:bg-[#3D3936] hover:text-[#FFF8F0] transition"
+            >
+              <KeyRound className="w-5 h-5" />
+              Cambiar Contraseña
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 w-full text-[#B8B0A8] hover:bg-[#3D3936] hover:text-[#FFF8F0] transition"

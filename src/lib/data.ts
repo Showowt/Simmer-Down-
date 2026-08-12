@@ -321,11 +321,13 @@ export const PIZZA_MODIFIERS: MenuItemModifier[] = [
   { id: 'jalapenos', name: 'Jalapeños', nameEs: 'Jalapeños', price: 0.75, category: 'topping' },
   { id: 'olives', name: 'Olives', nameEs: 'Aceitunas', price: 0.75, category: 'topping' },
   { id: 'shrimp', name: 'Shrimp', nameEs: 'Camarones', price: 2.50, category: 'topping' },
+  // Sauces per client (Martin, 2026-08-12): BBQ · Alioli · Buffalo. IDs kept
+  // stable (garlic→alioli, hot→buffalo) so open carts / order history don't
+  // orphan — only the display names change. Extras "Orilla Rellena" and
+  // "Base Sin Gluten" removed from the offering at the client's request.
   { id: 'bbq-sauce', name: 'BBQ Sauce', nameEs: 'Salsa BBQ', price: 0.50, category: 'sauce' },
-  { id: 'garlic-sauce', name: 'Garlic Sauce', nameEs: 'Salsa de Ajo', price: 0.50, category: 'sauce' },
-  { id: 'hot-sauce', name: 'Hot Sauce', nameEs: 'Salsa Picante', price: 0.50, category: 'sauce' },
-  { id: 'stuffed-crust', name: 'Stuffed Crust', nameEs: 'Orilla Rellena', price: 2.00, category: 'extra' },
-  { id: 'gluten-free-base', name: 'Gluten-Free Base', nameEs: 'Base Sin Gluten', price: 3.00, category: 'extra' },
+  { id: 'garlic-sauce', name: 'Aioli Sauce', nameEs: 'Salsa Alioli', price: 0.50, category: 'sauce' },
+  { id: 'hot-sauce', name: 'Buffalo Sauce', nameEs: 'Salsa Buffalo', price: 0.50, category: 'sauce' },
 ];
 
 // ============================================

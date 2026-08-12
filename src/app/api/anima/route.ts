@@ -199,10 +199,8 @@ function buildSystemPrompt(language: "es" | "en", promoBlock: string, eventsBloc
 - Aceitunas: +$0.75
 - Camarones: +$2.50
 - Salsa BBQ: +$0.50
-- Salsa de Ajo: +$0.50
-- Salsa Picante: +$0.50
-- Borde Relleno: +$2.00
-- Base Sin Gluten: +$3.00
+- Salsa Alioli: +$0.50
+- Salsa Buffalo: +$0.50
 
 ## TAMAÑOS DE PIZZA
 - Personal (8"): Precio base (regulares desde $5.75, especialidad desde $6.25)
