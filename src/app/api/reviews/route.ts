@@ -5,6 +5,11 @@
  * route returns { enabled:false } and the UI hides itself (same pattern as
  * ANIMA) — no fake data, ever. Cached 6h: reviews change slowly and the Places
  * API is billable per call.
+ *
+ * Uses Places API (New) — https://places.googleapis.com/v1/places/{id} — which
+ * works with keys from both legacy and post-Mar-2025 Cloud projects (the legacy
+ * maps/api/place/details endpoint can't be enabled on new projects). Auth via
+ * X-Goog-Api-Key header; response is trimmed by X-Goog-FieldMask.
  */
 
 import { NextResponse } from "next/server";
@@ -14,12 +19,23 @@ import type { NextRequest } from "next/server";
 
 export const revalidate = 21600; // 6h ISR
 
-interface GReview {
+/** Places API (New) review shape (subset we request via field mask). */
+interface NewPlaceReview {
+  rating?: number;
+  text?: { text?: string; languageCode?: string };
+  originalText?: { text?: string; languageCode?: string };
+  relativePublishTimeDescription?: string;
+  publishTime?: string;
+  authorAttribution?: { displayName?: string; uri?: string; photoUri?: string };
+}
+
+/** Shape we return to the client (unchanged contract — GoogleReviews.tsx). */
+interface OutReview {
   author_name: string;
   rating: number;
   text: string;
   relative_time_description: string;
-  profile_photo_url?: string;
+  profile_photo_url: string | null;
   time: number;
 }
 
@@ -39,38 +55,47 @@ export async function GET(request: NextRequest) {
 
   try {
     const url =
-      `https://maps.googleapis.com/maps/api/place/details/json` +
-      `?place_id=${encodeURIComponent(placeId)}` +
-      `&fields=rating,user_ratings_total,url,reviews` +
-      `&reviews_sort=newest&language=es&key=${encodeURIComponent(key)}`;
+      `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}` +
+      `?languageCode=es`;
 
-    const res = await fetch(url, { next: { revalidate: 21600 } });
-    const data = await res.json();
+    const res = await fetch(url, {
+      headers: {
+        "X-Goog-Api-Key": key,
+        "X-Goog-FieldMask": "rating,userRatingCount,googleMapsUri,reviews",
+      },
+      next: { revalidate: 21600 },
+    });
 
-    if (data.status !== "OK" || !data.result) {
-      logger.warn("[reviews] Places API non-OK", { status: data.status });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      logger.warn("[reviews] Places API (New) non-OK", {
+        http: res.status,
+        status: body?.error?.status,
+        message: body?.error?.message,
+      });
       return NextResponse.json({ enabled: false });
     }
 
-    const r = data.result;
-    const reviews: GReview[] = (r.reviews ?? [])
-      .filter((rv: GReview) => rv.text && rv.rating >= 4)
-      .slice(0, 6)
-      .map((rv: GReview) => ({
-        author_name: rv.author_name,
-        rating: rv.rating,
-        text: rv.text,
-        relative_time_description: rv.relative_time_description,
-        profile_photo_url: rv.profile_photo_url ?? null,
-        time: rv.time,
-      }));
+    const data = await res.json();
+
+    const reviews: OutReview[] = ((data.reviews as NewPlaceReview[] | undefined) ?? [])
+      .map((rv): OutReview => ({
+        author_name: rv.authorAttribution?.displayName ?? "",
+        rating: rv.rating ?? 0,
+        text: rv.text?.text ?? rv.originalText?.text ?? "",
+        relative_time_description: rv.relativePublishTimeDescription ?? "",
+        profile_photo_url: rv.authorAttribution?.photoUri ?? null,
+        time: rv.publishTime ? Math.floor(new Date(rv.publishTime).getTime() / 1000) : 0,
+      }))
+      .filter((rv) => rv.text && rv.rating >= 4)
+      .slice(0, 6);
 
     return NextResponse.json(
       {
         enabled: true,
-        rating: r.rating ?? null,
-        total: r.user_ratings_total ?? null,
-        url: r.url ?? null,
+        rating: data.rating ?? null,
+        total: data.userRatingCount ?? null,
+        url: data.googleMapsUri ?? null,
         reviews,
       },
       { headers: { "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=86400" } },
