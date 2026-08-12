@@ -68,18 +68,70 @@ export function computeCartTwoForOneDiscount(items: CartItem[]): number {
 }
 
 /**
- * Cart totals with the promo applied. `tax` is the IVA portion already
- * contained in the NET amount (prices include 13% IVA) — informational only.
- * `total` excludes the delivery fee, mirroring calculateCartTotal.
+ * ORDER-WIDE PERCENTAGE PROMOS (Especiales, discount_type='percentage')
+ * ---------------------------------------------------------------------
+ * A live `percentage` special discounts the WHOLE order by discount_value%.
+ * Only the single highest live percentage applies (no stacking of multiple
+ * percentages). The 2x1 special (PROMO_2X1_SPECIAL_ID) is itself stored as a
+ * percentage row but is handled by the 2x1 engine above — it is ALWAYS
+ * excluded here so it can't double-discount.
+ *
+ * Same parity contract as the 2x1 promo: the cart computes this for display and
+ * /api/orders/create computes it authoritatively. Callers pass specials they
+ * have already confirmed live (client: is_live; server: isSpecialLive).
+ */
+export const PROMO_PERCENT_CODE = "PROMO%";
+
+export interface LiveSpecialLite {
+  id: string;
+  title?: string | null;
+  discount_type: string;
+  discount_value: number | string;
+}
+
+/** The single order-wide percentage promo to apply, or null. */
+export function pickOrderPercentDiscount(
+  liveSpecials: LiveSpecialLite[],
+): { percent: number; title: string } | null {
+  let best: { percent: number; title: string } | null = null;
+  for (const s of liveSpecials) {
+    if (s.id === PROMO_2X1_SPECIAL_ID) continue; // handled by the 2x1 engine
+    if (s.discount_type !== "percentage") continue;
+    const pct = Number(s.discount_value);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) continue;
+    if (!best || pct > best.percent) {
+      best = {
+        percent: pct,
+        title: (s.title || "").trim() || `Promo ${pct}% de descuento`,
+      };
+    }
+  }
+  return best;
+}
+
+/** Order-wide percentage discount amount for a subtotal (2-decimal rounded). */
+export function orderPercentAmount(subtotal: number, percent: number): number {
+  if (percent <= 0 || subtotal <= 0) return 0;
+  return Math.round(subtotal * (percent / 100) * 100) / 100;
+}
+
+/**
+ * Cart totals with promos applied. `tax` is the IVA portion already contained
+ * in the NET amount (prices include 13% IVA) — informational only. `total`
+ * excludes the delivery fee, mirroring calculateCartTotal.
+ *
+ * `orderPercent` (0..100) is the live order-wide percentage promo; it is
+ * additive with the 2x1 discount and the combined total is capped at subtotal.
  */
 export function calculateCartTotalsWithPromo(
   items: CartItem[],
   promoLive: boolean,
+  orderPercent = 0,
 ): { subtotal: number; discount: number; tax: number; total: number } {
   const subtotal = items.reduce((s, i) => s + i.totalPrice, 0);
-  const discount = promoLive
-    ? Math.min(computeCartTwoForOneDiscount(items), subtotal)
-    : 0;
+  const twoForOne = promoLive ? computeCartTwoForOneDiscount(items) : 0;
+  const percent = orderPercentAmount(subtotal, orderPercent);
+  const discount = Math.min(Math.round((twoForOne + percent) * 100) / 100, subtotal);
   const net = Math.max(0, subtotal - discount);
   const tax = net - net / (1 + TAX_RATE);
   return { subtotal, discount, tax, total: net };

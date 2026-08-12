@@ -43,6 +43,8 @@ interface CartState {
   discount: number
   /** Synced from /api/specials by <PromoSync/>; server re-validates on order create. */
   promoLive: boolean
+  /** Live order-wide percentage promo (0..100); synced by <PromoSync/>, server re-validates. */
+  orderPercent: number
   tax: number
   total: number
   addItem: (item: MenuItem, quantity: number, size?: MenuItemSize, modifiers?: MenuItemModifier[], notes?: string) => void
@@ -50,6 +52,7 @@ interface CartState {
   removeItem: (lineKey: string) => void
   clearCart: () => void
   setPromoLive: (live: boolean) => void
+  setOrderPercent: (percent: number) => void
   setSelectedLocation: (location: Location) => void
   setCustomerInfo: (name: string, phone: string, email?: string) => void
   setOrderType: (type: 'dine_in' | 'takeout' | 'delivery') => void
@@ -70,6 +73,7 @@ export const useCartStore = create<CartState>()(
       subtotal: 0,
       discount: 0,
       promoLive: false,
+      orderPercent: 0,
       tax: 0,
       total: 0,
 
@@ -89,7 +93,7 @@ export const useCartStore = create<CartState>()(
           } else {
             newItems = [...state.items, cartItem]
           }
-          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive, state.orderPercent)
           return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
@@ -98,11 +102,11 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           if (quantity <= 0) {
             const newItems = state.items.filter((i) => cartLineKey(i) !== lineKey)
-            const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+            const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive, state.orderPercent)
             return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
           }
           const newItems = state.items.map((item) => cartLineKey(item) === lineKey ? { ...item, quantity, totalPrice: calculateItemTotal(item, quantity, item.selectedSize, item.selectedModifiers) } : item)
-          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive, state.orderPercent)
           return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
@@ -110,7 +114,7 @@ export const useCartStore = create<CartState>()(
       removeItem: (lineKey) => {
         set((state) => {
           const newItems = state.items.filter((i) => cartLineKey(i) !== lineKey)
-          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(newItems, state.promoLive, state.orderPercent)
           return { items: newItems, itemCount: newItems.reduce((s, i) => s + i.quantity, 0), subtotal, discount, tax, total }
         })
       },
@@ -120,8 +124,16 @@ export const useCartStore = create<CartState>()(
       setPromoLive: (live) => {
         set((state) => {
           if (state.promoLive === live) return state
-          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(state.items, live)
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(state.items, live, state.orderPercent)
           return { promoLive: live, subtotal, discount, tax, total }
+        })
+      },
+      setOrderPercent: (percent) => {
+        set((state) => {
+          const p = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0
+          if (state.orderPercent === p) return state
+          const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(state.items, state.promoLive, p)
+          return { orderPercent: p, subtotal, discount, tax, total }
         })
       },
       setSelectedLocation: (location) => set({ selectedLocation: location }),
@@ -145,6 +157,7 @@ export const useCartStore = create<CartState>()(
         subtotal: 0,
         discount: 0,
         promoLive: false,
+        orderPercent: 0,
         tax: 0,
         total: 0,
       }),
@@ -155,9 +168,9 @@ export const useCartStore = create<CartState>()(
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<CartState>
         const items = p.items ?? []
-        // promoLive is never persisted — <PromoSync/> re-fetches and triggers a
-        // recompute right after hydration, so booting at false is safe.
-        const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(items, current.promoLive)
+        // promoLive/orderPercent are never persisted — <PromoSync/> re-fetches
+        // and triggers a recompute right after hydration, so booting at 0 is safe.
+        const { subtotal, discount, tax, total } = calculateCartTotalsWithPromo(items, current.promoLive, current.orderPercent)
         return {
           ...current,
           ...p,

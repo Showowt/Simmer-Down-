@@ -29,7 +29,10 @@ import {
   PROMO_2X1_SPECIAL_ID,
   PROMO_2X1_CODE,
   PROMO_2X1_DESCRIPTION,
+  PROMO_PERCENT_CODE,
   computeTwoForOneDiscount,
+  pickOrderPercentDiscount,
+  orderPercentAmount,
 } from "@/lib/promo";
 
 // ═══════════════════════════════════════════════════════════════
@@ -542,6 +545,35 @@ export async function POST(
         discountCode = PROMO_2X1_CODE;
         discountDescription = PROMO_2X1_DESCRIPTION;
         logger.info("2x1 promo applied", { discount: promoDiscount });
+      }
+    }
+
+    // Auto-apply the best live order-wide percentage special (Especiales,
+    // discount_type='percentage'). Authoritative + mirrors the cart display.
+    // The 2x1 special is itself a percentage row but is excluded inside
+    // pickOrderPercentDiscount so it can't double-discount. Additive with 2x1;
+    // combined total is capped at subtotal below.
+    const { data: pctSpecials } = await supabase
+      .from("specials")
+      .select("id, title, discount_type, discount_value, active, start_date, end_date, days_of_week")
+      .eq("active", true)
+      .eq("discount_type", "percentage");
+    const livePct = (pctSpecials ?? []).filter((s) => isSpecialLive(s));
+    const orderPercent = pickOrderPercentDiscount(livePct);
+    if (orderPercent) {
+      const pctAmount = orderPercentAmount(subtotal, orderPercent.percent);
+      if (pctAmount > 0) {
+        discountAmount += pctAmount;
+        discountCode = discountCode
+          ? `${discountCode}+${PROMO_PERCENT_CODE}`
+          : PROMO_PERCENT_CODE;
+        discountDescription = discountDescription
+          ? `${discountDescription} · ${orderPercent.title}`
+          : orderPercent.title;
+        logger.info("order % promo applied", {
+          percent: orderPercent.percent,
+          amount: pctAmount,
+        });
       }
     }
 

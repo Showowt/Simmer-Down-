@@ -286,6 +286,9 @@ export const LOCATIONS: Location[] = [
 // ============================================
 
 export const MENU_CATEGORIES: MenuCategory[] = [
+  // Combos — dedicated bundle products (e.g. Combo SimmerLover). sortOrder 0 so
+  // it leads the menu when live; hidden while its only item is unavailable.
+  { id: 'combos', name: 'Combos', nameEs: 'Combos', icon: '🍽️', sortOrder: 0, description: 'Meal combos', descriptionEs: 'Combos y paquetes' },
   { id: 'pizzas', name: 'Pizzas', nameEs: 'Pizzas', icon: '🍕', sortOrder: 1, description: 'Artisan sourdough pizzas', descriptionEs: 'Pizzas artesanales de masa madre' },
   { id: 'specialty-pizzas', name: 'Specialty Pizzas', nameEs: 'Pizzas Especiales', icon: '⭐', sortOrder: 2, description: 'Premium gourmet creations', descriptionEs: 'Creaciones gourmet premium' },
   { id: 'starters', name: 'Starters', nameEs: 'Entradas', icon: '🥗', sortOrder: 3 },
@@ -335,6 +338,10 @@ export const PIZZA_MODIFIERS: MenuItemModifier[] = [
 // ============================================
 
 export const MENU_ITEMS: MenuItem[] = [
+  // COMBOS — dedicated bundle products. SCAFFOLD: hidden (isAvailable:false)
+  // until the client confirms exactly what's included. To go live: set
+  // isAvailable:true and fill description/descriptionEs with the real contents.
+  { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: 'Combo — contents to be confirmed', descriptionEs: 'Combo SimmerLover — contenido por confirmar', basePrice: 21.99, isAvailable: false, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true },
   // PIZZAS
   { id: 'fungi', categoryId: 'pizzas', name: 'Fungi', nameEs: 'Fungi', description: 'Vegetarian Pizza with Onions and Mushrooms in Chimichurri Sauce', descriptionEs: 'Pizza Vegetariana con Cebollas y Hongos en Salsa Chimichurri', basePrice: 5.75, image: '/images/menu/funghi-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
   { id: 'pineapple-pizza', categoryId: 'pizzas', name: 'With Pineapple', nameEs: 'Con Piña', description: 'Pizza with Pineapple, Pepperoni, Bacon and House Basil Pesto', descriptionEs: 'Pizza con Piña, Pepperoni, Tocino y Pesto de Albahaca de la Casa', basePrice: 5.75, image: '/images/menu/con-pina-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
