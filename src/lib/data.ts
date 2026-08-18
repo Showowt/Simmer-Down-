@@ -70,6 +70,16 @@ export interface MenuItem {
   deliveryAvailable?: boolean;
   sizes?: MenuItemSize[];
   modifiers?: MenuItemModifier[];
+  /** Combo products: each entry is a required "pick a product" slot the
+   *  customer chooses from `fromCategory` (e.g. 2 traditional-pizza flavors). */
+  comboPicks?: ComboPick[];
+}
+
+export interface ComboPick {
+  label: string;
+  labelEs: string;
+  /** categoryId the customer picks from (e.g. 'pizzas' = traditional pizzas). */
+  fromCategory: string;
 }
 
 export interface MenuItemSize {
@@ -84,7 +94,7 @@ export interface MenuItemModifier {
   name: string;
   nameEs: string;
   price: number;
-  category: 'topping' | 'sauce' | 'extra';
+  category: 'topping' | 'sauce' | 'extra' | 'combo';
 }
 
 export interface CartItem extends MenuItem {
@@ -341,7 +351,7 @@ export const MENU_ITEMS: MenuItem[] = [
   // COMBOS — dedicated bundle products. Contents per client (Martin, 2026-08-12):
   // Combo SimmerLover = 2 large traditional pizzas ($14.99 ea) + Coca-Cola 1.25 L
   // for $21.99. Fixed-price single product; customer states the 2 flavors in notes.
-  { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: '2 large traditional pizzas + Coca-Cola 1.25 L. Choose your 2 flavors in the notes.', descriptionEs: '2 pizzas grandes tradicionales + Coca-Cola 1.25 L. Indica los 2 sabores en las notas.', basePrice: 21.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true },
+  { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: '2 large traditional pizzas + Coca-Cola 1.25 L. Pick your 2 flavors.', descriptionEs: '2 pizzas grandes tradicionales + Coca-Cola 1.25 L. Elige tus 2 sabores.', basePrice: 21.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true, comboPicks: [ { label: 'Pizza 1 flavor', labelEs: 'Sabor de la pizza 1', fromCategory: 'pizzas' }, { label: 'Pizza 2 flavor', labelEs: 'Sabor de la pizza 2', fromCategory: 'pizzas' } ] },
   // PIZZAS
   { id: 'fungi', categoryId: 'pizzas', name: 'Fungi', nameEs: 'Fungi', description: 'Vegetarian Pizza with Onions and Mushrooms in Chimichurri Sauce', descriptionEs: 'Pizza Vegetariana con Cebollas y Hongos en Salsa Chimichurri', basePrice: 5.75, image: '/images/menu/funghi-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
   { id: 'pineapple-pizza', categoryId: 'pizzas', name: 'With Pineapple', nameEs: 'Con Piña', description: 'Pizza with Pineapple, Pepperoni, Bacon and House Basil Pesto', descriptionEs: 'Pizza con Piña, Pepperoni, Tocino y Pesto de Albahaca de la Casa', basePrice: 5.75, image: '/images/menu/con-pina-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },

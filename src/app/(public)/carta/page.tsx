@@ -176,6 +176,7 @@ function ItemDetailSheet() {
   const [quantity, setQuantity] = useState(1)
   const [selectedSize, setSelectedSize] = useState<MenuItemSize | undefined>(undefined)
   const [selectedModifiers, setSelectedModifiers] = useState<MenuItemModifier[]>([])
+  const [comboSelections, setComboSelections] = useState<string[]>([])
   const [notes, setNotes] = useState('')
   const sheetRef = useRef<HTMLDivElement>(null)
 
@@ -188,6 +189,7 @@ function ItemDetailSheet() {
         setQuantity(1)
         setSelectedSize(item.sizes ? item.sizes[0] : undefined)
         setSelectedModifiers([])
+        setComboSelections(item.comboPicks ? item.comboPicks.map(() => '') : [])
         setNotes('')
       })
     }
@@ -211,13 +213,29 @@ function ItemDetailSheet() {
     )
   }, [])
 
+  // Combo flavor picks → price-0 modifiers so they ride the existing cart /
+  // kitchen / notification plumbing (which renders modifier nameEs). The id is
+  // slot+flavor scoped so two combos with different flavors are distinct cart
+  // lines and duplicate flavors don't collide on React keys.
+  const comboPicks = item?.comboPicks ?? []
+  const comboComplete = comboPicks.every((_, i) => !!comboSelections[i])
+  const comboModifiers: MenuItemModifier[] = comboPicks
+    .map((_, i): MenuItemModifier | null => {
+      const flavor = MENU_ITEMS.find((m) => m.id === comboSelections[i])
+      return flavor
+        ? { id: `combo-${i + 1}-${flavor.id}`, name: flavor.name, nameEs: flavor.nameEs, price: 0, category: 'combo' }
+        : null
+    })
+    .filter((m): m is MenuItemModifier => m !== null)
+
   const total = item
     ? calculateItemTotal(item, quantity, selectedSize, selectedModifiers)
     : 0
 
   const handleAdd = () => {
     if (!item) return
-    addItem(item, quantity, selectedSize, selectedModifiers, notes || undefined)
+    if (comboPicks.length > 0 && !comboComplete) return
+    addItem(item, quantity, selectedSize, [...selectedModifiers, ...comboModifiers], notes || undefined)
     closeMenuItemSheet()
   }
 
@@ -346,6 +364,43 @@ function ItemDetailSheet() {
             </div>
           )}
 
+          {/* COMBO FLAVOR PICKS */}
+          {comboPicks.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wider">
+                Elige tus sabores
+              </h3>
+              <div className="space-y-3">
+                {comboPicks.map((pick, i) => {
+                  const options = MENU_ITEMS.filter(
+                    (m) => m.categoryId === pick.fromCategory && m.isAvailable,
+                  )
+                  return (
+                    <div key={i}>
+                      <label className="block text-white/60 text-xs mb-1.5">{pick.labelEs}</label>
+                      <select
+                        value={comboSelections[i] ?? ''}
+                        onChange={(e) =>
+                          setComboSelections((prev) => {
+                            const next = [...prev]
+                            next[i] = e.target.value
+                            return next
+                          })
+                        }
+                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#E85D04]/50 appearance-none"
+                      >
+                        <option value="">Selecciona un sabor</option>
+                        {options.map((o) => (
+                          <option key={o.id} value={o.id}>{o.nameEs}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {/* EXTRAS / MODIFIERS */}
           {item.modifiers && item.modifiers.length > 0 && (
             <div className="mb-6">
@@ -409,9 +464,12 @@ function ItemDetailSheet() {
           ) : (
             <button
               onClick={handleAdd}
-              className="w-full bg-[#E85D04] hover:bg-[#ff6a1f] active:scale-[0.98] text-white font-bold rounded-xl h-14 flex items-center justify-between px-5 transition-all duration-150"
+              disabled={comboPicks.length > 0 && !comboComplete}
+              className="w-full bg-[#E85D04] hover:bg-[#ff6a1f] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#E85D04] disabled:active:scale-100 text-white font-bold rounded-xl h-14 flex items-center justify-between px-5 transition-all duration-150"
             >
-              <span className="text-base">{t('menu.addToCart')}</span>
+              <span className="text-base">
+                {comboPicks.length > 0 && !comboComplete ? 'Elige tus 2 sabores' : t('menu.addToCart')}
+              </span>
               <span className="text-base">{formatPrice(total)}</span>
             </button>
           )}
