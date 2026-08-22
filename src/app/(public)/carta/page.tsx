@@ -24,11 +24,25 @@ import {
   type MenuItem,
   type MenuItemSize,
   type MenuItemModifier,
+  type ComboPick,
 } from '@/lib/data'
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────
+
+// Resolve a combo pick's choices: an explicit `options` list (e.g. soda
+// flavors that aren't menu items) or every available item in `fromCategory`
+// (e.g. pizza flavors). Both shapes reduce to {id,name,nameEs}.
+function comboPickOptions(pick: ComboPick): { id: string; name: string; nameEs: string }[] {
+  if (pick.options?.length) return pick.options
+  if (pick.fromCategory) {
+    return MENU_ITEMS.filter(
+      (m) => m.categoryId === pick.fromCategory && m.isAvailable,
+    ).map((m) => ({ id: m.id, name: m.name, nameEs: m.nameEs }))
+  }
+  return []
+}
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value)
@@ -220,10 +234,10 @@ function ItemDetailSheet() {
   const comboPicks = item?.comboPicks ?? []
   const comboComplete = comboPicks.every((_, i) => !!comboSelections[i])
   const comboModifiers: MenuItemModifier[] = comboPicks
-    .map((_, i): MenuItemModifier | null => {
-      const flavor = MENU_ITEMS.find((m) => m.id === comboSelections[i])
-      return flavor
-        ? { id: `combo-${i + 1}-${flavor.id}`, name: flavor.name, nameEs: flavor.nameEs, price: 0, category: 'combo' }
+    .map((pick, i): MenuItemModifier | null => {
+      const choice = comboPickOptions(pick).find((o) => o.id === comboSelections[i])
+      return choice
+        ? { id: `combo-${i + 1}-${choice.id}`, name: choice.name, nameEs: choice.nameEs, price: 0, category: 'combo' }
         : null
     })
     .filter((m): m is MenuItemModifier => m !== null)
@@ -372,9 +386,7 @@ function ItemDetailSheet() {
               </h3>
               <div className="space-y-3">
                 {comboPicks.map((pick, i) => {
-                  const options = MENU_ITEMS.filter(
-                    (m) => m.categoryId === pick.fromCategory && m.isAvailable,
-                  )
+                  const options = comboPickOptions(pick)
                   return (
                     <div key={i}>
                       <label className="block text-white/60 text-xs mb-1.5">{pick.labelEs}</label>
@@ -612,6 +624,25 @@ export default function CartaPage() {
       .filter((i) => i.isAvailable)
       .filter((i) => orderType !== 'delivery' || i.deliveryAvailable !== false)
   }, [searchQuery, selectedCategory, activeFilters, menuOverrides, orderType])
+
+  // ── Deep link: /carta?item=<id> opens that item's sheet once on load.
+  // Used by the specials banner "Ordenar ahora" CTA to jump straight to a
+  // combo. Reads from the merged/available list so overrides + availability
+  // apply; fires once so closing the sheet doesn't reopen it.
+  const deepLinkOpened = useRef(false)
+  useEffect(() => {
+    if (deepLinkOpened.current) return
+    const itemId = new URLSearchParams(window.location.search).get('item')
+    if (!itemId) {
+      deepLinkOpened.current = true
+      return
+    }
+    const target = displayItems.find((i) => i.id === itemId)
+    if (target) {
+      openMenuItemSheet(target)
+      deepLinkOpened.current = true
+    }
+  }, [displayItems, openMenuItemSheet])
 
   // ── Grouped by category (only when not searching) ────────
   const grouped = useMemo(() => {

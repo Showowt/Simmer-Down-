@@ -206,7 +206,7 @@ export default function SpecialsSection() {
                 {/* CTA */}
                 {special.is_live && (
                   <Link
-                    href="/carta"
+                    href={special.link_item_slug ? `/carta?item=${special.link_item_slug}` : '/carta'}
                     className="mt-2 inline-flex items-center justify-center gap-1.5 bg-[#E85D04] hover:bg-[#E85D04]/85 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
                   >
                     Ordenar ahora

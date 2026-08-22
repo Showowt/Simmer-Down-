@@ -54,7 +54,7 @@ export async function GET(
     const { data, error } = await supabase
       .from("specials")
       .select(
-        "id, title, description, discount_type, discount_value, original_price, special_price, menu_items, start_date, end_date, days_of_week, active, featured, image_url, created_at, updated_at",
+        "id, title, description, discount_type, discount_value, original_price, special_price, menu_items, link_item_slug, start_date, end_date, days_of_week, active, featured, image_url, created_at, updated_at",
       )
       .eq("active", true)
       .order("featured", { ascending: false })

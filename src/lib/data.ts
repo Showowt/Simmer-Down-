@@ -75,11 +75,21 @@ export interface MenuItem {
   comboPicks?: ComboPick[];
 }
 
+export interface ComboPickOption {
+  /** Stable id scoped to the combo (e.g. 'soda-coca-cola'). */
+  id: string;
+  name: string;
+  nameEs: string;
+}
+
 export interface ComboPick {
   label: string;
   labelEs: string;
-  /** categoryId the customer picks from (e.g. 'pizzas' = traditional pizzas). */
-  fromCategory: string;
+  /** categoryId the customer picks from (e.g. 'pizzas' = traditional pizzas).
+   *  Provide this OR `options`. */
+  fromCategory?: string;
+  /** Explicit choices for picks that aren't menu items (e.g. soda flavors). */
+  options?: ComboPickOption[];
 }
 
 export interface MenuItemSize {
@@ -352,12 +362,12 @@ export const MENU_ITEMS: MenuItem[] = [
   // Combo SimmerLover = 2 large traditional pizzas ($14.99 ea) + Coca-Cola 1.25 L
   // for $21.99. Fixed-price single product; customer states the 2 flavors in notes.
   { id: 'combo-simmerlover', categoryId: 'combos', name: 'SimmerLover Combo', nameEs: 'Combo SimmerLover', description: '2 large traditional pizzas + Coca-Cola 1.25 L. Pick your 2 flavors.', descriptionEs: '2 pizzas grandes tradicionales + Coca-Cola 1.25 L. Elige tus 2 sabores.', basePrice: 21.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true, comboPicks: [ { label: 'Pizza 1 flavor', labelEs: 'Sabor de la pizza 1', fromCategory: 'pizzas' }, { label: 'Pizza 2 flavor', labelEs: 'Sabor de la pizza 2', fromCategory: 'pizzas' } ] },
-  // Web Exclusive Combo (Martin, 2026-08-21): 1 large traditional pizza ($14.99)
-  // + Cheese Balls starter ($6.99) + Coca-Cola 1.25 L for $19.99 (reg $23.99).
-  // Fixed-price single product; customer picks the pizza flavor. Makes the
-  // "Exclusivo en la web" promo banner orderable as a combo instead of 3 items
-  // at full price. Soda defaults to Coca-Cola 1.25 L (matches SimmerLover).
-  { id: 'combo-web-exclusivo', categoryId: 'combos', name: 'Web Exclusive Combo', nameEs: 'Combo Exclusivo Web', description: 'Large traditional pizza + Cheese Balls starter + Coca-Cola 1.25 L. Pick your flavor.', descriptionEs: 'Pizza grande tradicional + entrada de Cheese Balls + Coca-Cola 1.25 L. Elige tu sabor.', basePrice: 19.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true, comboPicks: [ { label: 'Pizza flavor', labelEs: 'Sabor de la pizza', fromCategory: 'pizzas' } ] },
+  // Web Exclusive (Martin, 2026-08-21): 1 large traditional pizza ($14.99) +
+  // Cheese Balls starter ($6.99) + 1.25 L soda for $19.99 (reg $23.99). Fixed
+  // price; customer picks the pizza flavor and the soda (Coca-Cola/Sprite/Fanta,
+  // client-confirmed 2026-08-22). Makes the "Exclusivo en la web" promo banner
+  // orderable as a combo instead of 3 separate items at full price.
+  { id: 'combo-web-exclusivo', categoryId: 'combos', name: 'Web Exclusive', nameEs: 'Exclusivo en la Web', description: 'Large traditional pizza + Cheese Balls starter + 1.25 L soda. Pick your pizza flavor and soda.', descriptionEs: 'Pizza grande tradicional + entrada de Cheese Balls + soda 1.25 L. Elige el sabor de tu pizza y tu soda.', basePrice: 19.99, isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: true, comboPicks: [ { label: 'Pizza flavor', labelEs: 'Sabor de la pizza', fromCategory: 'pizzas' }, { label: 'Soda (1.25 L)', labelEs: 'Soda (1.25 L)', options: [ { id: 'soda-coca-cola', name: 'Coca-Cola 1.25 L', nameEs: 'Coca-Cola 1.25 L' }, { id: 'soda-sprite', name: 'Sprite 1.25 L', nameEs: 'Sprite 1.25 L' }, { id: 'soda-fanta', name: 'Fanta 1.25 L', nameEs: 'Fanta 1.25 L' } ] } ] },
   // PIZZAS
   { id: 'fungi', categoryId: 'pizzas', name: 'Fungi', nameEs: 'Fungi', description: 'Vegetarian Pizza with Onions and Mushrooms in Chimichurri Sauce', descriptionEs: 'Pizza Vegetariana con Cebollas y Hongos en Salsa Chimichurri', basePrice: 5.75, image: '/images/menu/funghi-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: true, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },
   { id: 'pineapple-pizza', categoryId: 'pizzas', name: 'With Pineapple', nameEs: 'Con Piña', description: 'Pizza with Pineapple, Pepperoni, Bacon and House Basil Pesto', descriptionEs: 'Pizza con Piña, Pepperoni, Tocino y Pesto de Albahaca de la Casa', basePrice: 5.75, image: '/images/menu/con-pina-final.jpg', isAvailable: true, isFeatured: false, isVegetarian: false, isSpicy: false, isGlutenFree: false, isNew: false, sizes: PIZZA_SIZES, modifiers: PIZZA_MODIFIERS },

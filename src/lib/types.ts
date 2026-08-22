@@ -225,6 +225,8 @@ export interface Special {
   original_price: number | null;
   special_price: number | null;
   menu_items: string[] | null;
+  /** Static menu-item slug the CTA deep-links to (/carta?item=<slug>). */
+  link_item_slug?: string | null;
   start_date: string;
   end_date: string | null;
   days_of_week: number[] | null;
