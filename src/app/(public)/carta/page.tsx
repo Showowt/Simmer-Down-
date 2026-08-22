@@ -468,7 +468,7 @@ function ItemDetailSheet() {
               className="w-full bg-[#E85D04] hover:bg-[#ff6a1f] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#E85D04] disabled:active:scale-100 text-white font-bold rounded-xl h-14 flex items-center justify-between px-5 transition-all duration-150"
             >
               <span className="text-base">
-                {comboPicks.length > 0 && !comboComplete ? 'Elige tus 2 sabores' : t('menu.addToCart')}
+                {comboPicks.length > 0 && !comboComplete ? (comboPicks.length === 1 ? 'Elige tu sabor' : `Elige tus ${comboPicks.length} sabores`) : t('menu.addToCart')}
               </span>
               <span className="text-base">{formatPrice(total)}</span>
             </button>
