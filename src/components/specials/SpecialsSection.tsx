@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Tag, Calendar, ChevronRight, Star } from 'lucide-react'
+import { Calendar, ChevronRight, Star } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Special } from '@/lib/types'
@@ -26,6 +26,23 @@ function discountBadge(s: PublicSpecial): string {
       return 'COMBO'
     default:
       return 'OFERTA'
+  }
+}
+
+// Big, image-free hero for specials without a photo — adapts to the promo
+// type so the card still lands hard without artwork.
+function heroContent(s: PublicSpecial): { big: string; small?: string } {
+  switch (s.discount_type) {
+    case 'percentage':
+      return { big: `${Math.round(s.discount_value)}%`, small: 'OFF' }
+    case 'fixed':
+      return s.special_price != null
+        ? { big: `$${s.special_price.toFixed(2)}`, small: 'Precio web' }
+        : { big: 'OFERTA' }
+    case 'bundle':
+      return { big: 'COMBO', small: 'Especial' }
+    default:
+      return { big: 'OFERTA' }
   }
 }
 
@@ -123,7 +140,9 @@ export default function SpecialsSection() {
 
         {/* Specials grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {specials.slice(0, 6).map((special, i) => (
+          {specials.slice(0, 6).map((special, i) => {
+            const hero = heroContent(special)
+            return (
             <motion.div
               key={special.id}
               initial={{ opacity: 0, y: 24 }}
@@ -153,14 +172,38 @@ export default function SpecialsSection() {
                   )}
                 </div>
               ) : (
-                <div className="relative h-32 bg-gradient-to-br from-[#E85D04]/15 to-[#0A0A0A] flex items-center justify-center">
-                  <Tag className="w-10 h-10 text-[#E85D04]/60" />
-                  <span className="absolute top-3 right-3 bg-[#E85D04] text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                    {discountBadge(special)}
-                  </span>
+                <div
+                  className="relative h-44 overflow-hidden flex flex-col items-center justify-center text-center px-4"
+                  style={{ background: 'radial-gradient(130% 130% at 50% -10%, #FB923C 0%, #E85D04 46%, #7C2D12 100%)' }}
+                >
+                  {/* Texture + depth so it reads as designed, not empty */}
+                  <div
+                    className="absolute inset-0 opacity-[0.10] mix-blend-overlay"
+                    style={{ backgroundImage: 'repeating-linear-gradient(135deg, #000 0 2px, transparent 2px 11px)' }}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute -top-12 -right-10 w-44 h-44 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
+                  <div className="absolute -bottom-14 -left-10 w-44 h-44 rounded-full bg-black/25 blur-3xl" aria-hidden="true" />
+                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-none" aria-hidden="true" />
+
+                  {/* Hero discount — the star of the card when there's no photo */}
+                  <div className="relative">
+                    <div
+                      className="font-display font-bold text-white leading-none"
+                      style={{ fontSize: 'clamp(2.75rem, 8vw, 3.75rem)', textShadow: '0 6px 28px rgba(0,0,0,0.4)' }}
+                    >
+                      {hero.big}
+                    </div>
+                    {hero.small && (
+                      <div className="mt-1 pl-[0.4em] text-white font-extrabold tracking-[0.4em] text-sm uppercase">
+                        {hero.small}
+                      </div>
+                    )}
+                  </div>
+
                   {special.featured && (
-                    <span className="absolute top-3 left-3 bg-[#FBBF24] text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-black" /> Destacado
+                    <span className="absolute top-3 left-3 bg-white/95 text-[#9A3412] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1 shadow-sm">
+                      <Star className="w-3 h-3 fill-[#E85D04] text-[#E85D04]" /> Destacado
                     </span>
                   )}
                 </div>
@@ -215,7 +258,8 @@ export default function SpecialsSection() {
                 )}
               </div>
             </motion.div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>
