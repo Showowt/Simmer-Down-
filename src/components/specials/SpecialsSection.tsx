@@ -16,19 +16,6 @@ interface PublicSpecial extends Special {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function discountBadge(s: PublicSpecial): string {
-  switch (s.discount_type) {
-    case 'percentage':
-      return `-${Math.round(s.discount_value)}%`
-    case 'fixed':
-      return s.special_price != null ? `$${s.special_price.toFixed(2)}` : 'OFERTA'
-    case 'bundle':
-      return 'COMBO'
-    default:
-      return 'OFERTA'
-  }
-}
-
 // Big, image-free hero for specials without a photo — adapts to the promo
 // type so the card still lands hard without artwork.
 function heroContent(s: PublicSpecial): { big: string; small?: string } {
@@ -153,27 +140,34 @@ export default function SpecialsSection() {
             >
               {/* Image or placeholder */}
               {special.image_url ? (
-                <div className="relative h-44 overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden bg-[#0A0A0A]">
+                  {/* Blurred fill: lets portrait/story flyers show whole without
+                      dead bars, and never crops the baked-in marketing. */}
+                  <Image
+                    src={special.image_url}
+                    alt=""
+                    aria-hidden="true"
+                    fill
+                    className="object-cover scale-110 blur-2xl opacity-50"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  {/* The full marketing image — contained, never cut. */}
                   <Image
                     src={special.image_url}
                     alt={special.title}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <span className="absolute top-3 right-3 bg-[#E85D04] text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                    {discountBadge(special)}
-                  </span>
                   {special.featured && (
-                    <span className="absolute top-3 left-3 bg-[#FBBF24] text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-black" /> Destacado
+                    <span className="absolute top-3 left-3 z-10 bg-white/95 text-[#9A3412] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1 shadow-sm">
+                      <Star className="w-3 h-3 fill-[#E85D04] text-[#E85D04]" /> Destacado
                     </span>
                   )}
                 </div>
               ) : (
                 <div
-                  className="relative h-44 overflow-hidden flex flex-col items-center justify-center text-center px-4"
+                  className="relative aspect-[3/4] overflow-hidden flex flex-col items-center justify-center text-center px-4"
                   style={{ background: 'radial-gradient(130% 130% at 50% -10%, #FB923C 0%, #E85D04 46%, #7C2D12 100%)' }}
                 >
                   {/* Texture + depth so it reads as designed, not empty */}
