@@ -270,6 +270,66 @@ export const reservationFormSchema = z
 export type ReservationFormInput = z.infer<typeof reservationFormSchema>;
 
 // ═══════════════════════════════════════════════════════════════
+// Room Booking (Estadía) Schema
+// ═══════════════════════════════════════════════════════════════
+
+const LODGING_LOCATION_IDS = ["lago-coatepeque"] as const;
+
+export const roomBookingSchema = z
+  .object({
+    location_id: z.enum(LODGING_LOCATION_IDS, {
+      error: "Ubicación de estadía inválida / Invalid lodging location",
+    }),
+    room_id: z.string().uuid("Habitación inválida / Invalid room"),
+    check_in: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de entrada inválida. Usa: YYYY-MM-DD"),
+    check_out: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha de salida inválida. Usa: YYYY-MM-DD"),
+    guest_count: z
+      .number()
+      .int()
+      .min(1, "Mínimo 1 huésped")
+      .max(20, "Para grupos grandes, contáctanos directamente"),
+    customer_name: z
+      .string()
+      .min(2, "El nombre debe tener al menos 2 caracteres")
+      .max(100, "El nombre es demasiado largo"),
+    customer_phone: z
+      .string()
+      .min(7, "El teléfono debe tener al menos 7 dígitos")
+      .max(20, "El teléfono es demasiado largo"),
+    customer_email: z
+      .string()
+      .email("Correo electrónico inválido")
+      .max(255)
+      .optional()
+      .nullable()
+      .or(z.literal("")),
+    special_requests: z
+      .string()
+      .max(1000, "Las solicitudes especiales son demasiado largas")
+      .optional()
+      .nullable()
+      .or(z.literal("")),
+  })
+  .refine((d) => d.check_out > d.check_in, {
+    message: "La salida debe ser posterior a la entrada / Check-out must be after check-in",
+    path: ["check_out"],
+  })
+  .refine(
+    (d) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return new Date(d.check_in + "T00:00:00") >= today;
+    },
+    { message: "La entrada no puede ser en el pasado / Check-in cannot be in the past", path: ["check_in"] },
+  );
+
+export type RoomBookingInput = z.infer<typeof roomBookingSchema>;
+
+// ═══════════════════════════════════════════════════════════════
 // Validation Error Response Helper
 // ═══════════════════════════════════════════════════════════════
 

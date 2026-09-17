@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
 import { type Location, getGoogleMapsUrl, isLocationOpen } from '@/lib/data'
+import { hasLodging } from '@/lib/rooms'
 
 // ─── Feature icon mapping ─────────────────────────────────
 
@@ -277,6 +278,33 @@ export default function LocationDetailClient({ location }: { location: Location 
             </div>
           </motion.div>
         </div>
+
+        {/* ─── Estadía CTA (lodging venues) ─── */}
+        {(location.features.includes('lodging') || hasLodging(location.id)) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-8 bg-gradient-to-br from-[#E85D04]/15 to-[#1A1A1A] border border-[#E85D04]/30 rounded-2xl p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5"
+          >
+            <div>
+              <h2 className="text-white font-display text-xl uppercase mb-1">
+                {locale === 'es' ? 'Estadía junto al lago' : 'Stay by the lake'}
+              </h2>
+              <p className="text-white/50 text-sm">
+                {locale === 'es'
+                  ? 'Reserva tu habitación. Confirmamos disponibilidad por WhatsApp.'
+                  : 'Book your room. We confirm availability by WhatsApp.'}
+              </p>
+            </div>
+            <Link
+              href="/estadia"
+              className="flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-3.5 font-semibold rounded-xl transition-colors whitespace-nowrap min-h-[52px]"
+            >
+              {locale === 'es' ? 'Reservar Estadía' : 'Book a Room'}
+            </Link>
+          </motion.div>
+        )}
 
         {/* ─── Map Section ─── */}
         <motion.div
