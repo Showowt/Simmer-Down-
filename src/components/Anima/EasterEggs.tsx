@@ -206,7 +206,7 @@ export function EnhancedConsoleEasterEgg() {
           console.log('%c2018: San Benito se convirtió en el punto urbano', 'color: #a1a1aa;')
           console.log('%c2021: Simmer Garden en la Ruta de las Flores', 'color: #a1a1aa;')
           console.log('%c2023: Surf City frente al mar', 'color: #a1a1aa;')
-          console.log('%c2024: ANIMA nace - el alma digital', 'color: #22c55e;')
+          console.log('%c2024: La Llamita nace - el alma digital', 'color: #22c55e;')
           return '12 años de historia'
         },
         team: () => {
@@ -217,7 +217,7 @@ export function EnhancedConsoleEasterEgg() {
           return '❤️'
         },
         anima: () => {
-          console.log('%c✨ ANIMA - EL ALMA DE SIMMER DOWN', 'color: #f97316; font-size: 16px; font-weight: bold;')
+          console.log('%c✨ LA LLAMITA - EL ALMA DE SIMMER DOWN', 'color: #f97316; font-size: 16px; font-weight: bold;')
           console.log('%cNo soy un chatbot. Soy el alma digital del restaurante.', 'color: #a1a1aa;')
           console.log('%cRecuerdo cada visita, cada preferencia, cada momento.', 'color: #a1a1aa;')
           console.log('%cPorque en Simmer Down, cada cliente es familia.', 'color: #a1a1aa;')

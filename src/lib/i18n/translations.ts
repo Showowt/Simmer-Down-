@@ -84,9 +84,9 @@ export const translations = {
     niceAgain: { es: 'Qué bueno verte de nuevo.', en: 'Great to see you again.' },
     visit: { es: 'Visita', en: 'Visit' },
     favLocation: { es: 'Tu ubicación favorita:', en: 'Your favorite location:' },
-    meetAnima: { es: 'Conoce a ANIMA', en: 'Meet ANIMA' },
+    meetAnima: { es: 'Conoce a La Llamita', en: 'Meet La Llamita' },
     animaGuide: { es: 'Tu guía personal de Simmer Down', en: 'Your personal Simmer Down guide' },
-    animaDesc: { es: 'ANIMA te ayuda a descubrir el menú, recordar tus favoritos y encontrar tu próxima experiencia perfecta.', en: 'ANIMA helps you discover the menu, remember your favorites and find your next perfect experience.' },
+    animaDesc: { es: 'La Llamita te ayuda a descubrir el menú, recordar tus favoritos y encontrar tu próxima experiencia perfecta.', en: 'La Llamita helps you discover the menu, remember your favorites and find your next perfect experience.' },
     letsChat: { es: 'Platiquemos', en: 'Let\'s Chat' },
   },
 

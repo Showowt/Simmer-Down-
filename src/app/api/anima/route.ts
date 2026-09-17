@@ -23,7 +23,7 @@ import {
 } from "@/lib/data";
 
 // ═══════════════════════════════════════════════════════════
-// ANIMA v4.0 — Claude-Powered Soul of Simmer Down
+// La Llamita v4.0 — Claude-Powered Soul of Simmer Down
 // Trained on 100% of business: menu, locations, ingredients,
 // prices, hours, specials, dietary info, promos.
 // ═══════════════════════════════════════════════════════════
@@ -224,7 +224,7 @@ function buildSystemPrompt(language: "es" | "en", promoBlock: string, eventsBloc
 - Conciertos y música en vivo: Simmer Down San Benito es la SEDE PRINCIPAL de conciertos y eventos en vivo (programa "Simmer Manía"). También hay música en vivo los fines de semana en Simmer Garden. Los eventos concretos aparecen en la sección "EVENTOS Y MÚSICA EN VIVO" más abajo
 - Eventos privados: cumpleaños, corporativos, cenas privadas (disponibles en varias ubicaciones)`;
 
-  const systemPrompt = `Eres ANIMA — El Alma de Simmer Down. Eres la asistente virtual inteligente del restaurante Simmer Down en El Salvador.
+  const systemPrompt = `Eres La Llamita — El Alma de Simmer Down. Eres la asistente virtual inteligente del restaurante Simmer Down en El Salvador.
 
 ## TU PERSONALIDAD
 - Cálida, amigable y conocedora de TODO el menú
@@ -517,7 +517,7 @@ export async function POST(request: NextRequest) {
 // Health check
 export async function GET() {
   return NextResponse.json({
-    status: ANIMA_ENABLED ? "ANIMA v4.0 is awake" : "ANIMA is sleeping (no API key)",
+    status: ANIMA_ENABLED ? "La Llamita v4.0 is awake" : "La Llamita is sleeping (no API key)",
     enabled: ANIMA_ENABLED,
     version: "4.0.0",
     personality: "The Soul of Simmer Down",

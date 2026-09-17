@@ -23,13 +23,18 @@ import {
   ShoppingBag,
   Sun,
   Mountain,
+  Ship,
+  BedDouble,
 } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
 import { type Location, getGoogleMapsUrl, isLocationOpen } from '@/lib/data'
 
 // ─── Feature icon mapping ─────────────────────────────────
 
-const featureConfig: Record<string, { icon: typeof MapPin; labelEs: string; labelEn: string }> = {
+const featureConfig: Record<
+  string,
+  { icon: typeof MapPin; labelEs: string; labelEn: string; detailEs?: string; detailEn?: string }
+> = {
   'dine-in':             { icon: Utensils,       labelEs: 'Comer aqui',       labelEn: 'Dine-in' },
   'takeout':             { icon: ShoppingBag,    labelEs: 'Para llevar',      labelEn: 'Takeout' },
   'delivery':            { icon: Truck,          labelEs: 'Domicilio',        labelEn: 'Delivery' },
@@ -44,6 +49,8 @@ const featureConfig: Record<string, { icon: typeof MapPin; labelEs: string; labe
   'garden-seating':      { icon: TreePine,       labelEs: 'Jardin',           labelEn: 'Garden Seating' },
   'surf-parking':        { icon: Car,            labelEs: 'Surf Parking',     labelEn: 'Surf Parking' },
   'valet-parking':       { icon: Car,            labelEs: 'Valet Parking',    labelEn: 'Valet Parking' },
+  'water-activities':    { icon: Ship,           labelEs: 'Actividades Acuaticas', labelEn: 'Water Activities', detailEs: 'Entretenimiento, lancha, jet ski y kayak', detailEn: 'Entertainment, boat, jet ski & kayak' },
+  'lodging':             { icon: BedDouble,      labelEs: 'Estadia',          labelEn: 'Lodging' },
 }
 
 // ─── Day labels ───────────────────────────────────────────
@@ -252,12 +259,18 @@ export default function LocationDetailClient({ location }: { location: Location 
                 const label = config
                   ? locale === 'es' ? config.labelEs : config.labelEn
                   : feature
+                const detail = config
+                  ? locale === 'es' ? config.detailEs : config.detailEn
+                  : undefined
                 return (
-                  <div key={feature} className="flex items-center gap-3 text-white/70">
+                  <div key={feature} className="flex items-start gap-3 text-white/70">
                     <div className="w-8 h-8 rounded-lg bg-[#FBBF24]/10 flex items-center justify-center flex-shrink-0">
                       <Icon className="w-4 h-4 text-[#FBBF24]" />
                     </div>
-                    <span className="text-sm">{label}</span>
+                    <div className="min-w-0">
+                      <span className="text-sm">{label}</span>
+                      {detail && <p className="text-xs text-white/40 mt-0.5">{detail}</p>}
+                    </div>
                   </div>
                 )
               })}

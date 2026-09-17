@@ -14,6 +14,9 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: '/carta', labelKey: 'nav.menu' },
+  { href: '/cortes-premium', labelKey: 'nav.cortes' },
+  { href: '/hospitality', labelKey: 'nav.hospitality' },
+  { href: '/merch', labelKey: 'nav.merch' },
   { href: '/events', labelKey: 'nav.events' },
   { href: '/restaurantes', labelKey: 'nav.locations' },
   { href: '/reservations', labelKey: 'nav.reserve' },
@@ -75,7 +78,7 @@ export default function NewHeader() {
 
           {/* Center — Desktop nav */}
           <nav
-            className="hidden lg:flex items-center gap-8"
+            className="hidden lg:flex items-center gap-3 xl:gap-5"
             aria-label="Navegación principal"
           >
             {NAV_LINKS.map(({ href, labelKey }) => (

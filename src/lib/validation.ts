@@ -225,6 +225,17 @@ export const reservationFormSchema = z
       .optional()
       .nullable()
       .or(z.literal("")),
+    // Optional specific-table selection (venues with a floor plan)
+    table_id: z
+      .string()
+      .uuid("Mesa inválida / Invalid table")
+      .optional()
+      .nullable(),
+    zone: z
+      .string()
+      .max(20)
+      .optional()
+      .nullable(),
   })
   .refine(
     (data) => {

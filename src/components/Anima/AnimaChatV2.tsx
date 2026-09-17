@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Flame, ChevronRight, Mic, MicOff, ShoppingCart, Plus, MapPin, Calendar, UtensilsCrossed } from 'lucide-react'
+import Image from 'next/image'
+import { X, Send, ChevronRight, Mic, MicOff, ShoppingCart, Plus, MapPin, Calendar, UtensilsCrossed } from 'lucide-react'
 import { useAnimaStore } from '@/store/anima'
 import { useCartStore } from '@/lib/store'
 import { MENU_ITEMS } from '@/lib/data'
@@ -465,9 +466,9 @@ export default function AnimaChatV2() {
             className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-[10000] lg:bottom-24 lg:right-6 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-[#E85D04] hover:bg-[#C2410C] text-white flex items-center justify-center shadow-md shadow-[#E85D04]/20 transition-all group"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            aria-label="Hablar con ANIMA"
+            aria-label="Hablar con La Llamita"
           >
-            <Flame className="w-5 h-5 lg:w-6 lg:h-6 relative z-10" />
+            <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-6 h-6 lg:w-7 lg:h-7 object-contain relative z-10" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 lg:w-3 lg:h-3 bg-[#4CAF50] rounded-full border-2 border-[#0A0A0A]" />
           </motion.button>
         )}
@@ -485,10 +486,10 @@ export default function AnimaChatV2() {
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center animate-pulse">
-                  <Flame className="w-5 h-5 text-white" />
+                  <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-sm">ANIMA</h3>
+                  <h3 className="font-semibold text-white text-sm">La Llamita</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-[#4CAF50] animate-pulse" />
                     {locale === 'en' ? 'Online' : 'En línea'}
@@ -534,10 +535,10 @@ export default function AnimaChatV2() {
             <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1A1A1A]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center">
-                  <Flame className="w-5 h-5 text-white" />
+                  <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">ANIMA</h3>
+                  <h3 className="font-semibold text-white">La Llamita</h3>
                   <p className="text-xs text-[#4CAF50] flex items-center gap-1">
                     <span className="w-2 h-2 bg-[#4CAF50] animate-pulse" />
                     {locale === 'en' ? 'The Soul of Simmer Down' : 'El alma de Simmer Down'}

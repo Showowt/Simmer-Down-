@@ -19,6 +19,9 @@ import logger from "@/lib/logger";
 import { sendTelegram, resolveLocationName } from "@/lib/telegram";
 import { sendWhatsApp } from "@/lib/twilio/client";
 import { LOCATIONS } from "@/lib/data";
+import { timesConflict } from "@/lib/tables";
+
+const ACTIVE_STATUSES = ["pending", "confirmed", "seated"];
 
 interface ReservationResponse {
   success: boolean;
@@ -78,7 +81,89 @@ export async function POST(
       customer_phone,
       customer_email,
       special_requests,
+      table_id,
+      zone,
     } = parseResult.data;
+
+    // ── Specific-table booking: validate + guard against double-booking ──
+    // Resolved server-side so we can include the table in notifications and
+    // reject conflicts (never trust the client's availability read).
+    let resolvedTableLabel: string | null = null;
+    let resolvedZone: string | null = zone ?? null;
+
+    if (table_id) {
+      try {
+        const supabase = createServiceClient();
+
+        const { data: tableRow, error: tableErr } = await supabase
+          .from("restaurant_tables")
+          .select("id, label, zone, is_blocked, is_active")
+          .eq("id", table_id)
+          .eq("location_id", location_id)
+          .single();
+
+        if (tableErr || !tableRow) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "La mesa seleccionada no es válida. / The selected table is invalid.",
+            },
+            { status: 400 },
+          );
+        }
+
+        if (!tableRow.is_active || tableRow.is_blocked) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "Esa mesa no está disponible. Elige otra. / That table is unavailable. Please pick another.",
+            },
+            { status: 409 },
+          );
+        }
+
+        const { data: sameDay, error: sameDayErr } = await supabase
+          .from("reservations")
+          .select("time")
+          .eq("location_id", location_id)
+          .eq("date", date)
+          .eq("table_id", table_id)
+          .in("status", ACTIVE_STATUSES);
+
+        if (!sameDayErr && sameDay) {
+          const collision = sameDay.some(
+            (r) => typeof r.time === "string" && timesConflict(r.time, time),
+          );
+          if (collision) {
+            return NextResponse.json(
+              {
+                success: false,
+                error:
+                  "Esa mesa acaba de ser reservada para ese horario. Elige otra. / That table was just booked for this time. Please pick another.",
+              },
+              { status: 409 },
+            );
+          }
+        }
+
+        resolvedTableLabel = tableRow.label as string;
+        resolvedZone = (tableRow.zone as string) ?? resolvedZone;
+      } catch (guardErr) {
+        logger.warn("Table booking guard failed", {
+          error: guardErr instanceof Error ? guardErr.message : String(guardErr),
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "No pudimos confirmar la mesa. Intenta de nuevo. / We couldn't confirm the table. Please try again.",
+          },
+          { status: 503 },
+        );
+      }
+    }
 
     // Prepare the reservation record
     const reservation = {
@@ -90,6 +175,8 @@ export async function POST(
       customer_phone,
       customer_email: customer_email || null,
       special_requests: special_requests || null,
+      table_id: table_id || null,
+      zone: resolvedZone,
       status: "confirmed",
     };
 
@@ -140,6 +227,9 @@ export async function POST(
       `\uD83D\uDCC5 Fecha: ${date}`,
       `\uD83D\uDD50 Hora: ${time}`,
       `\uD83D\uDC65 Personas: ${guest_count}`,
+      resolvedTableLabel
+        ? `\uD83E\uDE91 Mesa: ${resolvedTableLabel}${resolvedZone ? ` (${resolvedZone})` : ""}`
+        : "",
       ``,
       `\uD83D\uDC64 Nombre: ${safeName}`,
       `\uD83D\uDCDE Tel\u00E9fono: ${safePhone}`,
@@ -169,6 +259,9 @@ export async function POST(
         `📆 Fecha: ${date}`,
         `🕐 Hora: ${time}`,
         `👥 Personas: ${guest_count}`,
+        resolvedTableLabel
+          ? `🪑 Mesa: ${resolvedTableLabel}${resolvedZone ? ` (${resolvedZone})` : ""}`
+          : "",
         ``,
         `👤 Nombre: ${customer_name}`,
         `📞 Telefono: ${customer_phone}`,
