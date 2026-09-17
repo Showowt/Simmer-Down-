@@ -22,6 +22,7 @@ import {
   Camera,
   KeyRound,
   Users,
+  Gift,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -36,6 +37,7 @@ const navItems = [
   { href: "/admin/events", label: "Eventos", icon: Calendar },
   { href: "/admin/inquiries", label: "Consultas", icon: MessageSquare },
   { href: "/admin/simmerlovers", label: "SimmerLovers", icon: Flame },
+  { href: "/admin/premios", label: "Premios y Puntos", icon: Gift },
   { href: "/admin/locations", label: "Ubicaciones", icon: MapPin },
   { href: "/admin/users", label: "Usuarios", icon: Users },
   { href: "/admin/settings", label: "Configuración", icon: Settings },
