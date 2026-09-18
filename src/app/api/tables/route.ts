@@ -1,21 +1,23 @@
 /**
- * Tables API — floor plan availability
+ * Tables API — floor plan availability (grouped by venue area)
  *
- * GET /api/tables?location_id=juayua&date=YYYY-MM-DD&time=HH:MM
- *   Returns every active table for the venue, each decorated with an
- *   `available` flag computed from manual blocks + existing reservations
- *   that collide with the requested time (dining-window overlap).
- *
- * If date/time are omitted, tables are returned with availability based on
- * manual blocks only (used to render the layout before a slot is picked).
+ * GET /api/tables?location_id=santa-ana&date=YYYY-MM-DD&time=HH:MM
+ *   Returns the venue's ACTIVE areas, each with its active tables decorated
+ *   with an `available` flag (manual blocks + reservations that collide with
+ *   the requested time). `hasFloorPlan` tells the client whether to require a
+ *   table selection at all.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { computeAvailability, type RestaurantTable } from "@/lib/tables";
+import {
+  computeAvailability,
+  groupTablesByArea,
+  type RestaurantTable,
+  type VenueArea,
+} from "@/lib/tables";
 import logger from "@/lib/logger";
 
-// Reservation statuses that still hold a table.
 const ACTIVE_STATUSES = ["pending", "confirmed", "seated"];
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -34,11 +36,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = createServiceClient();
 
-    // 1. Load the venue's active tables
+    // 1. Active areas for the venue
+    const { data: areas, error: areasError } = await supabase
+      .from("venue_areas")
+      .select(
+        "id, location_id, code, name_es, name_en, description_es, description_en, floor, view, is_vip, image_url, min_party, is_active, sort_order",
+      )
+      .eq("location_id", locationId)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (areasError) {
+      logger.warn("Areas query failed", { error: areasError.message });
+    }
+    const areaList = (areas ?? []) as VenueArea[];
+
+    // 2. Active tables for the venue
     const { data: tables, error: tablesError } = await supabase
       .from("restaurant_tables")
       .select(
-        "id, location_id, zone, code, label, seats, pos_x, pos_y, shape, is_blocked, is_active, sort_order",
+        "id, location_id, zone, area_id, code, label, seats, pos_x, pos_y, shape, is_blocked, is_active, sort_order",
       )
       .eq("location_id", locationId)
       .eq("is_active", true)
@@ -51,13 +68,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         { status: 500 },
       );
     }
-
     const tableList = (tables ?? []) as RestaurantTable[];
 
-    // 2. Load same-day reservations that still hold a table
-    let reservationsOnDate: Array<{ table_id: string | null; time: string }> =
-      [];
-
+    // 3. Same-day reservations that still hold a table
+    let reservationsOnDate: Array<{ table_id: string | null; time: string }> = [];
     if (date) {
       const { data: reservations, error: resError } = await supabase
         .from("reservations")
@@ -65,7 +79,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         .eq("location_id", locationId)
         .eq("date", date)
         .in("status", ACTIVE_STATUSES);
-
       if (resError) {
         logger.warn("Reservations query failed", { error: resError.message });
       } else {
@@ -76,19 +89,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    // 3. Compute availability. Without a time, only manual blocks matter.
+    // 4. Availability per table, then grouped into their areas
     const availability = computeAvailability(
       tableList,
       time ? reservationsOnDate : [],
       time ?? "00:00",
     );
+    const areasWithTables = groupTablesByArea(areaList, availability);
 
     return NextResponse.json({
       success: true,
       location_id: locationId,
       date: date ?? null,
       time: time ?? null,
-      tables: availability,
+      hasFloorPlan: areasWithTables.length > 0,
+      areas: areasWithTables,
     });
   } catch (error) {
     logger.warn("Tables endpoint error", {

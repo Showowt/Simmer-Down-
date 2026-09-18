@@ -345,6 +345,8 @@ export default function ReservationsPage() {
   const [selectedTime, setSelectedTime] = useState('')
   const [guestCount, setGuestCount] = useState(2)
   const [selectedTable, setSelectedTable] = useState<TableAvailability | null>(null)
+  const [floorPlanActive, setFloorPlanActive] = useState<boolean | null>(null)
+  const [occasion, setOccasion] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
@@ -379,6 +381,7 @@ export default function ReservationsPage() {
     setSelectedLocationId(id)
     setSelectedTime('')
     setSelectedTable(null)
+    setFloorPlanActive(null)
     // If current date is now a closed day for new location, clear it
     if (selectedDate) {
       const loc = locations.find((l) => l.id === id)
@@ -397,7 +400,14 @@ export default function ReservationsPage() {
     })
   }, [])
 
+  const handleHasTables = useCallback((has: boolean) => {
+    setFloorPlanActive(has)
+    if (!has) setSelectedTable(null)
+  }, [])
+
   const showFloorPlan = hasFloorPlan(selectedLocationId)
+  // Only require a table when the venue actually has an active map.
+  const requireTable = showFloorPlan && floorPlanActive === true
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -412,7 +422,7 @@ export default function ReservationsPage() {
     if (!selectedTime) {
       errors.time = locale === 'es' ? 'Selecciona una hora' : 'Select a time'
     }
-    if (showFloorPlan && !selectedTable) {
+    if (requireTable && !selectedTable) {
       errors.table = locale === 'es' ? 'Selecciona tu mesa en el mapa' : 'Select your table on the map'
     }
     if (!name.trim()) {
@@ -444,8 +454,9 @@ export default function ReservationsPage() {
           customer_phone: phone,
           customer_email: email || null,
           special_requests: notes || null,
-          table_id: showFloorPlan && selectedTable ? selectedTable.id : null,
-          zone: showFloorPlan && selectedTable ? selectedTable.zone : null,
+          table_id: selectedTable ? selectedTable.id : null,
+          zone: selectedTable ? selectedTable.zone : null,
+          occasion: occasion || null,
         }),
       })
 
@@ -485,6 +496,8 @@ export default function ReservationsPage() {
     setSelectedTime('')
     setGuestCount(2)
     setSelectedTable(null)
+    setFloorPlanActive(null)
+    setOccasion('')
     setName('')
     setPhone('')
     setEmail('')
@@ -587,13 +600,13 @@ export default function ReservationsPage() {
                           </p>
                         </div>
                       </div>
-                      {showFloorPlan && selectedTable && (
+                      {selectedTable && (
                         <div className="flex items-start gap-3">
                           <MapPin className="w-5 h-5 text-[#FBBF24] mt-0.5 flex-shrink-0" />
                           <div>
                             <p className="text-white/40 text-sm">{t({ es: 'Mesa', en: 'Table' })}</p>
                             <p className="text-white font-medium">
-                              {selectedTable.label} · {locale === 'es' ? 'Zona' : 'Zone'} {selectedTable.zone}
+                              {selectedTable.label} · {selectedTable.zone}
                             </p>
                           </div>
                         </div>
@@ -787,8 +800,8 @@ export default function ReservationsPage() {
                   </p>
                 </motion.div>
 
-                {/* Floor plan — pick your table (venues with a floor plan only) */}
-                {showFloorPlan && (
+                {/* Floor plan — browse areas, pick your table (venues with an active map) */}
+                {showFloorPlan && floorPlanActive !== false && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -799,13 +812,13 @@ export default function ReservationsPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <MapPin className="w-5 h-5 text-[#FBBF24]" />
                       <h2 className="text-lg font-semibold text-white">
-                        {t({ es: 'Elige tu mesa', en: 'Choose your table' })}
+                        {t({ es: 'Elige tu área y mesa', en: 'Choose your area & table' })}
                       </h2>
                     </div>
                     <p className="text-white/40 text-sm mb-6">
                       {t({
-                        es: 'Toca una mesa disponible en el mapa para reservarla.',
-                        en: 'Tap an available table on the map to reserve it.',
+                        es: 'Explora las áreas del restaurante (planta, vista, salas VIP) y elige tu mesa.',
+                        en: 'Browse the restaurant areas (floor, view, VIP lounges) and pick your table.',
                       })}
                     </p>
 
@@ -816,6 +829,7 @@ export default function ReservationsPage() {
                       guestCount={guestCount}
                       selectedTableId={selectedTable?.id ?? null}
                       onSelectTable={handleSelectTable}
+                      onHasTables={handleHasTables}
                       locale={locale}
                       t={t}
                     />
@@ -825,6 +839,46 @@ export default function ReservationsPage() {
                     )}
                   </motion.div>
                 )}
+
+                {/* Occasion (helps staff prepare / upsell) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 }}
+                  viewport={{ once: true }}
+                  className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <FileText className="w-5 h-5 text-[#FBBF24]" />
+                    <h2 className="text-lg font-semibold text-white">
+                      {t({ es: '¿Ocasión especial?', en: 'Special occasion?' })}
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: '', es: 'Ninguna', en: 'None' },
+                      { key: 'cumpleanos', es: '🎂 Cumpleaños', en: '🎂 Birthday' },
+                      { key: 'aniversario', es: '❤️ Aniversario', en: '❤️ Anniversary' },
+                      { key: 'cita', es: '🍷 Cita romántica', en: '🍷 Date night' },
+                      { key: 'negocios', es: '💼 Negocios', en: '💼 Business' },
+                      { key: 'celebracion', es: '🎉 Celebración', en: '🎉 Celebration' },
+                    ].map((o) => (
+                      <button
+                        key={o.key || 'none'}
+                        type="button"
+                        onClick={() => setOccasion(o.key)}
+                        className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-all min-h-[44px] ${
+                          occasion === o.key
+                            ? 'bg-[#E85D04] text-white'
+                            : 'bg-[#0A0A0A] border border-white/10 text-white/60 hover:border-white/40 hover:text-white'
+                        }`}
+                        aria-pressed={occasion === o.key}
+                      >
+                        {locale === 'es' ? o.es : o.en}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
 
                 {/* Contact info */}
                 <motion.div
@@ -935,7 +989,7 @@ export default function ReservationsPage() {
                 >
                   <button
                     type="submit"
-                    disabled={loading || !selectedLocationId || !selectedDate || !selectedTime || (showFloorPlan && !selectedTable) || !name || !phone}
+                    disabled={loading || !selectedLocationId || !selectedDate || !selectedTime || (requireTable && !selectedTable) || !name || !phone}
                     className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/30 text-white py-4 rounded-xl text-lg font-semibold transition-colors min-h-[56px]"
                   >
                     {loading ? (

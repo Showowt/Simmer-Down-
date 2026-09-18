@@ -3,17 +3,19 @@
 // Venue #1 with a floor plan: Simmer Garden (location_id 'simmer-garden')
 // ============================================================
 
-export type TableZone = 'M' | 'J' | 'T' | 'BARRA'
+// Zone = the area code a table belongs to (e.g. 'PB', 'IGLESIA', 'VIP', 'M').
+export type TableZone = string
 
 export interface RestaurantTable {
   id: string
   location_id: string
-  zone: TableZone
+  zone: string
+  area_id: string | null
   code: string
   label: string
   seats: number
-  pos_x: number // 0..100 %, left within the zone canvas
-  pos_y: number // 0..100 %, top within the zone canvas
+  pos_x: number // 0..100 %, left within the area canvas
+  pos_y: number // 0..100 %, top within the area canvas
   shape: 'square' | 'rect'
   is_blocked: boolean
   is_active: boolean
@@ -27,23 +29,63 @@ export interface TableAvailability extends RestaurantTable {
   reason?: 'blocked' | 'reserved'
 }
 
-// ─── Which locations have an interactive floor plan ──────────
-// Keyed by the reservation location_id (see reservationFormSchema).
-export const FLOORPLAN_LOCATIONS = new Set<string>(['simmer-garden'])
+/** An owner-editable venue area (floor / view / VIP) grouping tables. */
+export interface VenueArea {
+  id: string
+  location_id: string
+  code: string
+  name_es: string
+  name_en: string
+  description_es: string | null
+  description_en: string | null
+  floor: string | null
+  view: string | null
+  is_vip: boolean
+  image_url: string | null
+  min_party: number | null
+  is_active: boolean
+  sort_order: number
+}
+
+/** An area with its tables + availability, as served to the public map. */
+export interface AreaWithTables extends VenueArea {
+  tables: TableAvailability[]
+  availableCount: number
+}
+
+// ─── Which locations offer an interactive floor plan ─────────
+// Data-driven: every reservation venue can have areas; the map only renders
+// when the venue actually has active areas + tables (see /api/tables).
+export const FLOORPLAN_LOCATIONS = new Set<string>([
+  'santa-ana',
+  'lago-coatepeque',
+  'san-benito',
+  'simmer-garden',
+  'surf-city',
+])
 
 export function hasFloorPlan(locationId: string | null | undefined): boolean {
   return !!locationId && FLOORPLAN_LOCATIONS.has(locationId)
 }
 
-// ─── Zone display metadata ───────────────────────────────────
+export function localizedAreaName(area: { name_es: string; name_en: string }, locale: string): string {
+  return locale === 'es' ? area.name_es : area.name_en
+}
 
-export const ZONE_ORDER: TableZone[] = ['M', 'J', 'T', 'BARRA']
-
-export const ZONE_LABELS: Record<TableZone, { es: string; en: string }> = {
-  M: { es: 'Zona M', en: 'Zone M' },
-  J: { es: 'Zona J', en: 'Zone J' },
-  T: { es: 'Terraza', en: 'Terrace' },
-  BARRA: { es: 'Barra', en: 'Bar' },
+export function groupTablesByArea(
+  areas: VenueArea[],
+  tables: TableAvailability[],
+): AreaWithTables[] {
+  return areas
+    .map((area) => {
+      const areaTables = tables.filter((t) => t.area_id === area.id)
+      return {
+        ...area,
+        tables: areaTables,
+        availableCount: areaTables.filter((t) => t.available).length,
+      }
+    })
+    .filter((a) => a.tables.length > 0)
 }
 
 // ─── Availability window ─────────────────────────────────────

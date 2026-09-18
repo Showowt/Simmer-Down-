@@ -31,7 +31,7 @@ const navItems = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/reservations", label: "Reservaciones", icon: CalendarCheck },
-  { href: "/admin/mesas", label: "Mesas", icon: MapPin },
+  { href: "/admin/mesas", label: "Salón · Mesas", icon: MapPin },
   { href: "/admin/habitaciones", label: "Habitaciones", icon: BedDouble },
   { href: "/admin/carta", label: "Carta y Precios", icon: UtensilsCrossed },
   { href: "/admin/fotos", label: "Fotos", icon: Camera },

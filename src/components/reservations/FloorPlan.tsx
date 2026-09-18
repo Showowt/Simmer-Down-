@@ -1,58 +1,50 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Users, Loader2, Check, Info } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  ZONE_ORDER,
-  ZONE_LABELS,
-  type TableAvailability,
-  type TableZone,
-} from '@/lib/tables'
+  Users, Loader2, Check, Info, ChevronLeft, Crown, Church, Trees, Waves, Eye, Layers,
+} from 'lucide-react'
+import { localizedAreaName, type AreaWithTables, type TableAvailability } from '@/lib/tables'
 
 // ═══════════════════════════════════════════════════════════════
-// Interactive floor plan — pick a specific table from the venue map.
-// Availability (green / red) is computed server-side from manual blocks
-// + colliding reservations for the chosen date & time.
+// Experience-first floor plan: browse named areas (floor / view / VIP,
+// with a photo + description) → open an area → pick a table inside it.
+// Availability (green / red) is computed server-side.
 // ═══════════════════════════════════════════════════════════════
 
 interface FloorPlanProps {
   locationId: string
-  date: string | null // YYYY-MM-DD
-  time: string | null // HH:MM
+  date: string | null
+  time: string | null
   guestCount: number
   selectedTableId: string | null
   onSelectTable: (table: TableAvailability | null) => void
+  onHasTables?: (has: boolean) => void
   locale: string
   t: (obj: { es: string; en: string }) => string
 }
 
+function viewIcon(view: string | null) {
+  const v = (view || '').toLowerCase()
+  if (v.includes('igles') || v.includes('church')) return Church
+  if (v.includes('parque') || v.includes('park')) return Trees
+  if (v.includes('lago') || v.includes('lake') || v.includes('mar') || v.includes('sea')) return Waves
+  return Eye
+}
+
 export default function FloorPlan({
-  locationId,
-  date,
-  time,
-  guestCount,
-  selectedTableId,
-  onSelectTable,
-  locale,
-  t,
+  locationId, date, time, guestCount, selectedTableId, onSelectTable, onHasTables, locale, t,
 }: FloorPlanProps) {
-  const [tables, setTables] = useState<TableAvailability[]>([])
+  const [areas, setAreas] = useState<AreaWithTables[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [activeZone, setActiveZone] = useState<TableZone>('M')
+  const [openAreaId, setOpenAreaId] = useState<string | null>(null)
 
-  const ready = Boolean(date && time)
-
-  // Fetch availability whenever the venue / date / time changes.
+  // Fetch areas + availability whenever venue / date / time changes.
   useEffect(() => {
-    if (!ready) {
-      setTables([])
-      return
-    }
     let cancelled = false
     const controller = new AbortController()
-
     async function load() {
       setLoading(true)
       setError('')
@@ -60,247 +52,220 @@ export default function FloorPlan({
         const params = new URLSearchParams({ location_id: locationId })
         if (date) params.set('date', date)
         if (time) params.set('time', time)
-        const res = await fetch(`/api/tables?${params.toString()}`, {
-          signal: controller.signal,
-        })
+        const res = await fetch(`/api/tables?${params.toString()}`, { signal: controller.signal })
         const json = await res.json()
         if (cancelled) return
         if (!res.ok || !json.success) {
-          setError(
-            locale === 'es'
-              ? 'No se pudieron cargar las mesas.'
-              : 'Could not load tables.',
-          )
-          setTables([])
+          setError(locale === 'es' ? 'No se pudieron cargar las mesas.' : 'Could not load tables.')
+          setAreas([])
+          onHasTables?.(false)
           return
         }
-        setTables(json.tables as TableAvailability[])
+        const list = (json.areas ?? []) as AreaWithTables[]
+        setAreas(list)
+        onHasTables?.(list.length > 0)
       } catch (err) {
         if (cancelled || (err instanceof Error && err.name === 'AbortError')) return
-        setError(
-          locale === 'es'
-            ? 'Error de conexión al cargar mesas.'
-            : 'Connection error loading tables.',
-        )
+        setError(locale === 'es' ? 'Error de conexión.' : 'Connection error.')
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
-
     load()
-    return () => {
-      cancelled = true
-      controller.abort()
-    }
-  }, [ready, locationId, date, time, locale])
+    return () => { cancelled = true; controller.abort() }
+  }, [locationId, date, time, locale, onHasTables])
 
-  // If the currently-selected table becomes unavailable after a refetch, drop it.
+  // Drop selection if the selected table becomes unavailable after a refetch.
   useEffect(() => {
     if (!selectedTableId) return
-    const stillOk = tables.find((tb) => tb.id === selectedTableId && tb.available)
-    if (tables.length > 0 && !stillOk) {
+    const all = areas.flatMap((a) => a.tables)
+    if (all.length > 0 && !all.find((tb) => tb.id === selectedTableId && tb.available)) {
       onSelectTable(null)
     }
-  }, [tables, selectedTableId, onSelectTable])
+  }, [areas, selectedTableId, onSelectTable])
 
-  const zonesPresent = useMemo(() => {
-    const set = new Set(tables.map((tb) => tb.zone))
-    return ZONE_ORDER.filter((z) => set.has(z))
-  }, [tables])
-
-  // Keep the active zone valid.
-  useEffect(() => {
-    if (zonesPresent.length > 0 && !zonesPresent.includes(activeZone)) {
-      setActiveZone(zonesPresent[0])
-    }
-  }, [zonesPresent, activeZone])
-
-  const zoneTables = useMemo(
-    () => tables.filter((tb) => tb.zone === activeZone),
-    [tables, activeZone],
+  const openArea = useMemo(() => areas.find((a) => a.id === openAreaId) || null, [areas, openAreaId])
+  const selectedTable = useMemo(
+    () => areas.flatMap((a) => a.tables).find((tb) => tb.id === selectedTableId) || null,
+    [areas, selectedTableId],
+  )
+  const selectedArea = useMemo(
+    () => (selectedTable ? areas.find((a) => a.tables.some((tb) => tb.id === selectedTable.id)) || null : null),
+    [areas, selectedTable],
   )
 
-  const availableCount = useMemo(
-    () => tables.filter((tb) => tb.available).length,
-    [tables],
-  )
+  const handleTableClick = useCallback((table: TableAvailability) => {
+    if (!table.available) return
+    onSelectTable(table.id === selectedTableId ? null : table)
+  }, [selectedTableId, onSelectTable])
 
-  const handleTableClick = useCallback(
-    (table: TableAvailability) => {
-      if (!table.available) return
-      if (table.id === selectedTableId) {
-        onSelectTable(null)
-      } else {
-        onSelectTable(table)
-      }
-    },
-    [selectedTableId, onSelectTable],
-  )
-
-  if (!ready) {
+  if (loading && areas.length === 0) {
+    return <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 text-[#E85D04] animate-spin" /></div>
+  }
+  if (!loading && areas.length === 0) {
     return (
-      <div className="bg-[#111] border border-white/10 rounded-2xl p-8 text-center">
-        <Info className="w-6 h-6 text-white/30 mx-auto mb-3" />
+      <div className="bg-[#111] border border-white/10 rounded-2xl p-6 text-center">
+        <Info className="w-5 h-5 text-white/30 mx-auto mb-2" />
         <p className="text-white/40 text-sm">
-          {t({
-            es: 'Selecciona fecha y hora para ver el mapa de mesas.',
-            en: 'Pick a date and time to see the table map.',
-          })}
+          {t({ es: 'Este restaurante aún no tiene mapa de mesas.', en: 'This restaurant has no table map yet.' })}
         </p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-5">
-      {/* Zone tabs */}
-      <div className="flex flex-wrap gap-2">
-        {zonesPresent.map((zone) => {
-          const isActive = zone === activeZone
-          return (
-            <button
-              key={zone}
-              type="button"
-              onClick={() => setActiveZone(zone)}
-              className={`px-4 py-2.5 text-sm font-semibold uppercase tracking-wider transition-all min-h-[44px] ${
-                isActive
-                  ? 'bg-[#E85D04] text-white'
-                  : 'bg-[#0A0A0A] border border-white/10 text-white/50 hover:text-white hover:border-white/30'
-              }`}
-              aria-pressed={isActive}
-            >
-              {locale === 'es' ? ZONE_LABELS[zone].es : ZONE_LABELS[zone].en}
+    <div className="space-y-4">
+      {(!date || !time) && (
+        <p className="text-white/40 text-xs flex items-center gap-2">
+          <Info className="w-3.5 h-3.5" />
+          {t({ es: 'Elige fecha y hora para ver la disponibilidad exacta.', en: 'Pick a date and time for exact availability.' })}
+        </p>
+      )}
+
+      <AnimatePresence mode="wait">
+        {!openArea ? (
+          <motion.div key="areas" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {areas.map((area) => {
+              const ViewIcon = viewIcon(area.view)
+              const soldOut = area.availableCount === 0
+              return (
+                <button
+                  key={area.id}
+                  type="button"
+                  onClick={() => setOpenAreaId(area.id)}
+                  className={`group text-left border rounded-2xl overflow-hidden transition-all bg-[#111] ${
+                    area.is_vip ? 'border-[#C9A84C]/40 hover:border-[#C9A84C]' : 'border-white/10 hover:border-white/30'
+                  }`}
+                >
+                  <div
+                    className={`relative h-28 ${area.is_vip ? 'bg-gradient-to-br from-[#C9A84C]/25 to-[#111]' : 'bg-gradient-to-br from-[#E85D04]/20 to-[#111]'}`}
+                    style={area.image_url ? { backgroundImage: `url(${area.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+                  >
+                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                      {area.floor && (
+                        <span className="flex items-center gap-1 bg-black/50 backdrop-blur text-white/90 text-[10px] uppercase tracking-wide px-2 py-1 rounded">
+                          <Layers className="w-3 h-3" /> {area.floor}
+                        </span>
+                      )}
+                      {area.view && (
+                        <span className="flex items-center gap-1 bg-black/50 backdrop-blur text-white/90 text-[10px] uppercase tracking-wide px-2 py-1 rounded">
+                          <ViewIcon className="w-3 h-3" /> {area.view}
+                        </span>
+                      )}
+                      {area.is_vip && (
+                        <span className="flex items-center gap-1 bg-[#C9A84C] text-black text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded">
+                          <Crown className="w-3 h-3" /> VIP
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-white font-semibold">{localizedAreaName(area, locale)}</h3>
+                    {(locale === 'es' ? area.description_es : area.description_en) && (
+                      <p className="text-white/50 text-sm mt-1 line-clamp-2">
+                        {locale === 'es' ? area.description_es : area.description_en}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between mt-3">
+                      <span className={`text-xs font-medium ${soldOut ? 'text-red-400' : 'text-[#4CAF50]'}`}>
+                        {soldOut
+                          ? t({ es: 'Sin mesas libres', en: 'No tables free' })
+                          : `${area.availableCount} ${t({ es: 'mesas libres', en: 'tables free' })}`}
+                      </span>
+                      <span className="text-[#E85D04] text-xs font-semibold group-hover:translate-x-0.5 transition-transform">
+                        {t({ es: 'Ver mesas →', en: 'View tables →' })}
+                      </span>
+                    </div>
+                    {area.min_party ? (
+                      <p className="text-white/30 text-[11px] mt-2">
+                        {t({ es: `Mínimo ${area.min_party} personas`, en: `Minimum ${area.min_party} guests` })}
+                      </p>
+                    ) : null}
+                  </div>
+                </button>
+              )
+            })}
+          </motion.div>
+        ) : (
+          <motion.div key="tables" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}>
+            <button type="button" onClick={() => setOpenAreaId(null)}
+              className="flex items-center gap-1.5 text-white/60 hover:text-white text-sm mb-3">
+              <ChevronLeft className="w-4 h-4" /> {t({ es: 'Cambiar área', en: 'Change area' })}
             </button>
-          )
-        })}
-      </div>
 
-      {/* Floor canvas */}
-      <div className="relative bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden">
-        {/* Warm "wood floor" wash to evoke the venue plan without a heavy image */}
-        <div
-          className="absolute inset-0 opacity-[0.5] pointer-events-none"
-          style={{
-            background:
-              'repeating-linear-gradient(90deg, #2a1c10 0px, #2a1c10 2px, #241609 2px, #241609 46px), linear-gradient(160deg, rgba(232,93,4,0.08), transparent 60%)',
-          }}
-          aria-hidden="true"
-        />
-
-        {loading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#1A1A1A]/70 backdrop-blur-sm">
-            <Loader2 className="w-6 h-6 text-[#E85D04] animate-spin" />
-          </div>
-        )}
-
-        <div className="relative w-full aspect-[16/10] min-h-[320px] sm:min-h-[380px]">
-          {zoneTables.map((table) => {
-            const selected = table.id === selectedTableId
-            const tooSmall = table.available && table.seats < guestCount
-            return (
-              <button
-                key={table.id}
-                type="button"
-                onClick={() => handleTableClick(table)}
-                disabled={!table.available}
-                aria-pressed={selected}
-                aria-label={`${table.label} — ${table.seats} ${
-                  locale === 'es' ? 'personas' : 'seats'
-                }${
-                  table.available
-                    ? ''
-                    : table.reason === 'blocked'
-                      ? locale === 'es'
-                        ? ' — no disponible'
-                        : ' — unavailable'
-                      : locale === 'es'
-                        ? ' — reservada'
-                        : ' — reserved'
-                }`}
-                title={
-                  tooSmall
-                    ? locale === 'es'
-                      ? `Capacidad ${table.seats} — menor a tu grupo`
-                      : `Seats ${table.seats} — smaller than your party`
-                    : undefined
-                }
-                className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center font-bold transition-all duration-150 ${
-                  table.shape === 'rect'
-                    ? 'w-16 h-11 sm:w-20 sm:h-12'
-                    : 'w-12 h-12 sm:w-14 sm:h-14'
-                } ${
-                  selected
-                    ? 'bg-[#E85D04] text-white ring-2 ring-[#F5D47A] ring-offset-2 ring-offset-[#1A1A1A] z-10 scale-110'
-                    : table.available
-                      ? tooSmall
-                        ? 'bg-[#4CAF50]/40 text-white/90 border border-[#4CAF50]/50 hover:bg-[#4CAF50]/60'
-                        : 'bg-[#2E7D32] text-white border border-[#4CAF50]/60 hover:bg-[#388E3C] hover:scale-105'
-                      : 'bg-[#3a1414] text-white/40 border border-red-900/50 cursor-not-allowed'
-                }`}
-                style={{ left: `${table.pos_x}%`, top: `${table.pos_y}%` }}
-              >
-                <span className="text-[11px] sm:text-xs leading-none">{table.label}</span>
-                <span className="flex items-center gap-0.5 text-[9px] sm:text-[10px] font-medium opacity-80 mt-0.5">
-                  <Users className="w-2.5 h-2.5" />
-                  {table.seats}
-                </span>
-              </button>
-            )
-          })}
-
-          {!loading && zoneTables.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-white/30 text-sm">
-                {t({ es: 'Sin mesas en esta zona.', en: 'No tables in this zone.' })}
-              </p>
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <h3 className="text-white font-semibold">{localizedAreaName(openArea, locale)}</h3>
+              {openArea.floor && <span className="text-white/40 text-xs">· {openArea.floor}</span>}
+              {openArea.view && <span className="text-white/40 text-xs">· {openArea.view}</span>}
+              {openArea.is_vip && <Crown className="w-4 h-4 text-[#C9A84C]" />}
             </div>
-          )}
-        </div>
-      </div>
+
+            <div className="relative bg-[#1A1A1A] border border-white/10 rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 opacity-[0.45] pointer-events-none" aria-hidden="true"
+                style={{ background: 'repeating-linear-gradient(90deg, #2a1c10 0px, #2a1c10 2px, #241609 2px, #241609 46px)' }} />
+              {loading && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#1A1A1A]/70">
+                  <Loader2 className="w-6 h-6 text-[#E85D04] animate-spin" />
+                </div>
+              )}
+              <div className="relative w-full aspect-[16/10] min-h-[300px]">
+                {openArea.tables.map((table) => {
+                  const selected = table.id === selectedTableId
+                  const tooSmall = table.available && table.seats < guestCount
+                  return (
+                    <button
+                      key={table.id}
+                      type="button"
+                      onClick={() => handleTableClick(table)}
+                      disabled={!table.available}
+                      aria-pressed={selected}
+                      aria-label={`${table.label} — ${table.seats} ${locale === 'es' ? 'personas' : 'seats'}`}
+                      title={tooSmall ? (locale === 'es' ? `Capacidad ${table.seats}` : `Seats ${table.seats}`) : undefined}
+                      className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center font-bold transition-all duration-150 ${
+                        table.shape === 'rect' ? 'w-16 h-11 sm:w-20 sm:h-12' : 'w-12 h-12 sm:w-14 sm:h-14'
+                      } ${
+                        selected
+                          ? 'bg-[#E85D04] text-white ring-2 ring-[#F5D47A] ring-offset-2 ring-offset-[#1A1A1A] z-10 scale-110'
+                          : table.available
+                            ? tooSmall
+                              ? 'bg-[#4CAF50]/40 text-white/90 border border-[#4CAF50]/50 hover:bg-[#4CAF50]/60'
+                              : 'bg-[#2E7D32] text-white border border-[#4CAF50]/60 hover:bg-[#388E3C] hover:scale-105'
+                            : 'bg-[#3a1414] text-white/40 border border-red-900/50 cursor-not-allowed'
+                      }`}
+                      style={{ left: `${table.pos_x}%`, top: `${table.pos_y}%` }}
+                    >
+                      <span className="text-[11px] sm:text-xs leading-none">{table.label}</span>
+                      <span className="flex items-center gap-0.5 text-[9px] sm:text-[10px] font-medium opacity-80 mt-0.5">
+                        <Users className="w-2.5 h-2.5" />{table.seats}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/50 mt-3">
+              <span className="flex items-center gap-2"><span className="w-3.5 h-3.5 bg-[#2E7D32] border border-[#4CAF50]/60 inline-block" />{t({ es: 'Disponible', en: 'Available' })}</span>
+              <span className="flex items-center gap-2"><span className="w-3.5 h-3.5 bg-[#3a1414] border border-red-900/50 inline-block" />{t({ es: 'Ocupada', en: 'Taken' })}</span>
+              <span className="flex items-center gap-2"><span className="w-3.5 h-3.5 bg-[#E85D04] inline-block" />{t({ es: 'Tu mesa', en: 'Your table' })}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {/* Legend + count */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/50">
-        <span className="flex items-center gap-2">
-          <span className="w-3.5 h-3.5 bg-[#2E7D32] border border-[#4CAF50]/60 inline-block" />
-          {t({ es: 'Disponible', en: 'Available' })}
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-3.5 h-3.5 bg-[#3a1414] border border-red-900/50 inline-block" />
-          {t({ es: 'Ocupada', en: 'Taken' })}
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-3.5 h-3.5 bg-[#E85D04] inline-block" />
-          {t({ es: 'Tu mesa', en: 'Your table' })}
-        </span>
-        <span className="ml-auto text-white/40">
-          {availableCount}{' '}
-          {t({ es: 'mesas libres', en: 'tables free' })}
-        </span>
-      </div>
-
-      {/* Selection confirmation */}
-      {selectedTableId && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 bg-[#E85D04]/10 border border-[#E85D04]/30 rounded-xl p-4"
-        >
-          <div className="w-9 h-9 bg-[#E85D04] flex items-center justify-center flex-shrink-0">
-            <Check className="w-5 h-5 text-white" />
-          </div>
+      {selectedTable && selectedArea && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 bg-[#E85D04]/10 border border-[#E85D04]/30 rounded-xl p-4">
+          <div className="w-9 h-9 bg-[#E85D04] flex items-center justify-center flex-shrink-0"><Check className="w-5 h-5 text-white" /></div>
           <p className="text-sm text-white">
-            {(() => {
-              const sel = tables.find((tb) => tb.id === selectedTableId)
-              if (!sel) return null
-              const zoneLabel =
-                locale === 'es' ? ZONE_LABELS[sel.zone].es : ZONE_LABELS[sel.zone].en
-              return t({
-                es: `Mesa ${sel.label} · ${zoneLabel} · ${sel.seats} personas`,
-                en: `Table ${sel.label} · ${zoneLabel} · seats ${sel.seats}`,
-              })
-            })()}
+            {t({
+              es: `Mesa ${selectedTable.label} · ${localizedAreaName(selectedArea, 'es')} · ${selectedTable.seats} personas`,
+              en: `Table ${selectedTable.label} · ${localizedAreaName(selectedArea, 'en')} · seats ${selectedTable.seats}`,
+            })}
           </p>
         </motion.div>
       )}

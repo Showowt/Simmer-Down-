@@ -23,6 +23,14 @@ import { timesConflict } from "@/lib/tables";
 
 const ACTIVE_STATUSES = ["pending", "confirmed", "seated"];
 
+const OCCASION_LABELS: Record<string, string> = {
+  cumpleanos: "Cumpleaños",
+  aniversario: "Aniversario",
+  cita: "Cita romántica",
+  negocios: "Negocios",
+  celebracion: "Celebración",
+};
+
 interface ReservationResponse {
   success: boolean;
   data?: {
@@ -83,7 +91,10 @@ export async function POST(
       special_requests,
       table_id,
       zone,
+      occasion,
     } = parseResult.data;
+
+    const occasionLabel = OCCASION_LABELS[occasion ?? ""] ?? null;
 
     // ── Specific-table booking: validate + guard against double-booking ──
     // Resolved server-side so we can include the table in notifications and
@@ -97,7 +108,7 @@ export async function POST(
 
         const { data: tableRow, error: tableErr } = await supabase
           .from("restaurant_tables")
-          .select("id, label, zone, is_blocked, is_active")
+          .select("id, label, zone, is_blocked, is_active, venue_areas(name_es)")
           .eq("id", table_id)
           .eq("location_id", location_id)
           .single();
@@ -149,7 +160,11 @@ export async function POST(
         }
 
         resolvedTableLabel = tableRow.label as string;
-        resolvedZone = (tableRow.zone as string) ?? resolvedZone;
+        const areaRel = (tableRow as { venue_areas?: unknown }).venue_areas;
+        const areaName = Array.isArray(areaRel)
+          ? (areaRel[0] as { name_es?: string } | undefined)?.name_es
+          : (areaRel as { name_es?: string } | null)?.name_es;
+        resolvedZone = areaName || (tableRow.zone as string) || resolvedZone;
       } catch (guardErr) {
         logger.warn("Table booking guard failed", {
           error: guardErr instanceof Error ? guardErr.message : String(guardErr),
@@ -177,6 +192,7 @@ export async function POST(
       special_requests: special_requests || null,
       table_id: table_id || null,
       zone: resolvedZone,
+      occasion: occasion || null,
       status: "confirmed",
     };
 
@@ -230,6 +246,7 @@ export async function POST(
       resolvedTableLabel
         ? `\uD83E\uDE91 Mesa: ${resolvedTableLabel}${resolvedZone ? ` (${resolvedZone})` : ""}`
         : "",
+      occasionLabel ? `\uD83C\uDF89 Ocasi\u00F3n: ${occasionLabel}` : "",
       ``,
       `\uD83D\uDC64 Nombre: ${safeName}`,
       `\uD83D\uDCDE Tel\u00E9fono: ${safePhone}`,
@@ -262,6 +279,7 @@ export async function POST(
         resolvedTableLabel
           ? `🪑 Mesa: ${resolvedTableLabel}${resolvedZone ? ` (${resolvedZone})` : ""}`
           : "",
+        occasionLabel ? `🎉 Ocasión: ${occasionLabel}` : "",
         ``,
         `👤 Nombre: ${customer_name}`,
         `📞 Telefono: ${customer_phone}`,

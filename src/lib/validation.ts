@@ -236,6 +236,11 @@ export const reservationFormSchema = z
       .max(20)
       .optional()
       .nullable(),
+    occasion: z
+      .string()
+      .max(40)
+      .optional()
+      .nullable(),
   })
   .refine(
     (data) => {
