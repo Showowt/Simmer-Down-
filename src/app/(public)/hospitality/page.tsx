@@ -1,10 +1,45 @@
 import type { Metadata } from 'next'
 import SegmentPage, { type SegmentConfig } from '@/components/segments/SegmentPage'
+import { getLocationWhatsAppUrl } from '@/lib/data'
 
 export const metadata: Metadata = {
-  title: 'Hospitality',
+  title: 'Hospitality — Eventos Privados y Catering en El Salvador',
   description:
-    'Simmer Down Hospitality — eventos privados, catering y experiencias a la medida en nuestras sucursales de El Salvador, incluyendo el Lago de Coatepeque.',
+    'Simmer Down Hospitality: eventos privados, catering y experiencias a la medida en Santa Ana, San Benito, Surf City, Simmer Garden y el Lago de Coatepeque — con actividades acuáticas, valet parking y estadía frente al lago.',
+  keywords: [
+    'eventos privados El Salvador',
+    'catering El Salvador',
+    'salón para eventos San Salvador',
+    'eventos corporativos El Salvador',
+    'cumpleaños restaurante Santa Ana',
+    'eventos Lago de Coatepeque',
+    'restaurante para eventos El Salvador',
+    'catering Santa Ana El Salvador',
+    'Simmer Down eventos',
+  ],
+  alternates: {
+    canonical: 'https://simmerdownsv.com/hospitality',
+  },
+  openGraph: {
+    title: 'Hospitality — Eventos Privados y Catering | Simmer Down',
+    description:
+      'Eventos privados, catering y experiencias a la medida en las 5 sucursales de Simmer Down, incluyendo el Lago de Coatepeque.',
+    url: 'https://simmerdownsv.com/hospitality',
+    images: [
+      {
+        url: '/og/events.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Simmer Down Hospitality — eventos privados y catering en El Salvador',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Hospitality | Simmer Down El Salvador',
+    description: 'Eventos privados, catering y experiencias a la medida en El Salvador.',
+    images: ['/og/events.jpg'],
+  },
 }
 
 const config: SegmentConfig = {
@@ -37,13 +72,23 @@ const config: SegmentConfig = {
       titleEn: 'Lake Experiences',
       bodyEs: 'En el Lago de Coatepeque: actividades acuáticas, valet parking y estadía.',
       bodyEn: 'At Lago de Coatepeque: water activities, valet parking and lodging.',
+      // Venue-specific card — must reach the Coatepeque line, not Santa Ana.
+      ctaHref: getLocationWhatsAppUrl(
+        'lago-coatepeque',
+        'Hola! Quiero información sobre las experiencias en Simmer Down Lago Coatepeque: actividades acuáticas, valet parking y estadía 🌊',
+      ),
+      ctaLabelEs: 'Escribir al Lago',
+      ctaLabelEn: 'Message the Lake',
     },
   ],
   ctaLabelEs: 'Planear mi evento',
   ctaLabelEn: 'Plan my event',
-  ctaHref:
-    'https://wa.me/50376804434?text=' +
-    encodeURIComponent('Hola! Quiero información sobre eventos y hospitality 🥂'),
+  // Chain-wide: events and catering run at every venue, so this keeps the main
+  // line — the message says so and asks which sucursal the client wants.
+  ctaHref: getLocationWhatsAppUrl(
+    'santa-ana',
+    'Hola! Quiero información sobre eventos y catering de Simmer Down (disponible en las 5 sucursales) 🥂 ¿Me ayudan a elegir la sucursal y la fecha?',
+  ),
   ctaExternal: true,
 }
 

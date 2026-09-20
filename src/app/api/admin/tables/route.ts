@@ -1,6 +1,8 @@
 /**
  * Admin tables API (salón floor plan)
- *   GET    /api/admin/tables?location_id=santa-ana  → all tables for a venue
+ *   GET    /api/admin/tables?location_id=santa-ana  → all tables for a venue,
+ *                                                     INCLUDING inactive ones so the
+ *                                                     owner can switch them back on
  *   POST   /api/admin/tables                         → create a table in an area
  *   PATCH  /api/admin/tables   { id, ... }           → edit / block / retire
  *   DELETE /api/admin/tables?id=...                   → remove (soft-falls-back if reserved)
@@ -57,6 +59,43 @@ async function requireAdmin(): Promise<
 const COLS =
   "id, location_id, zone, area_id, code, label, seats, pos_x, pos_y, shape, is_blocked, is_active, sort_order";
 
+// Table codes are unique per (location_id, code). The admin UI derives the next
+// code from the highest suffix it can see, but a concurrent add or a stale page
+// can still collide — this recovers the next genuinely free suffix.
+const CODE_SUFFIX = /^(.*?)(\d+)$/;
+
+async function nextFreeCode(
+  service: ReturnType<typeof createServiceClient>,
+  locationId: string,
+  code: string,
+): Promise<string | null> {
+  const parts = CODE_SUFFIX.exec(code);
+  if (!parts) return null;
+  const prefix = parts[1];
+  const { data, error } = await service
+    .from("restaurant_tables")
+    .select("code")
+    .eq("location_id", locationId);
+  if (error) {
+    logger.error("[AdminTables] code scan failed", error);
+    return null;
+  }
+  const taken = new Set(
+    (data ?? []).map((row: { code: string }) => String(row.code).toUpperCase()),
+  );
+  let highest = Number(parts[2]);
+  for (const existing of taken) {
+    const hit = CODE_SUFFIX.exec(existing);
+    if (hit && hit[1] === prefix.toUpperCase()) {
+      highest = Math.max(highest, Number(hit[2]));
+    }
+  }
+  let next = highest + 1;
+  const ceiling = highest + 500;
+  while (taken.has(`${prefix}${next}`.toUpperCase()) && next < ceiling) next += 1;
+  return `${prefix}${next}`;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const auth = await requireAdmin();
@@ -83,13 +122,28 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const parsed = CreateSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ data: null, error: "invalid_body", message: "Datos inválidos" }, { status: 400 });
     const service = createServiceClient();
-    const { data, error } = await service
+    const row = { shape: "square", pos_x: 50, pos_y: 50, is_active: true, sort_order: 0, ...parsed.data };
+    let { data, error } = await service
       .from("restaurant_tables")
-      .insert([{ shape: "square", pos_x: 50, pos_y: 50, is_active: true, sort_order: 0, ...parsed.data }])
+      .insert([row])
       .select("id")
       .single();
+    if (error?.code === "23505") {
+      // Duplicate code — retry once with the next free suffix before failing.
+      const retryCode = await nextFreeCode(service, row.location_id, row.code);
+      if (retryCode) {
+        const retry = await service
+          .from("restaurant_tables")
+          .insert([{ ...row, code: retryCode, label: row.label === row.code ? retryCode : row.label }])
+          .select("id")
+          .single();
+        data = retry.data;
+        error = retry.error;
+      }
+    }
     if (error) {
       const dup = error.code === "23505";
+      logger.error("[AdminTables] create failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: dup ? "Ya existe una mesa con ese código" : "Error al crear" }, { status: dup ? 409 : 500 });
     }
     return NextResponse.json({ data: { id: data?.id }, error: null, message: "Mesa creada" });

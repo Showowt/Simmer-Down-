@@ -1,24 +1,25 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   BedDouble, Calendar, Users, User, Phone, Mail, FileText, Check, ArrowRight, Loader2, Moon,
+  AlertTriangle, RefreshCw,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useI18n } from '@/lib/i18n'
-import { nightsBetween, type RoomAvailability } from '@/lib/rooms'
+import {
+  addDays,
+  computeStayTotal,
+  isRenderableRoomImage,
+  nightsBetween,
+  roomAmenities,
+  todayInSV,
+  type RoomAvailability,
+} from '@/lib/rooms'
 
 const LODGING_LOCATION = 'lago-coatepeque'
-
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
 
 export default function EstadiaClient() {
   const { locale } = useI18n()
@@ -29,7 +30,9 @@ export default function EstadiaClient() {
   const [checkOut, setCheckOut] = useState('')
   const [guests, setGuests] = useState(2)
   const [rooms, setRooms] = useState<RoomAvailability[]>([])
-  const [loadingRooms, setLoadingRooms] = useState(false)
+  const [loadingRooms, setLoadingRooms] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null)
 
   const [name, setName] = useState('')
@@ -39,11 +42,23 @@ export default function EstadiaClient() {
 
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submittedTotal, setSubmittedTotal] = useState<number | null>(null)
   const [error, setError] = useState('')
+
+  // /estadia is statically prerendered, so a render-time date is frozen at BUILD
+  // time in the HTML (verified: the built estadia.html carries min="2026-09-20").
+  // Reading it in an effect keeps SSR and the first client render identical and
+  // still gives the visitor today's SV date.
+  const [today, setToday] = useState('')
+  useEffect(() => { setToday(todayInSV()) }, [])
 
   const validRange = Boolean(checkIn && checkOut && checkOut > checkIn)
   const nights = useMemo(() => (validRange ? nightsBetween(checkIn, checkOut) : 0), [validRange, checkIn, checkOut])
   const selectedRoom = useMemo(() => rooms.find((r) => r.id === selectedRoomId) || null, [rooms, selectedRoomId])
+  const selectedTotal = useMemo(
+    () => (selectedRoom ? computeStayTotal(selectedRoom.price_per_night, nights) : null),
+    [selectedRoom, nights],
+  )
 
   // Load rooms/availability whenever dates or guests change
   useEffect(() => {
@@ -54,20 +69,26 @@ export default function EstadiaClient() {
       try {
         const params = new URLSearchParams({ location_id: LODGING_LOCATION, guests: String(guests) })
         if (validRange) { params.set('check_in', checkIn); params.set('check_out', checkOut) }
-        const res = await fetch(`/api/rooms?${params.toString()}`)
+        const res = await fetch(`/api/rooms?${params.toString()}`, { cache: 'no-store' })
         const json = await res.json()
         if (cancelled) return
-        if (res.ok && json.success) setRooms(json.rooms as RoomAvailability[])
-        else setRooms([])
+        if (res.ok && json.success) {
+          setRooms(json.rooms as RoomAvailability[])
+          setLoadFailed(false)
+        } else {
+          // An outage must look like an outage, never like an empty catalogue.
+          setRooms([])
+          setLoadFailed(true)
+        }
       } catch {
-        if (!cancelled) setRooms([])
+        if (!cancelled) { setRooms([]); setLoadFailed(true) }
       } finally {
         if (!cancelled) setLoadingRooms(false)
       }
     }
     load()
     return () => { cancelled = true }
-  }, [checkIn, checkOut, guests, validRange])
+  }, [checkIn, checkOut, guests, validRange, reloadKey])
 
   // Drop selection if the room becomes unavailable
   useEffect(() => {
@@ -105,10 +126,11 @@ export default function EstadiaClient() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) {
+      if (!res.ok || !json.success) {
         setError(json.error || json.message || tr('No se pudo enviar. Intenta de nuevo.', 'Could not submit. Try again.'))
         return
       }
+      setSubmittedTotal(typeof json.data?.total_amount === 'number' ? json.data.total_amount : null)
       setSubmitted(true)
     } catch {
       setError(tr('Error de conexión. Intenta de nuevo.', 'Connection error. Try again.'))
@@ -135,6 +157,12 @@ export default function EstadiaClient() {
             <p className="text-white/70"><span className="text-white/40">{tr('Habitación', 'Room')}:</span> {es ? selectedRoom?.name_es : selectedRoom?.name}</p>
             <p className="text-white/70"><span className="text-white/40">{tr('Entrada', 'Check-in')}:</span> {checkIn}</p>
             <p className="text-white/70"><span className="text-white/40">{tr('Salida', 'Check-out')}:</span> {checkOut} · {nights} {nights === 1 ? tr('noche', 'night') : tr('noches', 'nights')}</p>
+            {submittedTotal != null && (
+              <p className="text-white/70">
+                <span className="text-white/40">{tr('Total estimado', 'Estimated total')}:</span>{' '}
+                <span className="text-[#F5D47A]">${submittedTotal.toFixed(2)}</span>
+              </p>
+            )}
           </div>
           <Link href="/" className="inline-flex items-center gap-2 text-[#E85D04] hover:text-[#F5D47A] font-semibold">
             {tr('Volver al inicio', 'Back home')} <ArrowRight className="w-4 h-4" />
@@ -171,11 +199,12 @@ export default function EstadiaClient() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm text-white/50 mb-2">{tr('Entrada', 'Check-in')}</label>
-              <input type="date" min={todayStr()} value={checkIn} onChange={(e) => handleCheckIn(e.target.value)} className={inputCls} />
+              {/* min = today in El Salvador, so same-day check-in stays possible */}
+              <input type="date" min={today} value={checkIn} onChange={(e) => handleCheckIn(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className="block text-sm text-white/50 mb-2">{tr('Salida', 'Check-out')}</label>
-              <input type="date" min={checkIn ? addDays(checkIn, 1) : addDays(todayStr(), 1)} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className={inputCls} />
+              <input type="date" min={addDays(checkIn || today, 1)} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className={inputCls} />
             </div>
             <div>
               <label className="block text-sm text-white/50 mb-2">{tr('Huéspedes', 'Guests')}</label>
@@ -200,6 +229,20 @@ export default function EstadiaClient() {
 
           {loadingRooms ? (
             <div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 text-[#E85D04] animate-spin" /></div>
+          ) : loadFailed ? (
+            <div className="py-8 text-center">
+              <AlertTriangle className="w-7 h-7 text-[#FBBF24] mx-auto mb-3" />
+              <p className="text-white/60 text-sm mb-4">
+                {tr('No pudimos cargar la disponibilidad. Es un problema nuestro, no tuyo.', "We couldn't load availability. That's on us, not you.")}
+              </p>
+              <button
+                type="button"
+                onClick={() => setReloadKey((k) => k + 1)}
+                className="inline-flex items-center gap-2 border border-white/15 hover:border-white/40 text-white/80 px-5 py-2.5 rounded-xl text-sm transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" /> {tr('Reintentar', 'Try again')}
+              </button>
+            </div>
           ) : rooms.length === 0 ? (
             <p className="text-white/40 text-sm py-8 text-center">
               {tr('Aún no hay habitaciones disponibles. Vuelve pronto.', 'No rooms available yet. Check back soon.')}
@@ -209,6 +252,11 @@ export default function EstadiaClient() {
               {rooms.map((room) => {
                 const selected = room.id === selectedRoomId
                 const disabled = !room.available
+                const roomTotal = validRange ? computeStayTotal(room.price_per_night, nights) : null
+                const amenities = roomAmenities(room, locale)
+                // EN visitors see the Spanish copy rather than a blank card
+                // while the owner has not filled the English description in.
+                const description = es ? room.description_es : room.description || room.description_es
                 return (
                   <button
                     key={room.id}
@@ -223,19 +271,39 @@ export default function EstadiaClient() {
                           : 'border-white/10 bg-[#0A0A0A] hover:border-white/30'
                     }`}
                   >
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-[#141414] border border-white/5 mb-4">
+                      {isRenderableRoomImage(room.image_url) ? (
+                        <Image
+                          src={room.image_url}
+                          alt={es ? room.name_es : room.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 400px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <BedDouble className="w-8 h-8 text-white/15" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="text-white font-semibold">{es ? room.name_es : room.name}</h3>
                       {room.price_per_night != null && (
                         <span className="text-[#F5D47A] text-sm whitespace-nowrap">${room.price_per_night}/{tr('noche', 'night')}</span>
                       )}
                     </div>
-                    {(es ? room.description_es : room.description) && (
-                      <p className="text-white/50 text-sm mt-2">{es ? room.description_es : room.description}</p>
+                    {description && (
+                      <p className="text-white/50 text-sm mt-2">{description}</p>
                     )}
                     <div className="flex items-center gap-3 mt-3 text-xs text-white/40">
                       <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {room.capacity}</span>
-                      {room.amenities?.slice(0, 3).map((a) => <span key={a} className="px-2 py-0.5 bg-white/5 rounded">{a}</span>)}
+                      {amenities.slice(0, 3).map((a) => <span key={a} className="px-2 py-0.5 bg-white/5 rounded">{a}</span>)}
                     </div>
+                    {roomTotal != null && (
+                      <p className="text-white/40 text-xs mt-3">
+                        {tr('Total estimado', 'Estimated total')}: <span className="text-[#F5D47A]">${roomTotal.toFixed(2)}</span> · {nights} {nights === 1 ? tr('noche', 'night') : tr('noches', 'nights')}
+                      </p>
+                    )}
                     {disabled && (
                       <p className="text-red-400/70 text-xs mt-3">
                         {room.reason === 'too_small'
@@ -285,6 +353,17 @@ export default function EstadiaClient() {
             </div>
           </div>
         </div>
+
+        {selectedRoom && selectedTotal != null && (
+          <div className="bg-[#111] border border-white/10 rounded-xl p-4 flex flex-wrap items-center justify-between gap-2 text-sm">
+            <span className="text-white/50">
+              {es ? selectedRoom.name_es : selectedRoom.name} · {nights} {nights === 1 ? tr('noche', 'night') : tr('noches', 'nights')}
+            </span>
+            <span className="text-[#F5D47A] font-semibold">
+              {tr('Total estimado', 'Estimated total')}: ${selectedTotal.toFixed(2)}
+            </span>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center text-red-400 text-sm">{error}</div>

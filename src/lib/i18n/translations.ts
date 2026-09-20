@@ -352,7 +352,8 @@ export const translations = {
     signupFree: { es: 'Regístrate gratis', en: 'Sign up free' },
     wrongCredentials: { es: 'Correo o contraseña incorrectos', en: 'Incorrect email or password' },
     joinSimmerLovers: { es: 'Únete a SimmerLovers', en: 'Join SimmerLovers' },
-    signupSubtitle: { es: 'Crea tu cuenta y obtén 50 puntos de bienvenida', en: 'Create your account and get 50 welcome points' },
+    // {points} is filled from settings.loyalty_welcome_points — never hardcode the bonus.
+    signupSubtitle: { es: 'Crea tu cuenta y obtén {points} puntos de bienvenida', en: 'Create your account and get {points} welcome points' },
     fullName: { es: 'Nombre Completo', en: 'Full Name' },
     phoneOptional: { es: 'Teléfono (opcional)', en: 'Phone (optional)' },
     confirmPassword: { es: 'Confirmar Contraseña', en: 'Confirm Password' },
@@ -364,7 +365,7 @@ export const translations = {
     accountCreated: { es: '¡Cuenta Creada!', en: 'Account Created!' },
     checkEmail: { es: 'Hemos enviado un correo de confirmación a', en: 'We\'ve sent a confirmation email to' },
     checkInbox: { es: 'Por favor revisa tu bandeja de entrada y haz clic en el enlace para activar tu cuenta.', en: 'Please check your inbox and click the link to activate your account.' },
-    welcomePoints: { es: '¡50 puntos de bienvenida agregados!', en: '50 welcome points added!' },
+    welcomePoints: { es: '¡Agregamos {points} puntos de bienvenida!', en: 'We added {points} welcome points!' },
     goToLogin: { es: 'Ir a Iniciar Sesión', en: 'Go to Sign In' },
     passwordsNoMatch: { es: 'Las contraseñas no coinciden', en: 'Passwords do not match' },
     passwordReqs: {
@@ -515,9 +516,25 @@ export const translations = {
 type TranslationValue = { es: string; en: string }
 type NestedTranslations = { [key: string]: TranslationValue | NestedTranslations }
 
+/** Values interpolated into a {placeholder} inside a translation string. */
+export type TranslationVars = Record<string, string | number>
+
+const PLACEHOLDER = /\{(\w+)\}/g
+
 export function t(
   obj: TranslationValue,
-  locale: Locale
+  locale: Locale,
+  vars?: TranslationVars
 ): string {
-  return obj[locale]
+  const raw = obj[locale]
+  if (!raw.includes('{')) return raw
+  // A placeholder with no value is dropped, never printed raw: a member must
+  // never read "{points} puntos de bienvenida" because a caller forgot a var.
+  return raw
+    .replace(PLACEHOLDER, (_match, key: string) => {
+      const value = vars?.[key]
+      return value === undefined || value === null ? '' : String(value)
+    })
+    .replace(/\s{2,}/g, ' ')
+    .trim()
 }

@@ -30,6 +30,9 @@ import { useI18n, translations } from "@/lib/i18n";
 // ─────────────────────────────────────────────
 type Tier = "bronze" | "silver" | "gold" | "platinum";
 
+/** Rewards are never faked: the grid shows a skeleton, the catalogue, or an error. */
+type RewardsStatus = "loading" | "ready" | "error";
+
 interface Customer {
   id: string;
   auth_user_id: string | null;
@@ -111,7 +114,9 @@ function createClient() {
 
 // ─────────────────────────────────────────────
 // SSR fallback data (visible until live data hydrates)
-// Matches the seeded DB so what you see here is what you see after hydration.
+// Tiers only: the four tiers and their multipliers are structural and match
+// loyalty_tier_config. The rewards catalogue is owner-editable, so there is no
+// honest fallback for it — it is fetched and shown as loading / empty / error.
 // ─────────────────────────────────────────────
 const FALLBACK_TIERS: TierConfig[] = [
   {
@@ -156,16 +161,6 @@ const FALLBACK_TIERS: TierConfig[] = [
   },
 ];
 
-const FALLBACK_REWARDS: LoyaltyReward[] = [
-  { id: "fb-1", name: "Free Drink", name_es: "Bebida Gratis", description: null, description_es: "Cualquier bebida del menú", points_required: 100, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/frozen-positive.jpg", display_order: 1 },
-  { id: "fb-2", name: "Free Side", name_es: "Acompañamiento Gratis", description: null, description_es: "Pan de ajo, papas o aros de cebolla", points_required: 250, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/entradas-cheese-balls.jpg", display_order: 2 },
-  { id: "fb-3", name: "Free Dessert", name_es: "Postre Gratis", description: null, description_es: "Brownie, panna cotta o tiramisú", points_required: 300, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/brownie-helado.jpg", display_order: 3 },
-  { id: "fb-4", name: "10% Off", name_es: "10% de Descuento", description: null, description_es: "10% de descuento en tu próximo pedido", points_required: 400, reward_type: "percent_discount", discount_percent: 10, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/pizzas-hero.jpg", display_order: 4 },
-  { id: "fb-5", name: "Free Personal Pizza", name_es: "Pizza Personal Gratis", description: null, description_es: "Pizza personal de cualquier sabor del menú regular", points_required: 500, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "bronze", is_active: true, image_url: "/images/menu/pizza-maradona.jpg", display_order: 5 },
-  { id: "fb-6", name: "$15 Off", name_es: "$15 de Descuento", description: null, description_es: "$15 de descuento en pedidos de $40+", points_required: 750, reward_type: "fixed_discount", discount_percent: null, discount_amount: 15, min_tier_required: "silver", is_active: true, image_url: "/images/menu/terramar-maitre.jpg", display_order: 6 },
-  { id: "fb-7", name: "Free Large Pizza", name_es: "Pizza Grande Gratis", description: null, description_es: "Pizza grande de cualquier sabor signature", points_required: 1000, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "silver", is_active: true, image_url: "/images/menu/pizza-memoravel.jpg", display_order: 7 },
-  { id: "fb-8", name: "Pizza Party", name_es: "Pizza Party (4 Pizzas Grandes)", description: null, description_es: "Cuatro pizzas grandes + 4 bebidas", points_required: 2000, reward_type: "free_item", discount_percent: null, discount_amount: null, min_tier_required: "gold", is_active: true, image_url: "/images/heroes/homepage-pizzas.jpg", display_order: 8 },
-];
 
 // ─────────────────────────────────────────────
 // Main page
@@ -174,7 +169,8 @@ export default function SimmerLoversPage() {
   const { t, locale } = useI18n();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [tierConfigs, setTierConfigs] = useState<TierConfig[]>(FALLBACK_TIERS);
-  const [rewards, setRewards] = useState<LoyaltyReward[]>(FALLBACK_REWARDS);
+  const [rewards, setRewards] = useState<LoyaltyReward[]>([]);
+  const [rewardsStatus, setRewardsStatus] = useState<RewardsStatus>("loading");
   const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
   // Render guest view on SSR. Replaced with live data post-hydration.
   const [loading, setLoading] = useState(false);
@@ -183,44 +179,56 @@ export default function SimmerLoversPage() {
     const supabase = createClient();
 
     (async () => {
-      // Everyone gets tier config + rewards (public RLS).
-      const [tiersRes, rewardsRes] = await Promise.all([
-        supabase
-          .from("loyalty_tier_config")
-          .select("*")
-          .order("min_lifetime_points", { ascending: true }),
-        supabase
-          .from("loyalty_rewards")
-          .select("*")
-          .eq("is_active", true)
-          .order("display_order", { ascending: true }),
-      ]);
-
-      if (tiersRes.data) setTierConfigs(tiersRes.data as TierConfig[]);
-      if (rewardsRes.data) setRewards(rewardsRes.data as LoyaltyReward[]);
-
-      // If logged in, load customer + transaction history.
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: customerRow } = await supabase
-          .from("customers")
-          .select("*")
-          .eq("auth_user_id", user.id)
-          .maybeSingle();
-
-        if (customerRow) {
-          setCustomer(customerRow as Customer);
-          const { data: txs } = await supabase
-            .from("loyalty_transactions")
+      try {
+        // Everyone gets tier config + rewards (public RLS).
+        const [tiersRes, rewardsRes] = await Promise.all([
+          supabase
+            .from("loyalty_tier_config")
             .select("*")
-            .eq("customer_id", customerRow.id)
-            .order("created_at", { ascending: false })
-            .limit(25);
-          if (txs) setTransactions(txs as LoyaltyTransaction[]);
-        }
-      }
+            .order("min_lifetime_points", { ascending: true }),
+          supabase
+            .from("loyalty_rewards")
+            .select("*")
+            .eq("is_active", true)
+            .order("display_order", { ascending: true }),
+        ]);
 
-      setLoading(false);
+        if (tiersRes.data) setTierConfigs(tiersRes.data as TierConfig[]);
+        if (rewardsRes.error) {
+          console.error("[SimmerLovers] rewards fetch failed", rewardsRes.error);
+          setRewardsStatus("error");
+        } else {
+          setRewards((rewardsRes.data ?? []) as LoyaltyReward[]);
+          setRewardsStatus("ready");
+        }
+
+        // If logged in, load customer + transaction history.
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: customerRow } = await supabase
+            .from("customers")
+            .select("*")
+            .eq("auth_user_id", user.id)
+            .maybeSingle();
+
+          if (customerRow) {
+            setCustomer(customerRow as Customer);
+            const { data: txs } = await supabase
+              .from("loyalty_transactions")
+              .select("*")
+              .eq("customer_id", customerRow.id)
+              .order("created_at", { ascending: false })
+              .limit(25);
+            if (txs) setTransactions(txs as LoyaltyTransaction[]);
+          }
+        }
+      } catch (err) {
+        // Never leave the grid spinning on a fabricated promise of rewards.
+        console.error("[SimmerLovers] loyalty load failed", err);
+        setRewardsStatus((prev) => (prev === "loading" ? "error" : prev));
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -237,6 +245,7 @@ export default function SimmerLoversPage() {
           customer={customer}
           tierConfigs={tierConfigs}
           rewards={rewards}
+          rewardsStatus={rewardsStatus}
           transactions={transactions}
           t={t}
           locale={locale}
@@ -246,7 +255,13 @@ export default function SimmerLoversPage() {
           }}
         />
       ) : (
-        <GuestView tierConfigs={tierConfigs} rewards={rewards} t={t} locale={locale} />
+        <GuestView
+          tierConfigs={tierConfigs}
+          rewards={rewards}
+          rewardsStatus={rewardsStatus}
+          t={t}
+          locale={locale}
+        />
       )}
 
       <PerksSection t={t} locale={locale} />
@@ -333,11 +348,13 @@ function Hero({ signedIn, t, locale }: { signedIn: boolean; t: (obj: { es: strin
 function GuestView({
   tierConfigs,
   rewards,
+  rewardsStatus,
   t,
   locale,
 }: {
   tierConfigs: TierConfig[];
   rewards: LoyaltyReward[];
+  rewardsStatus: RewardsStatus;
   t: (obj: { es: string; en: string }) => string;
   locale: string;
 }) {
@@ -379,7 +396,14 @@ function GuestView({
 
       <TierLadder tierConfigs={tierConfigs} t={t} locale={locale} />
 
-      <RewardsGrid rewards={rewards} currentPoints={0} canRedeem={false} t={t} locale={locale} />
+      <RewardsGrid
+        rewards={rewards}
+        rewardsStatus={rewardsStatus}
+        currentPoints={0}
+        canRedeem={false}
+        t={t}
+        locale={locale}
+      />
     </>
   );
 }
@@ -391,6 +415,7 @@ function MemberDashboard({
   customer,
   tierConfigs,
   rewards,
+  rewardsStatus,
   transactions,
   t,
   locale,
@@ -399,6 +424,7 @@ function MemberDashboard({
   customer: Customer;
   tierConfigs: TierConfig[];
   rewards: LoyaltyReward[];
+  rewardsStatus: RewardsStatus;
   transactions: LoyaltyTransaction[];
   t: (obj: { es: string; en: string }) => string;
   locale: string;
@@ -579,6 +605,7 @@ function MemberDashboard({
 
         <RewardsGrid
           rewards={rewards}
+          rewardsStatus={rewardsStatus}
           currentPoints={customer.loyalty_points_balance}
           canRedeem={true}
           onRedeem={handleRedeem}
@@ -685,6 +712,7 @@ function TierLadder({ tierConfigs, t, locale }: { tierConfigs: TierConfig[]; t: 
 // ─────────────────────────────────────────────
 function RewardsGrid({
   rewards,
+  rewardsStatus,
   currentPoints,
   canRedeem,
   onRedeem,
@@ -694,6 +722,7 @@ function RewardsGrid({
   locale,
 }: {
   rewards: LoyaltyReward[];
+  rewardsStatus: RewardsStatus;
   currentPoints: number;
   canRedeem: boolean;
   onRedeem?: (reward: LoyaltyReward) => void;
@@ -726,7 +755,21 @@ function RewardsGrid({
           )}
         </div>
 
-        {rewards.length === 0 ? (
+        {rewardsStatus === "loading" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="bg-[#1A1A1A] border border-white/10 h-80" />
+            ))}
+          </div>
+        ) : rewardsStatus === "error" ? (
+          <div className="bg-[#1A1A1A] border border-white/10 p-12 text-center">
+            <p className="text-white/60">
+              {locale === 'es'
+                ? "No pudimos cargar las recompensas. Recarga la página."
+                : "We couldn't load the rewards. Please reload the page."}
+            </p>
+          </div>
+        ) : rewards.length === 0 ? (
           <div className="bg-[#1A1A1A] border border-white/10 p-12 text-center">
             <p className="text-white/60">
               {locale === 'es' ? "Pronto agregamos más recompensas." : "More rewards coming soon."}

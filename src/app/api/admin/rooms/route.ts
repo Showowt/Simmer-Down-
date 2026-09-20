@@ -6,12 +6,20 @@
  *   DELETE /api/admin/rooms?id=...                        → remove (soft-falls-back to inactive)
  *
  * Auth: profile role 'admin'. Writes via service client.
+ * Everything the public page reads is writable here (ES + EN), and an
+ * image_url the browser could not load is rejected instead of stored.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import {
+  isRenderableRoomImage,
+  isUndefinedColumn,
+  GUEST_ROOM_COLUMNS,
+  GUEST_ROOM_COLUMNS_LEGACY,
+} from "@/lib/rooms";
 import logger from "@/lib/logger";
 
 const Fields = {
@@ -25,6 +33,7 @@ const Fields = {
   price_per_night: z.number().min(0).max(100000).nullable().optional(),
   image_url: z.string().max(600).nullable().optional(),
   amenities: z.array(z.string().max(60)).max(30).optional(),
+  amenities_en: z.array(z.string().max(60)).max(30).optional(),
   is_active: z.boolean().optional(),
   sort_order: z.number().int().min(0).max(10000).optional(),
 };
@@ -42,9 +51,19 @@ const UpdateSchema = z.object({
   price_per_night: Fields.price_per_night,
   image_url: Fields.image_url,
   amenities: Fields.amenities,
+  amenities_en: Fields.amenities_en,
   is_active: z.boolean().optional(),
   sort_order: Fields.sort_order,
 });
+
+const BAD_IMAGE_MESSAGE =
+  "La imagen debe subirse aquí (se guarda en Supabase) o ser un enlace de images.unsplash.com. Otros enlaces los bloquea el navegador. / Upload the photo here or use an images.unsplash.com link — other hosts are blocked by the browser.";
+
+/** null/'' clears the photo; anything else must be loadable by the public page. */
+function imageUrlRejected(imageUrl: string | null | undefined): boolean {
+  if (imageUrl === undefined || imageUrl === null || imageUrl === "") return false;
+  return !isRenderableRoomImage(imageUrl);
+}
 
 async function requireAdmin(): Promise<
   { ok: true } | { ok: false; res: NextResponse }
@@ -63,20 +82,25 @@ async function requireAdmin(): Promise<
   return { ok: true };
 }
 
-const COLS =
-  "id, location_id, code, name, name_es, description, description_es, capacity, price_per_night, image_url, amenities, is_active, sort_order";
-
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const auth = await requireAdmin();
     if (!auth.ok) return auth.res;
     const locationId = new URL(request.url).searchParams.get("location_id") || "lago-coatepeque";
     const service = createServiceClient();
-    const { data, error } = await service
-      .from("guest_rooms")
-      .select(COLS)
-      .eq("location_id", locationId)
-      .order("sort_order", { ascending: true });
+
+    const list = (columns: string) =>
+      service
+        .from("guest_rooms")
+        .select(columns)
+        .eq("location_id", locationId)
+        .order("sort_order", { ascending: true });
+
+    let { data, error } = await list(GUEST_ROOM_COLUMNS);
+    if (isUndefinedColumn(error)) {
+      logger.warn("[AdminRooms] amenities_en missing; migration 20260920c pending");
+      ({ data, error } = await list(GUEST_ROOM_COLUMNS_LEGACY));
+    }
     if (error) {
       logger.error("[AdminRooms] list failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: "Error al cargar" }, { status: 500 });
@@ -96,12 +120,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!parsed.success) {
       return NextResponse.json({ data: null, error: "invalid_body", message: "Datos inválidos" }, { status: 400 });
     }
+    if (imageUrlRejected(parsed.data.image_url)) {
+      return NextResponse.json({ data: null, error: "invalid_image_url", message: BAD_IMAGE_MESSAGE }, { status: 400 });
+    }
     const service = createServiceClient();
-    const { data, error } = await service
-      .from("guest_rooms")
-      .insert([{ amenities: [], is_active: true, sort_order: 0, ...parsed.data }])
-      .select("id")
-      .single();
+    const row = { amenities: [], is_active: true, sort_order: 0, ...parsed.data };
+
+    let { data, error } = await service.from("guest_rooms").insert([row]).select("id").single();
+    if (isUndefinedColumn(error)) {
+      logger.warn("[AdminRooms] amenities_en missing on insert; migration 20260920c pending");
+      const legacyRow: Record<string, unknown> = { ...row };
+      delete legacyRow.amenities_en;
+      ({ data, error } = await service.from("guest_rooms").insert([legacyRow]).select("id").single());
+    }
     if (error) {
       logger.error("[AdminRooms] insert failed", error);
       const dup = error.code === "23505";
@@ -125,12 +156,21 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     if (!parsed.success) {
       return NextResponse.json({ data: null, error: "invalid_body", message: "Datos inválidos" }, { status: 400 });
     }
-    const { id, ...fields } = parsed.data;
+    if (imageUrlRejected(parsed.data.image_url)) {
+      return NextResponse.json({ data: null, error: "invalid_image_url", message: BAD_IMAGE_MESSAGE }, { status: 400 });
+    }
+    const { id, amenities_en, ...legacyFields } = parsed.data;
     const service = createServiceClient();
-    const { error } = await service
+    const stamped = { ...legacyFields, updated_at: new Date().toISOString() };
+
+    let { error } = await service
       .from("guest_rooms")
-      .update({ ...fields, updated_at: new Date().toISOString() })
+      .update(amenities_en === undefined ? stamped : { ...stamped, amenities_en })
       .eq("id", id);
+    if (isUndefinedColumn(error)) {
+      logger.warn("[AdminRooms] amenities_en missing on update; migration 20260920c pending");
+      ({ error } = await service.from("guest_rooms").update(stamped).eq("id", id));
+    }
     if (error) {
       logger.error("[AdminRooms] update failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: "Error al guardar" }, { status: 500 });

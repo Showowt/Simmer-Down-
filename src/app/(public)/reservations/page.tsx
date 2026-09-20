@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n, translations } from '@/lib/i18n'
-import FloorPlan from '@/components/reservations/FloorPlan'
+import FloorPlan, { type FloorPlanState } from '@/components/reservations/FloorPlan'
 import { hasFloorPlan, type TableAvailability } from '@/lib/tables'
 
 // ═══════════════════════════════════════════════════════════════
@@ -345,7 +345,9 @@ export default function ReservationsPage() {
   const [selectedTime, setSelectedTime] = useState('')
   const [guestCount, setGuestCount] = useState(2)
   const [selectedTable, setSelectedTable] = useState<TableAvailability | null>(null)
-  const [floorPlanActive, setFloorPlanActive] = useState<boolean | null>(null)
+  const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null)
+  const [floorPlan, setFloorPlan] = useState<FloorPlanState | null>(null)
+  const [tablesToken, setTablesToken] = useState(0)
   const [occasion, setOccasion] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -381,7 +383,8 @@ export default function ReservationsPage() {
     setSelectedLocationId(id)
     setSelectedTime('')
     setSelectedTable(null)
-    setFloorPlanActive(null)
+    setSelectedAreaName(null)
+    setFloorPlan(null)
     // If current date is now a closed day for new location, clear it
     if (selectedDate) {
       const loc = locations.find((l) => l.id === id)
@@ -391,8 +394,9 @@ export default function ReservationsPage() {
     }
   }, [selectedDate])
 
-  const handleSelectTable = useCallback((table: TableAvailability | null) => {
+  const handleSelectTable = useCallback((table: TableAvailability | null, areaName: string | null) => {
     setSelectedTable(table)
+    setSelectedAreaName(table ? areaName : null)
     setValidationErrors((prev) => {
       const next = { ...prev }
       delete next.table
@@ -400,14 +404,28 @@ export default function ReservationsPage() {
     })
   }, [])
 
-  const handleHasTables = useCallback((has: boolean) => {
-    setFloorPlanActive(has)
-    if (!has) setSelectedTable(null)
+  const handleFloorPlanState = useCallback((state: FloorPlanState) => {
+    setFloorPlan(state)
+    if (!state.hasMap) {
+      setSelectedTable(null)
+      setSelectedAreaName(null)
+    }
   }, [])
 
   const showFloorPlan = hasFloorPlan(selectedLocationId)
-  // Only require a table when the venue actually has an active map.
-  const requireTable = showFloorPlan && floorPlanActive === true
+  // Only require a table when the venue has an active map AND at least one
+  // table in the slot can actually host this party. A full house (or a party
+  // bigger than every table) must never dead-end the form — the restaurant
+  // assigns / joins tables on arrival.
+  const requireTable = showFloorPlan && floorPlan !== null && floorPlan.hasMap && floorPlan.selectableCount > 0
+  // Party bigger than every free table → point them at the large-group path.
+  const partyTooLarge =
+    showFloorPlan &&
+    floorPlan !== null &&
+    floorPlan.hasMap &&
+    floorPlan.availableCount > 0 &&
+    floorPlan.selectableCount === 0 &&
+    guestCount > floorPlan.maxSeats
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -472,7 +490,14 @@ export default function ReservationsPage() {
           setValidationErrors(serverErrors)
           return
         }
-        // Handle rate limit or other errors
+        // The server is authoritative on the table (capacity, min_party,
+        // double-booking): show ITS bilingual message and re-read the map so
+        // the customer sees the new truth instead of a stale green table.
+        if (res.status === 409) {
+          setSelectedTable(null)
+          setSelectedAreaName(null)
+          setTablesToken((n) => n + 1)
+        }
         setSubmitError(
           result.error || result.message || (locale === 'es' ? 'Error al reservar. Intenta de nuevo.' : 'Reservation failed. Please try again.')
         )
@@ -496,7 +521,8 @@ export default function ReservationsPage() {
     setSelectedTime('')
     setGuestCount(2)
     setSelectedTable(null)
-    setFloorPlanActive(null)
+    setSelectedAreaName(null)
+    setFloorPlan(null)
     setOccasion('')
     setName('')
     setPhone('')
@@ -606,7 +632,9 @@ export default function ReservationsPage() {
                           <div>
                             <p className="text-white/40 text-sm">{t({ es: 'Mesa', en: 'Table' })}</p>
                             <p className="text-white font-medium">
-                              {selectedTable.label} · {selectedTable.zone}
+                              {selectedAreaName
+                                ? `${selectedTable.label} · ${selectedAreaName}`
+                                : selectedTable.label}
                             </p>
                           </div>
                         </div>
@@ -800,44 +828,68 @@ export default function ReservationsPage() {
                   </p>
                 </motion.div>
 
-                {/* Floor plan — browse areas, pick your table (venues with an active map) */}
-                {showFloorPlan && floorPlanActive !== false && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    viewport={{ once: true }}
-                    className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
+                {/* Floor plan — browse areas, pick your table (venues with an active map).
+                    The wrapper stays mounted so FloorPlan can read availability, but it
+                    only becomes visible once we know this venue actually has a map. */}
+                {showFloorPlan && (
+                  <div
+                    className={floorPlan && (floorPlan.hasMap || floorPlan.loadError) ? 'block' : 'hidden'}
+                    aria-hidden={!floorPlan || !(floorPlan.hasMap || floorPlan.loadError)}
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <MapPin className="w-5 h-5 text-[#FBBF24]" />
-                      <h2 className="text-lg font-semibold text-white">
-                        {t({ es: 'Elige tu área y mesa', en: 'Choose your area & table' })}
-                      </h2>
-                    </div>
-                    <p className="text-white/40 text-sm mb-6">
-                      {t({
-                        es: 'Explora las áreas del restaurante (planta, vista, salas VIP) y elige tu mesa.',
-                        en: 'Browse the restaurant areas (floor, view, VIP lounges) and pick your table.',
-                      })}
-                    </p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6 md:p-8"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <MapPin className="w-5 h-5 text-[#FBBF24]" />
+                        <h2 className="text-lg font-semibold text-white">
+                          {t({ es: 'Elige tu área y mesa', en: 'Choose your area & table' })}
+                        </h2>
+                      </div>
+                      <p className="text-white/40 text-sm mb-6">
+                        {t({
+                          es: 'Explora las áreas del restaurante (planta, vista, salas VIP) y elige tu mesa.',
+                          en: 'Browse the restaurant areas (floor, view, VIP lounges) and pick your table.',
+                        })}
+                      </p>
 
-                    <FloorPlan
-                      locationId={selectedLocationId}
-                      date={selectedDate ? formatDateShort(selectedDate) : null}
-                      time={selectedTime || null}
-                      guestCount={guestCount}
-                      selectedTableId={selectedTable?.id ?? null}
-                      onSelectTable={handleSelectTable}
-                      onHasTables={handleHasTables}
-                      locale={locale}
-                      t={t}
-                    />
+                      <FloorPlan
+                        locationId={selectedLocationId}
+                        date={selectedDate ? formatDateShort(selectedDate) : null}
+                        time={selectedTime || null}
+                        guestCount={guestCount}
+                        selectedTableId={selectedTable?.id ?? null}
+                        onSelectTable={handleSelectTable}
+                        onStateChange={handleFloorPlanState}
+                        refreshToken={tablesToken}
+                        locale={locale}
+                        t={t}
+                      />
 
-                    {validationErrors.table && (
-                      <p className="text-sm text-red-400 mt-3">{validationErrors.table}</p>
-                    )}
-                  </motion.div>
+                      {/* Party bigger than every table: the map cannot help — send
+                          them down the existing large-group path. */}
+                      {partyTooLarge && (
+                        <div className="mt-4 bg-[#0A0A0A] border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                          <p className="text-sm text-white/70 flex items-center gap-2">
+                            <Users className="w-4 h-4 text-[#FBBF24] flex-shrink-0" />
+                            {t(b.largeParty)}
+                          </p>
+                          <Link
+                            href="/contact"
+                            className="text-[#E85D04] hover:text-[#F5D47A] text-sm font-semibold sm:ml-auto"
+                          >
+                            {t({ es: 'Contactar →', en: 'Contact us →' })}
+                          </Link>
+                        </div>
+                      )}
+
+                      {validationErrors.table && (
+                        <p className="text-sm text-red-400 mt-3">{validationErrors.table}</p>
+                      )}
+                    </motion.div>
+                  </div>
                 )}
 
                 {/* Occasion (helps staff prepare / upsell) */}

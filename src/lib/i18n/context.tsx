@@ -2,13 +2,13 @@
 
 import { createContext, useContext, useCallback, useEffect, type ReactNode } from 'react'
 import { useUIStore } from '@/lib/store'
-import { type Locale, translations, t as translate } from './translations'
+import { type Locale, type TranslationVars, translations, t as translate } from './translations'
 
 interface I18nContextValue {
   locale: Locale
   setLocale: (locale: Locale) => void
   toggleLocale: () => void
-  t: (obj: { es: string; en: string }) => string
+  t: (obj: { es: string; en: string }, vars?: TranslationVars) => string
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null)
@@ -28,8 +28,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLocale = useCallback((newLocale: Locale) => setLanguage(newLocale), [setLanguage])
 
+  // vars is forwarded so copy that quotes a configurable number (e.g. the
+  // SimmerLovers welcome bonus) can interpolate the real value instead of
+  // hardcoding one that drifts. Callers that pass nothing are unaffected.
   const t = useCallback(
-    (obj: { es: string; en: string }) => translate(obj, locale),
+    (obj: { es: string; en: string }, vars?: TranslationVars) => translate(obj, locale, vars),
     [locale]
   )
 
@@ -50,4 +53,4 @@ export function useI18n() {
 
 // Re-export translations for direct import
 export { translations }
-export type { Locale }
+export type { Locale, TranslationVars }

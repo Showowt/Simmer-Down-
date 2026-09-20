@@ -94,7 +94,11 @@ export async function POST(
       occasion,
     } = parseResult.data;
 
-    const occasionLabel = OCCASION_LABELS[occasion ?? ""] ?? null;
+    // Known occasions get a pretty label; an unknown value still reaches ops
+    // (stripped of Markdown-breaking chars) so nothing is silently dropped.
+    const occasionLabel =
+      OCCASION_LABELS[occasion ?? ""] ??
+      (occasion ? occasion.replace(/[_*`\[\]]/g, "") : null);
 
     // ── Specific-table booking: validate + guard against double-booking ──
     // Resolved server-side so we can include the table in notifications and
@@ -108,7 +112,9 @@ export async function POST(
 
         const { data: tableRow, error: tableErr } = await supabase
           .from("restaurant_tables")
-          .select("id, label, zone, is_blocked, is_active, venue_areas(name_es)")
+          .select(
+            "id, label, zone, seats, is_blocked, is_active, venue_areas(name_es, min_party, is_active)",
+          )
           .eq("id", table_id)
           .eq("location_id", location_id)
           .single();
@@ -135,6 +141,57 @@ export async function POST(
           );
         }
 
+        // PostgREST returns an embedded to-one relation as an object, but some
+        // shapes come back as a 1-item array — normalise both.
+        const areaRel = (tableRow as { venue_areas?: unknown }).venue_areas;
+        const area = (Array.isArray(areaRel) ? areaRel[0] : areaRel) as
+          | {
+              name_es?: string | null;
+              min_party?: number | null;
+              is_active?: boolean | null;
+            }
+          | null
+          | undefined;
+        const areaName = area?.name_es || null;
+
+        // A hidden area must not be bookable, even if a table under it is
+        // still flagged active.
+        if (area && area.is_active === false) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `${areaName ? `${areaName} no está` : "Esa zona no está"} disponible para reservar. Elige otra mesa. / ${areaName ?? "That area"} is not available for booking. Please pick another table.`,
+            },
+            { status: 409 },
+          );
+        }
+
+        // Server is authoritative on capacity — the party must fit the table.
+        const seats =
+          typeof tableRow.seats === "number" ? tableRow.seats : null;
+        if (seats !== null && guest_count > seats) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Esa mesa es para hasta ${seats} persona${seats === 1 ? "" : "s"} y tu reservación es para ${guest_count}. Elige una mesa más grande o déjanos asignarte una al llegar. / That table seats up to ${seats} and your party is ${guest_count}. Please pick a larger table or let us assign one on arrival.`,
+            },
+            { status: 409 },
+          );
+        }
+
+        // …and the area's minimum party size.
+        const minParty =
+          typeof area?.min_party === "number" ? area.min_party : null;
+        if (minParty !== null && guest_count < minParty) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `${areaName ?? "Esa zona"} requiere un mínimo de ${minParty} persona${minParty === 1 ? "" : "s"} y tu reservación es para ${guest_count}. Elige otra mesa. / ${areaName ?? "That area"} requires a minimum of ${minParty} guests and your party is ${guest_count}. Please pick another table.`,
+            },
+            { status: 409 },
+          );
+        }
+
         const { data: sameDay, error: sameDayErr } = await supabase
           .from("reservations")
           .select("time")
@@ -143,31 +200,48 @@ export async function POST(
           .eq("table_id", table_id)
           .in("status", ACTIVE_STATUSES);
 
-        if (!sameDayErr && sameDay) {
-          const collision = sameDay.some(
-            (r) => typeof r.time === "string" && timesConflict(r.time, time),
+        // FAIL CLOSED: if we cannot read the day's bookings we do not know the
+        // table is free, so we must not hand it out.
+        if (sameDayErr) {
+          logger.error("[Reservations] Table availability check failed", sameDayErr, {
+            code: sameDayErr.code,
+            location_id,
+            date,
+            time,
+            table_id,
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "No pudimos confirmar la disponibilidad de la mesa. Intenta de nuevo. / We couldn't confirm the table's availability. Please try again.",
+            },
+            { status: 503 },
           );
-          if (collision) {
-            return NextResponse.json(
-              {
-                success: false,
-                error:
-                  "Esa mesa acaba de ser reservada para ese horario. Elige otra. / That table was just booked for this time. Please pick another.",
-              },
-              { status: 409 },
-            );
-          }
+        }
+
+        const collision = (sameDay ?? []).some(
+          (r) => typeof r.time === "string" && timesConflict(r.time, time),
+        );
+        if (collision) {
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "Esa mesa acaba de ser reservada para ese horario. Elige otra. / That table was just booked for this time. Please pick another.",
+            },
+            { status: 409 },
+          );
         }
 
         resolvedTableLabel = tableRow.label as string;
-        const areaRel = (tableRow as { venue_areas?: unknown }).venue_areas;
-        const areaName = Array.isArray(areaRel)
-          ? (areaRel[0] as { name_es?: string } | undefined)?.name_es
-          : (areaRel as { name_es?: string } | null)?.name_es;
         resolvedZone = areaName || (tableRow.zone as string) || resolvedZone;
       } catch (guardErr) {
-        logger.warn("Table booking guard failed", {
-          error: guardErr instanceof Error ? guardErr.message : String(guardErr),
+        logger.error("[Reservations] Table booking guard failed", guardErr, {
+          location_id,
+          date,
+          time,
+          table_id,
         });
         return NextResponse.json(
           {
@@ -196,7 +270,8 @@ export async function POST(
       status: "confirmed",
     };
 
-    // Try to insert into Supabase
+    // Persist. A failed write must NEVER be reported as a confirmed booking:
+    // no row means no table, so we return an error and send NO notification.
     let insertedId: string | undefined;
 
     try {
@@ -208,20 +283,80 @@ export async function POST(
         .single();
 
       if (dbError) {
-        // Log but don't fail -- table might not exist yet
-        logger.warn("Reservation DB insert failed", {
-          error: dbError.message,
+        // Race-proof backstop: the DB rejects an overlapping table+slot with
+        // an exclusion-constraint violation (23P01) or a unique index (23505).
+        // Only meaningful when a table was actually chosen — a table-less
+        // reservation must never be told to "pick another table".
+        if (
+          table_id &&
+          (dbError.code === "23P01" || dbError.code === "23505")
+        ) {
+          logger.error("[Reservations] Table slot taken at insert", dbError, {
+            code: dbError.code,
+            location_id,
+            date,
+            time,
+            table_id,
+          });
+          return NextResponse.json(
+            {
+              success: false,
+              error:
+                "Esa mesa acaba de ser reservada para ese horario. Elige otra. / That table was just booked for this time. Please pick another.",
+            },
+            { status: 409 },
+          );
+        }
+
+        logger.error("[Reservations] DB insert failed", dbError, {
           code: dbError.code,
           hint: dbError.hint,
+          location_id,
+          date,
+          time,
         });
-      } else if (dbData) {
-        insertedId = dbData.id;
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "No pudimos guardar tu reservación. Por favor intenta de nuevo. / We couldn't save your reservation. Please try again.",
+          },
+          { status: 500 },
+        );
       }
+
+      if (!dbData?.id) {
+        logger.error("[Reservations] DB insert returned no row", null, {
+          location_id,
+          date,
+          time,
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "No pudimos guardar tu reservación. Por favor intenta de nuevo. / We couldn't save your reservation. Please try again.",
+          },
+          { status: 500 },
+        );
+      }
+
+      insertedId = dbData.id;
     } catch (dbErr) {
-      // Service client may throw if env vars missing -- log and continue
-      logger.warn("Reservation DB connection failed", {
-        error: dbErr instanceof Error ? dbErr.message : String(dbErr),
+      // Service client throws if env vars are missing — still a lost booking.
+      logger.error("[Reservations] DB connection failed", dbErr, {
+        location_id,
+        date,
+        time,
       });
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "No pudimos guardar tu reservación. Por favor intenta de nuevo. / We couldn't save your reservation. Please try again.",
+        },
+        { status: 500 },
+      );
     }
 
     // Send Telegram notification to staff (non-blocking)
@@ -305,7 +440,7 @@ export async function POST(
       date,
       time,
       guest_count,
-      insertedId: insertedId ?? "not_persisted",
+      insertedId,
     });
 
     return NextResponse.json({
@@ -354,7 +489,13 @@ export async function GET() {
         "customer_name",
         "customer_phone",
       ],
-      optional: ["customer_email", "special_requests"],
+      optional: [
+        "customer_email",
+        "special_requests",
+        "table_id",
+        "zone",
+        "occasion",
+      ],
     },
   });
 }

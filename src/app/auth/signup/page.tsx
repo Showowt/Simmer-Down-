@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff, Check, Gift } from 'lucide-react'
@@ -24,6 +24,27 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  // The welcome bonus is owner-editable (settings.loyalty_welcome_points, read
+  // by the handle_new_auth_user trigger). Copy must quote the real number, not
+  // a hardcoded one — this page used to promise 50 while the owner had set 2.
+  // null keeps the placeholder empty until it loads, never a wrong number.
+  const [welcomePoints, setWelcomePoints] = useState<number | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/loyalty/welcome-points')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        const value = json?.data?.welcomePoints
+        if (!cancelled && typeof value === 'number') setWelcomePoints(value)
+      })
+      .catch((err) => {
+        console.error('[Signup] welcome points fetch failed', err)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const passwordRequirements = [
     { met: formData.password.length >= 8, text: t(translations.auth.passwordReqs.minChars) },
@@ -104,7 +125,7 @@ export default function SignupPage() {
             <div className="bg-[#E85D04]/10 border border-[#E85D04]/20 p-4 mb-6">
               <div className="flex items-center justify-center gap-2 text-[#E85D04] font-medium">
                 <Gift className="w-5 h-5" />
-                {t(translations.auth.welcomePoints)}
+                {t(translations.auth.welcomePoints, welcomePoints !== null ? { points: welcomePoints } : undefined)}
               </div>
             </div>
             <Link
@@ -131,7 +152,7 @@ export default function SignupPage() {
             <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={144} height={48} className="h-12 w-auto mx-auto" />
           </Link>
           <h1 className="text-2xl font-bold text-white">{t(translations.auth.joinSimmerLovers)}</h1>
-          <p className="text-white/40 mt-2">{t(translations.auth.signupSubtitle)}</p>
+          <p className="text-white/40 mt-2">{t(translations.auth.signupSubtitle, welcomePoints !== null ? { points: welcomePoints } : undefined)}</p>
         </div>
 
         <form onSubmit={handleSignup} className="bg-[#1A1A1A] border border-white/10 p-8">

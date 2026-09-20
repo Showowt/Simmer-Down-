@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -75,6 +76,8 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 }
 
+type LodgingState = 'loading' | 'available' | 'none' | 'error'
+
 // ─── Component ────────────────────────────────────────────
 
 export default function LocationDetailClient({ location }: { location: Location }) {
@@ -88,6 +91,37 @@ export default function LocationDetailClient({ location }: { location: Location 
   )}`
 
   const embedUrl = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3000!2d${location.coordinates.lng}!3d${location.coordinates.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2ssv!4v1`
+
+  // Estadia CTA is gated on the LIVE catalogue, not the static features list:
+  // /api/rooms only returns rooms with is_active = true, so an empty list means
+  // there is nothing to book and the CTA must not send anyone to a dead page.
+  const offersLodging = location.features.includes('lodging') || hasLodging(location.id)
+  const [lodgingState, setLodgingState] = useState<LodgingState>(offersLodging ? 'loading' : 'none')
+
+  useEffect(() => {
+    if (!offersLodging) return
+    let cancelled = false
+    async function probeRooms() {
+      try {
+        const res = await fetch(`/api/rooms?location_id=${encodeURIComponent(location.id)}`, {
+          cache: 'no-store',
+        })
+        const json = await res.json()
+        if (cancelled) return
+        if (!res.ok || !json.success || !Array.isArray(json.rooms)) {
+          setLodgingState('error')
+          return
+        }
+        setLodgingState(json.rooms.length > 0 ? 'available' : 'none')
+      } catch {
+        if (!cancelled) setLodgingState('error')
+      }
+    }
+    probeRooms()
+    return () => {
+      cancelled = true
+    }
+  }, [offersLodging, location.id])
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
@@ -280,7 +314,7 @@ export default function LocationDetailClient({ location }: { location: Location 
         </div>
 
         {/* ─── Estadía CTA (lodging venues) ─── */}
-        {(location.features.includes('lodging') || hasLodging(location.id)) && (
+        {offersLodging && lodgingState !== 'loading' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -292,17 +326,30 @@ export default function LocationDetailClient({ location }: { location: Location 
                 {locale === 'es' ? 'Estadía junto al lago' : 'Stay by the lake'}
               </h2>
               <p className="text-white/50 text-sm">
-                {locale === 'es'
-                  ? 'Reserva tu habitación. Confirmamos disponibilidad por WhatsApp.'
-                  : 'Book your room. We confirm availability by WhatsApp.'}
+                {lodgingState === 'available'
+                  ? locale === 'es'
+                    ? 'Reserva tu habitación. Confirmamos disponibilidad por WhatsApp.'
+                    : 'Book your room. We confirm availability by WhatsApp.'
+                  : locale === 'es'
+                    ? 'Estamos preparando las habitaciones. Escríbenos por WhatsApp para consultar.'
+                    : 'Rooms are being prepared. Message us on WhatsApp to ask.'}
               </p>
             </div>
-            <Link
-              href="/estadia"
-              className="flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-3.5 font-semibold rounded-xl transition-colors whitespace-nowrap min-h-[52px]"
-            >
-              {locale === 'es' ? 'Reservar Estadía' : 'Book a Room'}
-            </Link>
+            {lodgingState === 'available' ? (
+              <Link
+                href="/estadia"
+                className="flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-6 py-3.5 font-semibold rounded-xl transition-colors whitespace-nowrap min-h-[52px]"
+              >
+                {locale === 'es' ? 'Reservar Estadía' : 'Book a Room'}
+              </Link>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="flex items-center gap-2 bg-white/5 border border-white/10 text-white/40 px-6 py-3.5 font-semibold rounded-xl whitespace-nowrap min-h-[52px] cursor-default"
+              >
+                {locale === 'es' ? 'Próximamente' : 'Coming soon'}
+              </span>
+            )}
           </motion.div>
         )}
 

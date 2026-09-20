@@ -27,6 +27,22 @@ const BaseFields = {
   discount_percent: z.number().int().min(0).max(100).nullable().optional(),
   discount_amount: z.number().min(0).max(100000).nullable().optional(),
   min_tier_required: z.enum(TIERS).default("bronze"),
+  // Rendered with next/image on the public /simmerlovers card. next/image THROWS
+  // on a host that is not in next.config.ts remotePatterns (which would crash the
+  // page for every visitor), so only a site-relative path or one of the two
+  // configured hosts is accepted. Keep this in sync with images.remotePatterns.
+  image_url: z
+    .string()
+    .max(500)
+    .regex(
+      /^(\/(?!\/)\S+|https:\/\/images\.unsplash\.com\/\S+|https:\/\/[a-z0-9-]+\.supabase\.co\/storage\/\S+)$/,
+      "Usa una ruta del sitio (/images/…) o una URL de Supabase Storage / Unsplash",
+    )
+    .nullable()
+    .optional(),
+  // Redemption caps enforced by /api/loyalty/redeem. null = unlimited.
+  max_total_redemptions: z.number().int().min(1).max(1000000).nullable().optional(),
+  max_redemptions_per_customer: z.number().int().min(1).max(10000).nullable().optional(),
   is_active: z.boolean().optional(),
   display_order: z.number().int().min(0).max(10000).optional(),
 };
@@ -43,6 +59,9 @@ const UpdateSchema = z.object({
   discount_percent: BaseFields.discount_percent,
   discount_amount: BaseFields.discount_amount,
   min_tier_required: z.enum(TIERS).optional(),
+  image_url: BaseFields.image_url,
+  max_total_redemptions: BaseFields.max_total_redemptions,
+  max_redemptions_per_customer: BaseFields.max_redemptions_per_customer,
   is_active: z.boolean().optional(),
   display_order: BaseFields.display_order,
 });
@@ -80,8 +99,22 @@ async function requireAdmin(): Promise<
   return { ok: true, email: user.email || "admin" };
 }
 
+/** Turns a Zod failure into a message the owner can act on (admin-only route). */
+function invalidBodyResponse(issues: z.core.$ZodIssue[]): NextResponse {
+  const first = issues[0];
+  const detail = first ? `${first.path.join(".") || "body"}: ${first.message}` : "";
+  return NextResponse.json(
+    {
+      data: null,
+      error: "invalid_body",
+      message: detail ? `Datos inválidos — ${detail}` : "Datos inválidos",
+    },
+    { status: 400 },
+  );
+}
+
 const SELECT_COLS =
-  "id, name, name_es, description, description_es, points_required, reward_type, discount_percent, discount_amount, min_tier_required, is_active, display_order";
+  "id, name, name_es, description, description_es, points_required, reward_type, discount_percent, discount_amount, min_tier_required, image_url, max_total_redemptions, max_redemptions_per_customer, current_redemptions, is_active, display_order";
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -117,12 +150,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!auth.ok) return auth.res;
 
     const parsed = CreateSchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { data: null, error: "invalid_body", message: "Datos inválidos" },
-        { status: 400 },
-      );
-    }
+    if (!parsed.success) return invalidBodyResponse(parsed.error.issues);
 
     const service = createServiceClient();
     const { data, error } = await service
@@ -154,12 +182,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     if (!auth.ok) return auth.res;
 
     const parsed = UpdateSchema.safeParse(await request.json());
-    if (!parsed.success) {
-      return NextResponse.json(
-        { data: null, error: "invalid_body", message: "Datos inválidos" },
-        { status: 400 },
-      );
-    }
+    if (!parsed.success) return invalidBodyResponse(parsed.error.issues);
     const { id, ...fields } = parsed.data;
     const patch: Record<string, unknown> = { ...fields, updated_at: new Date().toISOString() };
 

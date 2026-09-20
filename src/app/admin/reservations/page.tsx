@@ -13,9 +13,19 @@ import {
   X,
   UtensilsCrossed,
   UserX,
+  Armchair,
+  PartyPopper,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LOCATIONS } from "@/lib/data";
+
+// Table joined from restaurant_tables. PostgREST returns an embed as an object
+// (or an array, depending on how it resolves the FK) — normalise with linkedTable().
+interface LinkedTable {
+  label: string | null;
+  code: string | null;
+  seats: number | null;
+}
 
 interface Reservation {
   id: string;
@@ -29,6 +39,16 @@ interface Reservation {
   special_requests: string | null;
   status: string | null;
   created_at: string | null;
+  table_id: string | null;
+  zone: string | null;
+  occasion: string | null;
+  restaurant_tables?: LinkedTable | LinkedTable[] | null;
+}
+
+function linkedTable(r: Reservation): LinkedTable | null {
+  const t = r.restaurant_tables;
+  if (!t) return null;
+  return Array.isArray(t) ? (t[0] ?? null) : t;
 }
 
 type Filter = "upcoming" | "today" | "past" | "all";
@@ -56,6 +76,15 @@ function fmtDate(d: string): string {
   }).format(new Date(`${d}T12:00:00Z`));
 }
 
+// Mirrors OCCASION_LABELS in /api/reservations — same keys the public form submits.
+const OCCASION_LABELS: Record<string, { es: string; en: string }> = {
+  cumpleanos: { es: "Cumpleaños", en: "Birthday" },
+  aniversario: { es: "Aniversario", en: "Anniversary" },
+  cita: { es: "Cita romántica", en: "Date night" },
+  negocios: { es: "Negocios", en: "Business" },
+  celebracion: { es: "Celebración", en: "Celebration" },
+};
+
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "Pendiente", cls: "bg-[#FFB800]/10 text-[#FFB800] border-[#FFB800]/20" },
   confirmed: { label: "Confirmada", cls: "bg-[#4CAF50]/10 text-[#4CAF50] border-[#4CAF50]/20" },
@@ -74,16 +103,70 @@ export default function AdminReservationsPage() {
   const fetchReservations = useCallback(async () => {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
+
+      // Preferred: one round-trip with the table embedded on reservations.table_id.
+      const embedded = await supabase
+        .from("reservations")
+        .select("*, restaurant_tables(label, code, seats)")
+        .order("date", { ascending: true })
+        .order("time", { ascending: true });
+
+      if (!embedded.error) {
+        setRows((embedded.data as unknown as Reservation[]) || []);
+        setError(null);
+        return;
+      }
+
+      // Fallback: the embed could not be resolved (e.g. PGRST201 ambiguity).
+      // Read the rows plainly, then map table_id -> label with one extra query.
+      console.error("[AdminReservations] table embed failed", embedded.error);
+
+      const plain = await supabase
         .from("reservations")
         .select("*")
         .order("date", { ascending: true })
         .order("time", { ascending: true });
-      if (error) throw error;
-      setRows((data as Reservation[]) || []);
+      if (plain.error) throw plain.error;
+
+      const base = (plain.data as unknown as Reservation[]) || [];
+      const tableIds = Array.from(
+        new Set(base.map((r) => r.table_id).filter((id): id is string => !!id)),
+      );
+
+      if (tableIds.length === 0) {
+        setRows(base);
+        setError(null);
+        return;
+      }
+
+      const lookup = await supabase
+        .from("restaurant_tables")
+        .select("id, label, code, seats")
+        .in("id", tableIds);
+
+      if (lookup.error) {
+        // Labels are a nicety — the reservations themselves still render.
+        console.error("[AdminReservations] table lookup failed", lookup.error);
+        setRows(base);
+        setError(null);
+        return;
+      }
+
+      const byId = new Map<string, LinkedTable>();
+      for (const t of (lookup.data as (LinkedTable & { id: string })[]) || []) {
+        byId.set(t.id, { label: t.label, code: t.code, seats: t.seats });
+      }
+      setRows(
+        base.map((r) =>
+          r.table_id ? { ...r, restaurant_tables: byId.get(r.table_id) ?? null } : r,
+        ),
+      );
       setError(null);
-    } catch {
-      setError("No se pudieron cargar las reservaciones.");
+    } catch (err) {
+      console.error("[AdminReservations] fetch failed", err);
+      setError(
+        "No se pudieron cargar las reservaciones. / Couldn't load reservations.",
+      );
     } finally {
       setLoading(false);
     }
@@ -114,8 +197,9 @@ export default function AdminReservationsPage() {
         .update({ status, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
-    } catch {
-      setError("No se pudo actualizar. Reintenta.");
+    } catch (err) {
+      console.error("[AdminReservations] status update failed", err);
+      setError("No se pudo actualizar. Reintenta. / Couldn't update. Try again.");
       fetchReservations();
     } finally {
       setBusyId(null);
@@ -216,6 +300,27 @@ export default function AdminReservationsPage() {
           {filtered.map((r) => {
             const st = STATUS[r.status || "confirmed"] || STATUS.confirmed;
             const isCancelled = r.status === "cancelled" || r.status === "no_show";
+
+            // Table / area chip. A reservation without a table is normal
+            // (the host assigns on arrival) — render nothing, never "Mesa null".
+            const tbl = linkedTable(r);
+            const tableText = tbl?.label
+              ? `Mesa ${tbl.label}`
+              : r.table_id
+                ? "Mesa asignada"
+                : null;
+            const seatText = tbl?.seats ? `${tbl.seats}p` : null;
+            const placeText = [tableText, r.zone, seatText]
+              .filter(Boolean)
+              .join(" · ");
+            const placeTitle = tableText
+              ? "Mesa y área asignadas / Assigned table & area"
+              : "Área asignada / Assigned area";
+
+            // Occasion badge — same keys the reservations API uses.
+            const occ = r.occasion ? OCCASION_LABELS[r.occasion] : undefined;
+            const occText = occ ? occ.es : r.occasion;
+
             return (
               <div
                 key={r.id}
@@ -237,7 +342,27 @@ export default function AdminReservationsPage() {
 
                   {/* Who */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#FFF8F0] font-medium">{r.customer_name || "—"}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[#FFF8F0] font-medium">{r.customer_name || "—"}</p>
+                      {placeText && (
+                        <span
+                          title={placeTitle}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium border bg-[#FF6B35]/10 text-[#FF6B35] border-[#FF6B35]/20"
+                        >
+                          <Armchair className="w-3 h-3 shrink-0" />
+                          {placeText}
+                        </span>
+                      )}
+                      {occText && (
+                        <span
+                          title={occ ? `${occ.es} / ${occ.en}` : occText}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium border bg-[#FBBF24]/10 text-[#FBBF24] border-[#FBBF24]/20"
+                        >
+                          <PartyPopper className="w-3 h-3 shrink-0" />
+                          {occText}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#6B6560] mt-1">
                       {r.customer_phone && (
                         <a href={`tel:${r.customer_phone}`} className="flex items-center gap-1 text-[#FF6B35] hover:underline">

@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isUndefinedColumn } from "@/lib/rooms";
 import logger from "@/lib/logger";
 
 const STATUSES = ["pending", "confirmed", "checked_in", "checked_out", "cancelled"] as const;
@@ -40,18 +41,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const range = searchParams.get("range");
 
     const service = createServiceClient();
-    let query = service
-      .from("room_bookings")
-      .select(
-        "id, room_id, location_id, check_in, check_out, nights, guest_count, customer_name, customer_phone, customer_email, special_requests, status, created_at, guest_rooms(code, name_es, name)",
-      );
-    if (locationId) query = query.eq("location_id", locationId);
-    if (range === "upcoming") {
-      query = query.gte("check_out", new Date().toISOString().slice(0, 10));
-    }
-    query = query.order("check_in", { ascending: true }).limit(500);
+    // The owner needs to see the amount that was quoted to the guest. The price
+    // columns arrive with migration 20260920c, so fall back to the pre-price
+    // select if it has not been applied yet rather than 500-ing the whole list.
+    const buildQuery = (columns: string) => {
+      let q = service.from("room_bookings").select(columns);
+      if (locationId) q = q.eq("location_id", locationId);
+      if (range === "upcoming") {
+        q = q.gte("check_out", new Date().toISOString().slice(0, 10));
+      }
+      return q.order("check_in", { ascending: true }).limit(500);
+    };
 
-    const { data, error } = await query;
+    let { data, error } = await buildQuery(
+      "id, room_id, location_id, check_in, check_out, nights, guest_count, customer_name, customer_phone, customer_email, special_requests, status, created_at, price_per_night, total_amount, guest_rooms(code, name_es, name)",
+    );
+    if (isUndefinedColumn(error)) {
+      logger.warn("[AdminRoomBookings] price columns missing; migration 20260920c pending");
+      ({ data, error } = await buildQuery(
+        "id, room_id, location_id, check_in, check_out, nights, guest_count, customer_name, customer_phone, customer_email, special_requests, status, created_at, guest_rooms(code, name_es, name)",
+      ));
+    }
     if (error) {
       logger.error("[AdminRoomBookings] list failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: "Error al cargar" }, { status: 500 });

@@ -122,8 +122,89 @@ async function buildEventsBlock(): Promise<string> {
   }
 }
 
+/**
+ * Everything the 2026-09 build shipped that the prompt was blind to: the three
+ * brand segment pages, the Coatepeque rooms ("estadía") and lake services, and
+ * which venues expose the online table/area map.
+ *
+ * Rooms and areas are read LIVE, never hardcoded — while no room is active we
+ * say "próximamente / por solicitud" and quote no price at all. A failed read
+ * degrades to the same honest "no price, send them to the page" line rather
+ * than to an invented availability.
+ */
+async function buildExperiencesBlock(): Promise<string> {
+  const segmentLines = [
+    "- 🥩 Cortes Premium — simmerdownsv.com/cortes-premium: carnes selectas maduradas y selladas al fuego (molcajete de coulotte con tuétano asado, medallón de lomito al maître y la selección rotativa del chef). Disponible en la carta de las sucursales.",
+    "- 🥂 Hospitality — simmerdownsv.com/hospitality: eventos privados (cumpleaños, corporativos, celebraciones con reserva de zonas completas), catering a domicilio con menú a la medida, y las experiencias del Lago de Coatepeque.",
+    "- 👕 Merch — simmerdownsv.com/merch: camisetas, gorras, tote bags y ediciones limitadas \"Good Vibes Only\". TODAVÍA NO está a la venta (muy pronto): solo se toma el interés del cliente por WhatsApp.",
+  ].join("\n");
+
+  const lakeLine =
+    "- 🌊 Lago de Coatepeque: además del restaurante hay actividades acuáticas, valet parking y hospedaje (ver abajo). WhatsApp del lago: +503 6831-6907.";
+
+  const fallbackRooms =
+    "### HOSPEDAJE / ESTADÍA (Lago de Coatepeque)\n- No tengo el detalle de habitaciones en este momento. NO des precios ni disponibilidad: dirige al cliente a simmerdownsv.com/estadia o al WhatsApp del lago +503 6831-6907.";
+  const reservationsFallback =
+    "### RESERVA DE MESA\n- Las reservaciones se hacen en simmerdownsv.com/reservations o por el WhatsApp de cada sucursal.";
+
+  let roomsSection = fallbackRooms;
+  let reservationsSection = reservationsFallback;
+
+  try {
+    const supabase = createApiClient();
+    const [{ data: rooms, error: roomsError }, { data: areas, error: areasError }] =
+      await Promise.all([
+        supabase
+          .from("guest_rooms")
+          .select("name_es, name, capacity, price_per_night, is_active, sort_order")
+          .eq("location_id", "lago-coatepeque")
+          .order("sort_order", { ascending: true }),
+        supabase.from("venue_areas").select("location_id, is_active").eq("is_active", true),
+      ]);
+
+    if (roomsError) {
+      logger.error("[Anima] guest_rooms read failed", roomsError);
+    } else {
+      const active = (rooms ?? []).filter((r) => r.is_active);
+      roomsSection = active.length
+        ? `### HOSPEDAJE / ESTADÍA (Lago de Coatepeque)\nSe reserva en simmerdownsv.com/estadia (solicitud que el equipo confirma por WhatsApp).\n${active
+            .map(
+              (r) =>
+                `- 🛏️ ${r.name_es || r.name} — hasta ${r.capacity} huéspedes, ${formatPrice(Number(r.price_per_night))} por noche`,
+            )
+            .join("\n")}`
+        : '### HOSPEDAJE / ESTADÍA (Lago de Coatepeque)\n- Sí existe hospedaje frente al Lago de Coatepeque, pero está PRÓXIMAMENTE / por solicitud: todavía no hay habitaciones publicadas con precio ni disponibilidad. NUNCA inventes precios, tarifas ni cuartos libres. Toma el interés del cliente y dirígelo a simmerdownsv.com/estadia o al WhatsApp del lago +503 6831-6907.';
+    }
+
+    if (areasError) {
+      logger.error("[Anima] venue_areas read failed", areasError);
+    } else {
+      const nameBySlug = new Map(LOCATIONS.map((l) => [l.slug, l.shortName]));
+      const mapped = [...new Set((areas ?? []).map((a) => a.location_id as string))]
+        .map((slug) => nameBySlug.get(slug))
+        .filter((n): n is string => Boolean(n));
+      const venueList =
+        mapped.length > 1
+          ? `${mapped.slice(0, -1).join(", ")} y ${mapped[mapped.length - 1]}`
+          : mapped[0];
+      reservationsSection = mapped.length
+        ? `### RESERVA DE MESA\n- En ${venueList} el cliente puede elegir su zona y su mesa en el mapa en línea: simmerdownsv.com/reservations\n- En las demás sucursales la reserva es normal (sin mapa) y la mesa se asigna al llegar.\n- Elegir mesa es una PREFERENCIA, no una garantía: si no hay mesa libre en ese horario la reserva igual se puede hacer y el restaurante asigna al llegar.`
+        : reservationsFallback;
+    }
+  } catch (error) {
+    logger.error("[Anima] experiences block read failed", error);
+  }
+
+  return `\n## SEGMENTOS, HOSPEDAJE Y RESERVAS (verificados hoy)\n${segmentLines}\n${lakeLine}\n\n${roomsSection}\n\n${reservationsSection}`;
+}
+
 // Build the complete business knowledge base for Claude
-function buildSystemPrompt(language: "es" | "en", promoBlock: string, eventsBlock: string): string {
+function buildSystemPrompt(
+  language: "es" | "en",
+  promoBlock: string,
+  eventsBlock: string,
+  experiencesBlock: string,
+): string {
   // ── LOCATIONS ──────────────────────────────────────────────
   const locationBlocks = LOCATIONS.map((loc) => {
     const open = isLocationOpen(loc);
@@ -251,6 +332,7 @@ ${modifierBlock}
 
 ${promoBlock}
 ${eventsBlock}
+${experiencesBlock}
 
 ## REGLAS DE RESPUESTA
 1. Siempre menciona PRECIOS REALES del menú — nunca inventes precios
@@ -263,7 +345,10 @@ ${eventsBlock}
 8. Si preguntan por eventos, conciertos o música en vivo, usa la sección "EVENTOS Y MÚSICA EN VIVO". Simmer Down San Benito es la SEDE PRINCIPAL de conciertos (programa Simmer Manía) — NUNCA digas que San Benito no tiene música en vivo. Menciona eventos concretos con su fecha si están listados
 9. Para pedidos, dirige al WhatsApp: +503 7680-4434
 10. Responde en ${language === "es" ? "español" : "inglés"}
-11. NUNCA inventes items, precios, o información que no está arriba`;
+11. NUNCA inventes items, precios, o información que no está arriba
+12. Si preguntan por hospedaje, estadía, habitaciones o "dónde dormir" en el Lago de Coatepeque, usa EXCLUSIVAMENTE la sección "HOSPEDAJE / ESTADÍA". Si ahí no hay habitaciones con precio, di que el hospedaje viene muy pronto / es por solicitud y manda a simmerdownsv.com/estadia — jamás inventes tarifas ni digas que hay cuartos disponibles
+13. Si preguntan por cortes premium, eventos privados, catering o merch, usa la sección "SEGMENTOS, HOSPEDAJE Y RESERVAS" y comparte la URL correspondiente. El merch todavía NO está a la venta
+14. Si preguntan por reservar mesa o elegir zona/mesa, usa la sección "RESERVA DE MESA". Elegir mesa es una preferencia, no una garantía — nunca digas que una mesa concreta queda apartada`;
 
   return systemPrompt;
 }
@@ -438,11 +523,17 @@ export async function POST(request: NextRequest) {
       : message;
 
     // Call Claude API
-    const [promoBlock, eventsBlock] = await Promise.all([
+    const [promoBlock, eventsBlock, experiencesBlock] = await Promise.all([
       buildPromoBlock(),
       buildEventsBlock(),
+      buildExperiencesBlock(),
     ]);
-    const systemPrompt = buildSystemPrompt(language, promoBlock, eventsBlock);
+    const systemPrompt = buildSystemPrompt(
+      language,
+      promoBlock,
+      eventsBlock,
+      experiencesBlock,
+    );
 
     // claude-sonnet-5 defaults to adaptive thinking, which would consume the
     // small chat budget — disabled keeps replies fast and within max_tokens.

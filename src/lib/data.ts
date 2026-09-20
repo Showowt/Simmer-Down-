@@ -570,6 +570,18 @@ export function generateReservationUrl(r: ReservationDetails): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 
+/**
+ * WhatsApp deep link for a specific venue, built from LOCATIONS so that a
+ * number change in this file follows through to every CTA on the site.
+ * An unknown slug falls back to the main Santa Ana line instead of producing
+ * a dead link.
+ */
+export function getLocationWhatsAppUrl(slug: string, message: string): string {
+  const location = getLocationBySlug(slug) ?? LOCATIONS[0];
+  const phone = location.whatsapp.replace(/\D/g, '');
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+}
+
 export function getGoogleMapsUrl(location: Location): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${location.coordinates.lat},${location.coordinates.lng}`;
 }

@@ -28,11 +28,17 @@ interface Reward {
   id: string
   name: string
   name_es: string
+  description: string | null
+  description_es: string | null
   points_required: number
   reward_type: string
   discount_percent: number | null
   discount_amount: number | null
   min_tier_required: string
+  image_url: string | null
+  max_total_redemptions: number | null
+  max_redemptions_per_customer: number | null
+  current_redemptions: number
   is_active: boolean
   display_order: number
 }
@@ -44,28 +50,53 @@ function blankDraft(order: number): Draft {
     id: null,
     name: '',
     name_es: '',
+    description: null,
+    description_es: null,
     points_required: 100,
     reward_type: 'free_item',
     discount_percent: null,
     discount_amount: null,
     min_tier_required: 'bronze',
+    image_url: null,
+    max_total_redemptions: null,
+    max_redemptions_per_customer: null,
+    current_redemptions: 0,
     is_active: true,
     display_order: order,
   }
 }
 
+/** '' → null so an emptied field clears the column instead of failing validation. */
+function nullIfBlank(value: string): string | null {
+  const trimmed = value.trim()
+  return trimmed === '' ? null : trimmed
+}
+
+/** '' → null (unlimited); otherwise a positive integer. */
+function nullIfBlankInt(value: string): number | null {
+  if (value.trim() === '') return null
+  const n = parseInt(value, 10)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
 export default function AdminPremiosPage() {
-  const [welcomePoints, setWelcomePoints] = useState<number>(50)
-  const [pointsPerDollar, setPointsPerDollar] = useState<number>(1)
+  // null until the GET resolves: the form stays disabled so an early "Guardar"
+  // can never write a placeholder over the owner's real value.
+  const [welcomePoints, setWelcomePoints] = useState<number | null>(null)
+  const [pointsPerDollar, setPointsPerDollar] = useState<number | null>(null)
+  const [configLoaded, setConfigLoaded] = useState(false)
   const [savingConfig, setSavingConfig] = useState(false)
 
   const [rewards, setRewards] = useState<Draft[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
+    setLoadError(false)
     try {
       const [cfgRes, rwRes] = await Promise.all([
         fetch('/api/admin/loyalty/config'),
@@ -76,11 +107,19 @@ export default function AdminPremiosPage() {
       if (cfgRes.ok && cfg.data) {
         setWelcomePoints(cfg.data.welcomePoints)
         setPointsPerDollar(cfg.data.pointsPerDollar)
+        setConfigLoaded(true)
+      } else {
+        setToast({ kind: 'err', text: cfg?.message || 'No se pudo cargar la configuración de puntos' })
       }
-      if (rwRes.ok) {
-        setRewards((rw.data as Reward[]).map((r) => ({ ...r })))
+      if (rwRes.ok && Array.isArray(rw.data)) {
+        setRewards((rw.data as Reward[]).map((r) => ({ ...r, current_redemptions: r.current_redemptions ?? 0 })))
+      } else {
+        setLoadError(true)
+        setToast({ kind: 'err', text: rw?.message || 'No se pudo cargar el catálogo' })
       }
-    } catch {
+    } catch (err) {
+      console.error('[AdminPremios] load failed', err)
+      setLoadError(true)
       setToast({ kind: 'err', text: 'Error al cargar' })
     } finally {
       setLoading(false)
@@ -95,6 +134,8 @@ export default function AdminPremiosPage() {
   }, [toast])
 
   const saveConfig = async () => {
+    // Never PATCH values we never successfully read.
+    if (!configLoaded || welcomePoints === null || pointsPerDollar === null) return
     setSavingConfig(true)
     try {
       const res = await fetch('/api/admin/loyalty/config', {
@@ -125,24 +166,22 @@ export default function AdminPremiosPage() {
     setSavingId(key)
     try {
       const isNew = !r.id
+      const payload = {
+        name: r.name.trim(), name_es: r.name_es.trim(),
+        description: nullIfBlank(r.description ?? ''),
+        description_es: nullIfBlank(r.description_es ?? ''),
+        points_required: r.points_required,
+        reward_type: r.reward_type, discount_percent: r.discount_percent,
+        discount_amount: r.discount_amount, min_tier_required: r.min_tier_required,
+        image_url: nullIfBlank(r.image_url ?? ''),
+        max_total_redemptions: r.max_total_redemptions,
+        max_redemptions_per_customer: r.max_redemptions_per_customer,
+        is_active: r.is_active, display_order: r.display_order,
+      }
       const res = await fetch('/api/admin/loyalty/rewards', {
         method: isNew ? 'POST' : 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          isNew
-            ? {
-                name: r.name, name_es: r.name_es, points_required: r.points_required,
-                reward_type: r.reward_type, discount_percent: r.discount_percent,
-                discount_amount: r.discount_amount, min_tier_required: r.min_tier_required,
-                is_active: r.is_active, display_order: r.display_order,
-              }
-            : {
-                id: r.id, name: r.name, name_es: r.name_es, points_required: r.points_required,
-                reward_type: r.reward_type, discount_percent: r.discount_percent,
-                discount_amount: r.discount_amount, min_tier_required: r.min_tier_required,
-                is_active: r.is_active, display_order: r.display_order,
-              },
-        ),
+        body: JSON.stringify(isNew ? payload : { id: r.id, ...payload }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -158,10 +197,38 @@ export default function AdminPremiosPage() {
     }
   }
 
+  /** Soft-disable: the reward disappears from the public site, history survives. */
+  const deactivateReward = async (idx: number) => {
+    const r = rewards[idx]
+    if (!r.id) return
+    setSavingId(r.id)
+    try {
+      const res = await fetch('/api/admin/loyalty/rewards', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: r.id, is_active: false }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setToast({ kind: 'err', text: json.message || 'Error al desactivar' })
+      } else {
+        patchLocal(idx, { is_active: false })
+        setConfirmingId(null)
+        setToast({ kind: 'ok', text: 'Premio desactivado' })
+      }
+    } catch (err) {
+      console.error('[AdminPremios] deactivate failed', err)
+      setToast({ kind: 'err', text: 'Error de conexión' })
+    } finally {
+      setSavingId(null)
+    }
+  }
+
   const deleteReward = async (idx: number) => {
     const r = rewards[idx]
     if (!r.id) {
       setRewards((prev) => prev.filter((_, i) => i !== idx))
+      setConfirmingId(null)
       return
     }
     setSavingId(r.id)
@@ -172,13 +239,15 @@ export default function AdminPremiosPage() {
         setToast({ kind: 'err', text: json.message || 'Error al eliminar' })
       } else {
         setToast({ kind: 'ok', text: json.message || 'Premio eliminado' })
+        setConfirmingId(null)
         if (json.data?.softDeleted) {
           patchLocal(idx, { is_active: false })
         } else {
           setRewards((prev) => prev.filter((_, i) => i !== idx))
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('[AdminPremios] delete failed', err)
       setToast({ kind: 'err', text: 'Error de conexión' })
     } finally {
       setSavingId(null)
@@ -216,9 +285,10 @@ export default function AdminPremiosPage() {
             <label className="block text-xs text-[#6B6560] mb-1.5 uppercase tracking-wider">Puntos de bienvenida</label>
             <input
               type="number" min={0}
-              value={welcomePoints}
+              value={welcomePoints ?? ''}
+              disabled={!configLoaded}
               onChange={(e) => setWelcomePoints(Math.max(0, parseInt(e.target.value) || 0))}
-              className={`${inputCls} w-40`}
+              className={`${inputCls} w-40 disabled:opacity-40`}
             />
             <p className="text-xs text-[#6B6560] mt-1">Al registrarse un nuevo miembro.</p>
           </div>
@@ -226,20 +296,26 @@ export default function AdminPremiosPage() {
             <label className="block text-xs text-[#6B6560] mb-1.5 uppercase tracking-wider">Puntos por $1 gastado</label>
             <input
               type="number" min={0} step="0.1"
-              value={pointsPerDollar}
+              value={pointsPerDollar ?? ''}
+              disabled={!configLoaded}
               onChange={(e) => setPointsPerDollar(Math.max(0, parseFloat(e.target.value) || 0))}
-              className={`${inputCls} w-40`}
+              className={`${inputCls} w-40 disabled:opacity-40`}
             />
-            <p className="text-xs text-[#6B6560] mt-1">Tasa base de acumulación.</p>
+            <p className="text-xs text-[#6B6560] mt-1">Tasa base de acumulación (× multiplicador del nivel). 0 = pausa la acumulación.</p>
           </div>
           <button
             onClick={saveConfig}
-            disabled={savingConfig}
+            disabled={savingConfig || !configLoaded}
             className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50"
           >
             {savingConfig ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Guardar
           </button>
+          {!configLoaded && (
+            <p className="text-xs text-[#6B6560]">
+              {loading ? 'Cargando valores actuales…' : 'No se pudieron cargar los valores actuales. Recarga la página antes de guardar.'}
+            </p>
+          )}
         </div>
       </div>
 
@@ -260,6 +336,10 @@ export default function AdminPremiosPage() {
         <div className="bg-[#252320] border border-[#3D3936] p-12 text-center">
           <Loader2 className="w-8 h-8 text-[#FF6B35] animate-spin mx-auto" />
         </div>
+      ) : loadError && rewards.length === 0 ? (
+        <div className="bg-[#252320] border border-red-500/30 p-10 text-center text-red-300">
+          No se pudo cargar el catálogo. Recarga la página.
+        </div>
       ) : rewards.length === 0 ? (
         <div className="bg-[#252320] border border-[#3D3936] p-10 text-center text-[#6B6560]">
           No hay premios. Agrega el primero.
@@ -267,7 +347,9 @@ export default function AdminPremiosPage() {
       ) : (
         <div className="space-y-3">
           {rewards.map((r, idx) => {
-            const busy = savingId === (r.id ?? `new-${idx}`)
+            const rowKey = r.id ?? `new-${idx}`
+            const busy = savingId === rowKey
+            const confirming = confirmingId === rowKey
             return (
               <div key={r.id ?? `new-${idx}`} className={`bg-[#252320] border p-4 ${r.is_active ? 'border-[#3D3936]' : 'border-[#3D3936] opacity-60'}`}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
@@ -309,19 +391,96 @@ export default function AdminPremiosPage() {
                     </div>
                   )}
 
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Descripción (ES)</label>
+                    <input
+                      value={r.description_es ?? ''}
+                      onChange={(e) => patchLocal(idx, { description_es: e.target.value === '' ? null : e.target.value })}
+                      className={`${inputCls} w-full`}
+                      placeholder="Cualquier bebida del menú"
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Descripción (EN)</label>
+                    <input
+                      value={r.description ?? ''}
+                      onChange={(e) => patchLocal(idx, { description: e.target.value === '' ? null : e.target.value })}
+                      className={`${inputCls} w-full`}
+                      placeholder="Any beverage from the menu"
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="md:col-span-6">
+                    <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Imagen</label>
+                    <input
+                      value={r.image_url ?? ''}
+                      onChange={(e) => patchLocal(idx, { image_url: e.target.value === '' ? null : e.target.value })}
+                      className={`${inputCls} w-full`}
+                      placeholder="/images/menu/pizza-maradona.jpg"
+                      maxLength={500}
+                    />
+                    <p className="text-[10px] text-[#6B6560] mt-1">Ruta del sitio (/images/…) o URL de Supabase Storage / Unsplash. Otros dominios no se pueden mostrar. Sin imagen, la tarjeta sale gris.</p>
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Límite total de canjes</label>
+                    <input
+                      type="number" min={1}
+                      value={r.max_total_redemptions ?? ''}
+                      onChange={(e) => patchLocal(idx, { max_total_redemptions: nullIfBlankInt(e.target.value) })}
+                      className={`${inputCls} w-full`}
+                      placeholder="Sin límite"
+                    />
+                    <p className="text-[10px] text-[#6B6560] mt-1">Canjeado {r.current_redemptions} {r.current_redemptions === 1 ? 'vez' : 'veces'}.</p>
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Límite por cliente</label>
+                    <input
+                      type="number" min={1}
+                      value={r.max_redemptions_per_customer ?? ''}
+                      onChange={(e) => patchLocal(idx, { max_redemptions_per_customer: nullIfBlankInt(e.target.value) })}
+                      className={`${inputCls} w-full`}
+                      placeholder="Sin límite"
+                    />
+                  </div>
+
                   <div className="md:col-span-12 flex items-center gap-3 pt-1">
                     <label className="flex items-center gap-2 text-sm text-[#B8B0A8] cursor-pointer">
                       <input type="checkbox" checked={r.is_active} onChange={(e) => patchLocal(idx, { is_active: e.target.checked })} className="accent-[#FF6B35] w-4 h-4" />
                       {r.is_active ? 'Activo' : 'Inactivo'}
                     </label>
-                    <div className="ml-auto flex items-center gap-2">
-                      <button onClick={() => saveReward(idx)} disabled={busy} className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-4 py-2 text-sm font-semibold transition disabled:opacity-50">
-                        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                        {r.id ? 'Guardar' : 'Crear'}
-                      </button>
-                      <button onClick={() => deleteReward(idx)} disabled={busy} className="flex items-center gap-2 border border-red-500/30 text-red-300 hover:bg-red-500/15 px-3 py-2 text-sm transition disabled:opacity-50">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
+                      {confirming ? (
+                        <>
+                          <span className="text-xs text-[#B8B0A8]">
+                            ¿Quitar «{r.name_es || r.name || 'este premio'}»?
+                          </span>
+                          <button onClick={() => deactivateReward(idx)} disabled={busy} className="border border-[#FF6B35]/40 text-[#FF6B35] hover:bg-[#FF6B35]/10 px-3 py-2 text-sm transition disabled:opacity-50">
+                            Desactivar
+                          </button>
+                          <button onClick={() => deleteReward(idx)} disabled={busy} className="border border-red-500/30 text-red-300 hover:bg-red-500/15 px-3 py-2 text-sm transition disabled:opacity-50">
+                            Eliminar definitivamente
+                          </button>
+                          <button onClick={() => setConfirmingId(null)} disabled={busy} className="text-[#6B6560] hover:text-[#B8B0A8] px-2 py-2 text-sm transition disabled:opacity-50">
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => saveReward(idx)} disabled={busy} className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-4 py-2 text-sm font-semibold transition disabled:opacity-50">
+                            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                            {r.id ? 'Guardar' : 'Crear'}
+                          </button>
+                          <button
+                            onClick={() => (r.id ? setConfirmingId(rowKey) : deleteReward(idx))}
+                            disabled={busy}
+                            aria-label="Quitar premio"
+                            className="flex items-center gap-2 border border-red-500/30 text-red-300 hover:bg-red-500/15 px-3 py-2 text-sm transition disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

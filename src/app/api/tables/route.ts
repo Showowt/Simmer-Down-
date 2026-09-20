@@ -46,8 +46,22 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
 
+    // FAIL CLOSED: an unreadable area list is indistinguishable from "this
+    // venue has no floor plan", and the client drops the table requirement
+    // when there is none — so a read failure would silently sell untracked
+    // tables. Surface it instead.
     if (areasError) {
-      logger.warn("Areas query failed", { error: areasError.message });
+      logger.error("[Tables] Areas query failed", areasError, {
+        location_id: locationId,
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "No se pudieron cargar las áreas. Intenta de nuevo. / Couldn't load the areas. Please try again.",
+        },
+        { status: 500 },
+      );
     }
     const areaList = (areas ?? []) as VenueArea[];
 
@@ -62,9 +76,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .order("sort_order", { ascending: true });
 
     if (tablesError) {
-      logger.warn("Tables query failed", { error: tablesError.message });
+      logger.error("[Tables] Tables query failed", tablesError, {
+        location_id: locationId,
+      });
       return NextResponse.json(
-        { success: false, error: "No se pudieron cargar las mesas" },
+        {
+          success: false,
+          error:
+            "No se pudieron cargar las mesas. Intenta de nuevo. / Couldn't load the tables. Please try again.",
+        },
         { status: 500 },
       );
     }
@@ -79,14 +99,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         .eq("location_id", locationId)
         .eq("date", date)
         .in("status", ACTIVE_STATUSES);
+      // FAIL CLOSED: without the day's reservations every table would render
+      // as free, which is an invitation to double-book the whole venue.
       if (resError) {
-        logger.warn("Reservations query failed", { error: resError.message });
-      } else {
-        reservationsOnDate = (reservations ?? []).filter(
-          (r): r is { table_id: string | null; time: string } =>
-            typeof r.time === "string",
+        logger.error("[Tables] Reservations query failed", resError, {
+          location_id: locationId,
+          date,
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "No pudimos confirmar la disponibilidad. Intenta de nuevo. / We couldn't confirm availability. Please try again.",
+          },
+          { status: 503 },
         );
       }
+      reservationsOnDate = (reservations ?? []).filter(
+        (r): r is { table_id: string | null; time: string } =>
+          typeof r.time === "string",
+      );
     }
 
     // 4. Availability per table, then grouped into their areas
@@ -106,8 +138,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       areas: areasWithTables,
     });
   } catch (error) {
-    logger.warn("Tables endpoint error", {
-      error: error instanceof Error ? error.message : String(error),
+    logger.error("[Tables] Endpoint error", error, {
+      location_id: locationId,
     });
     return NextResponse.json(
       { success: false, error: "Error interno" },

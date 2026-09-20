@@ -42,6 +42,14 @@ export interface SegmentSection {
   titleEn: string
   bodyEs: string
   bodyEn: string
+  /**
+   * Optional per-card WhatsApp link. A card that sells one specific venue
+   * (e.g. the Lago de Coatepeque experiences) must reach THAT venue's line,
+   * not the page-level chain number.
+   */
+  ctaHref?: string
+  ctaLabelEs?: string
+  ctaLabelEn?: string
 }
 
 export interface SegmentConfig {
@@ -131,6 +139,20 @@ export default function SegmentPage({ config }: { config: SegmentConfig }) {
                 <p className="text-white/50 text-sm leading-relaxed">
                   {pick(s.bodyEs, s.bodyEn)}
                 </p>
+                {s.ctaHref && (
+                  <a
+                    href={s.ctaHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-4 text-[#E85D04] hover:text-[#F5D47A] text-sm font-semibold transition-colors min-h-[44px]"
+                  >
+                    {pick(
+                      s.ctaLabelEs ?? 'Escríbenos',
+                      s.ctaLabelEn ?? 'Message us',
+                    )}
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                )}
               </motion.div>
             )
           })}

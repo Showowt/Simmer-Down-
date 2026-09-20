@@ -14,6 +14,29 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import logger from "@/lib/logger";
 
+// venue_areas.image_url is interpolated straight into a CSS
+// `background-image: url(...)` by the public floor plan, so it must never carry
+// quotes, parentheses or backslashes that could close that url() and inject CSS.
+// It also has to be a host the browser can actually load: see
+// next.config.ts → images.remotePatterns and the CSP `img-src` directive.
+const ALLOWED_IMAGE_HOST = /^(images\.unsplash\.com|[a-z0-9-]+\.supabase\.co)$/;
+
+function isSafeImageUrl(raw: string): boolean {
+  if (raw.trim() === "") return true; // empty = no photo
+  if (/["'`()\\<>\s]/.test(raw)) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "https:") return false;
+  return ALLOWED_IMAGE_HOST.test(parsed.hostname.toLowerCase());
+}
+
+const IMAGE_URL_MESSAGE =
+  "URL de foto inválida: debe ser https en images.unsplash.com o en tu Supabase Storage, sin comillas ni paréntesis. / Invalid photo URL: use https on images.unsplash.com or your Supabase Storage.";
+
 const Fields = {
   location_id: z.string().min(2).max(60),
   code: z.string().min(1).max(40),
@@ -24,7 +47,12 @@ const Fields = {
   floor: z.string().max(60).nullable().optional(),
   view: z.string().max(60).nullable().optional(),
   is_vip: z.boolean().optional(),
-  image_url: z.string().max(600).nullable().optional(),
+  image_url: z
+    .string()
+    .max(600)
+    .refine(isSafeImageUrl, { message: IMAGE_URL_MESSAGE })
+    .nullable()
+    .optional(),
   min_party: z.number().int().min(0).max(100).nullable().optional(),
   is_active: z.boolean().optional(),
   sort_order: z.number().int().min(0).max(10000).optional(),
@@ -57,6 +85,12 @@ async function requireAdmin(): Promise<{ ok: true } | { ok: false; res: NextResp
   return { ok: true };
 }
 
+/** Surface the photo-URL rule to the owner; everything else stays generic. */
+function invalidMessage(error: z.ZodError): string {
+  const badImage = error.issues.some((issue) => issue.path[0] === "image_url");
+  return badImage ? IMAGE_URL_MESSAGE : "Datos inválidos";
+}
+
 const COLS =
   "id, location_id, code, name_es, name_en, description_es, description_en, floor, view, is_vip, image_url, min_party, is_active, sort_order";
 
@@ -84,7 +118,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const auth = await requireAdmin();
     if (!auth.ok) return auth.res;
     const parsed = CreateSchema.safeParse(await request.json());
-    if (!parsed.success) return NextResponse.json({ data: null, error: "invalid_body", message: "Datos inválidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ data: null, error: "invalid_body", message: invalidMessage(parsed.error) }, { status: 400 });
     const service = createServiceClient();
     const { data, error } = await service.from("venue_areas").insert([{ is_active: true, sort_order: 0, ...parsed.data }]).select("id").single();
     if (error) {
@@ -103,7 +137,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     const auth = await requireAdmin();
     if (!auth.ok) return auth.res;
     const parsed = UpdateSchema.safeParse(await request.json());
-    if (!parsed.success) return NextResponse.json({ data: null, error: "invalid_body", message: "Datos inválidos" }, { status: 400 });
+    if (!parsed.success) return NextResponse.json({ data: null, error: "invalid_body", message: invalidMessage(parsed.error) }, { status: 400 });
     const { id, ...fields } = parsed.data;
     const service = createServiceClient();
     const { error } = await service.from("venue_areas").update({ ...fields, updated_at: new Date().toISOString() }).eq("id", id);

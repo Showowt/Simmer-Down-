@@ -1,11 +1,18 @@
 /**
  * Admin loyalty config API
- *   GET   /api/admin/loyalty/config   → { welcomePoints, pointsPerDollar }
+ *   GET   /api/admin/loyalty/config            → { welcomePoints, pointsPerDollar }  (admin)
+ *   GET   /api/admin/loyalty/config?public=1   → { welcomePoints, pointsPerDollar }  (no auth)
  *   PATCH /api/admin/loyalty/config   { welcomePoints?, pointsPerDollar? }
  *
  * Backed by the settings key/value table:
  *   loyalty_welcome_points   — signup bonus (read by handle_new_auth_user)
- *   loyalty_points_per_dollar — base earn rate
+ *   loyalty_points_per_dollar — base earn rate (read by award_order_loyalty_points)
+ *
+ * Why a public branch lives under /api/admin: the signup page advertises the
+ * welcome bonus ("obtén N puntos de bienvenida") and must read the configured
+ * value instead of hardcoding it, but the settings table is not readable by
+ * anon (RLS). Both numbers are already published on the public site, so
+ * neither is a secret; the public branch is read-only and rate limited.
  *
  * Auth: logged-in user whose profile role is 'admin'. Writes via service client.
  */
@@ -14,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
 
 const WELCOME_KEY = "loyalty_welcome_points";
@@ -70,10 +78,25 @@ function toNumber(value: unknown, fallback: number): number {
   return fallback;
 }
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const auth = await requireAdmin();
-    if (!auth.ok) return auth.res;
+    const isPublic = new URL(request.url).searchParams.get("public") === "1";
+
+    if (isPublic) {
+      const rl = checkRateLimit(`loyalty_config_public:${getClientIp(request)}`, {
+        maxRequests: 60,
+        windowMs: 60_000,
+      });
+      if (!rl.success) {
+        return NextResponse.json(
+          { data: null, error: "rate_limited", message: "Demasiadas solicitudes" },
+          { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } },
+        );
+      }
+    } else {
+      const auth = await requireAdmin();
+      if (!auth.ok) return auth.res;
+    }
 
     const service = createServiceClient();
     const { data, error } = await service
