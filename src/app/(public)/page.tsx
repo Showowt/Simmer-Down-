@@ -17,6 +17,7 @@ import {
 import EventsSection from '@/components/events/EventsSection'
 import SpecialsSection from '@/components/specials/SpecialsSection'
 import GoogleReviews from '@/components/GoogleReviews'
+import EstadiaSection from '@/components/rooms/EstadiaSection'
 
 // ─── Animation variants ────────────────────────────────────────────────────
 
@@ -482,6 +483,11 @@ export default function HomePage() {
           4b. DYNAMIC EVENTS — Renders only if upcoming events exist
       ══════════════════════════════════════════════════ */}
       <EventsSection />
+
+      {/* ══════════════════════════════════════════════════
+          4c. ESTADÍA — Lakefront stays (renders only if rooms are published)
+      ══════════════════════════════════════════════════ */}
+      <EstadiaSection />
 
       {/* ══════════════════════════════════════════════════
           5. TESTIMONIALS — Customer reviews

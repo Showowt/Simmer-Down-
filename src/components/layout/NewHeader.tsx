@@ -16,6 +16,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/carta', labelKey: 'nav.menu' },
   { href: '/cortes-premium', labelKey: 'nav.cortes' },
   { href: '/hospitality', labelKey: 'nav.hospitality' },
+  { href: '/estadia', labelKey: 'nav.stay' },
   { href: '/merch', labelKey: 'nav.merch' },
   { href: '/events', labelKey: 'nav.events' },
   { href: '/restaurantes', labelKey: 'nav.locations' },
@@ -78,14 +79,14 @@ export default function NewHeader() {
 
           {/* Center — Desktop nav */}
           <nav
-            className="hidden lg:flex items-center gap-3 xl:gap-5"
+            className="hidden lg:flex items-center gap-x-2 xl:gap-5"
             aria-label="Navegación principal"
           >
             {NAV_LINKS.map(({ href, labelKey }) => (
               <Link
                 key={href}
                 href={href}
-                className={`text-[13px] font-medium uppercase tracking-[0.12em] transition-colors duration-200 py-1 border-b-2 ${
+                className={`text-[12px] xl:text-[13px] font-medium uppercase tracking-[0.1em] xl:tracking-[0.12em] whitespace-nowrap transition-colors duration-200 py-1 border-b-2 ${
                   isActive(href)
                     ? 'text-[#E85D04] border-[#E85D04]'
                     : 'text-white/60 border-transparent hover:text-white hover:border-white/20'
