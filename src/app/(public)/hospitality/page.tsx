@@ -79,6 +79,12 @@ const config: SegmentConfig = {
       ),
       ctaLabelEs: 'Escribir al Lago',
       ctaLabelEn: 'Message the Lake',
+      // Primary path: the on-site Estadía booking page. Guests browsing
+      // Hospitality could not previously find it (only the Coatepeque location
+      // page linked to /estadia).
+      ctaInternalHref: '/estadia',
+      ctaInternalLabelEs: 'Reservar Estadía',
+      ctaInternalLabelEn: 'Book a Stay',
     },
   ],
   ctaLabelEs: 'Planear mi evento',

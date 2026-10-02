@@ -110,7 +110,7 @@ async function sendPaymentNotification(
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .select(
-        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city, event_id, ticket_quantity",
+        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city, event_id, ticket_quantity, room_booking_id",
       )
       .eq("id", orderId)
       .single();
@@ -138,6 +138,44 @@ async function sendPaymentNotification(
         (tk?.qr_token ? `\nBoleto: https://simmerdownsv.com/boletos/${tk.qr_token}` : "");
       await sendTelegram(ticketMsg);
       await sendWhatsApp(staffPhone, ticketMsg);
+      return;
+    }
+
+    // Estadía (lodging) purchase → confirm the stay, not a kitchen order.
+    // The confirm trigger has already promoted the booking by the time we're here.
+    if (order.room_booking_id) {
+      const safe = (s: string) => String(s || "").replace(/[_*`[\]]/g, "");
+      const { data: booking } = await supabase
+        .from("room_bookings")
+        .select("check_in, check_out, nights, guest_count, room_id")
+        .eq("id", order.room_booking_id)
+        .maybeSingle();
+      let roomName = "Habitación";
+      if (booking?.room_id) {
+        const { data: rm } = await supabase
+          .from("guest_rooms")
+          .select("name_es, name")
+          .eq("id", booking.room_id)
+          .maybeSingle();
+        roomName = rm?.name_es || rm?.name || roomName;
+      }
+      const nights = booking?.nights ?? null;
+      const stayMsg =
+        `🏨 *ESTADÍA CONFIRMADA — Lago de Coatepeque*\n\n` +
+        `🛏️ ${safe(roomName)}\n` +
+        (booking?.check_in
+          ? `📅 ${booking.check_in} → ${booking.check_out}` +
+            (nights != null ? ` (${nights} noche${nights === 1 ? "" : "s"})` : "") +
+            "\n"
+          : "") +
+        (booking?.guest_count != null
+          ? `👥 ${booking.guest_count} huésped${booking.guest_count === 1 ? "" : "es"}\n`
+          : "") +
+        `💵 Pagado: $${Number(order.total_amount).toFixed(2)}\n` +
+        `👤 ${safe(order.customer_name) || "Cliente"} · ${safe(order.customer_phone) || "—"}\n` +
+        `Pedido: #${order.order_number}`;
+      await sendTelegram(stayMsg);
+      await sendWhatsApp(staffPhone, stayMsg);
       return;
     }
 

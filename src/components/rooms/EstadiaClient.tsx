@@ -4,11 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   BedDouble, Calendar, Users, User, Phone, Mail, FileText, Check, ArrowRight, Loader2, Moon,
-  AlertTriangle, RefreshCw,
+  AlertTriangle, RefreshCw, CreditCard, MessageCircle, ArrowLeft, ShieldCheck,
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useI18n } from '@/lib/i18n'
+import CardPaymentForm, { type CardFormData } from '@/components/checkout/CardPaymentForm'
+import ThreeDSecureModal from '@/components/checkout/ThreeDSecureModal'
+import PaymentResult from '@/components/checkout/PaymentResult'
 import {
   addDays,
   computeStayTotal,
@@ -45,6 +48,19 @@ export default function EstadiaClient() {
   const [submittedTotal, setSubmittedTotal] = useState<number | null>(null)
   const [error, setError] = useState('')
 
+  // Card-payment path (pay now) — runs alongside the WhatsApp request.
+  const [payStep, setPayStep] = useState<'none' | 'payment' | '3ds' | 'result'>('none')
+  const [payLoading, setPayLoading] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
+  const [redirectData, setRedirectData] = useState<string | null>(null)
+  const [payResult, setPayResult] = useState<{ status: 'paid' | 'failed'; message?: string } | null>(null)
+  // Snapshot of the stay captured when checkout starts, so the payment/result
+  // UI does not depend on the live rooms list — our own pending_payment hold
+  // marks the room unavailable on the next refetch.
+  const [payBooking, setPayBooking] = useState<
+    { nameEs: string; nameEn: string; nights: number; total: number; checkIn: string; checkOut: string; guests: number } | null
+  >(null)
+
   // /estadia is statically prerendered, so a render-time date is frozen at BUILD
   // time in the HTML (verified: the built estadia.html carries min="2026-09-20").
   // Reading it in an effect keeps SSR and the first client render identical and
@@ -62,6 +78,9 @@ export default function EstadiaClient() {
 
   // Load rooms/availability whenever dates or guests change
   useEffect(() => {
+    // Don't refetch (or flip loading/selection) once the guest is paying — our
+    // own hold would mark the room unavailable and clear their selection.
+    if (payStep !== 'none') return
     let cancelled = false
     async function load() {
       setLoadingRooms(true)
@@ -88,14 +107,16 @@ export default function EstadiaClient() {
     }
     load()
     return () => { cancelled = true }
-  }, [checkIn, checkOut, guests, validRange, reloadKey])
+  }, [checkIn, checkOut, guests, validRange, reloadKey, payStep])
 
-  // Drop selection if the room becomes unavailable
+  // Drop selection if the room becomes unavailable (only while browsing, not
+  // once a hold is in flight — see the load effect above).
   useEffect(() => {
+    if (payStep !== 'none') return
     if (selectedRoomId && rooms.length && !rooms.find((r) => r.id === selectedRoomId && r.available)) {
       setSelectedRoomId(null)
     }
-  }, [rooms, selectedRoomId])
+  }, [rooms, selectedRoomId, payStep])
 
   const handleCheckIn = useCallback((v: string) => {
     setCheckIn(v)
@@ -139,6 +160,80 @@ export default function EstadiaClient() {
     }
   }
 
+  // Pay-now: reserve the room (pending_payment hold) + create the order, then
+  // hand off to the certified PowerTranz card flow.
+  const startCardCheckout = async () => {
+    if (!canSubmit || selectedTotal == null || !selectedRoom) return
+    setPayLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/room-bookings/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location_id: LODGING_LOCATION,
+          room_id: selectedRoomId,
+          check_in: checkIn,
+          check_out: checkOut,
+          guest_count: guests,
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || null,
+          special_requests: notes || null,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        setError(json.error || json.message || tr('No se pudo iniciar el pago. Intenta de nuevo.', 'Could not start payment. Try again.'))
+        return
+      }
+      setOrderId(json.orderId)
+      setPayBooking({
+        nameEs: selectedRoom.name_es,
+        nameEn: selectedRoom.name,
+        nights,
+        total: selectedTotal,
+        checkIn,
+        checkOut,
+        guests,
+      })
+      setPayStep('payment')
+    } catch {
+      setError(tr('Error de conexión. Intenta de nuevo.', 'Connection error. Try again.'))
+    } finally {
+      setPayLoading(false)
+    }
+  }
+
+  const handleStayPayment = async (form: CardFormData) => {
+    if (!orderId) return
+    setPayLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/payments/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, card: form.card, billing: form.billing }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        setError(json.message || json.error || tr('Error al iniciar el pago.', 'Payment init error.'))
+        return
+      }
+      setRedirectData(json.redirectData)
+      setPayStep('3ds')
+    } catch {
+      setError(tr('Error de pago. Intenta de nuevo.', 'Payment error. Try again.'))
+    } finally {
+      setPayLoading(false)
+    }
+  }
+
+  const handle3DSComplete = (r: { status: 'paid' | 'failed'; message?: string; authorizationCode?: string | null }) => {
+    setPayResult({ status: r.status, message: r.message })
+    setPayStep('result')
+  }
+
   const inputCls =
     'w-full px-4 py-3.5 bg-[#111] border border-white/15 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-[#E85D04] focus:ring-1 focus:ring-[#E85D04]/30 transition'
 
@@ -172,8 +267,48 @@ export default function EstadiaClient() {
     )
   }
 
+  // Card payment result (pay-now path)
+  if (payStep === 'result' && payResult) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] pt-32 md:pt-40 pb-28 px-4">
+        <div className="max-w-md mx-auto">
+          {payResult.status === 'paid' ? (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-8 text-center">
+              <div className="w-16 h-16 bg-[#4CAF50]/10 border border-[#4CAF50]/20 flex items-center justify-center mx-auto mb-6">
+                <Check className="w-8 h-8 text-[#4CAF50]" />
+              </div>
+              <h2 className="font-display text-2xl text-white mb-3">{tr('¡Estadía confirmada!', 'Stay confirmed!')}</h2>
+              <p className="text-white/60 mb-6">
+                {tr('Tu pago fue recibido. Te esperamos frente al lago.', 'Your payment was received. See you by the lake.')}
+              </p>
+              {payBooking && (
+                <div className="bg-[#0A0A0A] border border-white/10 p-5 text-left text-sm space-y-2 mb-6">
+                  <p className="text-white/70"><span className="text-white/40">{tr('Habitación', 'Room')}:</span> {es ? payBooking.nameEs : payBooking.nameEn}</p>
+                  <p className="text-white/70"><span className="text-white/40">{tr('Entrada', 'Check-in')}:</span> {payBooking.checkIn}</p>
+                  <p className="text-white/70"><span className="text-white/40">{tr('Salida', 'Check-out')}:</span> {payBooking.checkOut} · {payBooking.nights} {payBooking.nights === 1 ? tr('noche', 'night') : tr('noches', 'nights')}</p>
+                  <p className="text-white/70"><span className="text-white/40">{tr('Total pagado', 'Total paid')}:</span> <span className="text-[#F5D47A]">${payBooking.total.toFixed(2)}</span></p>
+                </div>
+              )}
+              <Link href="/" className="inline-flex items-center gap-2 text-[#E85D04] hover:text-[#F5D47A] font-semibold">
+                {tr('Volver al inicio', 'Back home')} <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+          ) : (
+            <PaymentResult
+              status="failed"
+              message={payResult.message}
+              onRetry={() => { setPayResult(null); setError(''); setRedirectData(null); setPayStep('payment') }}
+            />
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] pt-32 md:pt-40 pb-28 lg:pb-16">
+      {payStep === 'none' && (
+      <>
       {/* Hero */}
       <section className="px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
@@ -369,17 +504,84 @@ export default function EstadiaClient() {
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center text-red-400 text-sm">{error}</div>
         )}
 
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/30 text-white py-4 rounded-xl text-lg font-semibold transition-colors min-h-[56px]"
-        >
-          {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> {tr('Enviando…', 'Sending…')}</> : <><Check className="w-5 h-5" /> {tr('Solicitar estadía', 'Request stay')}</>}
-        </button>
-        <p className="text-white/30 text-xs text-center">
-          {tr('Es una solicitud — confirmamos disponibilidad y pago por WhatsApp.', "This is a request — we confirm availability and payment by WhatsApp.")}
+        <div className="space-y-3">
+          {selectedTotal != null && (
+            <button
+              type="button"
+              onClick={startCardCheckout}
+              disabled={!canSubmit || payLoading}
+              className="w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/30 text-white py-4 rounded-xl text-lg font-semibold transition-colors min-h-[56px]"
+            >
+              {payLoading
+                ? <><Loader2 className="w-5 h-5 animate-spin" /> {tr('Procesando…', 'Processing…')}</>
+                : <><CreditCard className="w-5 h-5" /> {tr('Pagar y reservar', 'Pay & book')} ${selectedTotal.toFixed(2)}</>}
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={!canSubmit || submitting}
+            className={
+              selectedTotal != null
+                ? 'w-full flex items-center justify-center gap-2 border border-white/15 hover:border-white/40 text-white/80 py-3.5 rounded-xl text-base font-medium transition-colors min-h-[52px] disabled:opacity-40'
+                : 'w-full flex items-center justify-center gap-3 bg-[#E85D04] hover:bg-[#C2410C] disabled:bg-white/10 disabled:text-white/30 text-white py-4 rounded-xl text-lg font-semibold transition-colors min-h-[56px]'
+            }
+          >
+            {submitting
+              ? <><Loader2 className="w-5 h-5 animate-spin" /> {tr('Enviando…', 'Sending…')}</>
+              : <><MessageCircle className="w-5 h-5" /> {tr('Solicitar por WhatsApp', 'Request by WhatsApp')}</>}
+          </button>
+        </div>
+        <p className="text-white/30 text-xs text-center flex items-center justify-center gap-1.5">
+          {selectedTotal != null ? (
+            <><ShieldCheck className="w-3.5 h-3.5 shrink-0" /> {tr('Pago seguro con 3-D Secure (Visa · Mastercard · Amex). O reserva por WhatsApp y coordinamos el pago.', 'Secure 3-D Secure payment (Visa · Mastercard · Amex). Or book by WhatsApp and we arrange payment.')}</>
+          ) : (
+            tr('Es una solicitud — confirmamos disponibilidad y pago por WhatsApp.', 'This is a request — we confirm availability and payment by WhatsApp.')
+          )}
         </p>
       </form>
+      </>
+      )}
+
+      {(payStep === 'payment' || payStep === '3ds') && payBooking && (
+        <div className="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+          <button
+            type="button"
+            onClick={() => { setPayStep('none'); setError('') }}
+            className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> {tr('Volver', 'Back')}
+          </button>
+
+          <div className="bg-[#141414] border border-white/10 rounded-xl p-5 mb-6">
+            <div className="flex items-center gap-2 text-[#E85D04] text-xs font-bold uppercase tracking-wider mb-2">
+              <BedDouble className="w-4 h-4" /> {tr('Estadía', 'Stay')}
+            </div>
+            <h1 className="font-display text-xl text-white leading-tight">{es ? payBooking.nameEs : payBooking.nameEn}</h1>
+            <p className="text-white/60 text-sm mt-1">
+              {payBooking.checkIn} → {payBooking.checkOut} · {payBooking.nights} {payBooking.nights === 1 ? tr('noche', 'night') : tr('noches', 'nights')} · {payBooking.guests} {payBooking.guests === 1 ? tr('huésped', 'guest') : tr('huéspedes', 'guests')}
+            </p>
+            <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/10">
+              <span className="text-white/60">{tr('Total a pagar', 'Total to pay')}</span>
+              <span className="text-2xl font-bold text-white tabular-nums">${payBooking.total.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <CardPaymentForm onSubmit={handleStayPayment} loading={payLoading} error={error} />
+        </div>
+      )}
+
+      {payStep === '3ds' && redirectData && orderId && (
+        <ThreeDSecureModal
+          redirectData={redirectData}
+          orderId={orderId}
+          onComplete={handle3DSComplete}
+          onClose={() => {
+            setRedirectData(null)
+            setPayStep('payment')
+            setError(tr('Verificación cancelada. Puedes intentar de nuevo.', 'Verification cancelled. You can try again.'))
+          }}
+        />
+      )}
     </div>
   )
 }

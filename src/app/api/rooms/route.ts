@@ -18,6 +18,7 @@ import {
   isValidDate,
   isUndefinedColumn,
   ACTIVE_ROOM_STATUSES,
+  HOLD_EXPIRY_MINUTES,
   GUEST_ROOM_COLUMNS,
   GUEST_ROOM_COLUMNS_LEGACY,
   type GuestRoom,

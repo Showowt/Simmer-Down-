@@ -59,8 +59,15 @@ export function hasLodging(locationId: string | null | undefined): boolean {
   return !!locationId && LODGING_LOCATIONS.has(locationId)
 }
 
-// Booking statuses that still hold a room.
-export const ACTIVE_ROOM_STATUSES = ['pending', 'confirmed', 'checked_in']
+// Booking statuses that still hold a room. 'pending_payment' is a card hold:
+// the booking is created before the 3DS charge so the room is reserved during
+// checkout. Abandoned holds are swept after HOLD_EXPIRY_MINUTES (see the
+// checkout + rooms routes), so a dropped payment never locks a room for long.
+export const ACTIVE_ROOM_STATUSES = ['pending', 'confirmed', 'checked_in', 'pending_payment']
+
+// How long an unpaid card hold ('pending_payment') keeps a room before it is
+// swept back to 'expired'. A 3DS flow completes well within this.
+export const HOLD_EXPIRY_MINUTES = 15
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 

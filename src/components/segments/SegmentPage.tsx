@@ -50,6 +50,16 @@ export interface SegmentSection {
   ctaHref?: string
   ctaLabelEs?: string
   ctaLabelEn?: string
+  /**
+   * Optional per-card INTERNAL link (a Next route, e.g. /estadia). Rendered as a
+   * primary button above the WhatsApp line, so a card can send the guest to an
+   * on-site flow while keeping its "message us" fallback. Added so the Lake card
+   * reaches the Estadía booking page (it was only linked from the Coatepeque
+   * location page — guests browsing Hospitality could not find it).
+   */
+  ctaInternalHref?: string
+  ctaInternalLabelEs?: string
+  ctaInternalLabelEn?: string
 }
 
 export interface SegmentConfig {
@@ -139,19 +149,35 @@ export default function SegmentPage({ config }: { config: SegmentConfig }) {
                 <p className="text-white/50 text-sm leading-relaxed">
                   {pick(s.bodyEs, s.bodyEn)}
                 </p>
-                {s.ctaHref && (
-                  <a
-                    href={s.ctaHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 mt-4 text-[#E85D04] hover:text-[#F5D47A] text-sm font-semibold transition-colors min-h-[44px]"
-                  >
-                    {pick(
-                      s.ctaLabelEs ?? 'Escríbenos',
-                      s.ctaLabelEn ?? 'Message us',
+                {(s.ctaInternalHref || s.ctaHref) && (
+                  <div className="mt-5 flex flex-col items-start gap-3">
+                    {s.ctaInternalHref && (
+                      <Link
+                        href={s.ctaInternalHref}
+                        className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white px-5 py-2.5 text-sm font-semibold transition-colors min-h-[44px]"
+                      >
+                        {pick(
+                          s.ctaInternalLabelEs ?? 'Reservar',
+                          s.ctaInternalLabelEn ?? 'Book',
+                        )}
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
                     )}
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
+                    {s.ctaHref && (
+                      <a
+                        href={s.ctaHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[#E85D04] hover:text-[#F5D47A] text-sm font-semibold transition-colors min-h-[44px]"
+                      >
+                        {pick(
+                          s.ctaLabelEs ?? 'Escríbenos',
+                          s.ctaLabelEn ?? 'Message us',
+                        )}
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
                 )}
               </motion.div>
             )
