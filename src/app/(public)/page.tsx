@@ -18,6 +18,7 @@ import EventsSection from '@/components/events/EventsSection'
 import SpecialsSection from '@/components/specials/SpecialsSection'
 import GoogleReviews from '@/components/GoogleReviews'
 import EstadiaSection from '@/components/rooms/EstadiaSection'
+import ReviewsCarousel from '@/components/reviews/ReviewsCarousel'
 
 // ─── Animation variants ────────────────────────────────────────────────────
 
@@ -490,87 +491,9 @@ export default function HomePage() {
       <EstadiaSection />
 
       {/* ══════════════════════════════════════════════════
-          5. TESTIMONIALS — Customer reviews
+          5. REVIEWS — Real Google reviews (carousel)
       ══════════════════════════════════════════════════ */}
-      <section aria-label="Testimonios" className="py-16 md:py-24 px-6 bg-[#0A0A0A]">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <div className="flex items-center justify-center gap-1.5 mb-3">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 text-[#FBBF24] fill-[#FBBF24]" />
-              ))}
-            </div>
-            <p className="text-[#FBBF24] text-xs font-semibold uppercase tracking-[0.2em] mb-2">
-              4.9 / 5 &middot; +8,000 {locale === 'es' ? 'reseñas' : 'reviews'}
-            </p>
-            <h2
-              className="font-display text-white leading-tight"
-              style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}
-            >
-              {locale === 'es' ? 'LO QUE DICEN NUESTROS CLIENTES' : 'WHAT OUR GUESTS SAY'}
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Carlos M.',
-                location: 'Santa Ana',
-                textEs: 'La mejor pizza de El Salvador, sin duda. La Ghiottone es increíble y el ambiente con música en vivo es perfecto para una noche especial.',
-                textEn: 'The best pizza in El Salvador, no doubt. The Ghiottone is incredible and the live music atmosphere is perfect for a special night.',
-                rating: 5,
-              },
-              {
-                name: 'María José R.',
-                location: 'Lago de Coatepeque',
-                textEs: 'El Terramar al Maître es espectacular. La vista al lago desde la terraza, la comida fresca y el servicio impecable. Simmer Down nunca decepciona.',
-                textEn: 'The Terramar al Maître is spectacular. The lake view from the terrace, fresh food and impeccable service. Simmer Down never disappoints.',
-                rating: 5,
-              },
-              {
-                name: 'Roberto A.',
-                location: 'Surf City',
-                textEs: 'Comer pizza artesanal con los pies en la arena y un atardecer increíble. La Memoravel y una Heroica helada — combo perfecto.',
-                textEn: 'Eating artisan pizza with your feet in the sand and an incredible sunset. The Memoravel and a cold Heroica — perfect combo.',
-                rating: 5,
-              },
-            ].map((review, i) => (
-              <motion.div
-                key={review.name}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="bg-[#1A1A1A] rounded-xl border border-white/8 p-6 flex flex-col"
-              >
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(review.rating)].map((_, j) => (
-                    <Star key={j} className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
-                  ))}
-                </div>
-                <p className="text-white/70 text-sm leading-relaxed flex-1 mb-5">
-                  &ldquo;{locale === 'es' ? review.textEs : review.textEn}&rdquo;
-                </p>
-                <div className="flex items-center gap-3 pt-4 border-t border-white/8">
-                  <div className="w-9 h-9 rounded-full bg-[#E85D04]/20 flex items-center justify-center text-[#E85D04] text-sm font-bold">
-                    {review.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-medium">{review.name}</p>
-                    <p className="text-white/40 text-xs">{review.location}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ReviewsCarousel />
 
       {/* ══════════════════════════════════════════════════
           6. EVENTS PREVIEW — Lifestyle teaser
