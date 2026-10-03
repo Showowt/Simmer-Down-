@@ -20,6 +20,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { CANONICAL_LOCATION_SLUGS } from "@/lib/locations";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { isPastEvent } from "@/lib/events";
 
 // ─────────────────────────────────────────────
 // DB types matching the events schema
@@ -40,6 +41,7 @@ interface DbEvent {
   custom_venue: string | null;
   starts_at: string;
   ends_at: string | null;
+  recurrence?: string | null;
   image_url: string | null;
   thumbnail_url: string | null;
   has_capacity_limit: boolean;
@@ -63,7 +65,7 @@ interface LocationOption {
   name: string;
 }
 
-type FilterMode = "all" | "published" | "draft" | "featured";
+type FilterMode = "upcoming" | "past" | "all" | "published" | "draft" | "featured";
 
 const emptyEvent: Partial<DbEvent> = {
   title: "",
@@ -147,7 +149,7 @@ export default function AdminEventsPage() {
   const [editing, setEditing] = useState<Partial<DbEvent> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [filter, setFilter] = useState<FilterMode>("all");
+  const [filter, setFilter] = useState<FilterMode>("upcoming");
   const [search, setSearch] = useState("");
 
   // ── Fetch data ──────────────────────────────
@@ -331,18 +333,32 @@ export default function AdminEventsPage() {
   };
 
   // ── Filter + Search ─────────────────────────
-  const filteredEvents = events.filter((e) => {
-    if (filter === "published" && !e.is_published) return false;
-    if (filter === "draft" && e.is_published) return false;
-    if (filter === "featured" && !e.is_featured) return false;
-    if (
-      search &&
-      !e.title.toLowerCase().includes(search.toLowerCase()) &&
-      !(e.title_es || "").toLowerCase().includes(search.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  const isPast = (e: DbEvent) =>
+    isPastEvent({ starts_at: e.starts_at, ends_at: e.ends_at, recurrence: e.recurrence });
+  const pastCount = events.filter(isPast).length;
+  const upcomingCount = events.length - pastCount;
+
+  const filteredEvents = events
+    .filter((e) => {
+      if (filter === "upcoming" && isPast(e)) return false;
+      if (filter === "past" && !isPast(e)) return false;
+      if (filter === "published" && !e.is_published) return false;
+      if (filter === "draft" && e.is_published) return false;
+      if (filter === "featured" && !e.is_featured) return false;
+      if (
+        search &&
+        !e.title.toLowerCase().includes(search.toLowerCase()) &&
+        !(e.title_es || "").toLowerCase().includes(search.toLowerCase())
+      )
+        return false;
+      return true;
+    })
+    // Soonest upcoming first; most-recent past first in the archive.
+    .sort((a, b) =>
+      filter === "past"
+        ? +new Date(b.starts_at) - +new Date(a.starts_at)
+        : +new Date(a.starts_at) - +new Date(b.starts_at),
+    );
 
   // ── Location name resolver ──────────────────
   const getLocationName = (locationId: string | null): string | null => {
@@ -391,6 +407,8 @@ export default function AdminEventsPage() {
           onChange={(e) => setFilter(e.target.value as FilterMode)}
           className="bg-[#252320] border border-[#3D3936] text-[#FFF8F0] px-4 py-2 focus:border-[#FF6B35] focus:outline-none"
         >
+          <option value="upcoming">Próximos ({upcomingCount})</option>
+          <option value="past">Pasados · Archivados ({pastCount})</option>
           <option value="all">Todos ({events.length})</option>
           <option value="published">
             Publicados ({events.filter((e) => e.is_published).length})
@@ -445,7 +463,7 @@ export default function AdminEventsPage() {
             <div
               key={event.id}
               className={`bg-[#252320] border border-[#3D3936] overflow-hidden ${
-                !event.is_published ? "opacity-60" : ""
+                !event.is_published || isPast(event) ? "opacity-60" : ""
               }`}
             >
               {/* Card Image */}
@@ -472,6 +490,11 @@ export default function AdminEventsPage() {
                   {!event.is_published && (
                     <span className="bg-[#6B6560] text-white px-2 py-1 text-xs font-medium">
                       Borrador
+                    </span>
+                  )}
+                  {isPast(event) && (
+                    <span className="bg-[#1F1D1A]/90 border border-[#6B6560] text-[#B8B0A8] px-2 py-1 text-xs font-medium flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Finalizado
                     </span>
                   )}
                 </div>

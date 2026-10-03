@@ -8,6 +8,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { LOCATIONS } from "@/lib/data";
 import { useI18n, translations } from "@/lib/i18n";
+import EventCountdown from "./EventCountdown";
+import { isLiveOrUpcoming } from "@/lib/events";
 
 // ─────────────────────────────────────────────
 // Real events schema (matches prod DB)
@@ -220,9 +222,13 @@ export function EventsList() {
   // Cap full-width hero posters to the 2 soonest featured events — the client
   // marks most events "featured", and stacking 8 heroes reads as broken.
   // Nothing is hidden: every remaining event falls into the grid below.
-  const featured = events.filter((e) => e.is_featured).slice(0, 2);
+  // Auto-archive: hide events that are over (recurring programmes never pass).
+  const visible = events.filter((e) =>
+    isLiveOrUpcoming({ starts_at: e.starts_at, ends_at: e.ends_at, recurrence: e.recurrence }),
+  );
+  const featured = visible.filter((e) => e.is_featured).slice(0, 2);
   const heroIds = new Set(featured.map((e) => e.id));
-  const upcoming = events.filter((e) => !heroIds.has(e.id));
+  const upcoming = visible.filter((e) => !heroIds.has(e.id));
 
   if (loading) {
     return (
@@ -301,6 +307,14 @@ export function EventsList() {
                     </div>
                   )}
                 </div>
+                <EventCountdown
+                  startsAt={event.starts_at}
+                  endsAt={event.ends_at}
+                  recurrence={event.recurrence}
+                  locale={locale}
+                  variant="hero"
+                  className="mb-8"
+                />
                 {(() => {
                   const ts = ticketState(event);
                   if (ts.onSale && ts.soldOut) {
@@ -427,6 +441,15 @@ export function EventsList() {
                         </span>
                       </div>
                     )}
+                    <div className="absolute bottom-3 left-3">
+                      <EventCountdown
+                        startsAt={event.starts_at}
+                        endsAt={event.ends_at}
+                        recurrence={event.recurrence}
+                        locale={locale}
+                        variant="card"
+                      />
+                    </div>
                   </div>
 
                   <div className="p-6">

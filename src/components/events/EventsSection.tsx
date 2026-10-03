@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import EventCountdown from './EventCountdown'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -19,6 +20,7 @@ interface EventData {
   custom_venue: string | null
   starts_at: string
   ends_at: string | null
+  recurrence: string | null
   image_url: string | null
   thumbnail_url: string | null
   is_featured: boolean
@@ -165,6 +167,14 @@ export default function EventsSection() {
                       Destacado
                     </span>
                   )}
+                  <div className="absolute bottom-3 left-3">
+                    <EventCountdown
+                      startsAt={event.starts_at}
+                      endsAt={event.ends_at}
+                      recurrence={event.recurrence}
+                      variant="card"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="relative h-32 bg-gradient-to-br from-[#E85D04]/10 to-[#0A0A0A] flex items-center justify-center">

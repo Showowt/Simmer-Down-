@@ -15,6 +15,7 @@ import {
   rateLimitResponse,
 } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
+import { upcomingOrFilter, isLiveOrUpcoming } from "@/lib/events";
 
 interface EventRow {
   id: string;
@@ -27,6 +28,7 @@ interface EventRow {
   custom_venue: string | null;
   starts_at: string;
   ends_at: string | null;
+  recurrence: string | null;
   image_url: string | null;
   thumbnail_url: string | null;
   is_featured: boolean;
@@ -70,9 +72,13 @@ export async function GET(
 
     let query = supabase
       .from("events")
-      .select("id, title, title_es, slug, description, description_es, location_id, custom_venue, starts_at, ends_at, image_url, thumbnail_url, is_featured, is_published, tags, created_at")
+      .select("id, title, title_es, slug, description, description_es, location_id, custom_venue, starts_at, ends_at, recurrence, image_url, thumbnail_url, is_featured, is_published, tags, created_at")
       .eq("is_published", true)
-      .gte("starts_at", now)
+      // Auto-archive: keep recurring, live, and upcoming events; drop them once
+      // they are over (src/lib/events.ts). Previously `.gte("starts_at", now)`,
+      // which hid an event the moment it STARTED — even while it was happening.
+      // The DB returns a SUPERSET; the exact filter runs below in JS.
+      .or(upcomingOrFilter(now))
       .order("starts_at", { ascending: true });
 
     if (location) {
@@ -93,8 +99,12 @@ export async function GET(
       );
     }
 
+    // Exact filter: trims no-end events past their grace window and excludes
+    // recurrence='none' edge cases the SUPERSET query may include.
+    const events = ((data ?? []) as EventRow[]).filter((e) => isLiveOrUpcoming(e));
+
     return NextResponse.json(
-      { success: true, events: (data ?? []) as EventRow[] },
+      { success: true, events },
       {
         status: 200,
         headers: {
