@@ -5,6 +5,7 @@ import ToastContainer from '@/components/Toast'
 import ClientProviders from '@/components/ClientProviders'
 import AppProviders from '@/components/AppProviders'
 import { Analytics } from '@vercel/analytics/react'
+import TrackingScripts from '@/components/analytics/TrackingScripts'
 import { FilmGrain } from '@/components/cinema/FilmGrain'
 import {
   generateOrganizationSchema,
@@ -38,9 +39,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://simmerdownsv.com'),
+  // One template for the whole site. Child pages must NOT append their own
+  // "| Simmer Down" — that's how titles used to render doubled
+  // ("… | Simmer Down | Simmer Down — Pizza Artesanal El Salvador").
   title: {
-    default: 'Simmer Down | Pizzería & Restaurante | El Salvador',
-    template: '%s | Simmer Down — Pizza Artesanal El Salvador'
+    default: 'Simmer Down — Pizza Artesanal y Música en Vivo | El Salvador',
+    template: '%s | Simmer Down',
   },
   description: 'La mejor pizza artesanal en El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
   keywords: [
@@ -182,6 +186,8 @@ export default function RootLayout({
           <ToastContainer />
           <ClientProviders />
           <Analytics />
+          {/* GA4 + Meta Pixel — inert until the env IDs are set in Vercel */}
+          <TrackingScripts />
 
         {/* Organization Schema */}
         <script

@@ -14,6 +14,41 @@
 // begins at 8pm doesn't vanish at 8pm while it's still happening.
 export const EVENT_GRACE_HOURS = 5
 
+/**
+ * The public shape of an `events` row — the single event type shared by the
+ * public API, the /events listing, the /events/[slug] detail page, the
+ * homepage section, the sitemap and the JSON-LD generators.
+ */
+export interface PublicEvent {
+  id: string
+  title: string
+  title_es?: string | null
+  slug?: string | null
+  description?: string | null
+  description_es?: string | null
+  location_id?: string | null
+  custom_venue?: string | null
+  starts_at: string
+  ends_at?: string | null
+  recurrence?: string | null
+  image_url?: string | null
+  thumbnail_url?: string | null
+  is_featured?: boolean
+  is_published?: boolean
+  tags?: string[] | null
+  created_at?: string
+  rsvp_enabled?: boolean
+  has_capacity_limit?: boolean
+  max_capacity?: number | null
+  current_rsvps?: number | null
+  rsvp_deadline?: string | null
+  tickets_enabled?: boolean
+  ticket_price?: number | null
+  tickets_sold?: number | null
+  external_tickets_url?: string | null
+  ticket_tiers?: { name: string; price: number }[] | null
+}
+
 export interface EventTiming {
   starts_at: string
   ends_at?: string | null

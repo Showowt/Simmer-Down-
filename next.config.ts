@@ -6,11 +6,11 @@ import path from "path";
 // unsafe-inline kept for JSON-LD script tags and inline styles.
 const baseCsp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://*.vercel.app https://*.powertranz.com",
+  "script-src 'self' 'unsafe-inline' https://*.vercel.app https://*.powertranz.com https://www.googletagmanager.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
-  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.facebook.com https://www.google-analytics.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com",
   "frame-src https: http:",
   "form-action 'self' https://staging.ptranz.com https://gateway.ptranz.com",
   "frame-ancestors 'self'",

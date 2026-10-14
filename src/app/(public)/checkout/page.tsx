@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ShoppingBag, MapPin, CreditCard } from 'lucide-react'
 import { useCartStore, useTranslation } from '@/lib/store'
+import { trackBeginCheckout } from '@/lib/track'
 import { formatPrice, DELIVERY_FEE } from '@/lib/data'
 import CardPaymentForm from '@/components/checkout/CardPaymentForm'
 import ThreeDSecureModal from '@/components/checkout/ThreeDSecureModal'
@@ -94,6 +95,15 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('')
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [deliveryCity, setDeliveryCity] = useState('')
+
+  // Ad conversion: checkout opened with a priced cart (fires once per mount;
+  // no-op until GA4/Meta IDs are configured).
+  useEffect(() => {
+    if (mounted && items.length > 0 && step === 'review') {
+      trackBeginCheckout(cartTotal)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted])
 
   useEffect(() => {
     queueMicrotask(() => {

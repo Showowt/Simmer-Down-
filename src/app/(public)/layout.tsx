@@ -7,11 +7,10 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
 import PromoSync from "@/components/PromoSync";
 
+// NOTE: no `title` here — the ROOT layout owns the default + "%s | Simmer Down"
+// template. A second template at this level stacked with the root one and
+// rendered every public page title doubled.
 export const metadata: Metadata = {
-  title: {
-    default: "Simmer Down | Pizza Artesanal | El Salvador",
-    template: "%s | Simmer Down",
-  },
   description:
     "Pizza artesanal en El Salvador. 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito, Surf City, Simmer Garden. Ordena por WhatsApp.",
   openGraph: {

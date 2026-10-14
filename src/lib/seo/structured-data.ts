@@ -7,6 +7,8 @@
 
 interface LocationData {
   id: string
+  /** Slug of this location's live page under /locations/ (differs from `id` for two venues). */
+  pageSlug: string
   name: string
   description: string
   address: string
@@ -58,6 +60,7 @@ const BRAND_DESCRIPTION = 'La mejor pizza artesanal en El Salvador. 12 años, 5 
 export const LOCATIONS: LocationData[] = [
   {
     id: 'santa-ana',
+    pageSlug: 'santa-ana',
     name: 'Simmer Down Santa Ana',
     description: 'El restaurante original de Simmer Down. La mejor pizza artesanal frente a la catedral histórica de Santa Ana. 12 años de tradición gastronómica.',
     address: '1ra Calle Pte y Callejuela Sur Catedral',
@@ -76,6 +79,7 @@ export const LOCATIONS: LocationData[] = [
   },
   {
     id: 'coatepeque',
+    pageSlug: 'lago-coatepeque',
     name: 'Simmer Down Lago de Coatepeque',
     description: 'Pizza artesanal con la mejor vista al lago volcánico de Coatepeque. Experiencia gastronómica única frente a una maravilla natural de El Salvador.',
     address: 'Calle Principal al Lago #119',
@@ -94,6 +98,7 @@ export const LOCATIONS: LocationData[] = [
   },
   {
     id: 'san-benito',
+    pageSlug: 'san-benito',
     name: 'Simmer Down San Benito',
     description: 'Restaurante de pizza artesanal en la Zona Rosa de San Salvador. Jazz nights, valet parking, y la mejor cocina italiana de la capital salvadoreña.',
     address: '#548, Colonia San Benito',
@@ -114,6 +119,7 @@ export const LOCATIONS: LocationData[] = [
   },
   {
     id: 'juayua',
+    pageSlug: 'simmer-garden',
     name: 'Simmer Garden — Juayúa',
     description: 'Pizza artesanal en la Ruta de las Flores. Jardín botánico, café de altura y la magia de Juayúa. El destino perfecto para escapadas gastronómicas.',
     address: 'Kilómetro 91.5, San José La Majada',
@@ -132,6 +138,7 @@ export const LOCATIONS: LocationData[] = [
   },
   {
     id: 'surf-city',
+    pageSlug: 'surf-city',
     name: 'Simmer Down Surf City',
     description: 'Pizza frente al mar en El Tunco, Surf City. Atardeceres, surf y la mejor comida artesanal de la costa salvadoreña.',
     address: 'Hotel Casa Santa Emilia, Conchalio 2',
@@ -200,16 +207,16 @@ export function generateRestaurantSchema(location: LocationData) {
     '@id': `${BASE_URL}/locations#${location.id}`,
     name: location.name,
     image: location.image,
-    url: `${BASE_URL}/locations`,
+    url: `${BASE_URL}/locations/${location.pageSlug}`,
     telephone: location.phone,
     description: location.description,
     priceRange: location.priceRange || '$$',
     servesCuisine: ['Pizza', 'Pizza Artesanal', 'Italiana', 'Internacional', 'Salvadoreña'],
     acceptsReservations: true,
-    menu: `${BASE_URL}/menu`,
+    menu: `${BASE_URL}/carta`,
     hasMenu: {
       '@type': 'Menu',
-      url: `${BASE_URL}/menu`,
+      url: `${BASE_URL}/carta`,
       hasMenuSection: [
         { '@type': 'MenuSection', name: 'Pizzas Artesanales' },
         { '@type': 'MenuSection', name: 'Pastas' },
@@ -292,10 +299,10 @@ export function generateMenuSchema(items: MenuItemData[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Menu',
-    '@id': `${BASE_URL}/menu#menu`,
+    '@id': `${BASE_URL}/carta#menu`,
     name: 'Menú Simmer Down',
     description: 'Menú completo de pizzas artesanales, pastas, cortes, mariscos y cócteles',
-    url: `${BASE_URL}/menu`,
+    url: `${BASE_URL}/carta`,
     hasMenuSection: Array.from(sections.entries()).map(([category, sectionItems]) => ({
       '@type': 'MenuSection',
       name: category,
@@ -332,7 +339,7 @@ export function generateWebSiteSchema() {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${BASE_URL}/menu?q={search_term_string}`,
+        urlTemplate: `${BASE_URL}/carta?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -364,11 +371,11 @@ export const RESTAURANT_FAQS: FAQItem[] = [
   },
   {
     question: '¿Simmer Down tiene delivery o para llevar?',
-    answer: 'Sí, Simmer Down ofrece servicio de delivery a través de Uber Eats, DoorDash, PedidosYa y Hugo. También puedes ordenar para llevar directamente en cualquiera de nuestras 5 ubicaciones o a través de nuestra página web.',
+    answer: 'Sí. Ordena en línea con entrega a domicilio directamente en simmerdownsv.com/carta — pagas con tarjeta o coordinas por WhatsApp. También puedes ordenar para llevar en cualquiera de nuestras 5 ubicaciones.',
   },
   {
     question: '¿Cuánto cuesta comer en Simmer Down?',
-    answer: 'El rango de precios en Simmer Down es moderado ($$). Las pizzas van desde $8.99, las pastas desde $9.99, los cortes desde $14.99 y las entradas desde $6.99. Ofrecemos excelente relación calidad-precio para la experiencia gastronómica premium que brindamos.',
+    answer: 'El rango de precios en Simmer Down es moderado ($$). Las pizzas artesanales van desde $5.75 (tamaño personal), las pastas desde $9.99, los cortes desde $14.99 y las entradas desde $6.99. Ofrecemos excelente relación calidad-precio para la experiencia gastronómica premium que brindamos.',
   },
   {
     question: '¿Simmer Down es bueno para eventos y grupos grandes?',
@@ -392,3 +399,157 @@ export const SIGNATURE_MENU_ITEMS: MenuItemData[] = [
   { name: 'Alitas BBQ Simmer', description: 'Alitas de pollo glaseadas con nuestra salsa BBQ ahumada artesanal', price: 9.99, category: 'Entradas' },
   { name: 'Mojito Clásico', description: 'Ron blanco, hierba buena fresca, limón, azúcar de caña y soda', price: 6.99, category: 'Cócteles' },
 ]
+
+// ─── Event Schema (Google Event rich results) ────────────────────────────────
+// Events come from the DB (user-managed text), so ALWAYS serialize JSON-LD
+// with safeJsonLd() — it escapes `<` so a malicious title can never close the
+// <script> tag.
+
+import type { PublicEvent } from '@/lib/events'
+
+/** JSON-LD serializer safe for DB-sourced strings. */
+export function safeJsonLd(schema: object): string {
+  return JSON.stringify(schema).replace(/</g, '\\u003c')
+}
+
+/**
+ * UTC ISO → El Salvador local ISO with explicit -06:00 offset (SV has no DST).
+ * Google wants event times in the venue's local time, not UTC.
+ */
+export function svIso(utcIso: string): string {
+  const d = new Date(utcIso)
+  if (isNaN(d.getTime())) return utcIso
+  const local = new Date(d.getTime() - 6 * 3600_000)
+  return local.toISOString().replace(/\.\d{3}Z$/, '-06:00')
+}
+
+/** Best-effort match of a venue display name to one of our location records. */
+export function matchLocationForVenue(venueName: string): LocationData | null {
+  const v = venueName.toLowerCase()
+  return (
+    LOCATIONS.find(l => {
+      const tokens = [l.city.toLowerCase(), l.name.toLowerCase()]
+      return tokens.some(t => v.includes(t) || t.includes(v)) ||
+        (v.includes('san benito') && l.id === 'san-benito') ||
+        (v.includes('santa ana') && l.id === 'santa-ana') ||
+        (v.includes('coatepeque') && l.id === 'coatepeque') ||
+        ((v.includes('juay') || v.includes('garden')) && l.id === 'juayua') ||
+        ((v.includes('surf') || v.includes('tunco')) && l.id === 'surf-city')
+    }) ?? null
+  )
+}
+
+/** schema.org Event for one show — the unit Google surfaces in event search. */
+export function generateEventSchema(event: PublicEvent, venueName: string) {
+  const url = `${BASE_URL}/events/${event.slug}`
+  const name = event.title_es || event.title
+  const description =
+    event.description_es || event.description || `${name} en ${venueName}, El Salvador.`
+  const loc = matchLocationForVenue(venueName)
+
+  // Offers: native on-site ticketing wins; otherwise external tiers/link.
+  const tiers = (event.ticket_tiers ?? []).filter(t => t?.name)
+  const external = event.external_tickets_url?.trim()
+  const nativePrice = event.ticket_price != null ? Number(event.ticket_price) : 0
+  const nativeOnSale = !!event.tickets_enabled && nativePrice > 0 && !!event.slug
+  const soldOut =
+    !!event.has_capacity_limit &&
+    event.max_capacity != null &&
+    (event.tickets_sold ?? 0) >= event.max_capacity
+
+  let offers: object | object[] | undefined
+  if (nativeOnSale) {
+    offers = {
+      '@type': 'Offer',
+      url: `${BASE_URL}/boletos/comprar/${event.slug}`,
+      price: nativePrice.toFixed(2),
+      priceCurrency: 'USD',
+      availability: soldOut
+        ? 'https://schema.org/SoldOut'
+        : 'https://schema.org/InStock',
+      validFrom: event.created_at ?? event.starts_at,
+    }
+  } else if (external && tiers.length > 0) {
+    offers = tiers.map(t => ({
+      '@type': 'Offer',
+      name: t.name,
+      url: external,
+      price: Number(t.price).toFixed(2),
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      validFrom: event.created_at ?? event.starts_at,
+    }))
+  } else if (external) {
+    offers = {
+      '@type': 'Offer',
+      url: external,
+      availability: 'https://schema.org/InStock',
+      validFrom: event.created_at ?? event.starts_at,
+    }
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    '@id': `${url}#event`,
+    name,
+    description,
+    url,
+    startDate: svIso(event.starts_at),
+    ...(event.ends_at ? { endDate: svIso(event.ends_at) } : {}),
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    ...(event.image_url ? { image: [event.image_url] } : {}),
+    inLanguage: 'es',
+    location: {
+      '@type': 'Place',
+      // Full branded venue name when we matched one of our locations
+      // ("Simmer Down San Benito" reads better in Google's event panel
+      // than the DB's bare "San Benito").
+      name: loc?.name ?? venueName,
+      address: loc
+        ? {
+            '@type': 'PostalAddress',
+            streetAddress: loc.address,
+            addressLocality: loc.city,
+            addressRegion: loc.region,
+            addressCountry: 'SV',
+          }
+        : { '@type': 'PostalAddress', addressCountry: 'SV' },
+      ...(loc
+        ? {
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            },
+          }
+        : {}),
+    },
+    performer: { '@type': 'PerformingGroup', name: event.title },
+    organizer: {
+      '@type': 'Organization',
+      '@id': `${BASE_URL}/#organization`,
+      name: BRAND_NAME,
+      url: BASE_URL,
+    },
+    ...(offers ? { offers } : {}),
+  }
+}
+
+/** ItemList of upcoming events for the /events listing page. */
+export function generateEventListSchema(events: PublicEvent[]) {
+  const withSlug = events.filter(e => !!e.slug)
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${BASE_URL}/events#eventlist`,
+    name: 'Próximos eventos en Simmer Down — Simmer Manía',
+    numberOfItems: withSlug.length,
+    itemListElement: withSlug.map((e, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE_URL}/events/${e.slug}`,
+    })),
+  }
+}

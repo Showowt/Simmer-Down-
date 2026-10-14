@@ -6,71 +6,20 @@ import { Calendar, Clock, MapPin, ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { LOCATIONS } from "@/lib/data";
 import { useI18n, translations } from "@/lib/i18n";
 import EventCountdown from "./EventCountdown";
-import { isLiveOrUpcoming } from "@/lib/events";
+import { isLiveOrUpcoming, type PublicEvent } from "@/lib/events";
+import {
+  ticketState,
+  eventReservationUrl,
+  formatEventDate,
+  formatEventTime,
+  deriveCoverPrice,
+  firstCategoryTag,
+} from "@/lib/event-display";
 
-// ─────────────────────────────────────────────
-// Real events schema (matches prod DB)
-// ─────────────────────────────────────────────
-interface DbEvent {
-  id: string;
-  title: string;
-  title_es?: string | null;
-  slug?: string | null;
-  description?: string | null;
-  description_es?: string | null;
-  location_id?: string | null;
-  custom_venue?: string | null;
-  starts_at: string;
-  ends_at?: string | null;
-  recurrence?: string | null;
-  image_url?: string | null;
-  thumbnail_url?: string | null;
-  is_featured?: boolean;
-  is_published?: boolean;
-  tags?: string[] | null;
-  rsvp_enabled?: boolean;
-  has_capacity_limit?: boolean;
-  max_capacity?: number | null;
-  current_rsvps?: number | null;
-  rsvp_deadline?: string | null;
-  tickets_enabled?: boolean;
-  ticket_price?: number | null;
-  tickets_sold?: number | null;
-  external_tickets_url?: string | null;
-  ticket_tiers?: { name: string; price: number }[] | null;
-}
-
-// Whether an event can be bought online right now, and how many are left.
-function ticketState(e: DbEvent): { onSale: boolean; soldOut: boolean; price: number } {
-  const price = e.ticket_price != null ? Number(e.ticket_price) : 0;
-  const onSale = !!e.tickets_enabled && price > 0 && !!e.slug;
-  const soldOut =
-    !!e.has_capacity_limit &&
-    e.max_capacity != null &&
-    (e.tickets_sold ?? 0) >= e.max_capacity;
-  return { onSale, soldOut, price };
-}
-
-// Event-specific reservation via WhatsApp — pre-fills the show name/date/venue and
-// routes to that venue's WhatsApp (falls back to the main line) so the request is
-// never a generic "contact us".
-function eventReservationUrl(event: DbEvent, whenLabel: string, locale?: string): string {
-  const name = (locale === "en" ? event.title : event.title_es || event.title) || "un evento";
-  const venue = event.custom_venue || "Simmer Down";
-  const v = venue.toLowerCase();
-  const loc = LOCATIONS.find(
-    (l) => v.includes(l.shortName.toLowerCase()) || v.includes(l.name.toLowerCase()),
-  );
-  const phone = (loc?.whatsapp || "+50376804434").replace(/\D/g, "");
-  const msg =
-    locale === "en"
-      ? `Hi! I'd like to reserve for the event: ${name} — ${venue}${whenLabel ? ` (${whenLabel})` : ""}. Could you share more info?`
-      : `¡Hola! Quisiera reservar para el evento: ${name} — ${venue}${whenLabel ? ` (${whenLabel})` : ""}. ¿Me pueden dar más información?`;
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-}
+// Real events schema (matches prod DB) — shared type, see src/lib/events.ts
+type DbEvent = PublicEvent;
 
 // Fallback events (used only if the DB query returns zero rows).
 const fallbackEvents: DbEvent[] = [
@@ -93,104 +42,20 @@ const fallbackEvents: DbEvent[] = [
   },
 ];
 
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
-// El Salvador (UTC-6). ALWAYS format event dates/times in this zone — without
-// an explicit timeZone the server (UTC) and client (viewer-local) render
-// different strings → React #418 hydration mismatch, and times show wrong for
-// anyone outside SV.
-const EVENT_TZ = "America/El_Salvador";
-
-function formatEventDate(iso: string, recurrence?: string | null, locale?: string): string {
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) return "";
-  const dateLocale = locale === 'en' ? "en-US" : "es-SV";
-  if (recurrence === "monthly") {
-    return locale === 'en'
-      ? "Every month \u00b7 Simmer Down San Benito"
-      : "Cada mes \u00b7 Simmer Down San Benito";
-  }
-  if (recurrence === "weekly") {
-    return date.toLocaleDateString(dateLocale, {
-      weekday: "long",
-      timeZone: EVENT_TZ,
-    });
-  }
-  return date.toLocaleDateString(dateLocale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: EVENT_TZ,
-  });
-}
-
-function formatEventTime(iso: string, locale?: string): string {
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) return "";
-  const dateLocale = locale === 'en' ? "en-US" : "es-SV";
-  return date
-    .toLocaleTimeString(dateLocale, {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: EVENT_TZ,
-    })
-    .replace(" ", "");
-}
-
-function deriveCoverPrice(tags?: string[] | null, locale?: string): string | null {
-  if (!tags) return null;
-  for (const tag of tags) {
-    if (tag.startsWith("cover-")) return `$${tag.slice("cover-".length)}`;
-    if (tag.startsWith("preventa-")) {
-      const price = tag.slice("preventa-".length);
-      return locale === 'en' ? `Pre-sale $${price}` : `Preventa $${price}`;
-    }
-  }
-  return null;
-}
-
-function firstCategoryTag(tags?: string[] | null, locale?: string): string {
-  if (!tags || tags.length === 0) return locale === 'en' ? "Event" : "Evento";
-  const priority = ["music", "salsa", "rock", "poetry", "comedy", "openmic", "tribute", "signature"];
-  const displayEs: Record<string, string> = {
-    music: "M\u00fasica",
-    salsa: "Salsa",
-    rock: "Rock",
-    poetry: "Poes\u00eda",
-    comedy: "Comedia",
-    openmic: "Open Mic",
-    tribute: "Tributo",
-    signature: "Signature",
-    live: "En vivo",
-    monthly: "Mensual",
-  };
-  const displayEn: Record<string, string> = {
-    music: "Music",
-    salsa: "Salsa",
-    rock: "Rock",
-    poetry: "Poetry",
-    comedy: "Comedy",
-    openmic: "Open Mic",
-    tribute: "Tribute",
-    signature: "Signature",
-    live: "Live",
-    monthly: "Monthly",
-  };
-  const display = locale === 'en' ? displayEn : displayEs;
-  for (const p of priority) {
-    if (tags.includes(p)) return display[p] || p;
-  }
-  return display[tags[0]] || tags[0];
-}
 
 // ─────────────────────────────────────────────
 // EventsList — main component
 // ─────────────────────────────────────────────
-export function EventsList() {
+export function EventsList({
+  initialEvents,
+}: {
+  /** Server-fetched events: SSR'd into the HTML so Google indexes every show. */
+  initialEvents?: DbEvent[];
+}) {
   const { t, locale } = useI18n();
-  const [events, setEvents] = useState<DbEvent[]>(fallbackEvents);
+  const [events, setEvents] = useState<DbEvent[]>(
+    initialEvents && initialEvents.length > 0 ? initialEvents : fallbackEvents,
+  );
   // Render the fallback on SSR so the page isn't blank on first paint.
   const [loading, setLoading] = useState(false);
 
@@ -281,7 +146,16 @@ export function EventsList() {
                   {locale === 'es' ? 'Evento Destacado' : 'Featured Event'}
                 </span>
                 <h2 className="font-display text-3xl md:text-5xl text-white mb-4 leading-tight">
-                  {locale === 'es' ? (event.title_es || event.title) : event.title}
+                  {event.slug ? (
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="transition-colors hover:text-[#FBBF24]"
+                    >
+                      {locale === 'es' ? (event.title_es || event.title) : event.title}
+                    </Link>
+                  ) : (
+                    locale === 'es' ? (event.title_es || event.title) : event.title
+                  )}
                 </h2>
                 <p className="text-lg text-white/60 mb-6">
                   {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}
@@ -454,7 +328,16 @@ export function EventsList() {
 
                   <div className="p-6">
                     <h3 className="font-display text-xl text-white mb-2 line-clamp-2">
-                      {locale === 'es' ? (event.title_es || event.title) : event.title}
+                      {event.slug ? (
+                        <Link
+                          href={`/events/${event.slug}`}
+                          className="transition-colors hover:text-[#FBBF24]"
+                        >
+                          {locale === 'es' ? (event.title_es || event.title) : event.title}
+                        </Link>
+                      ) : (
+                        locale === 'es' ? (event.title_es || event.title) : event.title
+                      )}
                     </h3>
                     <p className="text-white/60 text-sm mb-4 line-clamp-2">
                       {locale === 'es' ? (event.description_es || event.description) : (event.description || event.description_es)}

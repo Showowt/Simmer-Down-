@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useI18n, translations } from '@/lib/i18n'
+import { trackLead } from '@/lib/track'
 import FloorPlan, { type FloorPlanState } from '@/components/reservations/FloorPlan'
 import { hasFloorPlan, type TableAvailability } from '@/lib/tables'
 
@@ -505,6 +506,9 @@ export default function ReservationsPage() {
       }
 
       setSubmitted(true)
+      // Ad conversion: a confirmed reservation request is the top non-payment
+      // conversion. No-op until GA4/Meta IDs are configured.
+      trackLead('reservation')
     } catch (err) {
       console.error('[Reservations] Submit error:', err)
       setSubmitError(

@@ -1,8 +1,25 @@
 import type { MetadataRoute } from 'next'
+import { fetchUpcomingEvents } from '@/lib/events-server'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Re-generate hourly so newly published events appear without a deploy.
+export const revalidate = 3600
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://simmerdownsv.com'
   const now = new Date()
+
+  // Live event pages — fetched from the DB so every published show gets a
+  // crawlable URL the moment it exists. fetchUpcomingEvents fails SOFT
+  // (empty list), so an events outage can never break the sitemap.
+  const events = await fetchUpcomingEvents()
+  const eventEntries: MetadataRoute.Sitemap = events
+    .filter((e) => !!e.slug)
+    .map((e) => ({
+      url: `${baseUrl}/events/${e.slug}`,
+      lastModified: e.created_at ? new Date(e.created_at) : now,
+      changeFrequency: 'daily',
+      priority: 0.85,
+    }))
 
   return [
     // ─── Core Pages (Highest Priority) ─────────────────────────────────
@@ -89,13 +106,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
 
-    // ─── Engagement Pages ──────────────────────────────────────────────
+    // ─── Events (the only live events marketing in the country) ────────
     {
       url: `${baseUrl}/events`,
       lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
+    ...eventEntries,
+
+    // ─── Engagement Pages ──────────────────────────────────────────────
     {
       url: `${baseUrl}/simmerlovers`,
       lastModified: now,

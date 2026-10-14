@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { CheckCircle, XCircle, RotateCcw, ShoppingBag, Flame, Receipt, MessageCircle } from 'lucide-react'
+import { trackPurchase } from '@/lib/track'
 
 interface PaymentResultProps {
   status: 'paid' | 'failed'
@@ -26,6 +28,19 @@ export default function PaymentResult({
   loyalty,
   total,
 }: PaymentResultProps) {
+  // Ad conversion: this component is the single success screen for food
+  // orders, event tickets AND estadía bookings, so one purchase event here
+  // covers every card payment. trackPurchase dedupes per order and is a
+  // no-op until the GA4/Meta IDs are configured.
+  useEffect(() => {
+    if (status === 'paid' && typeof total === 'number') {
+      trackPurchase({
+        value: total,
+        transactionId: orderNumber ?? orderId ?? 'unknown',
+      })
+    }
+  }, [status, total, orderNumber, orderId])
+
   // El Salvador runs on WhatsApp, not email — one tap saves the receipt to any
   // chat (including "message yourself"). No phone number = user picks the chat.
   const waReceipt =
