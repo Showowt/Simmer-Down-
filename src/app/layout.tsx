@@ -129,6 +129,11 @@ export const metadata: Metadata = {
       alt: 'Simmer Down — Pizza Artesanal',
     },
   },
+  // Google Search Console ownership (URL-prefix property, verified 2026-10-14).
+  // public/googlee662c3ff93afd708.html is the backup verification — keep both.
+  verification: {
+    google: 'tfC2Aqo6ZmBFWEJqIuoRJEQ5xrN-zrTufLLkQjxCDEw',
+  },
   robots: {
     index: true,
     follow: true,
