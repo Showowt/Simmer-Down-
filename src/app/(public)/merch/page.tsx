@@ -85,5 +85,5 @@ const config: SegmentConfig = {
 }
 
 export default function MerchPage() {
-  return <SegmentPage config={config} />
+  return <SegmentPage config={config} segment="merch" />
 }

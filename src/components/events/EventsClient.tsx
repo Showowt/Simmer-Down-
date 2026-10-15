@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useI18n, translations } from "@/lib/i18n";
 import EventCountdown from "./EventCountdown";
 import { isLiveOrUpcoming, type PublicEvent } from "@/lib/events";
+import { useSiteContent } from "@/lib/use-site-content";
 import {
   ticketState,
   eventReservationUrl,
@@ -433,6 +434,13 @@ export function PrivateEventsSection({
   eventTypes: PrivateEventType[];
 }) {
   const { t, locale } = useI18n();
+  // Owner-published Hospitality gallery (admin → Contenido Web) replaces the
+  // old hardcoded flyers, which repeated the events above and went stale
+  // (client PDF Oct 2026: "eliminar las imágenes antiguas").
+  const { segments } = useSiteContent();
+  const galleryPhotos = segments.hospitality
+    .filter((i) => i.category === "galeria" && i.image_url)
+    .slice(0, 4);
 
   return (
     <section className="py-24 bg-[#1A1A1A] border-t border-white/10 overflow-hidden">
@@ -471,56 +479,45 @@ export function PrivateEventsSection({
               ))}
             </div>
 
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-            >
-              {locale === 'es' ? 'Solicitar Información' : 'Request Information'}
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="relative"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative h-48">
-                <Image
-                  src="/images/events/musicos-poetas-locos-abril.jpg"
-                  alt="Noche de música y poesía en Simmer Down"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="relative h-48 mt-8">
-                <Image
-                  src="/images/events/zoe-siddhartha-bandalos.jpg"
-                  alt="Tributos a rock alternativo"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="relative h-48">
-                <Image
-                  src="/images/events/salzon-mayo.jpg"
-                  alt="Salsa en vivo con Salzón"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="relative h-48 mt-8">
-                <Image
-                  src="/images/events/open-mic-abril.jpg"
-                  alt="Open mic en Simmer Down"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/hospitality"
+                className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+              >
+                {locale === 'es' ? 'Ver Hospitality y Catering' : 'See Hospitality & Catering'}
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-4 font-bold transition-all min-h-[56px]"
+              >
+                {locale === 'es' ? 'Solicitar Información' : 'Request Information'}
+              </Link>
             </div>
           </motion.div>
+
+          {galleryPhotos.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                {galleryPhotos.map((photo, i) => (
+                  <div key={photo.id} className={`relative h-48 ${i % 2 === 1 ? 'mt-8' : ''}`}>
+                    <Image
+                      src={photo.image_url as string}
+                      alt={locale === 'es' ? photo.name_es : photo.name_en || photo.name_es}
+                      fill
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>

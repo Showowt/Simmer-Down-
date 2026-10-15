@@ -24,6 +24,7 @@ import {
   Users,
   Gift,
   BedDouble,
+  LayoutTemplate,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -34,6 +35,7 @@ const navItems = [
   { href: "/admin/mesas", label: "Salón · Mesas", icon: MapPin },
   { href: "/admin/habitaciones", label: "Habitaciones", icon: BedDouble },
   { href: "/admin/carta", label: "Carta y Precios", icon: UtensilsCrossed },
+  { href: "/admin/contenido", label: "Contenido Web", icon: LayoutTemplate },
   { href: "/admin/fotos", label: "Fotos", icon: Camera },
   { href: "/admin/specials", label: "Especiales", icon: Tag },
   { href: "/admin/events", label: "Eventos", icon: Calendar },

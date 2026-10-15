@@ -99,5 +99,5 @@ const config: SegmentConfig = {
 }
 
 export default function HospitalityPage() {
-  return <SegmentPage config={config} />
+  return <SegmentPage config={config} segment="hospitality" />
 }

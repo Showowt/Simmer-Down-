@@ -30,6 +30,7 @@ import {
 import { useI18n, translations } from '@/lib/i18n'
 import { type Location, getGoogleMapsUrl, isLocationOpen } from '@/lib/data'
 import { hasLodging } from '@/lib/rooms'
+import { useSiteContent } from '@/lib/use-site-content'
 
 // ─── Feature icon mapping ─────────────────────────────────
 
@@ -82,6 +83,9 @@ type LodgingState = 'loading' | 'available' | 'none' | 'error'
 
 export default function LocationDetailClient({ location }: { location: Location }) {
   const { t, locale } = useI18n()
+  // Owner-uploaded photos (admin → Contenido Web): hero override + gallery.
+  const { locationMedia } = useSiteContent()
+  const media = locationMedia[location.id]
   const isOpen = isLocationOpen(location)
   const mapsUrl = getGoogleMapsUrl(location)
   const whatsappUrl = `https://wa.me/${location.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
@@ -128,7 +132,7 @@ export default function LocationDetailClient({ location }: { location: Location 
       {/* ═══════ HERO ═══════ */}
       <section className="relative h-[50vh] min-h-[360px] max-h-[520px]">
         <Image
-          src={location.heroImage || location.image}
+          src={media?.hero || location.heroImage || location.image}
           alt={location.name}
           fill
           priority
@@ -446,6 +450,40 @@ export default function LocationDetailClient({ location }: { location: Location 
             </Link>
           </motion.div>
         </div>
+
+        {/* ─── Owner-published photo gallery ─── */}
+        {media && media.gallery.length > 0 && (
+          <div className="mt-14">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="font-display text-2xl md:text-3xl text-white uppercase mb-6"
+            >
+              {locale === 'es' ? 'Galería' : 'Gallery'}
+            </motion.h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {media.gallery.map((img, i) => (
+                <motion.div
+                  key={`${img}-${i}`}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.04 }}
+                  className="relative aspect-square overflow-hidden rounded-xl group"
+                >
+                  <Image
+                    src={img}
+                    alt={`${location.name} ${i + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-[1.05] transition-transform duration-500"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ─── Back to all locations ─── */}
         <motion.div

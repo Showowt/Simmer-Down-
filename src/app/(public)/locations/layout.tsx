@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Simmer Down — 5 Ubicaciones en El Salvador",
     description:
-      "Santa Ana ⭐4.9 | Coatepeque ⭐4.9 | San Benito ⭐4.8 | Juayúa ⭐4.9 | Surf City ⭐4.8. Encuentra tu favorita.",
+      "Santa Ana ⭐4.6 | Coatepeque ⭐4.7 | San Benito ⭐4.6 | Juayúa ⭐4.6 | Surf City ⭐4.5. Encuentra tu favorita.",
     images: [
       {
         url: "/og/locations.jpg",

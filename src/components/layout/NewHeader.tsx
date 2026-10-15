@@ -12,6 +12,8 @@ interface NavLink {
   labelKey: string
 }
 
+// Nosotros moved up per client request (Oct 2026 PDF: "Nuestra Historia" must
+// not be the last module) and "Trabaja con Nosotros" added to the header.
 const NAV_LINKS: NavLink[] = [
   { href: '/carta', labelKey: 'nav.menu' },
   { href: '/cortes-premium', labelKey: 'nav.cortes' },
@@ -20,8 +22,9 @@ const NAV_LINKS: NavLink[] = [
   { href: '/merch', labelKey: 'nav.merch' },
   { href: '/events', labelKey: 'nav.events' },
   { href: '/restaurantes', labelKey: 'nav.locations' },
-  { href: '/reservations', labelKey: 'nav.reserve' },
   { href: '/nosotros', labelKey: 'nav.about' },
+  { href: '/reservations', labelKey: 'nav.reserve' },
+  { href: '/trabaja', labelKey: 'nav.careers' },
 ]
 
 export default function NewHeader() {
@@ -79,14 +82,14 @@ export default function NewHeader() {
 
           {/* Center — Desktop nav */}
           <nav
-            className="hidden lg:flex items-center gap-x-2 xl:gap-5"
+            className="hidden lg:flex items-center gap-x-2 xl:gap-4"
             aria-label="Navegación principal"
           >
             {NAV_LINKS.map(({ href, labelKey }) => (
               <Link
                 key={href}
                 href={href}
-                className={`text-[12px] xl:text-[13px] font-medium uppercase tracking-[0.1em] xl:tracking-[0.12em] whitespace-nowrap transition-colors duration-200 py-1 border-b-2 ${
+                className={`text-[11px] xl:text-[12px] font-medium uppercase tracking-[0.08em] xl:tracking-[0.1em] whitespace-nowrap transition-colors duration-200 py-1 border-b-2 ${
                   isActive(href)
                     ? 'text-[#E85D04] border-[#E85D04]'
                     : 'text-white/60 border-transparent hover:text-white hover:border-white/20'

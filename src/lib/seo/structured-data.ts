@@ -69,8 +69,10 @@ export const LOCATIONS: LocationData[] = [
     phone: '+50376804434',
     latitude: 13.9946,
     longitude: -89.5597,
-    rating: 4.9,
-    reviewCount: 2100,
+    // Real Google listing figures (network audit 2026-10-15) — schema review
+    // claims must match the public profile or rich results get penalized.
+    rating: 4.6,
+    reviewCount: 3824,
     image: `${BASE_URL}/images/locations/santa-ana-fachada.png`,
     hours: [
       { days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'], opens: '11:00', closes: '21:00' },
@@ -88,8 +90,8 @@ export const LOCATIONS: LocationData[] = [
     phone: '+50368316907',
     latitude: 13.8667,
     longitude: -89.5500,
-    rating: 4.9,
-    reviewCount: 1850,
+    rating: 4.7,
+    reviewCount: 165,
     image: `${BASE_URL}/images/locations/gallery-coatepeque/coatepeque-2.jpg`,
     hours: [
       { days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'], opens: '11:00', closes: '20:00' },
@@ -107,8 +109,8 @@ export const LOCATIONS: LocationData[] = [
     phone: '+50374877792',
     latitude: 13.6929,
     longitude: -89.2365,
-    rating: 4.8,
-    reviewCount: 1420,
+    rating: 4.6,
+    reviewCount: 617,
     image: `${BASE_URL}/images/locations/gallery-san-benito/san-benito-1.jpg`,
     hours: [
       // Source of truth: src/lib/data.ts LOCATIONS.san-benito. Zona Rosa nightlife — opens PM weekdays.
@@ -128,8 +130,8 @@ export const LOCATIONS: LocationData[] = [
     phone: '+50369904674',
     latitude: 13.8442,
     longitude: -89.7456,
-    rating: 4.9,
-    reviewCount: 980,
+    rating: 4.6,
+    reviewCount: 892,
     image: `${BASE_URL}/images/locations/gallery-garden/garden-4.jpg`,
     hours: [
       // Client-confirmed 2026-08-10 (operator): Simmer Garden is open every day, never closes.
@@ -147,8 +149,8 @@ export const LOCATIONS: LocationData[] = [
     phone: '+50375360735',
     latitude: 13.4833,
     longitude: -89.3833,
-    rating: 4.8,
-    reviewCount: 750,
+    rating: 4.5,
+    reviewCount: 37,
     image: `${BASE_URL}/images/locations/surf-city-exterior.jpg`,
     hours: [
       // Source of truth: src/lib/data.ts LOCATIONS.surf-city — CLOSED Monday & Tuesday.
@@ -351,7 +353,7 @@ export function generateWebSiteSchema() {
 export const RESTAURANT_FAQS: FAQItem[] = [
   {
     question: '¿Cuál es la mejor pizza en El Salvador?',
-    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 12 años de tradición, más de 8,000 reseñas positivas y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas con ingredientes premium y masa artesanal.',
+    answer: 'Simmer Down es reconocido como el mejor restaurante de pizza artesanal en El Salvador, con 12 años de tradición, más de 5,500 reseñas en Google y 5 ubicaciones: Santa Ana, Lago de Coatepeque, San Benito (San Salvador), Juayúa y Surf City. Nuestras pizzas son preparadas con ingredientes premium y masa artesanal.',
   },
   {
     question: '¿Dónde puedo comer pizza artesanal en El Salvador?',

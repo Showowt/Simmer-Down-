@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     default: 'Simmer Down — Pizza Artesanal y Música en Vivo | El Salvador',
     template: '%s | Simmer Down',
   },
-  description: 'La mejor pizza artesanal en El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
+  description: 'La mejor pizza artesanal en El Salvador. 12 años, 5 ubicaciones, +5,500 reseñas. Pizzas, pastas, cortes y mariscos en Santa Ana, Coatepeque, San Benito, Juayúa y Surf City. Reserva ahora.',
   keywords: [
     // Primary — pizza dominance
     'mejor pizza El Salvador',
@@ -107,7 +107,7 @@ export const metadata: Metadata = {
     url: 'https://simmerdownsv.com',
     siteName: 'Simmer Down — La Mejor Pizza de El Salvador',
     title: 'Simmer Down | La Mejor Pizza Artesanal en El Salvador',
-    description: 'La pizza #1 de El Salvador. 12 años, 5 ubicaciones, +8,000 reseñas ⭐ 4.9. Ingredientes premium, masa artesanal. Santa Ana, Coatepeque, San Benito, Juayúa, Surf City.',
+    description: 'La pizza #1 de El Salvador. 12 años, 5 ubicaciones, +5,500 reseñas ⭐ 4.6. Ingredientes premium, masa artesanal. Santa Ana, Coatepeque, San Benito, Juayúa, Surf City.',
     images: [
       {
         url: 'https://simmerdownsv.com/og/home.jpg',
@@ -123,7 +123,7 @@ export const metadata: Metadata = {
     site: '@simmerdownsv',
     creator: '@simmerdownsv',
     title: 'Simmer Down | La Mejor Pizza de El Salvador',
-    description: 'Pizza artesanal. 12 años, 5 ubicaciones, +8,000 reseñas. Santa Ana, Coatepeque, San Salvador, Juayúa, Surf City.',
+    description: 'Pizza artesanal. 12 años, 5 ubicaciones, +5,500 reseñas. Santa Ana, Coatepeque, San Salvador, Juayúa, Surf City.',
     images: {
       url: 'https://simmerdownsv.com/og/home.jpg',
       alt: 'Simmer Down — Pizza Artesanal',

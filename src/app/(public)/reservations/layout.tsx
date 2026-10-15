@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Reserva tu Mesa | Simmer Down El Salvador',
-    description: 'Reserva en línea en la mejor pizzería de El Salvador. 5 ubicaciones, ⭐4.9 promedio.',
+    description: 'Reserva en línea en la mejor pizzería de El Salvador. 5 ubicaciones, ⭐4.6 promedio.',
     images: [
       {
         url: '/og/contact.jpg',

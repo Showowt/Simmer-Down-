@@ -6,6 +6,7 @@ import { MapPin, Phone, Clock, ChevronRight, Navigation, MessageCircle } from 'l
 import { motion } from 'framer-motion'
 import { LOCATIONS, isLocationOpen, getGoogleMapsUrl } from '@/lib/data'
 import { useTranslation } from '@/lib/store'
+import { useSiteContent } from '@/lib/use-site-content'
 
 const featureLabels: Record<string, Record<string, string>> = {
   'dine-in': { es: 'Comer aquí', en: 'Dine-in' },
@@ -66,6 +67,8 @@ function getCompactHours(location: typeof LOCATIONS[0], lang: string): string[] 
 
 export default function LocationsPage() {
   const { t, language } = useTranslation()
+  // Owner-uploaded covers (admin → Contenido Web) win over the static photos.
+  const { locationMedia } = useSiteContent()
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] pt-36 pb-32 px-4">
@@ -93,7 +96,7 @@ export default function LocationsPage() {
                 {/* Image */}
                 <div className="relative h-48 sm:h-56 bg-[#0A0A0A]">
                   <Image
-                    src={location.image}
+                    src={locationMedia[location.id]?.cover || location.image}
                     alt={location.name}
                     fill
                     className="object-cover"

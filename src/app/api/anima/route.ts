@@ -294,7 +294,7 @@ function buildSystemPrompt(
 - Fundada en 2014 en Santa Ana, El Salvador
 - 12 años de experiencia
 - 5 ubicaciones en El Salvador
-- +8,000 reseñas con calificación 4.9 estrellas
+- +5,500 reseñas en Google con calificación 4.6 estrellas
 - Especialidad: Pizza artesanal
 - También: Pastas, cortes, mariscos, ensaladas
 - Programa de lealtad: SimmerLovers (puntos por cada compra)

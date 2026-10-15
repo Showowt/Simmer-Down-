@@ -86,5 +86,5 @@ const config: SegmentConfig = {
 }
 
 export default function CortesPremiumPage() {
-  return <SegmentPage config={config} />
+  return <SegmentPage config={config} segment="cortes" />
 }

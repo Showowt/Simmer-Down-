@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import { useTranslation } from '@/lib/store'
 import { LOCATIONS } from '@/lib/data'
+import { useSiteContent } from '@/lib/use-site-content'
+import { formatStatPlus } from '@/lib/site-content'
 
 // ─── Animation variants (matching homepage) ──────────────────────────────
 
@@ -123,19 +125,24 @@ const MILESTONES = [
   },
 ]
 
-// ─── Stats data ──────────────────────────────────────────────────────────
-
-const STATS = [
-  { valueEs: '+14', valueEn: '14+', labelEs: 'Anos de historia', labelEn: 'Years of history' },
-  { valueEs: '5', valueEn: '5', labelEs: 'Ubicaciones', labelEn: 'Locations' },
-  { valueEs: '+8,000', valueEn: '8,000+', labelEs: 'Resenas', labelEn: 'Reviews' },
-  { valueEs: '4.9', valueEn: '4.9', labelEs: 'Estrellas', labelEn: 'Stars' },
-]
-
 // ─── Page ────────────────────────────────────────────────────────────────
 
 export default function NosotrosPage() {
   const { language: locale } = useTranslation()
+  // Owner-editable numbers (admin → Contenido Web). Defaults are the real
+  // Google-network figures, replacing the old unverifiable +8,000 / 4.9 claim.
+  const { historia } = useSiteContent()
+  const lang = locale === 'es' ? 'es' : 'en'
+  const STATS = [
+    {
+      value: formatStatPlus(historia.years, lang),
+      labelEs: 'Anos de historia',
+      labelEn: 'Years of history',
+    },
+    { value: String(historia.locations), labelEs: 'Ubicaciones', labelEn: 'Locations' },
+    { value: formatStatPlus(historia.reviews, lang), labelEs: 'Resenas', labelEn: 'Reviews' },
+    { value: historia.stars.toFixed(1), labelEs: 'Estrellas', labelEn: 'Stars' },
+  ]
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden pb-24 lg:pb-0">
@@ -215,7 +222,7 @@ export default function NosotrosPage() {
             {STATS.map((stat, i) => (
               <div key={i} className="text-center">
                 <p className="font-display text-[#E85D04] text-3xl md:text-4xl leading-tight">
-                  {locale === 'es' ? stat.valueEs : stat.valueEn}
+                  {stat.value}
                 </p>
                 <p className="text-white/50 text-xs uppercase tracking-wider mt-1">
                   {locale === 'es' ? stat.labelEs : stat.labelEn}

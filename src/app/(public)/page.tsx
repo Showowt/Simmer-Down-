@@ -7,6 +7,8 @@ import { motion, type Variants } from 'framer-motion'
 import { MapPin, ChevronRight, MessageCircle, Star, Flame, Leaf } from 'lucide-react'
 import { useTranslation, useCartStore } from '@/lib/store'
 import { useMenuOverrides, mergeMenuItem } from '@/lib/use-menu-image-overrides'
+import { useSiteContent } from '@/lib/use-site-content'
+import { formatStatPlus } from '@/lib/site-content'
 import {
   LOCATIONS,
   MENU_CATEGORIES,
@@ -61,6 +63,7 @@ export default function HomePage() {
   const { t, language: locale } = useTranslation()
   const addItem = useCartStore((s) => s.addItem)
   const menuOverrides = useMenuOverrides()
+  const { locationMedia, historia } = useSiteContent()
   const featuredItems = useMemo(
     () =>
       FEATURED_ITEMS.map((i) => mergeMenuItem(i, menuOverrides)).filter(
@@ -165,8 +168,11 @@ export default function HomePage() {
           >
             <div className="flex items-center gap-1.5">
               <Star className="w-4 h-4 text-[#FBBF24] fill-[#FBBF24]" />
-              <span className="text-white/80 font-medium">4.9</span>
-              <span>{locale === 'es' ? '· +8,000 reseñas' : '· 8,000+ reviews'}</span>
+              <span className="text-white/80 font-medium">{historia.stars.toFixed(1)}</span>
+              <span>
+                · {formatStatPlus(historia.reviews, locale === 'es' ? 'es' : 'en')}{' '}
+                {locale === 'es' ? 'reseñas' : 'reviews'}
+              </span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white/25" />
@@ -388,7 +394,9 @@ export default function HomePage() {
           >
             {LOCATIONS.map((loc, i) => {
               const open = isLocationOpen(loc)
-              const coverImg = LOCATION_COVER[loc.id] || loc.heroImage
+              // Owner-uploaded cover (admin → Contenido Web) wins over the static map.
+              const coverImg =
+                locationMedia[loc.id]?.cover || LOCATION_COVER[loc.id] || loc.heroImage
 
               return (
                 <motion.div
