@@ -83,15 +83,24 @@ or in bulk from /admin/mesas — but the seeded layout is invented, not real.
   unlimited on all 8 rewards.
 - **Owner:** Phil → Martin. All of it is self-serve in /admin/premios once decided.
 
-### 7. Segment pages — real content
-/cortes-premium, /hospitality and /merch are live, indexed and bilingual, but the
-copy is ours, not the client's.
-- **Cortes Premium:** which dishes belong on the page and at what shown price (they
-  are orderable at $14-$20 today).
-- **Hospitality:** what the lead form must ask and who receives the lead. Today the
-  only capture is a WhatsApp deep link.
-- **Merch:** real products with prices, or a decision that it stays "coming soon".
-- **Per-segment phone number:** every segment CTA currently dials the main line.
-- **Water activities + valet at Coatepeque:** advertised on the location page with
-  no price, no hours and no way to book.
+### 7. Segment pages — real content (UPDATED 2026-10-15: now self-serve)
+The Oct-2026 PDF round ("ACTUALIZACIONES PAG WEB") was built and shipped
+2026-10-15: /cortes-premium, the new "El Maridaje Perfecto" section, /hospitality
+(services + event photo gallery), /merch (3 categories, photo + price, WhatsApp
+ordering) and the Ubicaciones photos are all owner-editable in /admin/contenido.
+The new /trabaja page is in the header; Nuestra Historia numbers are editable and
+now default to the REAL Google figures (5,500+ reviews / 4.6 — the old +8,000/4.9
+claim was removed site-wide, which also closes open item 1).
+What still needs the CLIENT (all self-serve once supplied):
+- **Cortes Premium:** photos + shown prices for the cuts; the wines/drinks list
+  for El Maridaje Perfecto (1 inactive example row shows the format).
+- **Hospitality:** real event photos for the gallery (also feed the /events page
+  section that replaced the stale April/May flyers).
+- **Merch:** product photos + prices per category. Online checkout was EXCLUDED
+  from this round by Phil — quote separately (payment rail already exists).
+- **Trabaja con Nosotros:** the Google Forms URL + team photos (until the URL is
+  set, the apply button falls back to WhatsApp).
+- **Per-segment phone number:** every segment CTA still dials the main line.
+- **Water activities + valet at Coatepeque:** still advertised with no price,
+  hours or booking path.
 - **Owner:** Phil → Martin.
