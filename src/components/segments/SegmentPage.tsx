@@ -255,8 +255,12 @@ export default function SegmentPage({
       : []
 
   let mainCards: Card[] = staticCards
-  if (segment === 'hospitality' && hospitalityServices.length > 0) {
-    mainCards = hospitalityServices.map((i) => itemToCard(i))
+  if (segment === 'hospitality') {
+    // Gallery photos must never fall through into the service-card grid —
+    // with zero 'servicio' items the static cards remain the fallback.
+    if (hospitalityServices.length > 0) {
+      mainCards = hospitalityServices.map((i) => itemToCard(i))
+    }
   } else if (!isMerch && segment && dbItems.length > 0) {
     mainCards = dbItems.map((i) => itemToCard(i))
   }
