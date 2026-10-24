@@ -19,6 +19,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
 import Link from "next/link";
+import SegmentBreakdown from "@/components/admin/SegmentBreakdown";
 
 const EMBER = "#E85D04";
 
@@ -334,6 +335,9 @@ export default function AdminDashboard() {
           );
         })}
       </div>
+
+      {/* Segmentación de ventas — por canal y ubicación (rango de fechas) */}
+      <SegmentBreakdown />
 
       {/* Week + SimmerLovers + Promo tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

@@ -19,7 +19,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Beef, Wine, Sparkles, ShoppingBag, MapPin, BookOpen, Briefcase,
-  Plus, Trash2, Check, Loader2, RefreshCw, ImagePlus,
+  Plus, Trash2, Check, Loader2, RefreshCw, ImagePlus, Eye, EyeOff, ExternalLink,
 } from 'lucide-react'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { LOCATIONS } from '@/lib/data'
@@ -70,9 +70,19 @@ const TABS: { id: Tab; label: string; icon: typeof Beef }[] = [
 
 const SEGMENT_HELP: Record<SegmentKey, string> = {
   cortes: 'Productos de la página Cortes Premium. Sube fotos y agrega los cortes nuevos; el precio es opcional y se muestra en la tarjeta.',
-  maridaje: 'Sección "El Maridaje Perfecto" dentro de Cortes Premium: vinos y bebidas con foto e información. Se publica al marcar "Visible".',
+  maridaje: 'Vinos y bebidas de "El Maridaje Perfecto" con foto e información. Precio opcional.',
   hospitality: 'Tarjetas de servicios (eventos privados, catering...) y fotos de eventos. Las fotos con categoría "Galería" se muestran como galería en /hospitality y /events.',
   merch: 'Productos del merch con foto y precio en 3 categorías. El cliente pide por WhatsApp; la compra en línea llegará después.',
+}
+
+// Where each segment surfaces on the public site. Shown as a banner so the
+// owner knows where to look after editing — the Oct 2026 confusion was that
+// Maridaje has its own admin tab but renders INSIDE the Cortes Premium page.
+const SEGMENT_PUBLIC: Record<SegmentKey, { label: string; href: string }> = {
+  cortes: { label: 'Cortes Premium', href: '/cortes-premium' },
+  maridaje: { label: 'Cortes Premium · sección "El Maridaje Perfecto"', href: '/cortes-premium' },
+  hospitality: { label: 'Hospitality', href: '/hospitality' },
+  merch: { label: 'Merch', href: '/merch' },
 }
 
 const MERCH_CAT_OPTIONS = MERCH_CATEGORIES.map((c) => ({ value: c.id, label: c.es }))
@@ -191,6 +201,13 @@ export default function AdminContenidoPage() {
     } finally {
       setBusyKey(null)
     }
+  }
+
+  // One-click publish: flip the local toggle AND persist, so an edited-but-hidden
+  // item (e.g. a seeded example the owner filled in) goes live in a single action.
+  const publishItem = (item: Item) => {
+    patchItem(item, { is_active: true })
+    void saveItem({ ...item, is_active: true })
   }
 
   const deleteItem = async (item: Item) => {
@@ -323,9 +340,27 @@ export default function AdminContenidoPage() {
     const list = segmentItems(seg)
     const catOptions =
       seg === 'merch' ? MERCH_CAT_OPTIONS : seg === 'hospitality' ? HOSPITALITY_CAT_OPTIONS : null
+    const pub = SEGMENT_PUBLIC[seg]
     return (
       <div>
-        <p className="text-sm text-[#6B6560] mb-4">{SEGMENT_HELP[seg]}</p>
+        <div className="mb-4 bg-[#252320] border border-[#3D3936] px-4 py-3">
+          <div className="flex items-center gap-2 flex-wrap text-sm">
+            <span className="text-[#6B6560]">Aparece en:</span>
+            <a
+              href={pub.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[#FF8C42] hover:text-[#FFB07A] font-medium"
+            >
+              {pub.label} <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+          <p className="text-sm text-[#6B6560] mt-1.5">{SEGMENT_HELP[seg]}</p>
+          <p className="text-xs text-[#8A837C] mt-1.5">
+            Cada elemento solo se muestra en el sitio si está marcado como{' '}
+            <span className="text-[#8FD694] font-medium">Visible al público</span>.
+          </p>
+        </div>
         <div className="flex justify-end mb-3">
           <button
             onClick={() => addItem(seg)}
@@ -346,8 +381,13 @@ export default function AdminContenidoPage() {
               return (
                 <div
                   key={key}
-                  className={`bg-[#252320] border p-4 ${item.is_active ? 'border-[#3D3936]' : 'border-[#3D3936] opacity-60'}`}
+                  className={`bg-[#252320] border p-4 ${item.is_active ? 'border-[#3D3936]' : 'border-[#F59E0B]/50'}`}
                 >
+                  {!item.is_active && (
+                    <div className="flex items-center gap-1.5 mb-3 text-[11px] font-bold uppercase tracking-wide text-[#F59E0B]">
+                      <EyeOff className="w-3.5 h-3.5" /> Oculto — no aparece en el sitio
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                     <div className="md:col-span-4">
                       <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Nombre (ES)</label>
@@ -393,18 +433,36 @@ export default function AdminContenidoPage() {
                       <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Foto</label>
                       <ImageUpload value={item.image_url} onChange={(url) => patchItem(item, { image_url: url })} folder={`segments/${seg}`} />
                     </div>
-                    <div className="md:col-span-12 flex items-center gap-3 pt-1">
-                      <label className="flex items-center gap-2 text-sm text-[#B8B0A8] cursor-pointer">
-                        <input type="checkbox" checked={item.is_active} onChange={(e) => patchItem(item, { is_active: e.target.checked })} className="accent-[#FF6B35] w-4 h-4" />
-                        {item.is_active ? 'Visible al público' : 'Oculto'}
-                      </label>
-                      <div className="ml-auto flex items-center gap-2">
-                        <button onClick={() => saveItem(item)} disabled={busy} className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-4 py-2 text-sm font-semibold transition disabled:opacity-50">
-                          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {item.id ? 'Guardar' : 'Crear'}
-                        </button>
-                        <button onClick={() => deleteItem(item)} disabled={busy} className="flex items-center gap-2 border border-red-500/30 text-red-300 hover:bg-red-500/15 px-3 py-2 text-sm transition disabled:opacity-50">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                    <div className="md:col-span-12 pt-1">
+                      {!item.is_active && (
+                        <div className="mb-3 flex items-center gap-3 bg-[#F59E0B]/10 border border-[#F59E0B]/40 px-3 py-2 flex-wrap">
+                          <span className="text-sm text-[#F5C87A]">
+                            Este elemento <strong>no se ve</strong> en el sitio todavía.
+                          </span>
+                          <button
+                            onClick={() => publishItem(item)}
+                            disabled={busy}
+                            className="ml-auto flex items-center gap-1.5 bg-[#F59E0B] hover:bg-[#D98A08] text-[#1F1D1A] px-4 py-2 text-sm font-bold transition disabled:opacity-50"
+                          >
+                            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />} Hacer visible y guardar
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                          <input type="checkbox" checked={item.is_active} onChange={(e) => patchItem(item, { is_active: e.target.checked })} className="accent-[#FF6B35] w-4 h-4" />
+                          <span className={item.is_active ? 'text-[#8FD694] font-medium' : 'text-[#B8B0A8]'}>
+                            {item.is_active ? 'Visible al público' : 'Mostrar en el sitio'}
+                          </span>
+                        </label>
+                        <div className="ml-auto flex items-center gap-2">
+                          <button onClick={() => saveItem(item)} disabled={busy} className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-4 py-2 text-sm font-semibold transition disabled:opacity-50">
+                            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {item.id ? 'Guardar' : 'Crear'}
+                          </button>
+                          <button onClick={() => deleteItem(item)} disabled={busy} className="flex items-center gap-2 border border-red-500/30 text-red-300 hover:bg-red-500/15 px-3 py-2 text-sm transition disabled:opacity-50">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
