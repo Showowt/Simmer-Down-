@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-import SegmentPage, { type SegmentConfig } from '@/components/segments/SegmentPage'
-import { getLocationWhatsAppUrl } from '@/lib/data'
+import HospitalityExperience from '@/components/hospitality/HospitalityExperience'
 
 export const metadata: Metadata = {
   title: 'Hospitality — Eventos Privados y Catering en El Salvador',
@@ -42,62 +41,6 @@ export const metadata: Metadata = {
   },
 }
 
-const config: SegmentConfig = {
-  eyebrowEs: 'Simmer Down',
-  eyebrowEn: 'Simmer Down',
-  titleEs: 'Hospitality',
-  titleEn: 'Hospitality',
-  subtitleEs:
-    'Eventos privados, catering y experiencias a la medida. Deja que Simmer Down reciba a tu gente.',
-  subtitleEn:
-    'Private events, catering and tailor-made experiences. Let Simmer Down host your people.',
-  sections: [
-    {
-      icon: 'calendar',
-      titleEs: 'Eventos Privados',
-      titleEn: 'Private Events',
-      bodyEs: 'Cumpleaños, empresas y celebraciones con reserva de zonas completas.',
-      bodyEn: 'Birthdays, corporate and celebrations with full-zone bookings.',
-    },
-    {
-      icon: 'truck',
-      titleEs: 'Catering',
-      titleEn: 'Catering',
-      bodyEs: 'Llevamos la experiencia Simmer Down a tu lugar, con menú a tu medida.',
-      bodyEn: 'We bring the Simmer Down experience to your venue, with a custom menu.',
-    },
-    {
-      icon: 'sparkles',
-      titleEs: 'Experiencias en el Lago',
-      titleEn: 'Lake Experiences',
-      bodyEs: 'En el Lago de Coatepeque: actividades acuáticas, valet parking y estadía.',
-      bodyEn: 'At Lago de Coatepeque: water activities, valet parking and lodging.',
-      // Venue-specific card — must reach the Coatepeque line, not Santa Ana.
-      ctaHref: getLocationWhatsAppUrl(
-        'lago-coatepeque',
-        'Hola! Quiero información sobre las experiencias en Simmer Down Lago Coatepeque: actividades acuáticas, valet parking y estadía 🌊',
-      ),
-      ctaLabelEs: 'Escribir al Lago',
-      ctaLabelEn: 'Message the Lake',
-      // Primary path: the on-site Estadía booking page. Guests browsing
-      // Hospitality could not previously find it (only the Coatepeque location
-      // page linked to /estadia).
-      ctaInternalHref: '/estadia',
-      ctaInternalLabelEs: 'Reservar Estadía',
-      ctaInternalLabelEn: 'Book a Stay',
-    },
-  ],
-  ctaLabelEs: 'Planear mi evento',
-  ctaLabelEn: 'Plan my event',
-  // Chain-wide: events and catering run at every venue, so this keeps the main
-  // line — the message says so and asks which sucursal the client wants.
-  ctaHref: getLocationWhatsAppUrl(
-    'santa-ana',
-    'Hola! Quiero información sobre eventos y catering de Simmer Down (disponible en las 5 sucursales) 🥂 ¿Me ayudan a elegir la sucursal y la fecha?',
-  ),
-  ctaExternal: true,
-}
-
 export default function HospitalityPage() {
-  return <SegmentPage config={config} segment="hospitality" />
+  return <HospitalityExperience />
 }
