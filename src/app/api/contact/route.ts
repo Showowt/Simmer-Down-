@@ -59,7 +59,11 @@ export async function POST(
     const { name, email, phone, reason, message } = parseResult.data;
     const supabase = createApiClient();
 
-    // Insert into contact_submissions table
+    // Insert into contact_submissions table. NOTE: this table has no `status`
+    // column — status lives in `meta` (that's what /admin/inquiries reads).
+    // Writing a top-level `status` used to error out and, because the failure
+    // was swallowed below, every contact lead was silently lost. Keep status
+    // in meta and put the reason in `subject`.
     const { error: dbError } = await supabase
       .from("contact_submissions")
       .insert([
@@ -67,13 +71,15 @@ export async function POST(
           name,
           email,
           phone: phone || null,
-          message: reason ? `[${reason}] ${message}` : message,
-          status: "new",
+          subject: reason || null,
+          message,
+          meta: { status: "new" },
         },
       ]);
 
     if (dbError) {
-      // Log but don't fail - table might not exist in some environments
+      // Non-blocking: the Telegram ping still alerts the team even if the row
+      // fails to persist, so we don't fail the user's submission on a DB hiccup.
       logger.warn("Contact submission database insert failed", {
         error: dbError.message,
         code: dbError.code,
