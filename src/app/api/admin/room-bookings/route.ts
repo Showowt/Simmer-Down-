@@ -1,8 +1,15 @@
 /**
  * Admin room bookings API (estadía requests)
  *   GET   /api/admin/room-bookings?location_id=&range=upcoming
+ *   GET   /api/admin/room-bookings?count=pending   → { pending: n } (nav badge)
  *   PATCH /api/admin/room-bookings   { id, status }
  *         status ∈ pending|confirmed|checked_in|checked_out|cancelled
+ *
+ * Every GET first sweeps stale requests: 'pending' whose check-in date passed
+ * without staff confirming is dead demand → 'expired' (no cron needed; the
+ * admin read path is the choke point). Expiring also releases the row from the
+ * room_bookings_room_stay_excl active set, so a dead request never blocks a
+ * real booking.
  *
  * Auth: profile role 'admin'. Writes via service client.
  */
@@ -11,7 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { isUndefinedColumn } from "@/lib/rooms";
+import { isUndefinedColumn, todayInSV } from "@/lib/rooms";
 import logger from "@/lib/logger";
 
 const STATUSES = ["pending", "confirmed", "checked_in", "checked_out", "cancelled"] as const;
@@ -41,6 +48,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const range = searchParams.get("range");
 
     const service = createServiceClient();
+
+    // Auto-expire stale pending requests (see header). Fail-soft: a sweep
+    // error must never take the list down.
+    const { error: sweepErr } = await service
+      .from("room_bookings")
+      .update({ status: "expired", updated_at: new Date().toISOString() })
+      .eq("status", "pending")
+      .lt("check_in", todayInSV());
+    if (sweepErr) {
+      logger.warn("[AdminRoomBookings] stale-pending sweep failed", { error: sweepErr.message });
+    }
+
+    // Lightweight badge mode — pending count only, no row payload.
+    if (searchParams.get("count") === "pending") {
+      const { count, error: cErr } = await service
+        .from("room_bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (cErr) {
+        logger.error("[AdminRoomBookings] pending count failed", cErr);
+        return NextResponse.json({ data: null, error: "db_error", message: "Error al contar" }, { status: 500 });
+      }
+      return NextResponse.json({ data: { pending: count ?? 0 }, error: null });
+    }
     // The owner needs to see the amount that was quoted to the guest. The price
     // columns arrive with migration 20260920c, so fall back to the pre-price
     // select if it has not been applied yet rather than 500-ing the whole list.
@@ -54,7 +85,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     };
 
     let { data, error } = await buildQuery(
-      "id, room_id, location_id, check_in, check_out, nights, guest_count, customer_name, customer_phone, customer_email, special_requests, status, created_at, price_per_night, total_amount, guest_rooms(code, name_es, name)",
+      "id, room_id, location_id, check_in, check_out, nights, guest_count, customer_name, customer_phone, customer_email, special_requests, status, created_at, price_per_night, total_amount, notified_at, notify_error, guest_rooms(code, name_es, name)",
     );
     if (isUndefinedColumn(error)) {
       logger.warn("[AdminRoomBookings] price columns missing; migration 20260920c pending");

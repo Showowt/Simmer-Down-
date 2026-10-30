@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -57,6 +57,22 @@ export default function AdminShell({
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Pending estadía requests — a request the Telegram missed still gets seen
+  // here on the next login. Refreshes on every in-admin navigation; fail-soft.
+  const [roomPending, setRoomPending] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/room-bookings?count=pending", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!cancelled && typeof j?.data?.pending === "number") setRoomPending(j.data.pending);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -120,7 +136,17 @@ export default function AdminShell({
                 >
                   <Icon className="w-5 h-5" />
                   {item.label}
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                  {item.href === "/admin/habitaciones" && roomPending > 0 ? (
+                    <span
+                      className={`ml-auto text-[11px] px-2 py-0.5 rounded-full tabular-nums font-semibold ${
+                        isActive ? "bg-white/20 text-white" : "bg-[#FFB800]/15 text-[#FFB800]"
+                      }`}
+                    >
+                      {roomPending}
+                    </span>
+                  ) : (
+                    isActive && <ChevronRight className="w-4 h-4 ml-auto" />
+                  )}
                 </Link>
               );
             })}

@@ -6,8 +6,14 @@
  *
  *   Channels: pickup · delivery · dine_in · takeout  (food, from orders.order_type)
  *             tickets  (orders w/ event_id — orders field = ticket count)
- *             rooms    (room_bookings — orders field = booking count; value is
- *                       collected at check-in, so it's a reservation estimate)
+ *             rooms    (room_bookings that staff confirmed or that were paid by
+ *                       card — real reservations only)
+ *
+ * Unconfirmed 'pending' requests are returned separately as `pendingRooms`
+ * (count + quoted value) and NEVER counted as revenue — an unpaid request is
+ * demand, not a sale (two Oct-2026 test requests displayed as $298 "ventas"
+ * until this split). Stale pending requests (check-in date passed) are swept
+ * to 'expired' on every load, mirroring /api/admin/room-bookings.
  *
  * SV day boundaries (America/El_Salvador, UTC-6, no DST): a purchase made on
  * SV day D is counted in D. Dates are inclusive. Everything is keyed on the
@@ -40,9 +46,11 @@ const REVENUE_STATUSES = new Set([
   "completed",
 ]);
 
-// A room booking only stops counting once it is cancelled; pending/confirmed
-// are real reservation demand (payment happens at check-in).
-const ROOM_DEAD_STATUSES = new Set(["cancelled", "canceled"]);
+// Room bookings that count as revenue: staff confirmed the stay (card payments
+// also land here — the payment trigger flips the booking to 'confirmed').
+// 'pending' is unconfirmed demand (reported separately), and cancelled /
+// expired / transient card holds ('pending_payment') count nowhere.
+const ROOM_PAID_STATUSES = new Set(["confirmed", "checked_in", "checked_out"]);
 
 type FoodChannel = "pickup" | "delivery" | "dine_in" | "takeout" | "otro";
 type Channel = FoodChannel | "tickets" | "rooms";
@@ -158,6 +166,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { from, to, startUtc, endUtc } = resolveRange(new URL(request.url));
     const supabase = createServiceClient();
 
+    // Auto-expire stale pending requests before reading, so the dashboard
+    // never reports a request whose check-in already passed as live demand.
+    const { error: sweepErr } = await supabase
+      .from("room_bookings")
+      .update({ status: "expired", updated_at: new Date().toISOString() })
+      .eq("status", "pending")
+      .lt("check_in", svDayKey(new Date()));
+    if (sweepErr) {
+      logger.warn("[Segments] stale-pending sweep failed", { error: sweepErr.message });
+    }
+
     const [ordersRes, roomsRes, locationsRes] = await Promise.all([
       supabase
         .from("orders")
@@ -233,10 +252,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       add(venueKey, channel, total, 1);
     }
 
-    // ── Room bookings → rooms channel ────────────────────────
+    // ── Room bookings → rooms channel (+ pending demand aside) ──
+    const pendingRooms = zeroCell();
     for (const r of rooms) {
-      if (r.status && ROOM_DEAD_STATUSES.has(r.status.toLowerCase())) continue;
+      const st = (r.status ?? "").toLowerCase();
       const total = Number(r.total_amount ?? 0);
+      if (st === "pending") {
+        pendingRooms.orders += 1;
+        pendingRooms.revenue += total;
+        continue;
+      }
+      if (!ROOM_PAID_STATUSES.has(st)) continue;
       const venue = r.location_id ? VENUE_BY_SLUG.get(r.location_id) ?? null : null;
       add(venue?.key ?? null, "rooms", total, 1);
     }
@@ -279,6 +305,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       activeChannels,
       totals,
       byLocation,
+      pendingRooms,
     });
   } catch (error) {
     logger.api.error("/api/admin/segments", error, {});

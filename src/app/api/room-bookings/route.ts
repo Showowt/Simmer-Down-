@@ -5,6 +5,9 @@
  *   Validates + guards against date-range double-booking, records the rate the
  *   venue publishes (read from guest_rooms — never from the client), inserts a
  *   `pending` request, and notifies staff (Telegram + the venue WhatsApp).
+ *   The Telegram outcome is written back to the row (notified_at /
+ *   notify_error) so a silent send failure is visible in /admin/habitaciones
+ *   instead of only in 24h-retention runtime logs.
  *   Reserve-request model: staff confirm and collect payment at check-in.
  *
  * The overlap guard fails CLOSED: if it cannot complete, the request is
@@ -218,9 +221,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .filter(Boolean)
       .join("\n");
 
+    let notifiedAt: string | null = null;
+    let notifyError: string | null = null;
     try {
-      await sendTelegram(tgMsg);
+      const tg = await sendTelegram(tgMsg);
+      if (tg.success) {
+        notifiedAt = new Date().toISOString();
+      } else {
+        notifyError = tg.error || "Telegram send failed";
+        logger.error("[RoomBookings] Telegram notification failed", { error: notifyError });
+      }
     } catch (err) {
+      notifyError = err instanceof Error ? err.message : String(err);
       logger.error("[RoomBookings] Telegram notification failed", err);
     }
 
@@ -249,6 +261,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         await sendWhatsApp(locationData.whatsapp, waMsg);
       } catch (err) {
         logger.error("[RoomBookings] WhatsApp notification failed", err);
+      }
+    }
+
+    // Durable notification receipt (migration 20261030). Telegram is the real
+    // staff channel (WhatsApp runs on Twilio, which has no prod credentials),
+    // so the receipt records the Telegram outcome.
+    if (insertedId) {
+      const { error: rcptErr } = await supabase
+        .from("room_bookings")
+        .update({ notified_at: notifiedAt, notify_error: notifyError })
+        .eq("id", insertedId);
+      if (rcptErr && !isUndefinedColumn(rcptErr)) {
+        logger.error("[RoomBookings] notify-receipt write failed", rcptErr);
       }
     }
 

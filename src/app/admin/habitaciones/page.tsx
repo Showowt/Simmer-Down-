@@ -51,6 +51,10 @@ interface Booking {
   // quoted to the guest, which the nightly rate may have drifted from since.
   price_per_night?: number | null
   total_amount?: number | null
+  // Staff-notification receipt (migration 20261030): null/null on rows that
+  // predate it; notify_error set means the Telegram alert never went out.
+  notified_at?: string | null
+  notify_error?: string | null
   guest_rooms: LinkedRoom | LinkedRoom[] | null
 }
 
@@ -68,6 +72,8 @@ const B_STATUS: Record<string, { label: string; cls: string }> = {
   checked_in: { label: 'Check-in', cls: 'bg-[#FF6B35]/10 text-[#FF6B35] border-[#FF6B35]/20' },
   checked_out: { label: 'Check-out', cls: 'bg-white/10 text-[#B8B0A8] border-white/15' },
   cancelled: { label: 'Cancelada', cls: 'bg-[#C73E1D]/10 text-[#F0A090] border-[#C73E1D]/30' },
+  // Auto-set when a pending request's check-in date passes unconfirmed.
+  expired: { label: 'Vencida', cls: 'bg-white/5 text-[#6B6560] border-white/10' },
 }
 const B_ACTIONS = [
   { status: 'confirmed', label: 'Confirmar' },
@@ -209,12 +215,15 @@ export default function AdminHabitacionesPage() {
   const today = todayInSV()
   const visibleBookings = useMemo(() => bookings.filter((b) => {
     if (bookingFilter === 'all') return true
-    const isPast = b.check_out < today || b.status === 'cancelled'
+    const isPast = b.check_out < today || b.status === 'cancelled' || b.status === 'expired'
     return bookingFilter === 'past' ? isPast : !isPast
   }), [bookings, bookingFilter, today])
 
   const upcomingCount = useMemo(
-    () => bookings.filter((b) => b.check_out >= today && b.status !== 'cancelled').length,
+    () =>
+      bookings.filter(
+        (b) => b.check_out >= today && b.status !== 'cancelled' && b.status !== 'expired',
+      ).length,
     [bookings, today],
   )
   const pendingCount = useMemo(() => bookings.filter((b) => b.status === 'pending').length, [bookings])
@@ -276,6 +285,14 @@ export default function AdminHabitacionesPage() {
                       <span className="text-[#FFF8F0] font-semibold">{b.customer_name}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[11px] border ${st.cls}`}>{st.label}</span>
                       {rm && <span className="px-2 py-0.5 rounded-full text-[11px] bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30">{rm.name_es}</span>}
+                      {!b.notified_at && b.notify_error && (
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[11px] bg-red-500/10 text-red-300 border border-red-500/30"
+                          title={`La alerta de Telegram no se envió: ${b.notify_error}`}
+                        >
+                          ⚠ Sin notificación
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-[#B8B0A8]">
                       <span className="flex items-center gap-1.5"><CalendarClock className="w-4 h-4" />{b.check_in} → {b.check_out} ({b.nights ?? '—'}n)</span>

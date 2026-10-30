@@ -38,6 +38,8 @@ interface SegmentsData {
   activeChannels: string[];
   totals: Cell;
   byLocation: LocationRow[];
+  /** Unconfirmed estadía requests — demand, not revenue. Absent pre-deploy. */
+  pendingRooms?: Cell;
 }
 
 const CHANNEL_META: Record<
@@ -187,6 +189,17 @@ export default function SegmentBreakdown() {
                 <p className="text-xs text-[#6B6560] mt-0.5 tabular-nums">
                   {cell.orders} {meta.unit}
                 </p>
+                {c === "rooms" && (data?.pendingRooms?.orders ?? 0) > 0 && (
+                  <p
+                    className="text-[11px] text-[#FFB800] mt-1 tabular-nums"
+                    title="Solicitudes de estadía sin confirmar — no son ventas; confírmalas en Habitaciones."
+                  >
+                    +{data!.pendingRooms!.orders} solicitud
+                    {data!.pendingRooms!.orders === 1 ? "" : "es"} pendiente
+                    {data!.pendingRooms!.orders === 1 ? "" : "s"} ·{" "}
+                    {money(data!.pendingRooms!.revenue)} sin cobrar
+                  </p>
+                )}
               </div>
             );
           })}
@@ -282,8 +295,10 @@ export default function SegmentBreakdown() {
         </div>
 
         <p className="text-[11px] text-[#6B6560] mt-3">
-          Habitaciones: reservas registradas (el pago se cobra al llegar). Ventas aceptadas
-          únicamente; pedidos pendientes y cancelados no se cuentan.
+          Habitaciones: solo reservas confirmadas (el pago se cobra al llegar o en línea).
+          Las solicitudes sin confirmar se muestran aparte y no suman al total; si su fecha
+          de entrada pasa sin confirmarse, vencen automáticamente. Pedidos pendientes y
+          cancelados tampoco se cuentan.
         </p>
       </div>
     </div>
