@@ -99,6 +99,8 @@ export default function AdminSimmerLoversPage() {
   const [adjPoints, setAdjPoints] = useState("");
   const [adjReason, setAdjReason] = useState("");
   const [adjBusy, setAdjBusy] = useState(false);
+  const [earnAmount, setEarnAmount] = useState("");
+  const [earnBusy, setEarnBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -149,6 +151,7 @@ export default function AdminSimmerLoversPage() {
     setConfirmRewardId(null);
     setAdjPoints("");
     setAdjReason("");
+    setEarnAmount("");
     void loadDrawer(m.id);
   };
 
@@ -179,6 +182,35 @@ export default function AdminSimmerLoversPage() {
     } finally {
       setBusyRewardId(null);
       setConfirmRewardId(null);
+    }
+  };
+
+  const earn = async () => {
+    if (!openMemberId) return;
+    const amount = parseFloat(earnAmount);
+    if (!amount || amount <= 0) {
+      setToast({ kind: "err", text: "Ingresa el monto del consumo" });
+      return;
+    }
+    setEarnBusy(true);
+    try {
+      const res = await fetch("/api/admin/loyalty/canje", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_id: openMemberId, amount }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setToast({ kind: "err", text: json.message || "Error al acreditar" });
+      } else {
+        setToast({ kind: "ok", text: json.message || "Puntos acreditados" });
+        setEarnAmount("");
+        await Promise.all([loadDrawer(openMemberId), load()]);
+      }
+    } catch {
+      setToast({ kind: "err", text: "Error de conexión" });
+    } finally {
+      setEarnBusy(false);
     }
   };
 
@@ -518,6 +550,41 @@ export default function AdminSimmerLoversPage() {
                     })}
                   </div>
                 )}
+
+                {/* Dine-in earning — the counter's missing half */}
+                <h3 className="text-sm font-semibold text-[#FFF8F0] mb-2">Acreditar consumo en mesa</h3>
+                <div className="bg-[#252320] border border-[#3D3936] p-3 mb-6">
+                  <p className="text-xs text-[#6B6560] mb-2">
+                    Ingresa el total del ticket y el sistema calcula los puntos
+                    (tasa × nivel del miembro).
+                  </p>
+                  <div className="flex gap-2">
+                    <div className="relative w-32">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6560] text-sm">$</span>
+                      <input
+                        type="number"
+                        min={0.01}
+                        step="0.01"
+                        value={earnAmount}
+                        onChange={(e) => setEarnAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full bg-[#1F1D1A] border border-[#3D3936] pl-7 pr-3 py-2 text-[#FFF8F0] text-sm focus:outline-none focus:border-[#FF6B35]"
+                      />
+                    </div>
+                    <button
+                      onClick={earn}
+                      disabled={earnBusy}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-3 py-2 text-xs font-bold transition disabled:opacity-50"
+                    >
+                      {earnBusy ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <PlusCircle className="w-3.5 h-3.5" />
+                      )}
+                      Acreditar puntos
+                    </button>
+                  </div>
+                </div>
 
                 {/* Manual adjustment (admin) */}
                 <h3 className="text-sm font-semibold text-[#FFF8F0] mb-2">Ajuste manual (admin)</h3>

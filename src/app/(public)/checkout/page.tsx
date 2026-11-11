@@ -93,6 +93,8 @@ export default function CheckoutPage() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
+  const [promoCode, setPromoCode] = useState('')
+  const [promoNotice, setPromoNotice] = useState<string | null>(null)
   const [deliveryAddress, setDeliveryAddress] = useState('')
   const [deliveryCity, setDeliveryCity] = useState('')
 
@@ -162,6 +164,7 @@ export default function CheckoutPage() {
           customerPhone: cleanPhone,
           customerEmail: customerEmail || '',
           notes: cleanNotes || undefined,
+          promoCode: promoCode.trim() ? promoCode.trim().toUpperCase() : undefined,
           deliveryAddress: isDelivery ? deliveryAddress.trim() : undefined,
           deliveryCity: isDelivery && deliveryCity.trim() ? deliveryCity.trim() : undefined,
           items: items.map(item => {
@@ -206,13 +209,22 @@ export default function CheckoutPage() {
         discount: data.order.discount ?? 0,
         total: data.order.total,
       })
+      // The server silently ignores invalid codes — if one was typed and no
+      // discount came back, tell the customer before they pay full price.
+      setPromoNotice(
+        promoCode.trim() && !(data.order.discount > 0)
+          ? language === 'es'
+            ? `El código "${promoCode.trim().toUpperCase()}" no es válido o no aplica a este pedido.`
+            : `Code "${promoCode.trim().toUpperCase()}" is not valid or does not apply to this order.`
+          : null,
+      )
       setStep('payment')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error inesperado')
     } finally {
       setLoading(false)
     }
-  }, [items, location, orderType, name, phone, notes, deliveryAddress, deliveryCity, isDelivery, detailsValid, customerEmail, setCustomerInfo, setOrderNotes, language])
+  }, [items, location, orderType, name, phone, notes, promoCode, deliveryAddress, deliveryCity, isDelivery, detailsValid, customerEmail, setCustomerInfo, setOrderNotes, language])
 
   // ─── Step 2: Initiate Payment ───────────────────────────────
   const handleCardSubmit = useCallback(async (formData: CardFormData) => {
@@ -467,6 +479,23 @@ export default function CheckoutPage() {
                 rows={2}
                 className="w-full px-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:border-[#E85D04] focus:outline-none transition resize-none"
               />
+              <input
+                type="text"
+                value={promoCode}
+                onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                placeholder={language === 'es' ? 'Código promocional (opcional)' : 'Promo code (optional)'}
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                className="w-full h-12 px-4 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder:text-white/30 uppercase tracking-wider focus:border-[#E85D04] focus:outline-none transition"
+              />
+              {promoCode.trim() && (
+                <p className="text-xs text-white/40">
+                  {language === 'es'
+                    ? 'El descuento se aplica al continuar al pago.'
+                    : 'The discount is applied when you continue to payment.'}
+                </p>
+              )}
             </div>
 
             {/* Totals */}
@@ -543,11 +572,17 @@ export default function CheckoutPage() {
                 </p>
                 {orderData.discount > 0 && (
                   <p className="text-[#25D366] text-xs font-medium">
-                    {language === 'es' ? 'Promo 2x1' : '2x1 promo'}: -${orderData.discount.toFixed(2)}
+                    {language === 'es' ? 'Descuento' : 'Discount'}: -${orderData.discount.toFixed(2)}
                   </p>
                 )}
               </div>
             </div>
+
+            {promoNotice && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-5">
+                <p className="text-amber-400 text-sm">{promoNotice}</p>
+              </div>
+            )}
 
             <CardPaymentForm
               onSubmit={handleCardSubmit}

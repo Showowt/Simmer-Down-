@@ -347,6 +347,123 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+// ── PUT: dine-in earning — credit points for an in-venue ticket ──
+// The accrual trigger only fires on web orders; Simmer Down is a dine-in
+// business, so the counter needs an earning path too. Mirrors the SQL
+// award fn: floor(amount × points_per_dollar × tier_multiplier), lifetime
+// counts toward tier, tiers never downgrade.
+
+const EarnSchema = z.object({
+  customer_id: z.string().uuid(),
+  amount: z.number().min(0.01).max(10000),
+});
+
+export async function PUT(request: NextRequest): Promise<NextResponse> {
+  try {
+    const auth = await requireStaffUser();
+    if (!auth.ok) return auth.res;
+
+    const parsed = EarnSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { data: null, error: "invalid_body", message: "Monto inválido" },
+        { status: 400 },
+      );
+    }
+    const { customer_id, amount } = parsed.data;
+    const service = createServiceClient();
+
+    const [custRes, rateRes, tiersRes] = await Promise.all([
+      service
+        .from("customers")
+        .select("id, loyalty_points_balance, lifetime_points_earned, loyalty_tier")
+        .eq("id", customer_id)
+        .maybeSingle(),
+      service.from("settings").select("value").eq("key", "loyalty_points_per_dollar").maybeSingle(),
+      service.from("loyalty_tier_config").select("tier, points_multiplier, min_lifetime_points"),
+    ]);
+
+    const customer = custRes.data;
+    if (!customer) {
+      return NextResponse.json(
+        { data: null, error: "not_found", message: "Miembro no encontrado" },
+        { status: 404 },
+      );
+    }
+
+    const rate = Number(rateRes.data?.value) || 1;
+    const tiers = tiersRes.data ?? [];
+    const multiplier =
+      Number(tiers.find((t) => t.tier === customer.loyalty_tier)?.points_multiplier) || 1;
+    const points = Math.floor(amount * rate * multiplier);
+    if (points <= 0) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: "zero_points",
+          message: "El monto no genera puntos con la tasa actual.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const newBalance = (customer.loyalty_points_balance ?? 0) + points;
+    const newLifetime = (customer.lifetime_points_earned ?? 0) + points;
+    const qualifying = tiers
+      .filter((t) => Number(t.min_lifetime_points ?? 0) <= newLifetime)
+      .sort((a, b) => Number(b.min_lifetime_points ?? 0) - Number(a.min_lifetime_points ?? 0))[0]?.tier as
+      | string
+      | undefined;
+    const currentOrder = TIER_ORDER[customer.loyalty_tier ?? "bronze"] ?? 0;
+    const newTier =
+      qualifying && (TIER_ORDER[qualifying] ?? 0) > currentOrder
+        ? qualifying
+        : customer.loyalty_tier ?? "bronze";
+
+    const { error: updErr } = await service
+      .from("customers")
+      .update({
+        loyalty_points_balance: newBalance,
+        lifetime_points_earned: newLifetime,
+        loyalty_tier: newTier,
+      })
+      .eq("id", customer.id);
+    if (updErr) {
+      logger.error("[LoyaltyCanje] earn failed", updErr, { customerId: customer.id });
+      return NextResponse.json(
+        { data: null, error: "db_error", message: "Error al acreditar puntos" },
+        { status: 500 },
+      );
+    }
+
+    const { error: txErr } = await service.from("loyalty_transactions").insert({
+      customer_id: customer.id,
+      transaction_type: "earned",
+      points,
+      balance_after: newBalance,
+      description: `Consumo en sucursal: $${amount.toFixed(2)}`,
+      adjusted_by_staff_id: auth.userId,
+    });
+    if (txErr) {
+      logger.error("[LoyaltyCanje] earn ledger failed", txErr, { customerId: customer.id });
+    }
+
+    return NextResponse.json({
+      data: { points_awarded: points, new_balance: newBalance, tier: newTier },
+      error: null,
+      message: `+${points} pts por consumo de $${amount.toFixed(2)}${
+        newTier !== (customer.loyalty_tier ?? "bronze") ? ` — ¡subió a ${newTier}!` : ""
+      }`,
+    });
+  } catch (err) {
+    logger.error("[LoyaltyCanje] PUT error", err);
+    return NextResponse.json(
+      { data: null, error: "internal", message: "Error interno" },
+      { status: 500 },
+    );
+  }
+}
+
 // ── PATCH: manual ± adjustment (admin only) ──────────────────────
 
 const AdjustSchema = z.object({
