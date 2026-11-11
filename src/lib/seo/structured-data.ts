@@ -190,7 +190,7 @@ export function generateOrganizationSchema() {
       },
     ],
     sameAs: [
-      'https://www.instagram.com/simmerdownsv/',
+      'https://www.instagram.com/simmerdown_sv/',
       'https://www.facebook.com/simmerdownsv/',
       'https://www.tiktok.com/@simmerdownsv',
     ],

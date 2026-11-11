@@ -36,7 +36,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-5 mt-8">
               <a
-                href="https://instagram.com/simmerdownsv"
+                href="https://instagram.com/simmerdown_sv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/55 hover:text-[#FBBF24] transition-colors duration-300"

@@ -267,7 +267,7 @@ export default function ContactPage() {
                 </h3>
                 <div className="flex gap-3">
                   <a
-                    href="https://instagram.com/simmerdownsv"
+                    href="https://instagram.com/simmerdown_sv"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 flex items-center justify-center bg-white/10 text-white/60 hover:bg-[#FBBF24] hover:text-white transition-colors"
