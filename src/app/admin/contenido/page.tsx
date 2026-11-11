@@ -18,16 +18,20 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import {
-  Beef, Wine, Sparkles, ShoppingBag, MapPin, BookOpen, Briefcase,
+  Beef, Wine, Sparkles, ShoppingBag, MapPin, BookOpen, Briefcase, Type,
   Plus, Trash2, Check, Loader2, RefreshCw, ImagePlus, Eye, EyeOff, ExternalLink,
 } from 'lucide-react'
 import ImageUpload from '@/components/admin/ImageUpload'
 import { LOCATIONS } from '@/lib/data'
 import {
+  DEFAULT_PAGE_HEADINGS,
+  HEADING_STATIC_FALLBACKS,
   MERCH_CATEGORIES,
   type CareersContent,
+  type HeadingPageKey,
   type HistoriaStats,
   type LocationMediaKind,
+  type PageHeadings,
   type SegmentKey,
 } from '@/lib/site-content'
 
@@ -56,7 +60,7 @@ interface MediaRow {
   is_active: boolean
 }
 
-type Tab = 'cortes' | 'maridaje' | 'hospitality' | 'merch' | 'ubicaciones' | 'historia' | 'trabaja'
+type Tab = 'cortes' | 'maridaje' | 'hospitality' | 'merch' | 'ubicaciones' | 'historia' | 'trabaja' | 'encabezados'
 
 const TABS: { id: Tab; label: string; icon: typeof Beef }[] = [
   { id: 'cortes', label: 'Cortes Premium', icon: Beef },
@@ -66,6 +70,17 @@ const TABS: { id: Tab; label: string; icon: typeof Beef }[] = [
   { id: 'ubicaciones', label: 'Fotos Ubicaciones', icon: MapPin },
   { id: 'historia', label: 'Historia', icon: BookOpen },
   { id: 'trabaja', label: 'Trabaja con Nosotros', icon: Briefcase },
+  { id: 'encabezados', label: 'Encabezados', icon: Type },
+]
+
+// Pages whose hero heading (etiqueta/título/subtítulo) is owner-editable.
+const HEADING_PAGES: { id: HeadingPageKey; label: string; href: string; note?: string }[] = [
+  { id: 'cortes', label: 'Cortes Premium', href: '/cortes-premium' },
+  { id: 'maridaje', label: 'El Maridaje Perfecto', href: '/cortes-premium', note: 'Sección dentro de la página Cortes Premium.' },
+  { id: 'hospitality', label: 'Hospitality', href: '/hospitality' },
+  { id: 'merch', label: 'Merch', href: '/merch' },
+  { id: 'events', label: 'Eventos', href: '/events' },
+  { id: 'trabaja', label: 'Trabaja con Nosotros', href: '/trabaja', note: 'El párrafo de introducción se edita en la pestaña "Trabaja con Nosotros".' },
 ]
 
 const SEGMENT_HELP: Record<SegmentKey, string> = {
@@ -116,6 +131,8 @@ export default function AdminContenidoPage() {
   const [media, setMedia] = useState<MediaRow[]>([])
   const [careers, setCareers] = useState<CareersContent>({ form_url: null, intro_es: '', intro_en: '', photos: [] })
   const [historia, setHistoria] = useState<HistoriaStats>({ years: 12, locations: 5, reviews: 5500, stars: 4.6 })
+  const [headings, setHeadings] = useState<PageHeadings>(DEFAULT_PAGE_HEADINGS)
+  const [headingPage, setHeadingPage] = useState<HeadingPageKey>('cortes')
   const [mediaVenue, setMediaVenue] = useState<string>(LOCATIONS[0]?.id ?? 'santa-ana')
   const [loading, setLoading] = useState(true)
   const [busyKey, setBusyKey] = useState<string | null>(null)
@@ -139,6 +156,7 @@ export default function AdminContenidoPage() {
       if (contentRes.ok && contentJson.data) {
         setCareers(contentJson.data.careers as CareersContent)
         setHistoria(contentJson.data.historia as HistoriaStats)
+        if (contentJson.data.headings) setHeadings(contentJson.data.headings as PageHeadings)
       }
     } catch {
       setToast({ kind: 'err', text: 'Error al cargar' })
@@ -316,7 +334,7 @@ export default function AdminContenidoPage() {
 
   // ── Settings (historia + careers) ─────────────────────────
 
-  const saveSettings = async (body: { careers?: CareersContent; historia?: HistoriaStats }) => {
+  const saveSettings = async (body: { careers?: CareersContent; historia?: HistoriaStats; headings?: PageHeadings }) => {
     setBusyKey('settings')
     try {
       const res = await fetch('/api/admin/site-content', {
@@ -569,6 +587,94 @@ export default function AdminContenidoPage() {
     </div>
   )
 
+  const renderEncabezados = () => {
+    const page = HEADING_PAGES.find((p) => p.id === headingPage) ?? HEADING_PAGES[0]
+    const h = headings[page.id]
+    const fb = HEADING_STATIC_FALLBACKS[page.id]
+    const patch = (field: keyof typeof h, value: string) =>
+      setHeadings({ ...headings, [page.id]: { ...h, [field]: value } })
+    const showSubtitle = page.id !== 'trabaja'
+    return (
+      <div className="max-w-2xl">
+        <p className="text-sm text-[#6B6560] mb-4">
+          Edita la etiqueta pequeña, el título grande y el subtítulo de cada página.
+          Deja un campo vacío para usar el texto original (se muestra como ejemplo gris).
+        </p>
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {HEADING_PAGES.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setHeadingPage(p.id)}
+              className={`px-4 py-2 text-sm font-medium border transition ${
+                headingPage === p.id
+                  ? 'bg-[#FF6B35] border-[#FF6B35] text-white'
+                  : 'bg-[#252320] border-[#3D3936] text-[#B8B0A8] hover:border-[#FF6B35]/50'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-4 bg-[#252320] border border-[#3D3936] px-4 py-3">
+          <div className="flex items-center gap-2 flex-wrap text-sm">
+            <span className="text-[#6B6560]">Aparece en:</span>
+            <a
+              href={page.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-[#FF8C42] hover:text-[#FFB07A] font-medium"
+            >
+              {page.label} <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+          {page.note && <p className="text-sm text-[#6B6560] mt-1.5">{page.note}</p>}
+        </div>
+
+        <div className="space-y-4 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Etiqueta pequeña (ES)</label>
+              <input value={h.eyebrow_es} onChange={(e) => patch('eyebrow_es', e.target.value)} placeholder={fb.eyebrow_es} className={`${inputCls} w-full`} />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Etiqueta pequeña (EN)</label>
+              <input value={h.eyebrow_en} onChange={(e) => patch('eyebrow_en', e.target.value)} placeholder={fb.eyebrow_en} className={`${inputCls} w-full`} />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Título (ES)</label>
+              <input value={h.title_es} onChange={(e) => patch('title_es', e.target.value)} placeholder={fb.title_es} className={`${inputCls} w-full`} />
+            </div>
+            <div>
+              <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Título (EN)</label>
+              <input value={h.title_en} onChange={(e) => patch('title_en', e.target.value)} placeholder={fb.title_en} className={`${inputCls} w-full`} />
+            </div>
+          </div>
+          {showSubtitle && (
+            <>
+              <div>
+                <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Subtítulo (ES)</label>
+                <textarea value={h.subtitle_es} onChange={(e) => patch('subtitle_es', e.target.value)} placeholder={fb.subtitle_es} rows={2} className={`${inputCls} w-full`} />
+              </div>
+              <div>
+                <label className="block text-[10px] text-[#6B6560] mb-1 uppercase">Subtítulo (EN)</label>
+                <textarea value={h.subtitle_en} onChange={(e) => patch('subtitle_en', e.target.value)} placeholder={fb.subtitle_en} rows={2} className={`${inputCls} w-full`} />
+              </div>
+            </>
+          )}
+        </div>
+        <button
+          onClick={() => saveSettings({ headings })}
+          disabled={busyKey === 'settings'}
+          className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+        >
+          {busyKey === 'settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Guardar
+        </button>
+        <p className="text-[10px] text-[#6B6560] mt-2">Se guardan los encabezados de todas las páginas a la vez.</p>
+      </div>
+    )
+  }
+
   const renderTrabaja = () => (
     <div className="max-w-2xl">
       <p className="text-sm text-[#6B6560] mb-4">
@@ -672,6 +778,7 @@ export default function AdminContenidoPage() {
           {tab === 'ubicaciones' && renderUbicaciones()}
           {tab === 'historia' && renderHistoria()}
           {tab === 'trabaja' && renderTrabaja()}
+          {tab === 'encabezados' && renderEncabezados()}
         </>
       )}
     </div>

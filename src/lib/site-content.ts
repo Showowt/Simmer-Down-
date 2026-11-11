@@ -55,6 +55,125 @@ export interface CareersContent {
   photos: string[]
 }
 
+// ── Page headings (owner-editable hero eyebrow/title/subtitle) ──────────────
+// Martin's Nov 2026 ask: "esos encabezados los quisiera poder modificar también".
+// Stored in settings key 'page_headings'. Empty string = keep the original
+// static text, so a page never renders blank.
+
+export type HeadingPageKey = 'cortes' | 'maridaje' | 'hospitality' | 'merch' | 'events' | 'trabaja'
+
+export const HEADING_PAGE_KEYS: HeadingPageKey[] = [
+  'cortes', 'maridaje', 'hospitality', 'merch', 'events', 'trabaja',
+]
+
+export interface PageHeading {
+  eyebrow_es: string
+  eyebrow_en: string
+  title_es: string
+  title_en: string
+  subtitle_es: string
+  subtitle_en: string
+}
+
+export type PageHeadings = Record<HeadingPageKey, PageHeading>
+
+export const EMPTY_HEADING: PageHeading = {
+  eyebrow_es: '', eyebrow_en: '', title_es: '', title_en: '', subtitle_es: '', subtitle_en: '',
+}
+
+const HEADING_FIELDS = Object.keys(EMPTY_HEADING) as (keyof PageHeading)[]
+
+export const DEFAULT_PAGE_HEADINGS: PageHeadings = {
+  cortes: { ...EMPTY_HEADING },
+  maridaje: { ...EMPTY_HEADING },
+  hospitality: { ...EMPTY_HEADING },
+  merch: { ...EMPTY_HEADING },
+  events: { ...EMPTY_HEADING },
+  trabaja: { ...EMPTY_HEADING },
+}
+
+/**
+ * The original static copy per page — shown as placeholders in the admin so
+ * the owner sees what renders today, and what an empty field falls back to.
+ */
+export const HEADING_STATIC_FALLBACKS: PageHeadings = {
+  cortes: {
+    eyebrow_es: 'Simmer Down', eyebrow_en: 'Simmer Down',
+    title_es: 'Cortes Premium', title_en: 'Premium Cuts',
+    subtitle_es: 'Carnes selectas, maduradas con cuidado y selladas al fuego. La misma alma de Simmer Down, ahora en el corte perfecto.',
+    subtitle_en: 'Select cuts, carefully aged and fire-seared. The same Simmer Down soul, now in the perfect cut.',
+  },
+  maridaje: {
+    eyebrow_es: 'Vinos y bebidas', eyebrow_en: 'Wines & drinks',
+    title_es: 'El Maridaje Perfecto', title_en: 'The Perfect Pairing',
+    subtitle_es: 'Nuestros vinos y la variedad de bebidas que acompañan cada corte.',
+    subtitle_en: 'Our wines and the drinks selection that pairs with every cut.',
+  },
+  hospitality: {
+    eyebrow_es: 'Simmer Down Hospitality', eyebrow_en: 'Simmer Down Hospitality',
+    title_es: 'Eventos, catering y experiencias', title_en: 'Events, catering & experiences',
+    subtitle_es: 'Deja que Simmer Down reciba a tu gente. Eventos privados, catering a tu medida y experiencias frente al lago — en nuestras 5 sucursales.',
+    subtitle_en: 'Let Simmer Down host your people. Private events, custom catering and lakefront experiences — across our 5 locations.',
+  },
+  merch: {
+    eyebrow_es: 'Simmer Down', eyebrow_en: 'Simmer Down',
+    title_es: 'Merch', title_en: 'Merch',
+    subtitle_es: 'Lleva las buenas vibras contigo. Camisetas, gorras y accesorios con el sello Simmer Down.',
+    subtitle_en: 'Take the good vibes with you. Tees, caps and accessories with the Simmer Down mark.',
+  },
+  events: {
+    eyebrow_es: 'Experiencias Únicas', eyebrow_en: 'Unique Experiences',
+    title_es: 'Eventos y Experiencias', title_en: 'Events & Experiences',
+    subtitle_es: 'Desde música en vivo hasta talleres de pizza, siempre hay algo emocionante sucediendo en Simmer Down.',
+    subtitle_en: "From live music to pizza workshops, there's always something exciting happening at Simmer Down.",
+  },
+  trabaja: {
+    eyebrow_es: 'Simmer Down', eyebrow_en: 'Simmer Down',
+    title_es: 'Trabaja con Nosotros', title_en: 'Work With Us',
+    // The /trabaja subtitle is the careers intro, edited in its own tab.
+    subtitle_es: '', subtitle_en: '',
+  },
+}
+
+/** Coerce an untrusted settings value into a complete PageHeadings record. */
+export function sanitizePageHeadings(raw: unknown): PageHeadings {
+  const out: PageHeadings = {
+    cortes: { ...EMPTY_HEADING },
+    maridaje: { ...EMPTY_HEADING },
+    hospitality: { ...EMPTY_HEADING },
+    merch: { ...EMPTY_HEADING },
+    events: { ...EMPTY_HEADING },
+    trabaja: { ...EMPTY_HEADING },
+  }
+  if (!raw || typeof raw !== 'object') return out
+  for (const page of HEADING_PAGE_KEYS) {
+    const v = (raw as Record<string, unknown>)[page]
+    if (!v || typeof v !== 'object') continue
+    for (const field of HEADING_FIELDS) {
+      const val = (v as Record<string, unknown>)[field]
+      if (typeof val === 'string') out[page][field] = val.slice(0, 500)
+    }
+  }
+  return out
+}
+
+/**
+ * Effective heading text: owner override wins, EN falls back to the owner's
+ * ES override (owner intent beats stale static EN), then the static copy.
+ */
+export function headingText(
+  heading: PageHeading | undefined,
+  field: 'eyebrow' | 'title' | 'subtitle',
+  locale: 'es' | 'en',
+  fallbackEs: string,
+  fallbackEn: string,
+): string {
+  const es = (heading?.[`${field}_es`] ?? '').trim()
+  const en = (heading?.[`${field}_en`] ?? '').trim()
+  if (locale === 'es') return es || fallbackEs
+  return en || es || fallbackEn
+}
+
 export interface HistoriaStats {
   years: number
   locations: number
@@ -67,6 +186,7 @@ export interface SiteContentPayload {
   locationMedia: LocationMediaMap
   careers: CareersContent
   historia: HistoriaStats
+  headings: PageHeadings
 }
 
 // Real public numbers (Google listings network, Oct 2026 audit: 5,535 reviews /
@@ -90,6 +210,7 @@ export const EMPTY_SITE_CONTENT: SiteContentPayload = {
   locationMedia: {},
   careers: DEFAULT_CAREERS,
   historia: DEFAULT_HISTORIA,
+  headings: DEFAULT_PAGE_HEADINGS,
 }
 
 export const MERCH_CATEGORIES = [

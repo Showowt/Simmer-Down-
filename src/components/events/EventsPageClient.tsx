@@ -4,6 +4,8 @@ import { PartyPopper, Users, Utensils, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n, translations } from "@/lib/i18n";
+import { useSiteContent } from "@/lib/use-site-content";
+import { headingText } from "@/lib/site-content";
 import type { PublicEvent } from "@/lib/events";
 import {
   EventsList,
@@ -20,7 +22,9 @@ export default function EventsPageClient({
 }: {
   initialEvents: PublicEvent[];
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { headings } = useSiteContent();
+  const hero = headings.events;
 
   const privateEventTypes = [
     {
@@ -71,13 +75,13 @@ export default function EventsPageClient({
               />
             </div>
             <p className="text-white/50 text-sm uppercase tracking-[0.2em] mb-4">
-              {t(translations.events.uniqueExperiences)}
+              {headingText(hero, "eyebrow", locale, translations.events.uniqueExperiences.es, translations.events.uniqueExperiences.en)}
             </p>
             <h1 className="font-display text-3xl md:text-4xl tracking-tight text-white mb-6">
-              {t(translations.events.eventsTitle)}
+              {headingText(hero, "title", locale, translations.events.eventsTitle.es, translations.events.eventsTitle.en)}
             </h1>
             <p className="text-xl text-white/60">
-              {t(translations.events.eventsDesc)}
+              {headingText(hero, "subtitle", locale, translations.events.eventsDesc.es, translations.events.eventsDesc.en)}
             </p>
           </AnimatedHero>
         </div>

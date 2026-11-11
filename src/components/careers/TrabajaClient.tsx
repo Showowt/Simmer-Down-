@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Flame, Heart, MessageCircle, Users } from 'lucide-react'
 import { useI18n } from '@/lib/i18n'
 import { useSiteContent } from '@/lib/use-site-content'
+import { headingText } from '@/lib/site-content'
 import { getLocationWhatsAppUrl } from '@/lib/data'
 
 const PERKS = [
@@ -47,9 +48,10 @@ const FALLBACK_WHATSAPP = getLocationWhatsAppUrl(
 
 export default function TrabajaClient() {
   const { locale } = useI18n()
-  const { careers } = useSiteContent()
+  const { careers, headings } = useSiteContent()
   const es = locale === 'es'
   const pick = (a: string, b: string) => (es ? a : b)
+  const hero = headings.trabaja
 
   const intro =
     (es ? careers.intro_es : careers.intro_en || careers.intro_es) ||
@@ -71,7 +73,7 @@ export default function TrabajaClient() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-block text-[#E85D04] font-semibold uppercase tracking-[0.2em] text-xs mb-5"
           >
-            Simmer Down
+            {headingText(hero, 'eyebrow', locale, 'Simmer Down', 'Simmer Down')}
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -79,7 +81,7 @@ export default function TrabajaClient() {
             transition={{ delay: 0.05 }}
             className="font-display text-4xl md:text-6xl uppercase tracking-tight text-white mb-6"
           >
-            {pick('Trabaja con Nosotros', 'Work With Us')}
+            {headingText(hero, 'title', locale, 'Trabaja con Nosotros', 'Work With Us')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}

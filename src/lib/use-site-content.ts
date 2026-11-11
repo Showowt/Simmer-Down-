@@ -29,6 +29,7 @@ export function useSiteContent(): SiteContentPayload {
           locationMedia: data.locationMedia || {},
           careers: { ...EMPTY_SITE_CONTENT.careers, ...(data.careers || {}) },
           historia: { ...EMPTY_SITE_CONTENT.historia, ...(data.historia || {}) },
+          headings: { ...EMPTY_SITE_CONTENT.headings, ...(data.headings || {}) },
         }
         if (!cancelled) setPayload(cached)
       })

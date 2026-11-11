@@ -24,6 +24,7 @@ import { useI18n } from '@/lib/i18n'
 import { useSiteContent } from '@/lib/use-site-content'
 import {
   MERCH_CATEGORIES,
+  headingText,
   itemName,
   itemDescription,
   type SegmentItem,
@@ -277,6 +278,12 @@ export default function SegmentPage({
 
   const showComingSoon = Boolean(config.comingSoon) && !(isMerch && merchHasProducts)
 
+  // Owner-editable hero heading (settings 'page_headings'); static config = fallback.
+  const heroHeading = segment ? content.headings[segment] : undefined
+  const heroText = (field: 'eyebrow' | 'title' | 'subtitle', fbEs: string, fbEn: string) =>
+    headingText(heroHeading, field, locale, fbEs, fbEn)
+  const maridajeHeading = content.headings.maridaje
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] pt-32 md:pt-40 pb-28 lg:pb-16">
       {/* Hero */}
@@ -287,7 +294,7 @@ export default function SegmentPage({
             animate={{ opacity: 1, y: 0 }}
             className="inline-block text-[#E85D04] font-semibold uppercase tracking-[0.2em] text-xs mb-5"
           >
-            {pick(config.eyebrowEs, config.eyebrowEn)}
+            {heroText('eyebrow', config.eyebrowEs, config.eyebrowEn)}
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -295,7 +302,7 @@ export default function SegmentPage({
             transition={{ delay: 0.05 }}
             className="font-display text-4xl md:text-6xl uppercase tracking-tight text-white mb-6"
           >
-            {pick(config.titleEs, config.titleEn)}
+            {heroText('title', config.titleEs, config.titleEn)}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -303,7 +310,7 @@ export default function SegmentPage({
             transition={{ delay: 0.1 }}
             className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto"
           >
-            {pick(config.subtitleEs, config.subtitleEn)}
+            {heroText('subtitle', config.subtitleEs, config.subtitleEn)}
           </motion.p>
 
           {showComingSoon && (
@@ -385,13 +392,16 @@ export default function SegmentPage({
             >
               <span className="inline-flex items-center gap-2 text-[#FBBF24] font-semibold uppercase tracking-[0.2em] text-xs mb-4">
                 <Wine className="w-4 h-4" />
-                {pick('Vinos y bebidas', 'Wines & drinks')}
+                {headingText(maridajeHeading, 'eyebrow', locale, 'Vinos y bebidas', 'Wines & drinks')}
               </span>
               <h2 className="font-display text-3xl md:text-5xl uppercase tracking-tight text-white mb-4">
-                {pick('El Maridaje Perfecto', 'The Perfect Pairing')}
+                {headingText(maridajeHeading, 'title', locale, 'El Maridaje Perfecto', 'The Perfect Pairing')}
               </h2>
               <p className="text-white/50 max-w-2xl mx-auto">
-                {pick(
+                {headingText(
+                  maridajeHeading,
+                  'subtitle',
+                  locale,
                   'Nuestros vinos y la variedad de bebidas que acompañan cada corte.',
                   'Our wines and the drinks selection that pairs with every cut.',
                 )}

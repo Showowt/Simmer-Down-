@@ -14,8 +14,10 @@ import { createServiceClient } from "@/lib/supabase/service";
 import {
   DEFAULT_CAREERS,
   DEFAULT_HISTORIA,
+  DEFAULT_PAGE_HEADINGS,
   EMPTY_SITE_CONTENT,
   isRenderableSiteImage,
+  sanitizePageHeadings,
   type LocationMediaMap,
   type SegmentItem,
   type SegmentKey,
@@ -41,7 +43,10 @@ export async function GET(): Promise<NextResponse> {
         .select("id, location_id, kind, image_url, sort_order, is_active")
         .eq("is_active", true)
         .order("sort_order", { ascending: true }),
-      supabase.from("settings").select("key, value").in("key", ["careers", "historia_stats"]),
+      supabase
+        .from("settings")
+        .select("key, value")
+        .in("key", ["careers", "historia_stats", "page_headings"]),
     ]);
 
     if (itemsRes.error) logger.error("[SiteContent] segment_items load failed", itemsRes.error);
@@ -78,6 +83,7 @@ export async function GET(): Promise<NextResponse> {
 
     let careers = DEFAULT_CAREERS;
     let historia = DEFAULT_HISTORIA;
+    let headings = DEFAULT_PAGE_HEADINGS;
     for (const row of settingsRes.data || []) {
       if (row.key === "careers" && row.value && typeof row.value === "object") {
         const v = row.value as Partial<typeof DEFAULT_CAREERS>;
@@ -90,6 +96,9 @@ export async function GET(): Promise<NextResponse> {
             : [],
         };
       }
+      if (row.key === "page_headings" && row.value && typeof row.value === "object") {
+        headings = sanitizePageHeadings(row.value);
+      }
       if (row.key === "historia_stats" && row.value && typeof row.value === "object") {
         const v = row.value as Partial<typeof DEFAULT_HISTORIA>;
         historia = {
@@ -101,7 +110,7 @@ export async function GET(): Promise<NextResponse> {
       }
     }
 
-    const payload: SiteContentPayload = { segments, locationMedia, careers, historia };
+    const payload: SiteContentPayload = { segments, locationMedia, careers, historia, headings };
     return NextResponse.json(payload, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",

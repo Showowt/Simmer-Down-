@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n'
 import { useSiteContent } from '@/lib/use-site-content'
-import { itemName, itemDescription } from '@/lib/site-content'
+import { headingText, itemName, itemDescription } from '@/lib/site-content'
 import { LOCATIONS, getLocationWhatsAppUrl } from '@/lib/data'
 
 type Locale = 'es' | 'en'
@@ -226,6 +226,7 @@ export default function HospitalityExperience() {
   )
 
   const historia = content.historia
+  const hero = content.headings.hospitality
 
   // ── Inquiry form ───────────────────────────────────────────
   const [form, setForm] = useState({
@@ -294,7 +295,7 @@ export default function HospitalityExperience() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-block text-[#E85D04] font-semibold uppercase tracking-[0.2em] text-xs mb-5"
           >
-            Simmer Down Hospitality
+            {headingText(hero, 'eyebrow', locale, 'Simmer Down Hospitality', 'Simmer Down Hospitality')}
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -302,7 +303,7 @@ export default function HospitalityExperience() {
             transition={{ delay: 0.05 }}
             className="font-display text-4xl md:text-6xl uppercase tracking-tight text-white mb-6"
           >
-            {pick('Eventos, catering y experiencias', 'Events, catering & experiences')}
+            {headingText(hero, 'title', locale, 'Eventos, catering y experiencias', 'Events, catering & experiences')}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -310,7 +311,10 @@ export default function HospitalityExperience() {
             transition={{ delay: 0.1 }}
             className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto"
           >
-            {pick(
+            {headingText(
+              hero,
+              'subtitle',
+              locale,
               'Deja que Simmer Down reciba a tu gente. Eventos privados, catering a tu medida y experiencias frente al lago — en nuestras 5 sucursales.',
               'Let Simmer Down host your people. Private events, custom catering and lakefront experiences — across our 5 locations.',
             )}

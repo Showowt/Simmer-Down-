@@ -14,7 +14,9 @@ import { createServiceClient } from "@/lib/supabase/service";
 import {
   DEFAULT_CAREERS,
   DEFAULT_HISTORIA,
+  DEFAULT_PAGE_HEADINGS,
   isRenderableSiteImage,
+  sanitizePageHeadings,
 } from "@/lib/site-content";
 import logger from "@/lib/logger";
 
@@ -38,9 +40,28 @@ const HistoriaSchema = z.object({
   stars: z.number().min(0).max(5),
 });
 
+const HeadingSchema = z.object({
+  eyebrow_es: z.string().max(200),
+  eyebrow_en: z.string().max(200),
+  title_es: z.string().max(200),
+  title_en: z.string().max(200),
+  subtitle_es: z.string().max(500),
+  subtitle_en: z.string().max(500),
+});
+
+const HeadingsSchema = z.object({
+  cortes: HeadingSchema,
+  maridaje: HeadingSchema,
+  hospitality: HeadingSchema,
+  merch: HeadingSchema,
+  events: HeadingSchema,
+  trabaja: HeadingSchema,
+});
+
 const PatchSchema = z.object({
   careers: CareersSchema.optional(),
   historia: HistoriaSchema.optional(),
+  headings: HeadingsSchema.optional(),
 });
 
 const BAD_IMAGE_MESSAGE =
@@ -71,18 +92,20 @@ export async function GET(): Promise<NextResponse> {
     const { data, error } = await service
       .from("settings")
       .select("key, value")
-      .in("key", ["careers", "historia_stats"]);
+      .in("key", ["careers", "historia_stats", "page_headings"]);
     if (error) {
       logger.error("[AdminSiteContent] load failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: "Error al cargar" }, { status: 500 });
     }
     let careers = DEFAULT_CAREERS;
     let historia = DEFAULT_HISTORIA;
+    let headings = DEFAULT_PAGE_HEADINGS;
     for (const row of data || []) {
       if (row.key === "careers" && row.value) careers = { ...DEFAULT_CAREERS, ...row.value };
       if (row.key === "historia_stats" && row.value) historia = { ...DEFAULT_HISTORIA, ...row.value };
+      if (row.key === "page_headings" && row.value) headings = sanitizePageHeadings(row.value);
     }
-    return NextResponse.json({ data: { careers, historia }, error: null });
+    return NextResponse.json({ data: { careers, historia, headings }, error: null });
   } catch (err) {
     logger.error("[AdminSiteContent] GET error", err);
     return NextResponse.json({ data: null, error: "internal", message: "Error interno" }, { status: 500 });
@@ -98,7 +121,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       const msg = parsed.error.issues[0]?.message || "Datos inválidos";
       return NextResponse.json({ data: null, error: "invalid_body", message: msg }, { status: 400 });
     }
-    const { careers, historia } = parsed.data;
+    const { careers, historia, headings } = parsed.data;
     if (careers && careers.photos.some((p) => !isRenderableSiteImage(p))) {
       return NextResponse.json({ data: null, error: "invalid_image_url", message: BAD_IMAGE_MESSAGE }, { status: 400 });
     }
@@ -112,6 +135,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       });
     }
     if (historia) rows.push({ key: "historia_stats", value: historia });
+    if (headings) rows.push({ key: "page_headings", value: sanitizePageHeadings(headings) });
     if (rows.length === 0) {
       return NextResponse.json({ data: null, error: "invalid_body", message: "Nada que guardar" }, { status: 400 });
     }
