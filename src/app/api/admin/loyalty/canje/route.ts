@@ -391,7 +391,11 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const rate = Number(rateRes.data?.value) || 1;
+    // Match the SQL award fn exactly: a malformed/missing/negative rate falls
+    // back to 1, but an explicit 0 means the owner switched accrual off and is
+    // left as 0 (→ zero_points below), never silently bumped to 1.
+    const rawRate = Number(rateRes.data?.value);
+    const rate = Number.isFinite(rawRate) && rawRate >= 0 ? rawRate : 1;
     const tiers = tiersRes.data ?? [];
     const multiplier =
       Number(tiers.find((t) => t.tier === customer.loyalty_tier)?.points_multiplier) || 1;
