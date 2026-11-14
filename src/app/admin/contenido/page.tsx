@@ -79,14 +79,14 @@ const HEADING_PAGES: { id: HeadingPageKey; label: string; href: string; note?: s
   { id: 'maridaje', label: 'El Maridaje Perfecto', href: '/cortes-premium', note: 'Sección dentro de la página Cortes Premium.' },
   { id: 'hospitality', label: 'Hospitality', href: '/hospitality' },
   { id: 'merch', label: 'Merch', href: '/merch' },
-  { id: 'events', label: 'Eventos', href: '/events' },
+  { id: 'events', label: 'Eventos', href: '/ticketmania' },
   { id: 'trabaja', label: 'Trabaja con Nosotros', href: '/trabaja', note: 'El párrafo de introducción se edita en la pestaña "Trabaja con Nosotros".' },
 ]
 
 const SEGMENT_HELP: Record<SegmentKey, string> = {
   cortes: 'Productos de la página Cortes Premium. Sube fotos y agrega los cortes nuevos; el precio es opcional y se muestra en la tarjeta.',
   maridaje: 'Vinos y bebidas de "El Maridaje Perfecto" con foto e información. Precio opcional.',
-  hospitality: 'Tarjetas de servicios (eventos privados, catering...) y fotos de eventos. Las fotos con categoría "Galería" se muestran como galería en /hospitality y /events.',
+  hospitality: 'Tarjetas de servicios (eventos privados, catering...) y fotos de eventos. Las fotos con categoría "Galería" se muestran como galería en /hospitality y /ticketmania.',
   merch: 'Productos del merch con foto y precio en 3 categorías. El cliente pide por WhatsApp; la compra en línea llegará después.',
 }
 

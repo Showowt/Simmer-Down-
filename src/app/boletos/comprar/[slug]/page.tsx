@@ -67,7 +67,7 @@ export default async function BuyTicketsPage({
               : "Los boletos para este evento no están disponibles en línea."}
           </p>
           <Link
-            href="/events"
+            href="/ticketmania"
             className="inline-block px-6 py-3 bg-[#E85D04] hover:bg-[#C2410C] text-white font-semibold rounded-xl transition"
           >
             Ver eventos

@@ -132,7 +132,7 @@ export default function EventsSection() {
             </h2>
           </div>
           <Link
-            href="/events"
+            href="/ticketmania"
             className="hidden md:inline-flex items-center gap-2 text-white/50 text-sm font-medium uppercase tracking-wider hover:text-[#E85D04] transition-colors"
           >
             Ver todos
@@ -244,7 +244,7 @@ export default function EventsSection() {
         {/* Mobile "ver todos" link */}
         <div className="mt-8 md:hidden text-center">
           <Link
-            href="/events"
+            href="/ticketmania"
             className="inline-flex items-center gap-2 text-white/60 text-sm font-medium uppercase tracking-wider hover:text-[#E85D04] transition-colors"
           >
             Ver todos los eventos

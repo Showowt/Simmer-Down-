@@ -1,6 +1,6 @@
 // ============================================================
-// Server-side event fetching — used by the /events listing page,
-// the /events/[slug] detail page and the sitemap so events are
+// Server-side event fetching — used by the /ticketmania listing page,
+// the /ticketmania/[slug] detail page and the sitemap so events are
 // SERVER-RENDERED (Google sees them) instead of appearing only
 // after a client-side fetch.
 //
@@ -49,7 +49,7 @@ export async function fetchUpcomingEvents(): Promise<PublicEvent[]> {
 
 /**
  * One published event by slug — past events included on purpose: an indexed
- * or shared /events/[slug] URL must keep rendering after the show instead of
+ * or shared /ticketmania/[slug] URL must keep rendering after the show instead of
  * turning into a 404.
  */
 export async function fetchEventBySlug(

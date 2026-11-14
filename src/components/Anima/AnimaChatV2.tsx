@@ -366,7 +366,7 @@ export default function AnimaChatV2() {
       return
     }
     if (action === 'events') {
-      router.push('/events')
+      router.push('/ticketmania')
       return
     }
     if (action === 'checkout') {

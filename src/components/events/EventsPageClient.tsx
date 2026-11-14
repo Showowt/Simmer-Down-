@@ -14,8 +14,8 @@ import {
   AnimatedCTA,
 } from "@/components/events/EventsClient";
 
-// The /events page body. Presentational only — the server page
-// (app/(public)/events/page.tsx) fetches the events so they are in the HTML
+// The /ticketmania page body. Presentational only — the server page
+// (app/(public)/ticketmania/page.tsx) fetches the events so they are in the HTML
 // Google crawls, and this client shell keeps the i18n toggle + animations.
 export default function EventsPageClient({
   initialEvents,

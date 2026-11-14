@@ -39,13 +39,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     event.description ||
     `${name} en ${venue} — ${dateEs}. Música en vivo en El Salvador con Simmer Down.`
   ).slice(0, 300);
-  const url = `${BASE_URL}/events/${event.slug}`;
+  const url = `${BASE_URL}/ticketmania/${event.slug}`;
   const images = event.image_url
     ? [{ url: event.image_url, alt: name }]
     : [{ url: "/og/events.jpg", width: 1200, height: 630, alt: name }];
 
   return {
-    // absolute: the parent /events layout's plain-string title breaks the
+    // absolute: the parent /ticketmania layout's plain-string title breaks the
     // root "%s | Simmer Down" template chain here, so brand it explicitly.
     title: { absolute: `${name} — ${dateEs} | Simmer Down` },
     description,

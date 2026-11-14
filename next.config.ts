@@ -65,7 +65,11 @@ const nextConfig: NextConfig = {
       { source: '/locations', destination: '/restaurantes', permanent: true },
       { source: '/about', destination: '/nosotros', permanent: true },
       { source: '/reservar', destination: '/reservations', permanent: true },
-      { source: '/eventos', destination: '/events', permanent: true },
+      { source: '/eventos', destination: '/ticketmania', permanent: true },
+      // /events was the events URL until Nov 2026 — already indexed by Google
+      // and shared on WhatsApp/Instagram, so these must stay.
+      { source: '/events', destination: '/ticketmania', permanent: true },
+      { source: '/events/:slug', destination: '/ticketmania/:slug', permanent: true },
     ];
   },
   async headers() {

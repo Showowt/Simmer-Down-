@@ -101,7 +101,7 @@ async function buildEventsBlock(): Promise<string> {
       .slice(0, 12);
 
     if (upcoming.length === 0) {
-      return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía).\n- No hay eventos próximos publicados ahora mismo — revisa la sección de Eventos del sitio (simmerdownsv.com/events).`;
+      return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía).\n- No hay eventos próximos publicados ahora mismo — revisa la sección de Eventos del sitio (simmerdownsv.com/ticketmania).`;
     }
 
     const lines = upcoming.map((e) => {
@@ -116,9 +116,9 @@ async function buildEventsBlock(): Promise<string> {
       return `- 🎤 ${name} — ${venue}${when ? `, ${when}` : ""}${cover ? ` (${cover})` : ""}`;
     });
 
-    return `\n## EVENTOS Y MÚSICA EN VIVO (verificados hoy)\nSimmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Estos son los próximos eventos publicados:\n${lines.join("\n")}\nPara la lista completa y boletos: simmerdownsv.com/events`;
+    return `\n## EVENTOS Y MÚSICA EN VIVO (verificados hoy)\nSimmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Estos son los próximos eventos publicados:\n${lines.join("\n")}\nPara la lista completa y boletos: simmerdownsv.com/ticketmania`;
   } catch {
-    return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Consulta simmerdownsv.com/events para la programación.`;
+    return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Consulta simmerdownsv.com/ticketmania para la programación.`;
   }
 }
 

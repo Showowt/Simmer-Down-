@@ -28,7 +28,7 @@
     {
       "name": "Eventos y Boletos",
       "short_name": "Eventos",
-      "url": "/events?utm_source=pwa_shortcut",
+      "url": "/ticketmania?utm_source=pwa_shortcut",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {

@@ -181,7 +181,7 @@ export default async function TicketPage({
               Guardar en WhatsApp
             </a>
             <Link
-              href="/events"
+              href="/ticketmania"
               className="mt-3 block text-center text-white/40 hover:text-white/70 text-sm transition"
             >
               Ver más eventos

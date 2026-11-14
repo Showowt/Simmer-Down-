@@ -443,7 +443,7 @@ export function matchLocationForVenue(venueName: string): LocationData | null {
 
 /** schema.org Event for one show — the unit Google surfaces in event search. */
 export function generateEventSchema(event: PublicEvent, venueName: string) {
-  const url = `${BASE_URL}/events/${event.slug}`
+  const url = `${BASE_URL}/ticketmania/${event.slug}`
   const name = event.title_es || event.title
   const description =
     event.description_es || event.description || `${name} en ${venueName}, El Salvador.`
@@ -539,19 +539,19 @@ export function generateEventSchema(event: PublicEvent, venueName: string) {
   }
 }
 
-/** ItemList of upcoming events for the /events listing page. */
+/** ItemList of upcoming events for the /ticketmania listing page. */
 export function generateEventListSchema(events: PublicEvent[]) {
   const withSlug = events.filter(e => !!e.slug)
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    '@id': `${BASE_URL}/events#eventlist`,
+    '@id': `${BASE_URL}/ticketmania#eventlist`,
     name: 'Próximos eventos en Simmer Down — Simmer Manía',
     numberOfItems: withSlug.length,
     itemListElement: withSlug.map((e, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `${BASE_URL}/events/${e.slug}`,
+      url: `${BASE_URL}/ticketmania/${e.slug}`,
     })),
   }
 }

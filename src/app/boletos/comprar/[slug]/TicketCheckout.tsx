@@ -156,7 +156,7 @@ export default function TicketCheckout({ event }: { event: EventInfo }) {
                   </p>
                 )}
                 <Link
-                  href="/events"
+                  href="/ticketmania"
                   className="w-full py-3 bg-[#1A1A1A] border border-white/10 hover:border-white/20 text-white/70 hover:text-white font-medium rounded-xl flex items-center justify-center transition"
                 >
                   Ver más eventos
@@ -184,7 +184,7 @@ export default function TicketCheckout({ event }: { event: EventInfo }) {
     <div className="min-h-screen bg-[#0A0A0A] pt-28 pb-24 px-4">
       <div className="max-w-lg mx-auto">
         <Link
-          href="/events"
+          href="/ticketmania"
           className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" /> Eventos

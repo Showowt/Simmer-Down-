@@ -1,7 +1,7 @@
 // ============================================================
 // Shared event timing logic — the single source of truth for
 // "is this event upcoming, live, or past?" Used by the public API,
-// the /events page, the homepage section, the admin archive, and
+// the /ticketmania page, the homepage section, the admin archive, and
 // the countdown component.
 //
 // Auto-archive is COMPUTED (no cron, no status column, no migration):
@@ -16,7 +16,7 @@ export const EVENT_GRACE_HOURS = 5
 
 /**
  * The public shape of an `events` row — the single event type shared by the
- * public API, the /events listing, the /events/[slug] detail page, the
+ * public API, the /ticketmania listing, the /ticketmania/[slug] detail page, the
  * homepage section, the sitemap and the JSON-LD generators.
  */
 export interface PublicEvent {

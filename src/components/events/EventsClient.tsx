@@ -149,7 +149,7 @@ export function EventsList({
                 <h2 className="font-display text-3xl md:text-5xl text-white mb-4 leading-tight">
                   {event.slug ? (
                     <Link
-                      href={`/events/${event.slug}`}
+                      href={`/ticketmania/${event.slug}`}
                       className="transition-colors hover:text-[#FBBF24]"
                     >
                       {locale === 'es' ? (event.title_es || event.title) : event.title}
@@ -331,7 +331,7 @@ export function EventsList({
                     <h3 className="font-display text-xl text-white mb-2 line-clamp-2">
                       {event.slug ? (
                         <Link
-                          href={`/events/${event.slug}`}
+                          href={`/ticketmania/${event.slug}`}
                           className="transition-colors hover:text-[#FBBF24]"
                         >
                           {locale === 'es' ? (event.title_es || event.title) : event.title}

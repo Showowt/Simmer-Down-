@@ -534,7 +534,7 @@ export default function HomePage() {
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
-                    href="/events"
+                    href="/ticketmania"
                     className="inline-flex items-center gap-2 bg-[#E85D04] hover:bg-[#C2410C] text-white font-semibold text-sm px-6 py-3 rounded-full transition-all"
                   >
                     {locale === 'es' ? 'Ver Eventos' : 'View Events'}

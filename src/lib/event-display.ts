@@ -1,7 +1,7 @@
 // ============================================================
 // Shared event DISPLAY helpers — formatting, ticket state and the
-// event-specific WhatsApp reservation link. Used by the /events
-// listing (EventsClient), the /events/[slug] detail page and the
+// event-specific WhatsApp reservation link. Used by the /ticketmania
+// listing (EventsClient), the /ticketmania/[slug] detail page and the
 // homepage events section, so every surface renders an event the
 // same way.
 // ============================================================

@@ -892,7 +892,7 @@ async function handleEventos(chatId: string): Promise<void> {
       lines.push("");
     }
 
-    lines.push(`Sitio web: ${SITE_URL}/events`);
+    lines.push(`Sitio web: ${SITE_URL}/ticketmania`);
     await sendTelegram(lines.join("\n"), chatId);
   } catch (err) {
     logger.error("[TelegramBot] handleEventos error", err);

@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const eventEntries: MetadataRoute.Sitemap = events
     .filter((e) => !!e.slug)
     .map((e) => ({
-      url: `${baseUrl}/events/${e.slug}`,
+      url: `${baseUrl}/ticketmania/${e.slug}`,
       lastModified: e.created_at ? new Date(e.created_at) : now,
       changeFrequency: 'daily',
       priority: 0.85,
@@ -108,7 +108,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // ─── Events (the only live events marketing in the country) ────────
     {
-      url: `${baseUrl}/events`,
+      url: `${baseUrl}/ticketmania`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,

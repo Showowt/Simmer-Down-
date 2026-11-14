@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "dónde escuchar música en vivo El Salvador",
   ],
   alternates: {
-    canonical: "https://simmerdownsv.com/events",
+    canonical: "https://simmerdownsv.com/ticketmania",
   },
   openGraph: {
     title: "Simmer Manía — Música en Vivo en Simmer Down",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
         alt: "Simmer Manía — Eventos y Música en Vivo en Simmer Down",
       },
     ],
-    url: "https://simmerdownsv.com/events",
+    url: "https://simmerdownsv.com/ticketmania",
   },
   twitter: {
     card: "summary_large_image",
@@ -48,7 +48,7 @@ export default function EventsLayout({
 }) {
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: "Inicio", url: "https://simmerdownsv.com" },
-    { name: "Eventos", url: "https://simmerdownsv.com/events" },
+    { name: "Eventos", url: "https://simmerdownsv.com/ticketmania" },
   ]);
 
   return (

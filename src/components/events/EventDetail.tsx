@@ -41,7 +41,7 @@ export default function EventDetail({
       ? event.description_es || event.description
       : event.description || event.description_es;
   const whenLabel = formatEventDate(event.starts_at, event.recurrence, locale);
-  const shareUrl = `https://simmerdownsv.com/events/${event.slug ?? ""}`;
+  const shareUrl = `https://simmerdownsv.com/ticketmania/${event.slug ?? ""}`;
   const shareMsg =
     locale === "en"
       ? `${event.title} — ${venueName} (${whenLabel}). Details + tickets: ${shareUrl}`
@@ -56,7 +56,7 @@ export default function EventDetail({
     <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-16">
       <div className="max-w-6xl mx-auto px-6">
         <Link
-          href="/events"
+          href="/ticketmania"
           className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm uppercase tracking-[0.15em] mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -241,7 +241,7 @@ export default function EventDetail({
             </span>
           </Link>
           <Link
-            href="/events"
+            href="/ticketmania"
             className="group bg-[#1A1A1A] border border-white/10 hover:border-[#E85D04]/50 p-8 transition-all"
           >
             <h2 className="font-display text-2xl text-white mb-2">

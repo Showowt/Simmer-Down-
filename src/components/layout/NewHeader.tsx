@@ -20,7 +20,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/hospitality', labelKey: 'nav.hospitality' },
   { href: '/estadia', labelKey: 'nav.stay' },
   { href: '/merch', labelKey: 'nav.merch' },
-  { href: '/events', labelKey: 'nav.events' },
+  { href: '/ticketmania', labelKey: 'nav.events' },
   { href: '/restaurantes', labelKey: 'nav.locations' },
   { href: '/nosotros', labelKey: 'nav.about' },
   { href: '/reservations', labelKey: 'nav.reserve' },

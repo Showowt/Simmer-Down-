@@ -87,7 +87,7 @@ export default function EventCountdown({
   const finalHours = cd.totalMs < 6 * 3_600_000 // truly imminent → "Últimas horas"
   const accent = urgent ? '#E85D04' : '#FBBF24'
 
-  // ── Hero: segmented tiles (the showstopper on the /events page) ──
+  // ── Hero: segmented tiles (the showstopper on the /ticketmania page) ──
   if (variant === 'hero') {
     const segs: Array<[number, string]> = [
       [cd.days, es ? 'Días' : 'Days'],

@@ -160,7 +160,7 @@ export default function Header() {
                 {/* Secondary links */}
                 <div className="pt-8 mt-8 border-t border-white/10/40 space-y-3">
                   <Link
-                    href="/events"
+                    href="/ticketmania"
                     onClick={() => setIsOpen(false)}
                     className="block py-2 text-sm uppercase tracking-[0.15em] text-white/40 hover:text-white transition-colors"
                   >
