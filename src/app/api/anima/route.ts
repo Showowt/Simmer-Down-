@@ -13,6 +13,7 @@ import {
 import logger from "@/lib/logger";
 import { createApiClient } from "@/lib/supabase/api";
 import { isSpecialLive } from "@/lib/specials";
+import { isLiveOrUpcoming } from "@/lib/events";
 import {
   MENU_ITEMS,
   MENU_CATEGORIES,
@@ -84,20 +85,15 @@ async function buildEventsBlock(): Promise<string> {
     const [{ data: events }, { data: locs }] = await Promise.all([
       supabase
         .from("events")
-        .select("title, title_es, description_es, description, custom_venue, location_id, starts_at, recurrence, is_featured, tags")
+        .select("title, title_es, description_es, description, custom_venue, location_id, starts_at, ends_at, recurrence, is_featured, tags")
         .eq("is_published", true)
         .order("starts_at", { ascending: true }),
       supabase.from("locations").select("id, name"),
     ]);
 
     const venueById = new Map<string, string>((locs ?? []).map((l) => [l.id as string, l.name as string]));
-    const now = Date.now();
     const upcoming = (events ?? [])
-      .filter((e) => {
-        if (e.recurrence) return true;
-        const t = new Date(e.starts_at).getTime();
-        return !Number.isNaN(t) && t >= now - 12 * 3600 * 1000; // include today
-      })
+      .filter((e) => isLiveOrUpcoming(e))
       .slice(0, 12);
 
     if (upcoming.length === 0) {
