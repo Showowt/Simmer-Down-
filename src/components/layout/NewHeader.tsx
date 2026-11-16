@@ -131,10 +131,12 @@ export default function NewHeader() {
         </div>
       </header>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu overlay — z-[45]: above the sticky location bar and the
+          bottom nav (both z-40, which otherwise cover the first item), below
+          the header (z-50) so the close button stays reachable. */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 z-40 lg:hidden"
+          className="fixed inset-0 z-[45] lg:hidden"
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
