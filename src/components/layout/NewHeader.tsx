@@ -80,7 +80,8 @@ export default function NewHeader() {
             />
           </Link>
 
-          {/* Center — Desktop nav */}
+          {/* Center — Desktop nav. Between 1024 and 1119px the ten Spanish labels
+              only clear the logo and language toggle with 0.05em tracking. */}
           <nav
             className="hidden lg:flex items-center gap-x-2 xl:gap-4"
             aria-label="Navegación principal"
@@ -89,7 +90,7 @@ export default function NewHeader() {
               <Link
                 key={href}
                 href={href}
-                className={`text-[11px] xl:text-[12px] font-medium uppercase tracking-[0.08em] xl:tracking-[0.1em] whitespace-nowrap transition-colors duration-200 py-1 border-b-2 ${
+                className={`text-[11px] xl:text-[12px] font-medium uppercase tracking-[0.05em] min-[1120px]:tracking-[0.08em] xl:tracking-[0.1em] whitespace-nowrap transition-colors duration-200 py-1 border-b-2 ${
                   isActive(href)
                     ? 'text-[#E85D04] border-[#E85D04]'
                     : 'text-white/60 border-transparent hover:text-white hover:border-white/20'

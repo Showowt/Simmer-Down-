@@ -10,7 +10,7 @@ export const translations = {
     menu: { es: 'Menú', en: 'Menu' },
     locations: { es: 'Ubicaciones', en: 'Locations' },
     about: { es: 'Nosotros', en: 'About' },
-    events: { es: 'Eventos', en: 'Events' },
+    events: { es: 'TicketManía', en: 'TicketManía' },
     simmerlovers: { es: 'SimmerLovers', en: 'SimmerLovers' },
     reservations: { es: 'Reservar', en: 'Reserve' },
     order: { es: 'Ordenar', en: 'Order' },
