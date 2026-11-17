@@ -79,7 +79,8 @@ const HEADING_PAGES: { id: HeadingPageKey; label: string; href: string; note?: s
   { id: 'maridaje', label: 'El Maridaje Perfecto', href: '/cortes-premium', note: 'Sección dentro de la página Cortes Premium.' },
   { id: 'hospitality', label: 'Hospitality', href: '/hospitality' },
   { id: 'merch', label: 'Merch', href: '/merch' },
-  { id: 'events', label: 'Eventos', href: '/ticketmania' },
+  // Key stays 'events' (saved settings use it); the page is branded TicketManía.
+  { id: 'events', label: 'TicketManía', href: '/ticketmania' },
   { id: 'trabaja', label: 'Trabaja con Nosotros', href: '/trabaja', note: 'El párrafo de introducción se edita en la pestaña "Trabaja con Nosotros".' },
 ]
 

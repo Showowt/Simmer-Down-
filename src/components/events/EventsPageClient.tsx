@@ -63,14 +63,15 @@ export default function EventsPageClient({
         </div>
         <div className="max-w-6xl mx-auto px-6 relative">
           <AnimatedHero>
-            {/* SIMMER MANIA — flagship live-events program brand lockup */}
-            <div className="relative mx-auto mb-6 w-[min(78vw,440px)] aspect-[1080/327] drop-shadow-[0_4px_24px_rgba(232,93,4,0.25)]">
+            {/* TICKETMANÍA — the page's brand (client's circular logo, Nov 2026;
+                replaces the Simmer Manía wordmark — same emblem as the crest). */}
+            <div className="relative mx-auto mb-6 w-[min(56vw,240px)] aspect-square drop-shadow-[0_4px_24px_rgba(232,93,4,0.25)]">
               <Image
-                src="/logos/simmer-mania-wordmark.png"
-                alt="Simmer Manía"
+                src="/logos/ticketmania-logo.png"
+                alt="TicketManía"
                 fill
                 priority
-                sizes="(max-width: 768px) 78vw, 440px"
+                sizes="(max-width: 768px) 56vw, 240px"
                 className="object-contain"
               />
             </div>
