@@ -105,6 +105,9 @@ export default async function TicketPage({
 
   const isUsed = ticket.status === "used";
   const isVoid = ticket.status === "void";
+  // Group tickets can be admitted in parts; the QR stays valid for the rest.
+  const remaining = ticket.status === "valid" ? Math.max(0, ticket.quantity - ticket.admitted_count) : 0;
+  const isPartial = ticket.status === "valid" && ticket.admitted_count > 0 && remaining > 0;
 
   const waText = `🎫 Mi boleto — ${ticket.event_title}\nAdmite: ${ticket.quantity}\nhttps://simmerdownsv.com/boletos/${ticket.qr_token}`;
   const waHref = `https://wa.me/?text=${encodeURIComponent(waText)}`;
@@ -150,6 +153,16 @@ export default async function TicketPage({
                 <p className="text-[#FF6B6B] font-semibold">Boleto anulado</p>
               </div>
             )}
+            {isPartial && (
+              <div className="mb-5 rounded-lg border border-[#FFB800]/30 bg-[#FFB800]/10 px-4 py-3 text-center">
+                <p className="text-[#FFB800] font-semibold">
+                  Ya ingresaron {ticket.admitted_count} de {ticket.quantity}
+                </p>
+                <p className="text-white/50 text-xs mt-1">
+                  El mismo QR sirve para las {remaining} entrada{remaining === 1 ? "" : "s"} restante{remaining === 1 ? "" : "s"}.
+                </p>
+              </div>
+            )}
 
             {/* QR */}
             <div
@@ -161,7 +174,7 @@ export default async function TicketPage({
 
             <div className="mt-4 text-center">
               <p className="text-3xl font-bold text-[#E85D04] tabular-nums">
-                Admite {ticket.quantity}
+                Admite {isPartial ? remaining : ticket.quantity}
               </p>
               <p className="text-white/40 text-sm mt-1">
                 {ticket.buyer_name ? `A nombre de ${ticket.buyer_name}` : ""}

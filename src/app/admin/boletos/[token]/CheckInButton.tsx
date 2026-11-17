@@ -1,30 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
-
-interface Result {
-  ok: boolean;
-  reason?: string;
-  admitted?: number;
-  quantity?: number;
-  checked_in_at?: string;
-}
+import type { CheckInResult } from "@/lib/ticket-door";
 
 export default function CheckInButton({
   token,
   quantity,
+  admittedCount,
   initialStatus,
 }: {
   token: string;
   quantity: number;
+  admittedCount: number;
   initialStatus: string;
 }) {
-  const [result, setResult] = useState<Result | null>(
-    initialStatus === "used"
-      ? { ok: false, reason: "already_used", admitted: quantity, quantity }
-      : initialStatus === "void"
-        ? { ok: false, reason: "void" }
+  // Partially admitted tickets stay 'valid' — only the rest can still enter.
+  const remaining = initialStatus === "valid" ? Math.max(0, quantity - admittedCount) : 0;
+  const [result, setResult] = useState<CheckInResult | null>(
+    initialStatus === "void"
+      ? { ok: false, reason: "void" }
+      : remaining === 0
+        ? { ok: false, reason: "already_used", admitted: admittedCount, quantity }
         : null,
   );
   const [loading, setLoading] = useState(false);
@@ -37,8 +35,10 @@ export default function CheckInButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
-      setResult(await res.json());
-    } catch {
+      const json = (await res.json().catch(() => null)) as CheckInResult | null;
+      setResult(json ?? { ok: false, reason: "error" });
+    } catch (err) {
+      console.error("[CheckInButton] check-in failed", err);
       setResult({ ok: false, reason: "error" });
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export default function CheckInButton({
         <AlertTriangle className="w-16 h-16 text-[#FFB800] mx-auto mb-3" />
         <p className="text-2xl font-bold text-white">Ya fue usado</p>
         <p className="text-white/60 mt-1">
-          Este boleto ({result.quantity}) ya se registró en la entrada.
+          Este boleto ({result.quantity ?? quantity}) ya se registró en la entrada.
         </p>
       </div>
     );
@@ -78,13 +78,39 @@ export default function CheckInButton({
     );
   }
 
+  if (result && !result.ok && result.reason === "unauthorized") {
+    return (
+      <div className="rounded-xl border border-[#C73E1D]/40 bg-[#C73E1D]/10 px-6 py-6 text-center">
+        <p className="text-lg font-bold text-white">Tu sesión expiró</p>
+        <Link
+          href={`/auth/login?redirect=/admin/boletos/${token}`}
+          className="inline-block mt-3 px-6 py-3 bg-[#FF6B35] text-white font-semibold rounded-xl"
+        >
+          Iniciar sesión
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <button
-      onClick={admit}
-      disabled={loading}
-      className="w-full py-6 bg-[#4CAF50] hover:bg-[#43A047] disabled:opacity-60 text-white text-2xl font-bold rounded-xl transition flex items-center justify-center gap-3"
-    >
-      {loading ? "..." : `Admitir ${quantity} →`}
-    </button>
+    <div className="space-y-2">
+      {admittedCount > 0 && (
+        <p className="text-center text-sm text-[#FFB800]">
+          Ya entraron {admittedCount} de {quantity}. Quedan {remaining}.
+        </p>
+      )}
+      {result && !result.ok && (
+        <p className="text-center text-sm text-red-400">
+          No se pudo registrar la entrada. Revisa el internet e intenta de nuevo.
+        </p>
+      )}
+      <button
+        onClick={admit}
+        disabled={loading}
+        className="w-full py-6 bg-[#4CAF50] hover:bg-[#43A047] disabled:opacity-60 text-white text-2xl font-bold rounded-xl transition flex items-center justify-center gap-3"
+      >
+        {loading ? "..." : `Admitir ${remaining} →`}
+      </button>
+    </div>
   );
 }

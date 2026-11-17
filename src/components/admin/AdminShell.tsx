@@ -26,6 +26,7 @@ import {
   Gift,
   BedDouble,
   LayoutTemplate,
+  ScanLine,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,6 +42,7 @@ const navItems = [
   { href: "/admin/specials", label: "Especiales", icon: Tag },
   { href: "/admin/codigos", label: "Códigos Promo", icon: TicketPercent },
   { href: "/admin/events", label: "Eventos", icon: Calendar },
+  { href: "/admin/boletos", label: "Escanear Boletos", icon: ScanLine },
   { href: "/admin/inquiries", label: "Consultas", icon: MessageSquare },
   { href: "/admin/simmerlovers", label: "SimmerLovers", icon: Flame },
   { href: "/admin/premios", label: "Premios y Puntos", icon: Gift },

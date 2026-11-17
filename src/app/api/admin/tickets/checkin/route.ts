@@ -1,49 +1,35 @@
 /**
- * POST /api/admin/tickets/checkin  { token }
+ * POST /api/admin/tickets/checkin  { token, count? }
  * Staff-authenticated door check-in. Delegates to the check_in_ticket DB
- * function, which is atomic and idempotent (a second scan of the same ticket
- * returns already_used rather than admitting twice).
+ * function, which is atomic and idempotent (a second scan of a fully used
+ * ticket returns already_used rather than admitting twice). `count` admits
+ * part of a multi-person ticket; omitted = everyone still remaining.
+ * Returns the function's own { ok, reason, ... } shape (the door UIs read it).
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { z } from "zod";
-import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase/service";
+import { getActiveStaff } from "@/lib/staff-auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import logger from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-const schema = z.object({ token: z.string().min(16).max(80) });
-
-async function requireStaff(): Promise<{ id: string } | null> {
-  try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } },
-    );
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
-    const { data: staff } = await supabase
-      .from("staff")
-      .select("id, is_active")
-      .eq("auth_user_id", user.id)
-      .eq("is_active", true)
-      .maybeSingle();
-    return staff ? { id: staff.id } : null;
-  } catch {
-    return null;
-  }
-}
+const schema = z.object({
+  token: z.string().regex(/^[A-Za-z0-9]{16,80}$/),
+  count: z.number().int().min(1).max(50).optional(),
+});
 
 export async function POST(request: NextRequest) {
-  const staff = await requireStaff();
+  const staff = await getActiveStaff();
   if (!staff) {
     return NextResponse.json({ ok: false, reason: "unauthorized" }, { status: 401 });
+  }
+
+  const rl = checkRateLimit(`door_checkin:${staff.id}`, { maxRequests: 120, windowMs: 60_000 });
+  if (!rl.success) {
+    return NextResponse.json({ ok: false, reason: "rate_limited" }, { status: 429 });
   }
 
   const parsed = schema.safeParse(await request.json().catch(() => null));
@@ -56,6 +42,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase.rpc("check_in_ticket", {
       p_token: parsed.data.token,
       p_staff: staff.id,
+      p_count: parsed.data.count ?? null,
     });
     if (error) {
       logger.error("[tickets/checkin] rpc error", error);

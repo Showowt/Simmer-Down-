@@ -73,10 +73,23 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    // The door scanner (/admin/boletos) needs the camera. A later entry wins
+    // for the same header key, so /admin and /auth (login hands off to the
+    // panel by client-side navigation, keeping its document policy) get
+    // camera=(self); the public site keeps the camera off.
+    const staffPermissions = "camera=(self), microphone=(), geolocation=(self), payment=(self)";
     return [
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/admin/:path*",
+        headers: [{ key: "Permissions-Policy", value: staffPermissions }],
+      },
+      {
+        source: "/auth/:path*",
+        headers: [{ key: "Permissions-Policy", value: staffPermissions }],
       },
     ];
   },

@@ -3,6 +3,7 @@
  * middleware). Opened by scanning a ticket's QR with a phone camera.
  */
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import CheckInButton from "./CheckInButton";
@@ -92,10 +93,20 @@ export default async function AdminTicketPage({
           <CheckInButton
             token={tk.qr_token}
             quantity={tk.quantity}
+            admittedCount={tk.admitted_count}
             initialStatus={tk.status}
           />
         </div>
       </div>
+
+      {/* Scanning one QR at a time with the phone camera works, but the
+          continuous scanner is much faster at a busy door. */}
+      <Link
+        href="/admin/boletos"
+        className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-[#3D3936] bg-[#252320] px-4 py-3 text-sm font-medium text-[#FF8C42] hover:border-[#FF6B35]/50"
+      >
+        Abrir el escáner de la puerta →
+      </Link>
     </div>
   );
 }
