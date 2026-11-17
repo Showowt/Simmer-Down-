@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
+  Ticket,
+  ScanLine,
   Plus,
   Edit2,
   Trash2,
@@ -166,6 +169,7 @@ export default function AdminEventsPage() {
       const { data, error: fetchErr } = await supabase
         .from("events")
         .select("*")
+        .is("deleted_at", null)
         .order("is_featured", { ascending: false })
         .order("starts_at", { ascending: false });
 
@@ -273,22 +277,27 @@ export default function AdminEventsPage() {
     }
   };
 
-  const deleteEvent = async (id: string) => {
-    if (!confirm("¿Eliminar este evento? Esta acción no se puede deshacer."))
+  // Server-side so events with ticket checkouts can be removed (soft delete)
+  // and events with sold tickets are refused with the reason.
+  const deleteEvent = async (event: DbEvent) => {
+    const name = event.title_es || event.title;
+    if (!confirm(`¿Eliminar «${name}»? Dejará de aparecer en el sitio y en este panel.`))
       return;
 
     try {
-      const supabase = createClient();
-      const { error: deleteErr } = await supabase
-        .from("events")
-        .delete()
-        .eq("id", id);
-
-      if (deleteErr) throw deleteErr;
-      setEvents(events.filter((e) => e.id !== id));
+      const res = await fetch(
+        `/api/admin/events?id=${encodeURIComponent(event.id)}`,
+        { method: "DELETE" },
+      );
+      const json: { message?: string } | null = await res.json().catch(() => null);
+      if (!res.ok) {
+        alert(json?.message || "Error al eliminar el evento.");
+        return;
+      }
+      setEvents((prev) => prev.filter((e) => e.id !== event.id));
     } catch (err) {
       console.error("[AdminEventsPage] deleteEvent:", err);
-      alert("Error al eliminar el evento.");
+      alert("No se pudo conectar para eliminar el evento. Revisa tu internet e intenta de nuevo.");
     }
   };
 
@@ -545,6 +554,18 @@ export default function AdminEventsPage() {
                         : "s"}
                     </span>
                   )}
+                  {(event.tickets_enabled || event.tickets_sold > 0) && (
+                    <span className="flex items-center gap-1.5">
+                      <Ticket className="w-3 h-3 flex-shrink-0" />
+                      {event.tickets_sold} boleto{event.tickets_sold === 1 ? "" : "s"} vendido{event.tickets_sold === 1 ? "" : "s"}
+                      <Link
+                        href={`/admin/boletos?event=${event.id}`}
+                        className="ml-auto inline-flex items-center gap-1 text-[#FF6B35] hover:text-[#FF8555]"
+                      >
+                        <ScanLine className="w-3 h-3" /> Puerta
+                      </Link>
+                    </span>
+                  )}
                 </div>
 
                 {/* Tags */}
@@ -612,7 +633,7 @@ export default function AdminEventsPage() {
                     <Edit2 className="w-4 h-4 text-[#6B6560]" />
                   </button>
                   <button
-                    onClick={() => deleteEvent(event.id)}
+                    onClick={() => deleteEvent(event)}
                     className="p-2 hover:bg-red-500/10 transition"
                     title="Eliminar"
                   >

@@ -860,6 +860,7 @@ async function handleEventos(chatId: string): Promise<void> {
     const { data: events, error } = await supabase
       .from("events")
       .select("id, title, starts_at, custom_venue, location_id, is_published, is_featured")
+      .is("deleted_at", null)
       .gte("starts_at", `${today}T00:00:00-06:00`)
       .order("starts_at", { ascending: true })
       .limit(15);
@@ -1009,6 +1010,7 @@ async function handleBorrarEvento(chatId: string, args: string): Promise<void> {
     const { data: events } = await supabase
       .from("events")
       .select("id, title, starts_at")
+      .is("deleted_at", null)
       .ilike("title", `%${query}%`)
       .limit(3);
 
@@ -1063,6 +1065,7 @@ async function handleDestacar(chatId: string, args: string): Promise<void> {
     const { data: events } = await supabase
       .from("events")
       .select("id, title, is_featured")
+      .is("deleted_at", null)
       .ilike("title", `%${query}%`)
       .limit(1)
       .maybeSingle();
