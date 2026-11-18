@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   MessageCircle,
   PartyPopper,
+  Ticket,
 } from "lucide-react";
 import { Order } from "@/lib/types";
 import { orderStatusLabel } from "@/lib/order-status";
@@ -75,6 +76,11 @@ function OrderTracker() {
   const [error, setError] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
   const [isNewOrder, setIsNewOrder] = useState(false);
+  // Event-ticket orders: no kitchen tracker, just the QR links once paid.
+  const [isTicketOrder, setIsTicketOrder] = useState(false);
+  const [orderTickets, setOrderTickets] = useState<
+    { token: string; tier_name: string | null; quantity: number }[]
+  >([]);
 
   useEffect(() => {
     if (orderId) {
@@ -119,6 +125,8 @@ function OrderTracker() {
 
       setOrder(json.data as unknown as Order);
       setOrderItems(json.data.items ?? []);
+      setIsTicketOrder(!!json.data.is_ticket_order);
+      setOrderTickets(Array.isArray(json.data.tickets) ? json.data.tickets : []);
     } catch {
       if (silent) return;
       setError(
@@ -385,7 +393,40 @@ function OrderTracker() {
               </div>
             )}
 
-            {/* Order Status */}
+            {/* Event tickets — one QR per ticket type */}
+            {orderTickets.length > 0 && (
+              <div className="bg-[#E85D04]/10 border border-[#E85D04]/30 p-6" data-testid="order-tickets">
+                <h2 className="font-semibold text-white mb-1 flex items-center gap-2">
+                  <Ticket className="w-5 h-5 text-[#E85D04]" />
+                  {t({ es: "Tus boletos", en: "Your tickets" })}
+                </h2>
+                <p className="text-white/60 text-sm mb-4">
+                  {t({
+                    es: "Muestra el código QR en la entrada del evento.",
+                    en: "Show the QR code at the event entrance.",
+                  })}
+                </p>
+                <div className="space-y-2">
+                  {orderTickets.map((tk) => (
+                    <Link
+                      key={tk.token}
+                      href={`/boletos/${tk.token}`}
+                      className="block w-full py-3 px-4 bg-[#E85D04] hover:bg-[#C2410C] text-white font-semibold text-center transition"
+                    >
+                      {tk.tier_name
+                        ? t({
+                            es: `Ver boleto ${tk.tier_name} (${tk.quantity})`,
+                            en: `View ${tk.tier_name} ticket (${tk.quantity})`,
+                          })
+                        : t({ es: "Ver mi boleto (QR)", en: "View my ticket (QR)" })}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Order Status (kitchen orders only) */}
+            {!isTicketOrder && (
             <div className="bg-[#1A1A1A] border border-white/10 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
@@ -460,6 +501,7 @@ function OrderTracker() {
               </div>
               )}
             </div>
+            )}
 
             {/* Order Details */}
             <div className="bg-[#1A1A1A] border border-white/10 p-6">

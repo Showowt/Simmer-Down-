@@ -144,7 +144,7 @@ export async function GET(
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .select(
-        "id, order_number, status, order_type, subtotal, delivery_fee, discount_amount, total_amount, created_at, customer_name, delivery_address_line1, delivery_city",
+        "id, order_number, status, order_type, subtotal, delivery_fee, discount_amount, total_amount, created_at, customer_name, delivery_address_line1, delivery_city, event_id",
       )
       .eq("id", orderId)
       .maybeSingle();
@@ -187,12 +187,32 @@ export async function GET(
       paymentStatus = "failed";
     }
 
+    // Ticket order → its QR links once paid (one per ticket type), so the 3DS
+    // fallback page (/orders?id=…&paid=1) can still hand the buyer their
+    // boletos. Same capability as /api/payments/status: the order UUID.
+    let tickets: { token: string; tier_name: string | null; quantity: number }[] = [];
+    if (order.event_id && paymentStatus === "paid") {
+      const { data: tks, error: tkErr } = await supabase
+        .from("event_tickets")
+        .select("qr_token, tier_name, quantity, line_no")
+        .eq("order_id", orderId)
+        .order("line_no", { ascending: true });
+      if (tkErr) logger.api.error(endpoint, tkErr, { orderId, step: "tickets" });
+      tickets = (tks ?? []).map((t) => ({
+        token: String(t.qr_token),
+        tier_name: (t.tier_name as string | null) ?? null,
+        quantity: Number(t.quantity),
+      }));
+    }
+
     const duration = Date.now() - startTime;
     logger.api.response(endpoint, 200, duration, { orderId });
 
     return NextResponse.json({
       success: true,
       data: {
+        is_ticket_order: !!order.event_id,
+        tickets,
         id: order.id,
         order_number: order.order_number,
         status: order.status,

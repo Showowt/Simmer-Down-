@@ -43,10 +43,16 @@ export interface PublicEvent {
   current_rsvps?: number | null
   rsvp_deadline?: string | null
   tickets_enabled?: boolean
+  /** Single-price events: the price. With ticket types: the cheapest type (kept in sync by the DB). */
   ticket_price?: number | null
   tickets_sold?: number | null
   external_tickets_url?: string | null
-  ticket_tiers?: { name: string; price: number }[] | null
+  /** Ticket types (JSONB) — read through parseTicketTiers / onSiteTickets in lib/ticket-tiers. */
+  ticket_tiers?: unknown
+  /** Seats sold per ticket type, {type id: seats} (JSONB, written only by the DB). */
+  ticket_tier_sold?: unknown
+  /** Service fee % added on top of every ticket's price (0 = none). */
+  ticket_fee_percent?: number | string | null
 }
 
 export interface EventTiming {

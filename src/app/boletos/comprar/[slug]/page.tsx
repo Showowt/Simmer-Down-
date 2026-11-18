@@ -1,25 +1,33 @@
 /**
  * /boletos/comprar/[slug] — buy tickets for one event.
- * Server-fetches the event, then hands off to the client checkout which reuses
- * the certified card-payment components (CardPaymentForm, ThreeDSecureModal).
+ * Server-fetches the event (ticket types, cupos, service fee), then hands off
+ * to the client checkout which reuses the certified card-payment components
+ * (CardPaymentForm, ThreeDSecureModal).
+ *
+ * ?tipo=<ticket type id> preselects one type (links from the event page).
+ * Drafts open only for logged-in staff, so the team can check a new event's
+ * checkout before publishing it.
  */
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
+import { getActiveStaff } from "@/lib/staff-auth";
+import { eventSeatsLeft, onSiteTickets } from "@/lib/ticket-tiers";
 import TicketCheckout from "./TicketCheckout";
 
 export const dynamic = "force-dynamic";
 
 async function getEvent(slug: string) {
   const supabase = createServiceClient();
-  const { data: ev } = await supabase
+  const { data: ev, error } = await supabase
     .from("events")
     .select(
-      "id, slug, title, title_es, description_es, description, starts_at, custom_venue, location_id, image_url, is_published, tickets_enabled, ticket_price, has_capacity_limit, max_capacity, tickets_sold",
+      "id, slug, title, title_es, starts_at, custom_venue, location_id, image_url, is_published, deleted_at, tickets_enabled, ticket_price, ticket_tiers, ticket_tier_sold, ticket_fee_percent, has_capacity_limit, max_capacity, tickets_sold",
     )
     .eq("slug", slug)
     .maybeSingle();
+  if (error) throw error;
   if (!ev) return null;
 
   let venue = ev.custom_venue as string | null;
@@ -31,30 +39,31 @@ async function getEvent(slug: string) {
       .maybeSingle();
     venue = loc?.name ?? null;
   }
-  return { ...ev, venue };
+  const ended = !!ev.starts_at && new Date(ev.starts_at).getTime() <= Date.now();
+  return { ...ev, venue, ended };
 }
 
 export default async function BuyTicketsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ tipo?: string | string[] }>;
 }) {
-  const { slug } = await params;
+  const [{ slug }, { tipo }] = await Promise.all([params, searchParams]);
   const ev = await getEvent(slug);
-  if (!ev || !ev.is_published) notFound();
+  if (!ev || ev.deleted_at) notFound();
 
-  const onSale =
-    ev.tickets_enabled &&
-    ev.ticket_price != null &&
-    Number(ev.ticket_price) > 0 &&
-    (!ev.starts_at || new Date(ev.starts_at).getTime() > Date.now());
+  let draft = false;
+  if (!ev.is_published) {
+    if (!(await getActiveStaff())) notFound();
+    draft = true;
+  }
 
-  const remaining =
-    ev.has_capacity_limit && ev.max_capacity != null
-      ? Math.max(0, ev.max_capacity - ev.tickets_sold)
-      : null;
+  const offer = onSiteTickets(ev);
+  const ended = ev.ended;
 
-  if (!onSale || remaining === 0) {
+  if (offer.mode === "none" || ended || offer.soldOut) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 px-4">
         <div className="max-w-md mx-auto text-center">
@@ -62,9 +71,11 @@ export default async function BuyTicketsPage({
             {ev.title_es || ev.title}
           </h1>
           <p className="text-white/60 mb-8">
-            {remaining === 0
+            {offer.soldOut && !ended
               ? "Boletos agotados para este evento."
-              : "Los boletos para este evento no están disponibles en línea."}
+              : ended
+                ? "Este evento ya pasó."
+                : "Los boletos para este evento no están disponibles en línea."}
           </p>
           <Link
             href="/ticketmania"
@@ -77,6 +88,8 @@ export default async function BuyTicketsPage({
     );
   }
 
+  const initialTierId = typeof tipo === "string" ? tipo : null;
+
   return (
     <TicketCheckout
       event={{
@@ -85,9 +98,22 @@ export default async function BuyTicketsPage({
         startsAt: ev.starts_at,
         venue: ev.venue,
         imageUrl: ev.image_url,
-        price: Number(ev.ticket_price),
-        remaining,
+        mode: offer.mode,
+        feePercent: offer.feePercent,
+        tiers: offer.tiers.map((t) => ({
+          id: t.id,
+          name: t.name,
+          description: t.description,
+          price: t.price,
+          fee: t.fee,
+          total: t.total,
+          remaining: t.remaining,
+          soldOut: t.soldOut,
+        })),
+        seatsLeft: eventSeatsLeft(ev),
+        draft,
       }}
+      initialTierId={initialTierId}
     />
   );
 }

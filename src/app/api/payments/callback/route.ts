@@ -20,6 +20,7 @@ import type { SaleResponse } from "@/lib/powertranz/types";
 import { sendWhatsApp } from "@/lib/twilio/client";
 import { sendTelegram, notifyPaymentFailed } from "@/lib/telegram";
 import { formatPaymentConfirmWhatsApp } from "@/lib/notifications/order-notify";
+import { formatTicketSaleMessage } from "@/lib/notifications/ticket-sale";
 
 function hmacSign(payload: string): string {
   const secret = process.env.PAYMENT_CALLBACK_SECRET;
@@ -121,21 +122,33 @@ async function sendPaymentNotification(
     }
 
     // Ticket purchase → alert staff about a boleto sale, not a kitchen order.
-    // The trigger has already issued the ticket by the time we get here.
+    // The trigger has already issued the tickets (one QR per ticket type) by
+    // the time we get here.
     if (order.event_id) {
-      const [{ data: ev }, { data: tk }] = await Promise.all([
+      const [{ data: ev }, { data: tks }] = await Promise.all([
         supabase.from("events").select("title, title_es, starts_at").eq("id", order.event_id).maybeSingle(),
-        supabase.from("event_tickets").select("qr_token").eq("order_id", orderId).maybeSingle(),
+        supabase
+          .from("event_tickets")
+          .select("qr_token, tier_name, quantity, unit_fee, total_amount, oversold, line_no")
+          .eq("order_id", orderId)
+          .order("line_no", { ascending: true }),
       ]);
-      const eventName = ev?.title_es || ev?.title || "Evento";
-      const qty = order.ticket_quantity ?? 1;
-      const ticketMsg =
-        `🎫 *BOLETO VENDIDO — ${eventName}*\n\n` +
-        `Cantidad: ${qty}\n` +
-        `Total: $${Number(order.total_amount).toFixed(2)}\n` +
-        `Comprador: ${order.customer_name || "Cliente"} · ${order.customer_phone || "—"}\n` +
-        `Pedido: #${order.order_number}` +
-        (tk?.qr_token ? `\nBoleto: https://simmerdownsv.com/boletos/${tk.qr_token}` : "");
+      const ticketMsg = formatTicketSaleMessage({
+        eventName: ev?.title_es || ev?.title || "Evento",
+        orderNumber: order.order_number,
+        customerName: order.customer_name,
+        customerPhone: order.customer_phone,
+        totalAmount: order.total_amount,
+        ticketQuantity: order.ticket_quantity,
+        tickets: (tks ?? []).map((t) => ({
+          qr_token: String(t.qr_token),
+          tier_name: t.tier_name ?? null,
+          quantity: Number(t.quantity),
+          unit_fee: t.unit_fee,
+          total_amount: t.total_amount,
+          oversold: t.oversold,
+        })),
+      });
       await sendTelegram(ticketMsg);
       await sendWhatsApp(staffPhone, ticketMsg);
       return;

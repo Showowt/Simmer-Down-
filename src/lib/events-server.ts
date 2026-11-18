@@ -19,7 +19,7 @@ import {
 import logger from "@/lib/logger";
 
 export const EVENT_SELECT =
-  "id, title, title_es, slug, description, description_es, location_id, custom_venue, starts_at, ends_at, recurrence, image_url, thumbnail_url, is_featured, is_published, tags, created_at, tickets_enabled, ticket_price, tickets_sold, has_capacity_limit, max_capacity, external_tickets_url, ticket_tiers";
+  "id, title, title_es, slug, description, description_es, location_id, custom_venue, starts_at, ends_at, recurrence, image_url, thumbnail_url, is_featured, is_published, tags, created_at, tickets_enabled, ticket_price, tickets_sold, has_capacity_limit, max_capacity, external_tickets_url, ticket_tiers, ticket_tier_sold, ticket_fee_percent";
 
 /** Published events that are live or upcoming, soonest first. */
 export async function fetchUpcomingEvents(): Promise<PublicEvent[]> {

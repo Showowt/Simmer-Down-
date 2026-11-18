@@ -14,6 +14,7 @@ import logger from "@/lib/logger";
 import { createApiClient } from "@/lib/supabase/api";
 import { isSpecialLive } from "@/lib/specials";
 import { isLiveOrUpcoming } from "@/lib/events";
+import { ticketsLineForAssistant } from "@/lib/ticket-tiers";
 import {
   MENU_ITEMS,
   MENU_CATEGORIES,
@@ -85,7 +86,7 @@ async function buildEventsBlock(): Promise<string> {
     const [{ data: events }, { data: locs }] = await Promise.all([
       supabase
         .from("events")
-        .select("title, title_es, description_es, description, custom_venue, location_id, starts_at, ends_at, recurrence, is_featured, tags")
+        .select("title, title_es, slug, description_es, description, custom_venue, location_id, starts_at, ends_at, recurrence, is_featured, tags, tickets_enabled, ticket_price, ticket_tiers, ticket_tier_sold, ticket_fee_percent, has_capacity_limit, max_capacity, tickets_sold, external_tickets_url")
         .eq("is_published", true)
         .order("starts_at", { ascending: true }),
       supabase.from("locations").select("id, name"),
@@ -109,10 +110,10 @@ async function buildEventsBlock(): Promise<string> {
         // e.g. Aug 14 8PM SV (Aug 15 02:00 UTC) would print as "15 de agosto".
         : new Date(e.starts_at).toLocaleDateString("es-SV", { day: "numeric", month: "long", timeZone: "America/El_Salvador" });
       const cover = eventCoverFromTags(e.tags);
-      return `- 🎤 ${name} — ${venue}${when ? `, ${when}` : ""}${cover ? ` (${cover})` : ""}`;
+      return `- 🎤 ${name} — ${venue}${when ? `, ${when}` : ""}${cover ? ` (${cover})` : ""}${ticketsLineForAssistant(e)}`;
     });
 
-    return `\n## EVENTOS Y MÚSICA EN VIVO (verificados hoy)\nSimmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Estos son los próximos eventos publicados:\n${lines.join("\n")}\nPara la lista completa y boletos: simmerdownsv.com/ticketmania`;
+    return `\n## EVENTOS Y MÚSICA EN VIVO (verificados hoy)\nSimmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Estos son los próximos eventos publicados:\n${lines.join("\n")}\nPara la lista completa y boletos: simmerdownsv.com/ticketmania\nBoletos: usa SOLO los precios de arriba. Si hay cargo por servicio, di el precio del boleto, el cargo y el total (ej. "$5.00 + $0.65 de cargo = $5.65"). Si un tipo dice AGOTADO, no lo ofrezcas. Para comprar, da el enlace de compra del evento.`;
   } catch {
     return `\n## EVENTOS Y MÚSICA EN VIVO\n- Simmer Down San Benito es la sede principal de conciertos y eventos en vivo (programa Simmer Manía). Consulta simmerdownsv.com/ticketmania para la programación.`;
   }

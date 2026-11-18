@@ -21,6 +21,7 @@ import { sendTelegram } from "@/lib/telegram";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { MENU_ITEMS } from "@/lib/data";
 import { matchMenuItems } from "@/lib/menu-images";
+import { parseTicketTiers, soldByTier } from "@/lib/ticket-tiers";
 import logger from "@/lib/logger";
 
 // ═══════════════════════════════════════════════════════════════
@@ -859,7 +860,7 @@ async function handleEventos(chatId: string): Promise<void> {
 
     const { data: events, error } = await supabase
       .from("events")
-      .select("id, title, starts_at, custom_venue, location_id, is_published, is_featured")
+      .select("id, title, starts_at, custom_venue, location_id, is_published, is_featured, tickets_enabled, tickets_sold, ticket_tiers, ticket_tier_sold, has_capacity_limit, max_capacity")
       .is("deleted_at", null)
       .gte("starts_at", `${today}T00:00:00-06:00`)
       .order("starts_at", { ascending: true })
@@ -890,6 +891,16 @@ async function handleEventos(chatId: string): Promise<void> {
 
       lines.push(`${ev.is_featured ? "\\u2B50" : "\\u2022"} ${escapeMarkdown(ev.title as string)}`);
       lines.push(`  ${dateStr} ${timeStr} | ${escapeMarkdown(venue)} | ${status}`);
+      const soldTotal = Number(ev.tickets_sold ?? 0);
+      if (ev.tickets_enabled || soldTotal > 0) {
+        // Sold per ticket type (only when the event has types).
+        const sold = soldByTier(ev.ticket_tier_sold);
+        const perType = parseTicketTiers(ev.ticket_tiers)
+          .filter((t) => t.id)
+          .map((t) => `${escapeMarkdown(t.name)} ${sold[t.id] ?? 0}${t.capacity != null ? `/${t.capacity}` : ""}`);
+        const cap = ev.has_capacity_limit && ev.max_capacity ? ` de ${ev.max_capacity}` : "";
+        lines.push(`  Boletos: ${soldTotal}${cap} vendidos${perType.length ? ` (${perType.join(" · ")})` : ""}`);
+      }
       lines.push("");
     }
 

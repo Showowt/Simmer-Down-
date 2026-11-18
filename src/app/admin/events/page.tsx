@@ -23,16 +23,25 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { CANONICAL_LOCATION_SLUGS } from "@/lib/locations";
 import ImageUpload from "@/components/admin/ImageUpload";
+import TicketTierEditor, { emptyTier } from "@/components/admin/TicketTierEditor";
 import { isPastEvent } from "@/lib/events";
+import {
+  feePercent as eventFeePercent,
+  money,
+  parseTicketTiers,
+  percentLabel,
+  soldByTier,
+  ticketFee,
+  type TicketTier,
+} from "@/lib/ticket-tiers";
+
+const SV_TZ = "America/El_Salvador";
+// El Salvador has no daylight saving: always UTC-6.
+const SV_OFFSET = "-06:00";
 
 // ─────────────────────────────────────────────
 // DB types matching the events schema
 // ─────────────────────────────────────────────
-interface TicketTier {
-  name: string;
-  price: number;
-}
-
 interface DbEvent {
   id: string;
   title: string;
@@ -55,7 +64,12 @@ interface DbEvent {
   ticket_price: number | null;
   tickets_sold: number;
   external_tickets_url: string | null;
+  /** Parsed on load (the column is JSONB, normalised by the DB on save). */
   ticket_tiers: TicketTier[] | null;
+  /** Seats sold per ticket type — written only by the DB, never saved from here. */
+  ticket_tier_sold: unknown;
+  /** Service fee % added on top of each ticket's price. */
+  ticket_fee_percent: number | string | null;
   is_featured: boolean;
   is_published: boolean;
   tags: string[] | null;
@@ -91,25 +105,41 @@ const emptyEvent: Partial<DbEvent> = {
   tickets_sold: 0,
   external_tickets_url: null,
   ticket_tiers: [],
+  ticket_tier_sold: {},
+  ticket_fee_percent: 0,
   is_featured: false,
   is_published: true,
   tags: [],
 };
 
 // ─────────────────────────────────────────────
-// Helpers: datetime-local <-> ISO
+// Helpers: datetime-local <-> ISO, always in El Salvador time — the event is
+// in SV whatever timezone the editing device is set to (a laptop on US
+// Eastern used to save 7:00 PM as 6:00 PM SV).
 // ─────────────────────────────────────────────
+const SV_INPUT_PARTS = new Intl.DateTimeFormat("en-CA", {
+  timeZone: SV_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
 function toLocalInput(iso?: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "";
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const parts = SV_INPUT_PARTS.formatToParts(d);
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
 }
 
 function fromLocalInput(s: string): string {
   if (!s) return "";
-  return new Date(s).toISOString();
+  const d = new Date(`${s}:00${SV_OFFSET}`);
+  return isNaN(d.getTime()) ? "" : d.toISOString();
 }
 
 function formatEventDate(iso: string): string {
@@ -120,6 +150,7 @@ function formatEventDate(iso: string): string {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: SV_TZ,
   });
 }
 
@@ -130,7 +161,106 @@ function formatEventTime(iso: string): string {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: SV_TZ,
   });
+}
+
+/** DB row → editor shape (ticket types parsed from JSONB). */
+function withParsedTiers(e: DbEvent): DbEvent {
+  return { ...e, ticket_tiers: parseTicketTiers(e.ticket_tiers) };
+}
+
+/** Why the ticket setup can't be saved yet (null = fine). */
+function ticketSetupProblem(e: Partial<DbEvent>): string | null {
+  const fee = Number(e.ticket_fee_percent ?? 0);
+  if (!Number.isFinite(fee) || fee < 0 || fee > 100) {
+    return "El cargo por servicio debe ser un porcentaje entre 0 y 100.";
+  }
+  const tiers = (e.ticket_tiers ?? []).filter((t) => t.name.trim() || t.price > 0);
+  const names = new Set<string>();
+  for (const t of tiers) {
+    const name = t.name.trim();
+    if (!name) return "Ponle nombre a cada tipo de boleto (ej. Preferencial, VIP).";
+    const key = name.toLowerCase();
+    if (names.has(key)) return `Hay dos tipos de boleto llamados «${name}». Usa un nombre distinto para cada uno.`;
+    names.add(key);
+    if (e.tickets_enabled && !(t.price > 0)) return `Escribe el precio de «${name}» (mayor que $0).`;
+  }
+  if (e.tickets_enabled && tiers.length === 0 && !(Number(e.ticket_price) > 0)) {
+    return "Escribe el precio por boleto (mayor que $0), o agrega tipos de boleto.";
+  }
+  if (e.tickets_enabled && tiers.length > 0 && !tiers.some((t) => t.active)) {
+    return "Todos los tipos de boleto están ocultos: activa al menos uno o desactiva la venta en línea.";
+  }
+  return null;
+}
+
+/** Sales of one event, for the editor: per type, plus taquilla vs. service fees. */
+function EventSalesSummary({ eventId }: { eventId: string }) {
+  const [rows, setRows] = useState<
+    { tier_name: string | null; quantity: number; unit_price: number | null; unit_fee: number | null; total_amount: number | null }[] | null
+  >(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("event_tickets")
+          .select("tier_name, quantity, unit_price, unit_fee, total_amount")
+          .eq("event_id", eventId)
+          .neq("status", "void");
+        if (error) throw error;
+        if (!cancelled) setRows(data ?? []);
+      } catch (err) {
+        console.error("[AdminEventsPage] sales summary:", err);
+        if (!cancelled) setFailed(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
+
+  if (failed) return <p className="text-xs text-red-400">No se pudo cargar el resumen de ventas.</p>;
+  if (!rows) return <p className="text-xs text-[#6B6560]">Cargando ventas…</p>;
+  if (rows.length === 0) return <p className="text-xs text-[#6B6560]">Todavía no hay boletos vendidos.</p>;
+
+  const cents = (n: number | null) => Math.round(Number(n ?? 0) * 100);
+  const seats = rows.reduce((s, r) => s + r.quantity, 0);
+  const totalC = rows.reduce((s, r) => s + cents(r.total_amount), 0);
+  const split = rows.every((r) => r.unit_fee != null);
+  const feeC = split ? rows.reduce((s, r) => s + cents(r.unit_fee) * r.quantity, 0) : 0;
+  const byType = new Map<string, number>();
+  for (const r of rows) {
+    const k = r.tier_name || "General";
+    byType.set(k, (byType.get(k) ?? 0) + r.quantity);
+  }
+
+  return (
+    <div className="text-xs text-[#B8B0A8] space-y-1" data-testid="event-sales-summary">
+      <p>
+        <span className="text-[#4CAF50] font-semibold">{seats} boleto{seats === 1 ? "" : "s"}</span> · cobrado{" "}
+        {money(totalC / 100)}
+        {split && feeC > 0 && (
+          <>
+            {" "}
+            (taquilla {money((totalC - feeC) / 100)} + cargos {money(feeC / 100)})
+          </>
+        )}
+      </p>
+      {byType.size > 1 && (
+        <p>
+          {[...byType.entries()].map(([name, n]) => `${name}: ${n}`).join(" · ")}
+        </p>
+      )}
+      {!split && rows.some((r) => r.unit_fee != null) && (
+        <p className="text-[#6B6560]">Algunos boletos se vendieron antes de separar el cargo; su total va completo.</p>
+      )}
+    </div>
+  );
 }
 
 function generateSlug(title: string): string {
@@ -174,7 +304,7 @@ export default function AdminEventsPage() {
         .order("starts_at", { ascending: false });
 
       if (fetchErr) throw fetchErr;
-      setEvents((data as DbEvent[]) || []);
+      setEvents(((data as DbEvent[]) || []).map(withParsedTiers));
     } catch (err) {
       console.error("[AdminEventsPage] fetchEvents:", err);
       setError("Error al cargar los eventos. Intenta de nuevo.");
@@ -203,6 +333,30 @@ export default function AdminEventsPage() {
   const saveEvent = async () => {
     if (!editing?.title || !editing?.starts_at) return;
 
+    const problem = ticketSetupProblem(editing);
+    if (problem) {
+      alert(problem);
+      return;
+    }
+
+    // Ticket types: drop blank rows; keep each type's id so sold counts and
+    // issued tickets stay linked when it's renamed or repriced. The DB trigger
+    // validates again and keeps ticket_price = the cheapest type on sale.
+    const tiers = (editing.ticket_tiers || [])
+      .filter((t) => t.name.trim())
+      .map((t) => ({
+        id: t.id,
+        name: t.name.trim(),
+        name_en: t.name_en?.trim() || null,
+        description: t.description?.trim() || null,
+        description_en: t.description_en?.trim() || null,
+        price: Math.round((Number(t.price) || 0) * 100) / 100,
+        capacity: t.capacity == null ? null : Math.max(0, Math.floor(t.capacity)),
+        active: t.active !== false,
+      }));
+    const onSaleTiers = tiers.filter((t) => t.active && t.price > 0);
+    const fee = Math.round((Number(editing.ticket_fee_percent) || 0) * 100) / 100;
+
     setSaving(true);
     try {
       const supabase = createClient();
@@ -226,13 +380,13 @@ export default function AdminEventsPage() {
         rsvp_enabled: !!editing.rsvp_enabled,
         tickets_enabled: !!editing.tickets_enabled,
         ticket_price: editing.tickets_enabled
-          ? editing.ticket_price || null
+          ? onSaleTiers.length > 0
+            ? Math.min(...onSaleTiers.map((t) => t.price))
+            : editing.ticket_price || null
           : null,
+        ticket_fee_percent: fee,
         external_tickets_url: editing.external_tickets_url?.trim() || null,
-        // Drop blank rows and coerce prices to numbers before persisting.
-        ticket_tiers: (editing.ticket_tiers || [])
-          .filter((t) => t && t.name?.trim())
-          .map((t) => ({ name: t.name.trim(), price: Number(t.price) || 0 })),
+        ticket_tiers: tiers,
         is_featured: !!editing.is_featured,
         is_published: editing.is_published !== false,
         tags: editing.tags || [],
@@ -247,21 +401,19 @@ export default function AdminEventsPage() {
           .single();
 
         if (insertErr) throw insertErr;
-        setEvents([data as DbEvent, ...events]);
+        setEvents([withParsedTiers(data as DbEvent), ...events]);
       } else if (editing.id) {
-        const { error: updateErr } = await supabase
+        // Read the row back: the DB normalises the ticket types and price.
+        const { data, error: updateErr } = await supabase
           .from("events")
           .update(payload)
-          .eq("id", editing.id);
+          .eq("id", editing.id)
+          .select()
+          .single();
 
         if (updateErr) throw updateErr;
-        setEvents(
-          events.map((e) =>
-            e.id === editing.id
-              ? ({ ...e, ...payload, id: editing.id } as DbEvent)
-              : e,
-          ),
-        );
+        const saved = withParsedTiers(data as DbEvent);
+        setEvents(events.map((e) => (e.id === saved.id ? saved : e)));
       }
 
       setEditing(null);
@@ -864,7 +1016,7 @@ export default function AdminEventsPage() {
                 </p>
               </div>
 
-              {/* RSVP + Capacity */}
+              {/* RSVP */}
               <div className="border border-[#3D3936] p-4 space-y-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -883,67 +1035,21 @@ export default function AdminEventsPage() {
                   </span>
                 </label>
 
-                {editing.rsvp_enabled && (
-                  <div className="space-y-4 pl-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!!editing.has_capacity_limit}
-                        onChange={(e) =>
-                          setEditing({
-                            ...editing,
-                            has_capacity_limit: e.target.checked,
-                            max_capacity: e.target.checked
-                              ? editing.max_capacity || 50
-                              : null,
-                          })
-                        }
-                        className="w-4 h-4 accent-[#FF6B35]"
-                      />
-                      <span className="text-sm text-[#B8B0A8]">
-                        Limitar capacidad
-                      </span>
-                    </label>
-
-                    {editing.has_capacity_limit && (
-                      <div>
-                        <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                          Capacidad maxima
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={editing.max_capacity || ""}
-                          onChange={(e) =>
-                            setEditing({
-                              ...editing,
-                              max_capacity:
-                                parseInt(e.target.value) || null,
-                            })
-                          }
-                          className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                          placeholder="50"
-                        />
-                      </div>
-                    )}
-
-                    {!isNew && (
-                      <div className="flex items-center gap-2 text-sm text-[#6B6560]">
-                        <Users className="w-4 h-4" />
-                        <span>
-                          RSVPs actuales: {editing.current_rsvps || 0}
-                          {editing.has_capacity_limit &&
-                            editing.max_capacity &&
-                            ` / ${editing.max_capacity}`}
-                        </span>
-                      </div>
-                    )}
+                {editing.rsvp_enabled && !isNew && (
+                  <div className="flex items-center gap-2 text-sm text-[#6B6560] pl-6">
+                    <Users className="w-4 h-4" />
+                    <span>
+                      RSVPs actuales: {editing.current_rsvps || 0}
+                      {editing.has_capacity_limit &&
+                        editing.max_capacity &&
+                        ` / ${editing.max_capacity}`}
+                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Ticket sales */}
-              <div className="border border-[#3D3936] p-4 space-y-4">
+              {/* Ticket sales on simmerdownsv.com */}
+              <div className="border border-[#3D3936] p-4 space-y-4" data-testid="ticket-sales-box">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -961,140 +1067,229 @@ export default function AdminEventsPage() {
                   </span>
                 </label>
 
-                {editing.tickets_enabled && (
-                  <div className="space-y-4 pl-6">
-                    <div>
-                      <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                        Precio por boleto (USD)
-                      </label>
+                {editing.tickets_enabled && (() => {
+                  const tiers = editing.ticket_tiers || [];
+                  const sold = soldByTier(editing.ticket_tier_sold);
+                  const fee = eventFeePercent(editing);
+                  const samplePrice =
+                    (tiers.find((t) => t.price > 0)?.price ?? Number(editing.ticket_price)) || 5;
+                  const sampleFee = ticketFee(samplePrice, fee);
+                  const untypedSales =
+                    (editing.tickets_sold ?? 0) > 0 && Object.keys(sold).length === 0;
+                  return (
+                    <div className="space-y-4 pl-6">
+                      {tiers.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-[#B8B0A8]">Tipos de boleto</p>
+                          <p className="text-xs text-[#6B6560]">
+                            Un tipo por cada precio (ej. Preferencial y VIP Dinner). El cliente elige
+                            cuántos de cada uno; cada tipo lleva su propio QR y en la puerta se ve el tipo.
+                          </p>
+                          {untypedSales && (
+                            <p className="text-xs text-[#FFB800]">
+                              Los {editing.tickets_sold} boletos que ya se vendieron con un solo precio
+                              aparecen como «General» en la puerta.
+                            </p>
+                          )}
+                          <TicketTierEditor
+                            tiers={tiers}
+                            onChange={(next) => setEditing({ ...editing, ticket_tiers: next })}
+                            mode="sale"
+                            sold={sold}
+                            feePercent={fee}
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-[#B8B0A8]">
+                            Precio por boleto (USD)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={editing.ticket_price ?? ""}
+                            onChange={(e) =>
+                              setEditing({
+                                ...editing,
+                                ticket_price: e.target.value
+                                  ? parseFloat(e.target.value)
+                                  : null,
+                              })
+                            }
+                            className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                            placeholder="5.00"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditing({
+                                ...editing,
+                                ticket_tiers: [
+                                  emptyTier(Number(editing.ticket_price) || 0),
+                                  emptyTier(),
+                                ],
+                              })
+                            }
+                            className="text-sm text-[#FF6B35] hover:text-[#FF8555] flex items-center gap-1"
+                          >
+                            <Plus className="w-4 h-4" /> ¿Varios precios? Agregar tipos de boleto (ej. Preferencial y VIP)
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Service fee, shown to buyers apart from the price */}
+                      <div className="space-y-1">
+                        <label className="block text-sm font-medium text-[#B8B0A8]" htmlFor="ticket-fee-percent">
+                          Cargo por servicio (%)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            id="ticket-fee-percent"
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={editing.ticket_fee_percent ?? ""}
+                            onChange={(e) =>
+                              setEditing({
+                                ...editing,
+                                ticket_fee_percent: e.target.value === "" ? 0 : parseFloat(e.target.value),
+                              })
+                            }
+                            className="w-28 px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                            placeholder="0"
+                          />
+                          <span className="text-[#6B6560]">%</span>
+                        </div>
+                        <p className="text-xs text-[#6B6560]">
+                          El precio de cada boleto es la taquilla; el cargo se suma encima y el cliente lo
+                          ve por separado. 0 = sin cargo.
+                          {fee > 0 && (
+                            <>
+                              {" "}Ej.: boleto de {money(samplePrice)} → el cliente ve {money(samplePrice)} +{" "}
+                              {money(sampleFee)} de cargo ({percentLabel(fee)}) y paga {money(samplePrice + sampleFee)}.
+                            </>
+                          )}
+                        </p>
+                      </div>
+
+                      {!isNew && editing.id && (
+                        <div className="space-y-2 border-t border-[#3D3936] pt-3">
+                          <EventSalesSummary eventId={editing.id} />
+                          {editing.slug && (
+                            <a
+                              href={`/boletos/comprar/${editing.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-[#FF6B35] hover:text-[#FF8555]"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> Ver la compra como cliente ↗
+                              {editing.is_published === false ? " (borrador: solo el personal)" : ""}
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Cupo: one limit for RSVPs and tickets together */}
+              {(editing.rsvp_enabled || editing.tickets_enabled) && (
+                <div className="border border-[#3D3936] p-4 space-y-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!editing.has_capacity_limit}
+                      onChange={(e) =>
+                        setEditing({
+                          ...editing,
+                          has_capacity_limit: e.target.checked,
+                          max_capacity: e.target.checked
+                            ? editing.max_capacity || 50
+                            : null,
+                        })
+                      }
+                      className="w-4 h-4 accent-[#FF6B35]"
+                    />
+                    <span className="text-sm font-medium text-[#B8B0A8]">
+                      Limitar el cupo total del evento
+                    </span>
+                  </label>
+                  {editing.has_capacity_limit && (
+                    <div className="pl-6 space-y-2">
                       <input
                         type="number"
-                        min="0"
-                        step="0.01"
-                        value={editing.ticket_price ?? ""}
+                        min="1"
+                        value={editing.max_capacity || ""}
                         onChange={(e) =>
                           setEditing({
                             ...editing,
-                            ticket_price: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
+                            max_capacity: parseInt(e.target.value) || null,
                           })
                         }
                         className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                        placeholder="3.00"
+                        placeholder="50"
+                        aria-label="Cupo total del evento"
                       />
+                      <p className="text-xs text-[#6B6560]">
+                        Tope para todos los boletos juntos (y las RSVP). Cada tipo de boleto puede tener
+                        además su propio cupo.
+                      </p>
                     </div>
-                    <p className="text-xs text-[#6B6560]">
-                      El límite de capacidad de arriba controla cuántos boletos se
-                      pueden vender. Sin límite = venta ilimitada.
-                    </p>
-                    {!isNew && (
-                      <div className="flex items-center gap-2 text-sm text-[#4CAF50]">
-                        <Users className="w-4 h-4" />
-                        <span>
-                          Boletos vendidos: {editing.tickets_sold || 0}
-                          {editing.has_capacity_limit &&
-                            editing.max_capacity &&
-                            ` / ${editing.max_capacity}`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                  )}
+                  {editing.tickets_enabled && !isNew && (
+                    <div className="flex items-center gap-2 text-sm text-[#4CAF50]">
+                      <Users className="w-4 h-4" />
+                      <span>
+                        Boletos vendidos: {editing.tickets_sold || 0}
+                        {editing.has_capacity_limit &&
+                          editing.max_capacity &&
+                          ` / ${editing.max_capacity}`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {/* External tickets / multiple price tiers (Option B) */}
-              <div className="border border-[#3D3936] p-4 space-y-4">
-                <p className="text-sm font-medium text-[#B8B0A8]">
-                  🎟️ Boletos externos / varios precios
-                </p>
-                <p className="text-xs text-[#6B6560]">
-                  Para shows vendidos en otra plataforma (Smart Ticket, etc.) o con
-                  varias categorías de precio. Se muestran en la página del evento con
-                  un botón que lleva al enlace externo — no procesa pagos en el sitio.
-                </p>
-                <div>
-                  <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
-                    URL para comprar boletos (externa)
-                  </label>
-                  <input
-                    type="url"
-                    value={editing.external_tickets_url ?? ""}
-                    onChange={(e) =>
-                      setEditing({ ...editing, external_tickets_url: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                    placeholder="https://smartticket.com.sv/..."
-                  />
+              {/* Sold on another platform (display only) */}
+              {!editing.tickets_enabled && (
+                <div className="border border-[#3D3936] p-4 space-y-4">
+                  <p className="text-sm font-medium text-[#B8B0A8]">
+                    🎟️ Boletos en otra plataforma
+                  </p>
+                  <p className="text-xs text-[#6B6560]">
+                    Para shows vendidos en otro sitio (Smart Ticket, etc.): la página del evento muestra
+                    los precios y un botón al enlace externo. No cobra en este sitio. Para cobrar aquí con
+                    varios precios, activa «Vender boletos en línea».
+                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-[#B8B0A8] mb-2">
+                      URL para comprar boletos (externa)
+                    </label>
+                    <input
+                      type="url"
+                      value={editing.external_tickets_url ?? ""}
+                      onChange={(e) =>
+                        setEditing({ ...editing, external_tickets_url: e.target.value })
+                      }
+                      className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                      placeholder="https://smartticket.com.sv/..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-[#B8B0A8]">Precios a mostrar (opcional)</p>
+                    <TicketTierEditor
+                      tiers={editing.ticket_tiers || []}
+                      onChange={(next) => setEditing({ ...editing, ticket_tiers: next })}
+                      mode="display"
+                      sold={{}}
+                      feePercent={0}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-[#B8B0A8]">
-                    Precios / categorías de boletos
-                  </label>
-                  {(editing.ticket_tiers || []).map((tier, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={tier.name}
-                        onChange={(e) => {
-                          const next = [...(editing.ticket_tiers || [])];
-                          next[i] = { ...next[i], name: e.target.value };
-                          setEditing({ ...editing, ticket_tiers: next });
-                        }}
-                        className="flex-1 px-3 py-2 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                        placeholder="Ej: L-Gante RKT"
-                      />
-                      <span className="text-[#6B6560]">$</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={tier.price ?? ""}
-                        onChange={(e) => {
-                          const next = [...(editing.ticket_tiers || [])];
-                          next[i] = {
-                            ...next[i],
-                            price: e.target.value ? parseFloat(e.target.value) : 0,
-                          };
-                          setEditing({ ...editing, ticket_tiers: next });
-                        }}
-                        className="w-24 px-3 py-2 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
-                        placeholder="55.00"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditing({
-                            ...editing,
-                            ticket_tiers: (editing.ticket_tiers || []).filter(
-                              (_, idx) => idx !== i,
-                            ),
-                          })
-                        }
-                        className="p-2 text-[#C73E1D] hover:bg-[#C73E1D]/10"
-                        aria-label="Eliminar precio"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditing({
-                        ...editing,
-                        ticket_tiers: [
-                          ...(editing.ticket_tiers || []),
-                          { name: "", price: 0 },
-                        ],
-                      })
-                    }
-                    className="text-sm text-[#FF6B35] hover:text-[#FF8555] flex items-center gap-1"
-                  >
-                    <Plus className="w-4 h-4" /> Agregar precio
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* Tags */}
               <div>

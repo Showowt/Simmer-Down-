@@ -408,6 +408,7 @@ export const SIGNATURE_MENU_ITEMS: MenuItemData[] = [
 // <script> tag.
 
 import type { PublicEvent } from '@/lib/events'
+import { onSiteTickets, parseTicketTiers } from '@/lib/ticket-tiers'
 
 /** JSON-LD serializer safe for DB-sourced strings. */
 export function safeJsonLd(schema: object): string {
@@ -449,28 +450,27 @@ export function generateEventSchema(event: PublicEvent, venueName: string) {
     event.description_es || event.description || `${name} en ${venueName}, El Salvador.`
   const loc = matchLocationForVenue(venueName)
 
-  // Offers: native on-site ticketing wins; otherwise external tiers/link.
-  const tiers = (event.ticket_tiers ?? []).filter(t => t?.name)
+  // Offers: on-site sales (each ticket type, or the single price) win;
+  // otherwise the external link with its price list. Google wants the price
+  // the buyer actually pays, so on-site offers include the service fee.
+  const onSite = onSiteTickets(event)
+  const tiers = parseTicketTiers(event.ticket_tiers).filter(t => t.active)
   const external = event.external_tickets_url?.trim()
-  const nativePrice = event.ticket_price != null ? Number(event.ticket_price) : 0
-  const nativeOnSale = !!event.tickets_enabled && nativePrice > 0 && !!event.slug
-  const soldOut =
-    !!event.has_capacity_limit &&
-    event.max_capacity != null &&
-    (event.tickets_sold ?? 0) >= event.max_capacity
 
   let offers: object | object[] | undefined
-  if (nativeOnSale) {
-    offers = {
+  if (onSite.mode !== 'none' && event.slug) {
+    const list = onSite.tiers.map(t => ({
       '@type': 'Offer',
+      ...(onSite.mode === 'tiers' ? { name: t.name } : {}),
       url: `${BASE_URL}/boletos/comprar/${event.slug}`,
-      price: nativePrice.toFixed(2),
+      price: t.total.toFixed(2),
       priceCurrency: 'USD',
-      availability: soldOut
+      availability: t.soldOut
         ? 'https://schema.org/SoldOut'
         : 'https://schema.org/InStock',
       validFrom: event.created_at ?? event.starts_at,
-    }
+    }))
+    offers = list.length === 1 ? list[0] : list
   } else if (external && tiers.length > 0) {
     offers = tiers.map(t => ({
       '@type': 'Offer',

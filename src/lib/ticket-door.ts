@@ -37,7 +37,16 @@ export interface DoorTicket {
   orderNumber: string | null
   oversold: boolean
   checkedInAt: string | null
+  /** Ticket type ("VIP Dinner"), null for single-price events. */
+  tierName: string | null
   event: { id: string; title: string; startsAt: string | null } | null
+}
+
+/** Seats sold / inside for one ticket type. */
+export interface DoorTierCount {
+  name: string
+  seats: number
+  admitted: number
 }
 
 export interface DoorEvent {
@@ -49,6 +58,25 @@ export interface DoorEvent {
   orders: number
   seats: number
   admitted: number
+  /** Per ticket type (empty for single-price events). */
+  tiers: DoorTierCount[]
+}
+
+/** Group non-void tickets by type for the door counters. */
+export function tierCounts(
+  tickets: { tierName: string | null; quantity: number; admitted: number; status: string }[],
+): DoorTierCount[] {
+  if (!tickets.some((t) => t.tierName)) return []
+  const byName = new Map<string, DoorTierCount>()
+  for (const t of tickets) {
+    if (t.status === 'void') continue
+    const name = t.tierName || 'General'
+    const row = byName.get(name) ?? { name, seats: 0, admitted: 0 }
+    row.seats += t.quantity
+    row.admitted += t.admitted
+    byName.set(name, row)
+  }
+  return [...byName.values()]
 }
 
 export interface DoorRoster {

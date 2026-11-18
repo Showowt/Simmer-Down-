@@ -553,6 +553,19 @@ export default function ScannerClient({ initialEventId }: { initialEventId: stri
           <p className="text-xs text-[#6B6560] mt-1.5">
             {stats.orders} compra{stats.orders === 1 ? "" : "s"} · faltan {Math.max(0, stats.seats - stats.admitted)}
           </p>
+          {stats.tiers.length > 0 && (
+            <ul className="mt-2 space-y-1 border-t border-[#3D3936] pt-2" data-testid="door-tier-counts">
+              {stats.tiers.map((tier) => (
+                <li key={tier.name} className="flex items-baseline justify-between gap-3 text-sm">
+                  <span className="min-w-0 truncate text-[#FFB800] font-semibold">{tier.name}</span>
+                  <span className="shrink-0 tabular-nums text-[#FFF8F0]">
+                    {tier.admitted}
+                    <span className="text-[#6B6560]"> / {tier.seats}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -683,6 +696,7 @@ export default function ScannerClient({ initialEventId }: { initialEventId: stri
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[#FFF8F0] font-medium">{t.buyerName || "Sin nombre"}</p>
                       <p className="truncate text-xs text-[#6B6560]">
+                        {t.tierName && <span className="text-[#FFB800] font-semibold">{t.tierName} · </span>}
                         #{t.orderNumber ?? "—"}
                         {t.buyerPhone ? ` · ${t.buyerPhone}` : ""}
                       </p>
@@ -769,6 +783,9 @@ function SheetView({
         <CheckCircle2 className="w-20 h-20 mx-auto mb-3" />
         <p className="text-3xl font-black tracking-wide">ADMITIDO</p>
         <p className="mt-2 text-2xl font-semibold">Pasan {people(sheet.admitted)}</p>
+        {sheet.ticket.tierName && (
+          <p className="mt-1 text-xl font-black uppercase tracking-wide">{sheet.ticket.tierName}</p>
+        )}
         <p className="mt-1 text-white/80">{sheet.ticket.buyerName || ""}</p>
         {sheet.remaining > 0 && (
           <p className="mt-4 rounded-lg bg-black/20 px-3 py-2 text-sm">
@@ -834,6 +851,14 @@ function SheetView({
       </div>
 
       <div className="p-5 space-y-3">
+        {t.tierName && (
+          <p
+            className="rounded-xl bg-[#FFB800]/15 border border-[#FFB800]/40 px-4 py-2 text-center text-xl font-black uppercase tracking-wide text-[#FFB800] break-words"
+            data-testid="door-tier"
+          >
+            {t.tierName}
+          </p>
+        )}
         <div>
           <p className="text-2xl font-bold text-[#FFF8F0] leading-tight break-words">{t.buyerName || "Sin nombre"}</p>
           {t.event && (

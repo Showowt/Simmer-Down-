@@ -15,14 +15,13 @@ import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 import type { PublicEvent } from "@/lib/events";
 import {
-  ticketState,
-  eventReservationUrl,
   formatEventDate,
   formatEventTime,
   deriveCoverPrice,
   firstCategoryTag,
 } from "@/lib/event-display";
 import EventCountdown from "./EventCountdown";
+import EventTicketCta from "./EventTicketCta";
 
 // Full event page body — the landing page for Google event results, WhatsApp
 // shares and (later) ad campaigns. Server page provides the data + JSON-LD.
@@ -47,10 +46,6 @@ export default function EventDetail({
       ? `${event.title} — ${venueName} (${whenLabel}). Details + tickets: ${shareUrl}`
       : `${event.title_es || event.title} — ${venueName} (${whenLabel}). Detalles y entradas: ${shareUrl}`;
   const waShare = `https://wa.me/?text=${encodeURIComponent(shareMsg)}`;
-
-  const ts = ticketState(event);
-  const tiers = (event.ticket_tiers ?? []).filter((t) => t?.name);
-  const external = event.external_tickets_url?.trim();
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] pt-32 pb-24 lg:pb-16">
@@ -128,85 +123,9 @@ export default function EventDetail({
               className="mb-8"
             />
 
-            {/* CTA — identical decision tree to the listing cards */}
-            {(() => {
-              if (ts.onSale && ts.soldOut) {
-                return (
-                  <span className="inline-flex items-center gap-2 bg-white/10 text-white/60 px-8 py-4 font-bold min-h-[56px]">
-                    {locale === "es" ? "Agotado" : "Sold Out"}
-                  </span>
-                );
-              }
-              if (ts.onSale) {
-                return (
-                  <Link
-                    href={`/boletos/comprar/${event.slug}`}
-                    className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                  >
-                    {locale === "es"
-                      ? `Comprar Boletos · $${ts.price.toFixed(2)}`
-                      : `Buy Tickets · $${ts.price.toFixed(2)}`}
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                );
-              }
-              if (external || tiers.length > 0) {
-                return (
-                  <div className="space-y-5">
-                    {tiers.length > 0 && (
-                      <div className="max-w-md">
-                        <p className="text-white/40 text-xs uppercase tracking-[0.15em] mb-2">
-                          {locale === "es" ? "Precios de entradas" : "Ticket prices"}
-                        </p>
-                        <ul className="space-y-1.5">
-                          {tiers.map((t, ti) => (
-                            <li key={ti} className="flex items-baseline gap-3">
-                              <span className="text-white/80">{t.name}</span>
-                              <span className="flex-1 border-b border-dotted border-white/15" />
-                              <span className="text-[#FBBF24] font-semibold">
-                                ${Number(t.price).toFixed(2)}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {external ? (
-                      <a
-                        href={external}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                      >
-                        {locale === "es" ? "Comprar Boletos" : "Buy Tickets"}
-                        <ArrowRight className="w-5 h-5" />
-                      </a>
-                    ) : (
-                      <a
-                        href={eventReservationUrl(event, whenLabel, locale)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                      >
-                        {locale === "es" ? "Más Información" : "More Info"}
-                        <ArrowRight className="w-5 h-5" />
-                      </a>
-                    )}
-                  </div>
-                );
-              }
-              return (
-                <a
-                  href={eventReservationUrl(event, whenLabel, locale)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#C2410C] hover:bg-[#9A3412] text-white px-8 py-4 font-bold transition-all min-h-[56px]"
-                >
-                  {locale === "es" ? "Reservar Tu Lugar" : "Reserve Your Spot"}
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-              );
-            })()}
+            {/* CTA — the same component as the /ticketmania posters */}
+            <EventTicketCta event={event} locale={locale} whenLabel={whenLabel} />
+
 
             {/* WhatsApp share — SV's real distribution channel */}
             <a

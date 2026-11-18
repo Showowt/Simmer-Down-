@@ -85,16 +85,24 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Ticket order → surface the issued QR token so the success screen can send
-  // the buyer straight to their boleto (issued by the confirm trigger).
+  // Ticket order → surface the issued QR tokens (one per ticket type, issued
+  // by the confirm trigger) so the success screen can send the buyer straight
+  // to their boletos. ticketToken = the first one, for older checkout pages.
   let ticketToken: string | null = null;
+  let tickets: { token: string; tierName: string | null; quantity: number }[] = [];
   if (externalStatus === "paid") {
-    const { data: tk } = await supabase
+    const { data: tks, error: tkErr } = await supabase
       .from("event_tickets")
-      .select("qr_token")
+      .select("qr_token, tier_name, quantity, line_no")
       .eq("order_id", order.id)
-      .maybeSingle();
-    ticketToken = tk?.qr_token ?? null;
+      .order("line_no", { ascending: true });
+    if (tkErr) logger.error("[payments/status] ticket lookup failed", tkErr, { orderId: order.id });
+    tickets = (tks ?? []).map((t) => ({
+      token: String(t.qr_token),
+      tierName: (t.tier_name as string | null) ?? null,
+      quantity: Number(t.quantity),
+    }));
+    ticketToken = tickets[0]?.token ?? null;
   }
 
   // Strip sensitive fields from unauthenticated response.
@@ -113,5 +121,6 @@ export async function GET(request: NextRequest) {
     },
     loyalty,
     ticketToken,
+    tickets,
   });
 }

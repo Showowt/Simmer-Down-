@@ -8,6 +8,13 @@
 
 import { LOCATIONS } from "@/lib/data";
 import type { PublicEvent } from "@/lib/events";
+import {
+  money,
+  onSiteTickets,
+  parseTicketTiers,
+  type TicketTier,
+  type TierAvailability,
+} from "@/lib/ticket-tiers";
 
 // El Salvador (UTC-6). ALWAYS format event dates/times in this zone — without
 // an explicit timeZone the server (UTC) and client (viewer-local) render
@@ -15,19 +22,69 @@ import type { PublicEvent } from "@/lib/events";
 // anyone outside SV.
 export const EVENT_TZ = "America/El_Salvador";
 
-/** Whether an event can be bought online right now, and the single price. */
-export function ticketState(e: PublicEvent): {
+export interface TicketState {
+  /** Can be bought on simmerdownsv.com (date not checked — past events are hidden anyway). */
   onSale: boolean;
+  /** On sale, but every ticket type is sold out. */
   soldOut: boolean;
+  /** Cheapest ticket's own price, before the service fee. */
   price: number;
-} {
-  const price = e.ticket_price != null ? Number(e.ticket_price) : 0;
-  const onSale = !!e.tickets_enabled && price > 0 && !!e.slug;
-  const soldOut =
-    !!e.has_capacity_limit &&
-    e.max_capacity != null &&
-    (e.tickets_sold ?? 0) >= e.max_capacity;
-  return { onSale, soldOut, price };
+  /** Cheapest ticket including the fee — what the buyer pays. */
+  total: number;
+  /** Several different prices → "desde $X". */
+  multiPrice: boolean;
+  feePercent: number;
+  /** The types a buyer can pick (sold-out ones flagged). One entry for single-price events. */
+  tiers: TierAvailability[];
+  /** true when the event has ticket types (not just one price). */
+  hasTypes: boolean;
+}
+
+/** Whether an event can be bought online right now, and at what price(s). */
+export function ticketState(e: PublicEvent, locale?: string): TicketState {
+  const offer = onSiteTickets(e, locale === "en" ? "General admission" : "General");
+  return {
+    onSale: offer.mode !== "none" && !!e.slug,
+    soldOut: offer.soldOut,
+    price: offer.fromPrice,
+    total: offer.fromTotal,
+    multiPrice: offer.multiPrice,
+    feePercent: offer.feePercent,
+    tiers: offer.tiers,
+    hasTypes: offer.mode === "tiers",
+  };
+}
+
+/**
+ * Buy-button label. The price is the ticket's own price (what the poster
+ * says); a service fee is flagged as "+ cargo" and itemised on the event
+ * page and at checkout.
+ */
+export function buyLabel(ts: TicketState, locale?: string, short = false): string {
+  const en = locale === "en";
+  const verb = short ? (en ? "Buy" : "Comprar") : en ? "Buy Tickets" : "Comprar Boletos";
+  const from = ts.multiPrice ? (en ? "from " : "desde ") : "";
+  const fee = ts.feePercent > 0 ? (en ? " + fee" : " + cargo") : "";
+  return `${verb} · ${from}${money(ts.price)}${fee}`;
+}
+
+/** "Valor $5.00 + cargo $0.65 = $5.65" for one ticket (empty when there's no fee). */
+export function feeBreakdown(
+  t: Pick<TierAvailability, "price" | "fee" | "total">,
+  locale?: string,
+): string {
+  if (!(t.fee > 0)) return "";
+  return locale === "en"
+    ? `Price ${money(t.price)} + service fee ${money(t.fee)} = ${money(t.total)}`
+    : `Valor ${money(t.price)} + cargo por servicio ${money(t.fee)} = ${money(t.total)}`;
+}
+
+/**
+ * Price list shown for shows sold on ANOTHER platform (or not sold online):
+ * display-only, never purchasable here.
+ */
+export function displayTiers(e: PublicEvent): TicketTier[] {
+  return parseTicketTiers(e.ticket_tiers).filter((t) => t.active);
 }
 
 // Event-specific reservation via WhatsApp — pre-fills the show name/date/venue and

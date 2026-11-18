@@ -17,6 +17,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { isLiveOrUpcoming } from "@/lib/events";
 import {
   isTicketToken,
+  tierCounts,
   type DoorEvent,
   type DoorRoster,
   type DoorTicket,
@@ -43,6 +44,7 @@ interface EventRow {
 interface TicketRow {
   qr_token: string;
   event_id: string;
+  order_id: string;
   quantity: number;
   admitted_count: number;
   status: string;
@@ -50,11 +52,15 @@ interface TicketRow {
   buyer_phone: string | null;
   oversold: boolean | null;
   checked_in_at: string | null;
+  tier_name: string | null;
   orders: { order_number: string | null } | { order_number: string | null }[] | null;
 }
 
+type CountRow = Pick<TicketRow, "order_id" | "quantity" | "admitted_count" | "status" | "tier_name">;
+
 const TICKET_SELECT =
-  "qr_token, event_id, quantity, admitted_count, status, buyer_name, buyer_phone, oversold, checked_in_at, orders(order_number)";
+  "qr_token, event_id, order_id, quantity, admitted_count, status, buyer_name, buyer_phone, oversold, checked_in_at, tier_name, orders(order_number)";
+const COUNT_SELECT = "event_id, order_id, quantity, admitted_count, status, tier_name";
 
 function fail(status: number, error: string, message: string) {
   return NextResponse.json({ data: null, error, message }, { status });
@@ -80,11 +86,12 @@ function toDoorTicket(row: TicketRow, event: DoorTicket["event"]): DoorTicket {
     orderNumber: order?.order_number ?? null,
     oversold: !!row.oversold,
     checkedInAt: row.checked_in_at,
+    tierName: row.tier_name ?? null,
     event,
   };
 }
 
-function toDoorEvent(e: EventRow, tickets: Pick<TicketRow, "quantity" | "admitted_count" | "status">[]): DoorEvent {
+function toDoorEvent(e: EventRow, tickets: CountRow[]): DoorEvent {
   const live = tickets.filter((t) => t.status !== "void");
   return {
     id: e.id,
@@ -92,9 +99,13 @@ function toDoorEvent(e: EventRow, tickets: Pick<TicketRow, "quantity" | "admitte
     startsAt: e.starts_at,
     liveOrUpcoming: isLiveOrUpcoming({ starts_at: e.starts_at, ends_at: e.ends_at, recurrence: e.recurrence }),
     ticketsEnabled: !!e.tickets_enabled,
-    orders: live.length,
+    // One purchase can hold a QR per ticket type; count purchases, not QRs.
+    orders: new Set(live.map((t) => t.order_id)).size,
     seats: live.reduce((sum, t) => sum + t.quantity, 0),
     admitted: live.reduce((sum, t) => sum + t.admitted_count, 0),
+    tiers: tierCounts(
+      live.map((t) => ({ tierName: t.tier_name ?? null, quantity: t.quantity, admitted: t.admitted_count, status: t.status })),
+    ),
   };
 }
 
@@ -176,11 +187,11 @@ export async function GET(request: NextRequest) {
 
     const ids = eventRows.map((e) => e.id);
     const { data: tix, error: tixErr } = ids.length
-      ? await service.from("event_tickets").select("event_id, quantity, admitted_count, status").in("event_id", ids)
+      ? await service.from("event_tickets").select(COUNT_SELECT).in("event_id", ids)
       : { data: [], error: null };
     if (tixErr) throw tixErr;
-    const byEvent = new Map<string, Pick<TicketRow, "quantity" | "admitted_count" | "status">[]>();
-    for (const t of (tix ?? []) as Pick<TicketRow, "event_id" | "quantity" | "admitted_count" | "status">[]) {
+    const byEvent = new Map<string, CountRow[]>();
+    for (const t of (tix ?? []) as (CountRow & { event_id: string })[]) {
       const list = byEvent.get(t.event_id) ?? [];
       list.push(t);
       byEvent.set(t.event_id, list);

@@ -16,7 +16,7 @@ async function getTicket(token: string) {
   const supabase = createServiceClient();
   const { data: tk } = await supabase
     .from("event_tickets")
-    .select("qr_token, quantity, status, admitted_count, buyer_name, buyer_phone, oversold, event_id, order_id, checked_in_at")
+    .select("qr_token, quantity, status, admitted_count, buyer_name, buyer_phone, oversold, event_id, order_id, checked_in_at, tier_name")
     .eq("qr_token", token)
     .maybeSingle();
   if (!tk) return null;
@@ -65,6 +65,11 @@ export default async function AdminTicketPage({
         </div>
 
         <div className="p-6 space-y-4">
+          {tk.tier_name && (
+            <p className="rounded-xl bg-[#FFB800]/15 border border-[#FFB800]/40 px-4 py-2 text-center text-xl font-black uppercase tracking-wide text-[#FFB800] break-words">
+              {tk.tier_name}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <p className="text-[#6B6560]">Comprador</p>
