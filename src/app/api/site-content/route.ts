@@ -6,7 +6,10 @@
  *   careers:       { form_url, intro_es, intro_en, photos },
  *   historia:      { years, locations, reviews, stars },
  * }
- * Cached at the edge for 60s so admin edits go live within a minute.
+ * Cached at the edge for 10s (+50s stale-while-revalidate) so an owner who
+ * saves in the admin and reloads the page sees the change within seconds.
+ * The old 60s + 300s window showed the previous text for minutes, which
+ * read as "it doesn't let me change it" (Nov 17).
  */
 
 import { NextResponse } from "next/server";
@@ -113,7 +116,7 @@ export async function GET(): Promise<NextResponse> {
     const payload: SiteContentPayload = { segments, locationMedia, careers, historia, headings };
     return NextResponse.json(payload, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "Cache-Control": "public, s-maxage=10, stale-while-revalidate=50",
       },
     });
   } catch (err) {

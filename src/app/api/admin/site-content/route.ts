@@ -1,10 +1,17 @@
 /**
- * Admin site content settings (Trabaja con Nosotros + Nuestra Historia)
- *   GET   /api/admin/site-content → { careers, historia }
- *   PATCH /api/admin/site-content → update either or both settings rows
+ * Admin site content settings (Trabaja con Nosotros, Nuestra Historia, page headings)
+ *   GET   /api/admin/site-content → { careers, historia, headings }
+ *   PATCH /api/admin/site-content → { careers?, historia?, heading_pages? }
  *
- * Backed by the settings key/value table (keys 'careers' / 'historia_stats').
- * Auth: profile role 'admin'. Writes via service client.
+ * heading_pages carries ONLY the pages the editor changed, each with the copy
+ * it started from ({ value, base }). The server merges those pages into the
+ * stored headings and refuses (409) any page whose stored copy no longer
+ * matches its base — so a second window, a phone, or a screen loaded before
+ * someone else's save can't silently put old text back (Nov 17: TicketManía
+ * edits were reverted a minute later by a save from an older screen).
+ *
+ * Backed by the settings key/value table (keys 'careers' / 'historia_stats' /
+ * 'page_headings'). Auth: profile role 'admin'. Writes via service client.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -15,8 +22,11 @@ import {
   DEFAULT_CAREERS,
   DEFAULT_HISTORIA,
   DEFAULT_PAGE_HEADINGS,
+  HEADING_PAGE_KEYS,
   isRenderableSiteImage,
+  samePageHeading,
   sanitizePageHeadings,
+  type PageHeadings,
 } from "@/lib/site-content";
 import logger from "@/lib/logger";
 
@@ -40,13 +50,15 @@ const HistoriaSchema = z.object({
   stars: z.number().min(0).max(5),
 });
 
+const HEADING_TOO_LONG = "El texto es demasiado largo (título y etiqueta: máx. 200 caracteres; subtítulo: 500).";
+
 const HeadingSchema = z.object({
-  eyebrow_es: z.string().max(200),
-  eyebrow_en: z.string().max(200),
-  title_es: z.string().max(200),
-  title_en: z.string().max(200),
-  subtitle_es: z.string().max(500),
-  subtitle_en: z.string().max(500),
+  eyebrow_es: z.string().max(200, HEADING_TOO_LONG),
+  eyebrow_en: z.string().max(200, HEADING_TOO_LONG),
+  title_es: z.string().max(200, HEADING_TOO_LONG),
+  title_en: z.string().max(200, HEADING_TOO_LONG),
+  subtitle_es: z.string().max(500, HEADING_TOO_LONG),
+  subtitle_en: z.string().max(500, HEADING_TOO_LONG),
 });
 
 const HeadingsSchema = z.object({
@@ -58,14 +70,37 @@ const HeadingsSchema = z.object({
   trabaja: HeadingSchema,
 });
 
+const HeadingUpdateSchema = z.object({
+  value: HeadingSchema,
+  base: HeadingSchema,
+});
+
+const HeadingPagesSchema = z.object({
+  cortes: HeadingUpdateSchema.optional(),
+  maridaje: HeadingUpdateSchema.optional(),
+  hospitality: HeadingUpdateSchema.optional(),
+  merch: HeadingUpdateSchema.optional(),
+  events: HeadingUpdateSchema.optional(),
+  trabaja: HeadingUpdateSchema.optional(),
+});
+
 const PatchSchema = z.object({
   careers: CareersSchema.optional(),
   historia: HistoriaSchema.optional(),
+  heading_pages: HeadingPagesSchema.optional(),
+  // Editors loaded before Nov 17 send every page at once with no base copy;
+  // that shape is refused below because it is what overwrote newer text.
   headings: HeadingsSchema.optional(),
 });
 
 const BAD_IMAGE_MESSAGE =
   "Las fotos deben subirse aquí (se guardan en Supabase) o ser enlaces de images.unsplash.com. / Photos must be uploaded here or be images.unsplash.com links.";
+
+const STALE_EDITOR_MESSAGE =
+  "No se guardó: el panel se actualizó. Recarga esta página del navegador y vuelve a guardar. / Not saved: the admin panel was updated — reload this page and save again.";
+
+const CONFLICT_MESSAGE =
+  "No se guardó: este encabezado se cambió desde otra ventana o teléfono mientras lo editabas. Toca «Actualizar» para ver la versión actual y vuelve a hacer tu cambio. / Not saved: this heading was changed in another window while you were editing — tap Actualizar and redo your change.";
 
 async function requireAdmin(): Promise<
   { ok: true } | { ok: false; res: NextResponse }
@@ -121,7 +156,10 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       const msg = parsed.error.issues[0]?.message || "Datos inválidos";
       return NextResponse.json({ data: null, error: "invalid_body", message: msg }, { status: 400 });
     }
-    const { careers, historia, headings } = parsed.data;
+    const { careers, historia, heading_pages: headingPages, headings: legacyHeadings } = parsed.data;
+    if (legacyHeadings) {
+      return NextResponse.json({ data: null, error: "stale_editor", message: STALE_EDITOR_MESSAGE }, { status: 409 });
+    }
     if (careers && careers.photos.some((p) => !isRenderableSiteImage(p))) {
       return NextResponse.json({ data: null, error: "invalid_image_url", message: BAD_IMAGE_MESSAGE }, { status: 400 });
     }
@@ -135,7 +173,41 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       });
     }
     if (historia) rows.push({ key: "historia_stats", value: historia });
-    if (headings) rows.push({ key: "page_headings", value: sanitizePageHeadings(headings) });
+
+    let savedHeadings: PageHeadings | null = null;
+    const headingUpdates = headingPages
+      ? HEADING_PAGE_KEYS.flatMap((page) => {
+          const update = headingPages[page];
+          return update ? [{ page, value: update.value, base: update.base }] : [];
+        })
+      : [];
+    if (headingUpdates.length > 0) {
+      // Read → compare → write. Two admins saving within the same instant
+      // could still race; the base check is what stops stale screens.
+      const { data: stored, error: readErr } = await service
+        .from("settings")
+        .select("value")
+        .eq("key", "page_headings")
+        .maybeSingle();
+      if (readErr) {
+        logger.error("[AdminSiteContent] headings read failed", readErr);
+        return NextResponse.json({ data: null, error: "db_error", message: "Error al guardar" }, { status: 500 });
+      }
+      const merged = sanitizePageHeadings(stored?.value);
+      const conflicts = headingUpdates
+        .filter((u) => !samePageHeading(merged[u.page], u.base))
+        .map((u) => u.page);
+      if (conflicts.length > 0) {
+        return NextResponse.json(
+          { data: { headings: merged, conflicts }, error: "conflict", message: CONFLICT_MESSAGE },
+          { status: 409 },
+        );
+      }
+      for (const u of headingUpdates) merged[u.page] = { ...u.value };
+      rows.push({ key: "page_headings", value: merged });
+      savedHeadings = merged;
+    }
+
     if (rows.length === 0) {
       return NextResponse.json({ data: null, error: "invalid_body", message: "Nada que guardar" }, { status: 400 });
     }
@@ -145,7 +217,11 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
       logger.error("[AdminSiteContent] upsert failed", error);
       return NextResponse.json({ data: null, error: "db_error", message: "Error al guardar" }, { status: 500 });
     }
-    return NextResponse.json({ data: { saved: rows.map((r) => r.key) }, error: null, message: "Contenido guardado" });
+    return NextResponse.json({
+      data: { saved: rows.map((r) => r.key), headings: savedHeadings },
+      error: null,
+      message: "Contenido guardado",
+    });
   } catch (err) {
     logger.error("[AdminSiteContent] PATCH error", err);
     return NextResponse.json({ data: null, error: "internal", message: "Error interno" }, { status: 500 });

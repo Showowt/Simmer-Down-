@@ -158,6 +158,17 @@ export function sanitizePageHeadings(raw: unknown): PageHeadings {
 }
 
 /**
+ * Same text in every field (after the 500-char cap the server stores). Used to
+ * find which pages an editor changed, and by the API to refuse a save made
+ * from a screen whose copy of that page is out of date.
+ */
+export function samePageHeading(a: PageHeading | undefined, b: PageHeading | undefined): boolean {
+  return HEADING_FIELDS.every(
+    (field) => (a?.[field] ?? '').slice(0, 500) === (b?.[field] ?? '').slice(0, 500),
+  )
+}
+
+/**
  * Effective heading text: owner override wins, EN falls back to the owner's
  * ES override (owner intent beats stale static EN), then the static copy.
  */

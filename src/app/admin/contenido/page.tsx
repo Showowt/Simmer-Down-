@@ -25,8 +25,10 @@ import ImageUpload from '@/components/admin/ImageUpload'
 import { LOCATIONS } from '@/lib/data'
 import {
   DEFAULT_PAGE_HEADINGS,
+  HEADING_PAGE_KEYS,
   HEADING_STATIC_FALLBACKS,
   MERCH_CATEGORIES,
+  samePageHeading,
   type CareersContent,
   type HeadingPageKey,
   type HistoriaStats,
@@ -133,6 +135,12 @@ export default function AdminContenidoPage() {
   const [careers, setCareers] = useState<CareersContent>({ form_url: null, intro_es: '', intro_en: '', photos: [] })
   const [historia, setHistoria] = useState<HistoriaStats>({ years: 12, locations: 5, reviews: 5500, stars: 4.6 })
   const [headings, setHeadings] = useState<PageHeadings>(DEFAULT_PAGE_HEADINGS)
+  // What the server held when this screen loaded / last saved. A page whose
+  // text differs from its base has unsaved changes; the base also travels
+  // with each save so the API can refuse to overwrite newer text.
+  const [headingsBase, setHeadingsBase] = useState<PageHeadings>(DEFAULT_PAGE_HEADINGS)
+  const [headingsSavedAt, setHeadingsSavedAt] = useState<Date | null>(null)
+  const [headingsConflict, setHeadingsConflict] = useState<string | null>(null)
   const [headingPage, setHeadingPage] = useState<HeadingPageKey>('cortes')
   const [mediaVenue, setMediaVenue] = useState<string>(LOCATIONS[0]?.id ?? 'santa-ana')
   const [loading, setLoading] = useState(true)
@@ -157,7 +165,14 @@ export default function AdminContenidoPage() {
       if (contentRes.ok && contentJson.data) {
         setCareers(contentJson.data.careers as CareersContent)
         setHistoria(contentJson.data.historia as HistoriaStats)
-        if (contentJson.data.headings) setHeadings(contentJson.data.headings as PageHeadings)
+        if (contentJson.data.headings) {
+          const loaded = contentJson.data.headings as PageHeadings
+          setHeadings(loaded)
+          setHeadingsBase(loaded)
+          setHeadingsConflict(null)
+        }
+      } else {
+        setToast({ kind: 'err', text: contentJson.message || 'Error al cargar los textos — toca Actualizar' })
       }
     } catch {
       setToast({ kind: 'err', text: 'Error al cargar' })
@@ -169,7 +184,7 @@ export default function AdminContenidoPage() {
   useEffect(() => { load() }, [load])
   useEffect(() => {
     if (!toast) return
-    const t = setTimeout(() => setToast(null), 3500)
+    const t = setTimeout(() => setToast(null), toast.kind === 'err' ? 9000 : 5000)
     return () => clearTimeout(t)
   }, [toast])
 
@@ -335,7 +350,7 @@ export default function AdminContenidoPage() {
 
   // ── Settings (historia + careers) ─────────────────────────
 
-  const saveSettings = async (body: { careers?: CareersContent; historia?: HistoriaStats; headings?: PageHeadings }) => {
+  const saveSettings = async (body: { careers?: CareersContent; historia?: HistoriaStats }) => {
     setBusyKey('settings')
     try {
       const res = await fetch('/api/admin/site-content', {
@@ -348,6 +363,61 @@ export default function AdminContenidoPage() {
       else setToast({ kind: 'ok', text: 'Guardado — visible en el sitio en ~1 minuto' })
     } catch {
       setToast({ kind: 'err', text: 'Error de conexión' })
+    } finally {
+      setBusyKey(null)
+    }
+  }
+
+  // ── Page headings: save only the pages that changed ───────
+
+  const dirtyHeadingPages = HEADING_PAGE_KEYS.filter((p) => !samePageHeading(headings[p], headingsBase[p]))
+
+  // After a save, open the public page with ?cms=<save time>: useSiteContent
+  // passes it to /api/site-content, so the owner sees the new text at once
+  // instead of the edge-cached copy.
+  const freshHref = (href: string) => (headingsSavedAt ? `${href}?cms=${headingsSavedAt.getTime()}` : href)
+
+  const saveHeadings = async () => {
+    if (dirtyHeadingPages.length === 0) {
+      setToast({ kind: 'ok', text: 'No hay cambios nuevos: lo que ves ya está guardado.' })
+      return
+    }
+    const sent = headings
+    const heading_pages = Object.fromEntries(
+      dirtyHeadingPages.map((p) => [p, { value: sent[p], base: headingsBase[p] }]),
+    )
+    setBusyKey('settings')
+    try {
+      const res = await fetch('/api/admin/site-content', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ heading_pages }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        const text = json.message || 'Error al guardar'
+        if (res.status === 409) setHeadingsConflict(text)
+        setToast({ kind: 'err', text })
+        return
+      }
+      const saved = json.data?.headings as PageHeadings | null | undefined
+      if (saved) {
+        setHeadingsBase(saved)
+        // Keep anything typed while the save was in flight; otherwise take
+        // the server copy (it also carries other people's saved pages).
+        setHeadings((prev) => {
+          const next = { ...prev }
+          for (const p of HEADING_PAGE_KEYS) {
+            if (samePageHeading(prev[p], sent[p])) next[p] = saved[p]
+          }
+          return next
+        })
+      }
+      setHeadingsConflict(null)
+      setHeadingsSavedAt(new Date())
+      setToast({ kind: 'ok', text: 'Guardado ✓ — en el sitio en unos segundos (recarga la página para verlo).' })
+    } catch {
+      setToast({ kind: 'err', text: 'Error de conexión: no se guardó. Revisa el internet y vuelve a tocar Guardar.' })
     } finally {
       setBusyKey(null)
     }
@@ -606,13 +676,21 @@ export default function AdminContenidoPage() {
             <button
               key={p.id}
               onClick={() => setHeadingPage(p.id)}
-              className={`px-4 py-2 text-sm font-medium border transition ${
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border transition ${
                 headingPage === p.id
                   ? 'bg-[#FF6B35] border-[#FF6B35] text-white'
                   : 'bg-[#252320] border-[#3D3936] text-[#B8B0A8] hover:border-[#FF6B35]/50'
               }`}
             >
               {p.label}
+              {dirtyHeadingPages.includes(p.id) && (
+                <span
+                  role="img"
+                  title="Cambios sin guardar"
+                  aria-label="cambios sin guardar"
+                  className={`w-2 h-2 rounded-full ${headingPage === p.id ? 'bg-white' : 'bg-[#F59E0B]'}`}
+                />
+              )}
             </button>
           ))}
         </div>
@@ -621,7 +699,7 @@ export default function AdminContenidoPage() {
           <div className="flex items-center gap-2 flex-wrap text-sm">
             <span className="text-[#6B6560]">Aparece en:</span>
             <a
-              href={page.href}
+              href={freshHref(page.href)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-[#FF8C42] hover:text-[#FFB07A] font-medium"
@@ -664,14 +742,53 @@ export default function AdminContenidoPage() {
             </>
           )}
         </div>
-        <button
-          onClick={() => saveSettings({ headings })}
-          disabled={busyKey === 'settings'}
-          className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50"
-        >
-          {busyKey === 'settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Guardar
-        </button>
-        <p className="text-[10px] text-[#6B6560] mt-2">Se guardan los encabezados de todas las páginas a la vez.</p>
+        {headingsConflict && (
+          <div className="mb-4 flex items-start gap-3 bg-red-500/10 border border-red-500/40 px-4 py-3 flex-wrap">
+            <p className="text-sm text-red-300 flex-1 min-w-[14rem]">{headingsConflict}</p>
+            <button
+              onClick={load}
+              className="flex items-center gap-2 bg-[#252320] border border-red-500/40 hover:border-red-400 text-red-200 px-3 py-1.5 text-sm transition"
+            >
+              <RefreshCw className="w-4 h-4" /> Actualizar
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-x-4 gap-y-2 flex-wrap">
+          <button
+            onClick={saveHeadings}
+            disabled={busyKey === 'settings'}
+            className="flex items-center gap-2 bg-[#FF6B35] hover:bg-[#E85D04] text-white px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50"
+          >
+            {busyKey === 'settings' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Guardar
+          </button>
+          <p role="status" aria-live="polite" className="text-sm" data-testid="headings-status">
+            {busyKey === 'settings' ? (
+              <span className="text-[#B8B0A8]">Guardando…</span>
+            ) : dirtyHeadingPages.length > 0 ? (
+              <span className="text-[#F5C87A]">
+                ● Cambios sin guardar:{' '}
+                {dirtyHeadingPages.map((id) => HEADING_PAGES.find((p) => p.id === id)?.label ?? id).join(', ')}
+              </span>
+            ) : headingsSavedAt ? (
+              <span className="text-[#8FD694]">
+                ✓ Guardado a las{' '}
+                {headingsSavedAt.toLocaleTimeString('es-SV', { hour: 'numeric', minute: '2-digit' })} ·{' '}
+                <a
+                  href={freshHref(page.href)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-[#B5F0B9]"
+                >
+                  Ver en el sitio <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </span>
+            ) : null}
+          </p>
+        </div>
+        <p className="text-[10px] text-[#6B6560] mt-2">
+          Guardar guarda las páginas que editaste (marcadas con ●). Si alguien cambió la misma página desde
+          otra ventana o teléfono mientras editabas, no se borra su cambio: te avisamos.
+        </p>
       </div>
     )
   }
@@ -746,8 +863,22 @@ export default function AdminContenidoPage() {
         </button>
       </div>
 
+      {/* Fixed, not inline: the Guardar buttons sit below the fold, and an
+          inline banner at the top of the page was off-screen — saves looked
+          like they did nothing (Nov 17: six clicks in six minutes). */}
       {toast && (
-        <div className={`mb-5 px-4 py-3 text-sm border ${toast.kind === 'ok' ? 'bg-[#4CAF50]/10 border-[#4CAF50]/30 text-[#8FD694]' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>{toast.text}</div>
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="contenido-toast"
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] w-[min(92vw,560px)] px-4 py-3 text-sm border shadow-2xl shadow-black/60 backdrop-blur ${
+            toast.kind === 'ok'
+              ? 'bg-[#15291A]/95 border-[#4CAF50]/40 text-[#8FD694]'
+              : 'bg-[#2E1414]/95 border-red-500/50 text-red-300'
+          }`}
+        >
+          {toast.text}
+        </div>
       )}
 
       <div className="flex gap-2 mb-6 flex-wrap">

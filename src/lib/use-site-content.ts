@@ -21,7 +21,11 @@ export function useSiteContent(): SiteContentPayload {
   useEffect(() => {
     if (cached) return
     let cancelled = false
-    fetch('/api/site-content')
+    // ?cms=<n> (the admin's "Ver en el sitio" link after a save) asks for a
+    // copy the edge cache hasn't seen, so a just-saved change shows at once.
+    const bust = new URLSearchParams(window.location.search).get('cms')
+    const url = bust && /^\d{1,16}$/.test(bust) ? `/api/site-content?cms=${bust}` : '/api/site-content'
+    fetch(url)
       .then((r) => (r.ok ? r.json() : EMPTY_SITE_CONTENT))
       .then((data: Partial<SiteContentPayload>) => {
         cached = {
