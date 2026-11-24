@@ -3,6 +3,7 @@
 import { MapPin, ChevronDown } from 'lucide-react'
 import { useCartStore, useUIStore } from '@/lib/store'
 import { isLocationOpen } from '@/lib/data'
+import { useNow } from '@/lib/use-now'
 
 type OrderType = 'dine_in' | 'takeout' | 'delivery'
 
@@ -27,7 +28,9 @@ export default function NewLocationBar() {
   const openLocationSheet = useUIStore((s) => s.openLocationSheet)
   const language = useUIStore((s) => s.language)
 
-  const open = selectedLocation ? isLocationOpen(selectedLocation) : false
+  // null until the client clock exists (SSR / first render): neutral dot, no label.
+  const now = useNow()
+  const open = selectedLocation && now ? isLocationOpen(selectedLocation, now) : null
 
   const getLabel = (option: OrderTypeOption) =>
     language === 'es' ? option.labelEs : option.labelEn
@@ -59,11 +62,13 @@ export default function NewLocationBar() {
               {/* Open/closed status dot */}
               <span
                 className={`shrink-0 w-2 h-2 rounded-full ${
-                  open
-                    ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]'
-                    : 'bg-red-500'
+                  open === null
+                    ? 'bg-white/30'
+                    : open
+                      ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.7)]'
+                      : 'bg-red-500'
                 }`}
-                aria-label={open ? 'Abierto' : 'Cerrado'}
+                aria-label={open === null ? 'Horario' : open ? 'Abierto' : 'Cerrado'}
                 role="img"
               />
 
@@ -71,6 +76,7 @@ export default function NewLocationBar() {
                 {selectedLocation.shortName}
               </span>
 
+              {open !== null && (
               <span
                 className={`hidden sm:inline text-[11px] font-medium px-1.5 py-0.5 rounded-full shrink-0 ${
                   open
@@ -87,6 +93,7 @@ export default function NewLocationBar() {
                   ? 'Cerrado'
                   : 'Closed'}
               </span>
+              )}
             </span>
           ) : (
             <span className="text-[13px] font-medium text-white/50 group-hover:text-white/80 transition-colors duration-150">

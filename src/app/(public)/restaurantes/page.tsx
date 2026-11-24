@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { LOCATIONS, isLocationOpen, getGoogleMapsUrl } from '@/lib/data'
 import { useTranslation } from '@/lib/store'
 import { useSiteContent } from '@/lib/use-site-content'
+import { useNow } from '@/lib/use-now'
 
 const featureLabels: Record<string, Record<string, string>> = {
   'dine-in': { es: 'Comer aquí', en: 'Dine-in' },
@@ -67,6 +68,8 @@ function getCompactHours(location: typeof LOCATIONS[0], lang: string): string[] 
 
 export default function LocationsPage() {
   const { t, language } = useTranslation()
+  // Client-only clock: this page is prerendered, so open/closed must not be in the HTML.
+  const now = useNow()
   // Owner-uploaded covers (admin → Contenido Web) win over the static photos.
   const { locationMedia } = useSiteContent()
 
@@ -84,7 +87,7 @@ export default function LocationsPage() {
         {/* Location Cards */}
         <div className="space-y-6">
           {LOCATIONS.map((location, i) => {
-            const isOpen = isLocationOpen(location)
+            const isOpen = now ? isLocationOpen(location, now) : null
             return (
               <motion.div
                 key={location.id}
@@ -103,7 +106,8 @@ export default function LocationsPage() {
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent" />
-                  {/* Open/Closed badge */}
+                  {/* Open/Closed badge — client-side only (lib/use-now) */}
+                  {isOpen !== null && (
                   <div className="absolute top-4 right-4">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                       isOpen ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'
@@ -112,6 +116,7 @@ export default function LocationsPage() {
                       {isOpen ? t('locations.open') : t('locations.closed')}
                     </span>
                   </div>
+                  )}
                 </div>
 
                 {/* Content */}

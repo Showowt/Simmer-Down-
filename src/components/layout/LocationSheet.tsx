@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { X, MapPin, Navigation, Clock } from 'lucide-react'
 import { useUIStore, useCartStore, useGeolocation, useTranslation } from '@/lib/store'
 import { LOCATIONS, isLocationOpen, type Location } from '@/lib/data'
+import { useNow } from '@/lib/use-now'
 
 function formatDistance(km: number): string {
   if (km < 1) return `${Math.round(km * 1000)} m`
@@ -15,6 +16,7 @@ export default function LocationSheet() {
   const { setSelectedLocation } = useCartStore()
   const { language } = useTranslation()
   const { distances, loading, requestLocation, nearestLocation } = useGeolocation()
+  const now = useNow()
 
   // Request location when sheet opens
   useEffect(() => {
@@ -97,7 +99,7 @@ export default function LocationSheet() {
             {sortedLocations.map((entry, i) => {
               const loc = 'location' in entry ? entry.location : entry as unknown as Location
               const dist = entry.distanceKm
-              const open = isLocationOpen(loc)
+              const open = now ? isLocationOpen(loc, now) : null
               const isNearest = nearestLocation?.id === loc.id && distances !== null
 
               return (
@@ -123,10 +125,12 @@ export default function LocationSheet() {
                       </div>
                       <p className="text-white/40 text-xs mt-1 ml-6">{loc.address}, {loc.city}</p>
                       <div className="flex items-center gap-3 mt-2 ml-6">
+                        {open !== null && (
                         <span className={`flex items-center gap-1.5 text-xs font-medium ${open ? 'text-green-400' : 'text-red-400'}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-green-500' : 'bg-red-500'}`} />
                           {open ? (language === 'es' ? 'Abierto' : 'Open') : (language === 'es' ? 'Cerrado' : 'Closed')}
                         </span>
+                        )}
                         <span className="flex items-center gap-1 text-white/30 text-xs">
                           <Clock className="w-3 h-3" />
                           {loc.hours.weekday !== 'Cerrado' ? loc.hours.weekday : loc.hours.weekend}

@@ -516,11 +516,39 @@ export function calculateCartTotal(items: CartItem[]): { subtotal: number; tax: 
   return { subtotal, tax, total: subtotal };
 }
 
-export function isLocationOpen(location: Location): boolean {
-  const now = new Date();
+// Restaurants live in El Salvador (no DST, always UTC-6): "open now" is the
+// SV clock whatever the viewer's or the server's timezone. Vercel renders in
+// UTC, so the device-local getHours()/getDay() used before said "Cerrado" in
+// the HTML and "Abierto" in the browser → hydration error #418 on every page
+// that rendered a badge. Callers must pass a client-side `now` (lib/use-now)
+// and render nothing until they have one.
+const SV_CLOCK = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/El_Salvador',
+  weekday: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+const SV_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** Weekday (0 = Sunday) and minutes since midnight in El Salvador for an instant. */
+export function svClock(now: Date): { day: number; minutes: number } {
+  const parts = SV_CLOCK.formatToParts(now);
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? '';
+  const day = SV_WEEKDAYS.indexOf(get('weekday'));
+  const hour = parseInt(get('hour'), 10) % 24;
+  const minute = parseInt(get('minute'), 10);
+  return {
+    day: day >= 0 ? day : now.getUTCDay(),
+    minutes: (Number.isFinite(hour) ? hour : 0) * 60 + (Number.isFinite(minute) ? minute : 0),
+  };
+}
+
+export function isLocationOpen(location: Location, now: Date = new Date()): boolean {
+  const { day, minutes: currentTime } = svClock(now);
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
-  const todayKey = dayNames[now.getDay()];
-  const todayHours = location.hours[todayKey] || (now.getDay() >= 1 && now.getDay() <= 5 ? location.hours.weekday : location.hours.weekend);
+  const todayKey = dayNames[day];
+  const todayHours = location.hours[todayKey] || (day >= 1 && day <= 5 ? location.hours.weekday : location.hours.weekend);
   if (!todayHours || todayHours.toLowerCase() === 'cerrado' || todayHours.toLowerCase() === 'closed') return false;
   const match = todayHours.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   if (!match) return false;
@@ -531,7 +559,6 @@ export function isLocationOpen(location: Location): boolean {
   let closeTime = parseInt(ch) * 60 + parseInt(cm);
   if (cp.toUpperCase() === 'PM' && parseInt(ch) !== 12) closeTime += 720;
   if (cp.toUpperCase() === 'AM' && parseInt(ch) === 12) closeTime -= 720;
-  const currentTime = now.getHours() * 60 + now.getMinutes();
   if (closeTime < openTime) return currentTime >= openTime || currentTime <= closeTime;
   return currentTime >= openTime && currentTime <= closeTime;
 }

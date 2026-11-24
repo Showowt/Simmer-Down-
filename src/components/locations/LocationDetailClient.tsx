@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { useI18n, translations } from '@/lib/i18n'
 import { type Location, getGoogleMapsUrl, isLocationOpen } from '@/lib/data'
+import { useNow } from '@/lib/use-now'
 import { hasLodging } from '@/lib/rooms'
 import { useSiteContent } from '@/lib/use-site-content'
 
@@ -86,7 +87,9 @@ export default function LocationDetailClient({ location }: { location: Location 
   // Owner-uploaded photos (admin → Contenido Web): hero override + gallery.
   const { locationMedia } = useSiteContent()
   const media = locationMedia[location.id]
-  const isOpen = isLocationOpen(location)
+  // Client-only clock (lib/use-now): the badge is not in the server HTML.
+  const now = useNow()
+  const isOpen = now ? isLocationOpen(location, now) : null
   const mapsUrl = getGoogleMapsUrl(location)
   const whatsappUrl = `https://wa.me/${location.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
     locale === 'es'
@@ -162,7 +165,8 @@ export default function LocationDetailClient({ location }: { location: Location 
         <div className="absolute bottom-0 left-0 right-0 px-4 md:px-8 pb-8">
           <div className="max-w-5xl mx-auto">
             <motion.div initial="hidden" animate="visible" variants={stagger}>
-              {/* Open/Closed badge */}
+              {/* Open/Closed badge — rendered once the client clock exists */}
+              {isOpen !== null && (
               <motion.div variants={fadeUp} className="mb-4">
                 <span
                   className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide ${
@@ -177,6 +181,7 @@ export default function LocationDetailClient({ location }: { location: Location 
                     : locale === 'es' ? 'Cerrado' : 'Closed'}
                 </span>
               </motion.div>
+              )}
 
               <motion.h1
                 variants={fadeUp}

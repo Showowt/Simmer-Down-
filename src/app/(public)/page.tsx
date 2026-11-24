@@ -8,6 +8,7 @@ import { MapPin, ChevronRight, MessageCircle, Star, Flame, Leaf } from 'lucide-r
 import { useTranslation, useCartStore } from '@/lib/store'
 import { useMenuOverrides, mergeMenuItem } from '@/lib/use-menu-image-overrides'
 import { useSiteContent } from '@/lib/use-site-content'
+import { useNow } from '@/lib/use-now'
 import { formatStatPlus } from '@/lib/site-content'
 import {
   LOCATIONS,
@@ -64,6 +65,8 @@ export default function HomePage() {
   const addItem = useCartStore((s) => s.addItem)
   const menuOverrides = useMenuOverrides()
   const { locationMedia, historia } = useSiteContent()
+  // Client-only clock: the page is prerendered, so open/closed must not be in the HTML.
+  const now = useNow()
   const featuredItems = useMemo(
     () =>
       FEATURED_ITEMS.map((i) => mergeMenuItem(i, menuOverrides)).filter(
@@ -393,7 +396,7 @@ export default function HomePage() {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {LOCATIONS.map((loc, i) => {
-              const open = isLocationOpen(loc)
+              const open = now ? isLocationOpen(loc, now) : null
               // Owner-uploaded cover (admin → Contenido Web) wins over the static map.
               const coverImg =
                 locationMedia[loc.id]?.cover || LOCATION_COVER[loc.id] || loc.heroImage
@@ -417,7 +420,8 @@ export default function HomePage() {
                       sizes="280px"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                    {/* Open / closed badge */}
+                    {/* Open / closed badge — client-side only (see lib/use-now) */}
+                    {open !== null && (
                     <div className="absolute top-3 right-3">
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${
@@ -436,6 +440,7 @@ export default function HomePage() {
                           : locale === 'es' ? 'Cerrado' : 'Closed'}
                       </span>
                     </div>
+                    )}
                   </div>
 
                   {/* Card body */}
