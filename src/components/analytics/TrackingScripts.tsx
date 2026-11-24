@@ -15,7 +15,11 @@ const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 // Vercel env (NEXT_PUBLIC_GTM_ID / NEXT_PUBLIC_GA4_ID / NEXT_PUBLIC_META_PIXEL_ID),
 // so the site ships ad-ready with zero third-party weight otherwise.
 //
-// GTM: the canonical snippet (gtm.start event + gtm.js + <noscript> iframe).
+// GTM: the canonical snippet (gtm.start event + gtm.js). NO <noscript> iframe
+// on purpose: browsers parse noscript children as text, so React cannot
+// hydrate the <iframe> — the first deploy threw hydration error #418 on every
+// page. It only ever served JS-disabled visitors, whom GA4 can't track anyway;
+// @next/third-parties' GoogleTagManager omits it for the same reason.
 // With GTM alone, window.gtag becomes a dataLayer shim so every
 // lib/track.ts call (purchase, begin_checkout, …) reaches GTM as a custom
 // event of that name — the client wires GA4 tags to them inside GTM.
@@ -57,15 +61,6 @@ export default function TrackingScripts() {
             src={`https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`}
             strategy="afterInteractive"
           />
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager"
-            />
-          </noscript>
         </>
       )}
       {GA4_ID && (
