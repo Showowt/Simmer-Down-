@@ -15,9 +15,13 @@ import {
   Flame,
   Gift,
   Ticket,
+  Truck,
+  BedDouble,
+  type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
+import { orderChannelMeta, type OrderChannel } from "@/lib/order-channel";
 import Link from "next/link";
 import SegmentBreakdown from "@/components/admin/SegmentBreakdown";
 
@@ -56,6 +60,18 @@ function deltaPct(current: number, baseline: number): number | null {
 }
 
 const DAY_LETTERS = ["D", "L", "M", "X", "J", "V", "S"];
+
+// "Tipo" column of Pedidos Recientes — Boletos / Estadía / Delivery / Recoger…
+// (client, Nov 2026: ticket and estadía orders used to read as "Recoger").
+const CHANNEL_ICON: Record<OrderChannel, LucideIcon> = {
+  tickets: Ticket,
+  rooms: BedDouble,
+  delivery: Truck,
+  pickup: ShoppingBag,
+  dine_in: UtensilsCrossed,
+  takeout: ShoppingBag,
+  otro: ShoppingBag,
+};
 
 function dayLetter(dayStr: string): string {
   // dayStr is an SV-local YYYY-MM-DD; noon UTC avoids date shift
@@ -208,14 +224,6 @@ export default function AdminDashboard() {
       default:
         return status;
     }
-  };
-
-  const isDeliveryOrder = (order: Order) => {
-    if ("order_type" in order)
-      return (
-        (order as unknown as { order_type?: string }).order_type === "delivery"
-      );
-    return order.is_delivery;
   };
 
   return (
@@ -590,11 +598,20 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span
-                        className={`text-sm ${isDeliveryOrder(order) ? "text-[#FF6B35]" : "text-[#4CAF50]"}`}
-                      >
-                        {isDeliveryOrder(order) ? "Delivery" : "Recoger"}
-                      </span>
+                      {(() => {
+                        const ch = orderChannelMeta(order);
+                        const Icon = CHANNEL_ICON[ch.key];
+                        return (
+                          <span
+                            className="inline-flex items-center gap-1.5 text-sm font-medium"
+                            style={{ color: ch.color }}
+                            data-channel={ch.key}
+                          >
+                            <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                            {ch.label}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 font-medium text-[#FFF8F0] tabular-nums">
                       ${getOrderTotal(order).toFixed(2)}

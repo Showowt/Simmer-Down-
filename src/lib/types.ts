@@ -126,6 +126,12 @@ export interface Order {
   order_source?: OrderSourceProvider | string | null;
   external_order_id?: string | null;
   external_payload?: unknown;
+  // Ticket purchases (event_id) and estadía bookings (room_booking_id) are
+  // `orders` rows too — classify with lib/order-channel, never order_type alone.
+  event_id?: string | null;
+  ticket_quantity?: number | null;
+  ticket_lines?: unknown;
+  room_booking_id?: string | null;
   placed_at?: string | null;
   confirmed_at?: string | null;
   estimated_ready_at?: string | null;

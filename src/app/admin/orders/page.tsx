@@ -19,6 +19,11 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
+import {
+  deliveryAddressLine,
+  isDeliveryOrder,
+  orderChannelMeta,
+} from "@/lib/order-channel";
 
 const statusOptions = [
   "pending",
@@ -188,8 +193,8 @@ export default function AdminOrdersPage() {
         <div class="divider"></div>
         <p><strong>${order.customer_name}</strong></p>
         <p class="meta">${order.customer_phone}</p>
-        ${order.is_delivery && order.delivery_address ? `<p class="meta">${order.delivery_address}</p>` : ""}
-        <p class="meta">${order.is_delivery ? "DELIVERY" : "PARA RECOGER"}</p>
+        ${isDeliveryOrder(order) && deliveryAddressLine(order) ? `<p class="meta">${deliveryAddressLine(order)}</p>` : ""}
+        <p class="meta">${orderChannelMeta(order).printLabel}</p>
         <div class="divider"></div>
         <table>
           ${itemsHtml}
@@ -211,7 +216,7 @@ export default function AdminOrdersPage() {
               : ""
           }
           ${
-            order.is_delivery
+            isDeliveryOrder(order)
               ? `
           <tr>
             <td>Delivery:</td>
@@ -222,7 +227,7 @@ export default function AdminOrdersPage() {
           }
           <tr class="total">
             <td>TOTAL:</td>
-            <td style="text-align: right;">$${(order.total || 0).toFixed(2)}</td>
+            <td style="text-align: right;">$${(order.total_amount ?? order.total ?? 0).toFixed(2)}</td>
           </tr>
         </table>
         ${
@@ -481,11 +486,18 @@ export default function AdminOrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span
-                          className={`text-sm font-medium ${order.is_delivery ? "text-[#FF6B35]" : "text-[#4CAF50]"}`}
-                        >
-                          {order.is_delivery ? "Delivery" : "Recoger"}
-                        </span>
+                        {(() => {
+                          const ch = orderChannelMeta(order);
+                          return (
+                            <span
+                              className="text-sm font-medium"
+                              style={{ color: ch.color }}
+                              data-channel={ch.key}
+                            >
+                              {ch.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4 font-medium text-white">
                         <div className="flex flex-col gap-1">
@@ -672,7 +684,7 @@ export default function AdminOrdersPage() {
                         {selectedOrder.customer_name}
                       </p>
                       <p className="text-sm text-[#6B6560]">
-                        {selectedOrder.is_delivery ? "Delivery" : "Recoger"}
+                        {orderChannelMeta(selectedOrder).label}
                       </p>
                     </div>
                   </div>
@@ -685,10 +697,10 @@ export default function AdminOrdersPage() {
                       {selectedOrder.customer_phone}
                     </a>
                   </div>
-                  {selectedOrder.delivery_address && (
+                  {deliveryAddressLine(selectedOrder) && (
                     <div className="flex items-start gap-2 text-[#B8B0A8]">
                       <MapPin className="w-4 h-4 text-[#6B6560] mt-0.5" />
-                      <span>{selectedOrder.delivery_address}</span>
+                      <span>{deliveryAddressLine(selectedOrder)}</span>
                     </div>
                   )}
                 </div>
