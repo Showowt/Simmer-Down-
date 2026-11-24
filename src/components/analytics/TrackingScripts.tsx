@@ -5,13 +5,24 @@ import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { trackPageview } from "@/lib/track";
 
+// Google Tag Manager container (client's own, GTM-PQW4RLQQ — set in Vercel
+// PRODUCTION only, so previews / local dev never pollute their GA4 data).
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID;
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-// GA4 + Meta Pixel loaders — render NOTHING until the IDs exist in Vercel env
-// (NEXT_PUBLIC_GA4_ID / NEXT_PUBLIC_META_PIXEL_ID), so the site ships ad-ready
-// with zero third-party weight today. SPA navigations are tracked manually via
-// usePathname (gtag/fbq only auto-track the first full page load).
+// GTM + GA4 + Meta Pixel loaders — render NOTHING until the IDs exist in
+// Vercel env (NEXT_PUBLIC_GTM_ID / NEXT_PUBLIC_GA4_ID / NEXT_PUBLIC_META_PIXEL_ID),
+// so the site ships ad-ready with zero third-party weight otherwise.
+//
+// GTM: the canonical snippet (gtm.start event + gtm.js + <noscript> iframe).
+// With GTM alone, window.gtag becomes a dataLayer shim so every
+// lib/track.ts call (purchase, begin_checkout, …) reaches GTM as a custom
+// event of that name — the client wires GA4 tags to them inside GTM.
+// SPA navigations are tracked manually via usePathname (gtag/fbq only
+// auto-track the first full page load; GA4's enhanced measurement inside
+// GTM handles history changes on its own, the `page_view` push is inert
+// until a trigger is built for it).
 export default function TrackingScripts() {
   const pathname = usePathname();
   const isFirstLoad = useRef(true);
@@ -23,13 +34,40 @@ export default function TrackingScripts() {
       isFirstLoad.current = false;
       return;
     }
-    if (GA4_ID || META_PIXEL_ID) trackPageview(pathname);
+    if (GTM_ID || GA4_ID || META_PIXEL_ID) trackPageview(pathname);
   }, [pathname]);
 
-  if (!GA4_ID && !META_PIXEL_ID) return null;
+  if (!GTM_ID && !GA4_ID && !META_PIXEL_ID) return null;
 
   return (
     <>
+      {GTM_ID && (
+        <>
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+              if (typeof window.gtag !== 'function') {
+                window.gtag = function () { window.dataLayer.push(arguments); };
+              }
+            `}
+          </Script>
+          <Script
+            id="gtm-container"
+            src={`https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`}
+            strategy="afterInteractive"
+          />
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager"
+            />
+          </noscript>
+        </>
+      )}
       {GA4_ID && (
         <>
           <Script

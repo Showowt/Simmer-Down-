@@ -1,9 +1,11 @@
 // ============================================================
 // Conversion tracking — GA4 (gtag) + Meta Pixel (fbq) wrappers.
 //
-// DORMANT until NEXT_PUBLIC_GA4_ID / NEXT_PUBLIC_META_PIXEL_ID are set in
-// Vercel (see TrackingScripts.tsx): every call is a safe no-op when the
-// scripts aren't loaded, so this can ship before the ad accounts exist.
+// DORMANT until NEXT_PUBLIC_GTM_ID / NEXT_PUBLIC_GA4_ID / NEXT_PUBLIC_META_PIXEL_ID
+// are set in Vercel (see TrackingScripts.tsx): every call is a safe no-op when
+// the scripts aren't loaded, so this can ship before the ad accounts exist.
+// With GTM only, window.gtag is a dataLayer shim: every gtag('event', name, …)
+// below reaches GTM as a custom event called `name` (tags are wired there).
 // All amounts are USD.
 // ============================================================
 

@@ -4,13 +4,17 @@ import path from "path";
 // Content-Security-Policy — HARDENED.
 // ★ unsafe-eval REMOVED (was neutralizing XSS protection).
 // unsafe-inline kept for JSON-LD script tags and inline styles.
+// Google Tag Manager (NEXT_PUBLIC_GTM_ID): scripts from googletagmanager.com,
+// GA4 hits to *.google-analytics.com / *.analytics.google.com, Google Signals /
+// Ads to google.com + doubleclick, tagassistant.google.com for GTM Preview.
+// Any NEW third-party tag the client adds in GTM needs its host here too.
 const baseCsp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://*.vercel.app https://*.powertranz.com https://www.googletagmanager.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
-  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.facebook.com https://www.google-analytics.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://*.google-analytics.com https://*.google.com https://*.doubleclick.net",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://*.google.com https://*.doubleclick.net https://tagassistant.google.com",
   "frame-src https: http:",
   "form-action 'self' https://staging.ptranz.com https://gateway.ptranz.com",
   "frame-ancestors 'self'",
