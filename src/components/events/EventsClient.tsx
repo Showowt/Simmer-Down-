@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useI18n, translations } from "@/lib/i18n";
 import EventCountdown from "./EventCountdown";
 import { isLiveOrUpcoming, type PublicEvent } from "@/lib/events";
+import { EVENT_SEGMENTS, eventSegment, type EventSegment } from "@/lib/event-segments";
 import { useSiteContent } from "@/lib/use-site-content";
 import {
   formatEventDate,
@@ -58,6 +59,9 @@ export function EventsList({
   );
   // Render the fallback on SSR so the page isn't blank on first paint.
   const [loading, setLoading] = useState(false);
+  // Segment chips (Simmermanía / Frontline / Otros) — only rendered once the
+  // owner uses at least two segments; "all" is the default view.
+  const [segment, setSegment] = useState<EventSegment | "all">("all");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -91,9 +95,17 @@ export function EventsList({
   const visible = events.filter((e) =>
     isLiveOrUpcoming({ starts_at: e.starts_at, ends_at: e.ends_at, recurrence: e.recurrence }),
   );
-  const featured = visible.filter((e) => e.is_featured).slice(0, 2);
+  const segmentsInUse = EVENT_SEGMENTS.filter((s) =>
+    visible.some((e) => eventSegment(e.segment) === s.key),
+  );
+  const showSegmentChips = segmentsInUse.length >= 2;
+  const shown =
+    showSegmentChips && segment !== "all"
+      ? visible.filter((e) => eventSegment(e.segment) === segment)
+      : visible;
+  const featured = shown.filter((e) => e.is_featured).slice(0, 2);
   const heroIds = new Set(featured.map((e) => e.id));
-  const upcoming = visible.filter((e) => !heroIds.has(e.id));
+  const upcoming = shown.filter((e) => !heroIds.has(e.id));
 
   if (loading) {
     return (
@@ -114,6 +126,32 @@ export function EventsList({
 
   return (
     <>
+      {/* Segment chips — Simmermanía · Frontline · Otros */}
+      {showSegmentChips && (
+        <section className="pb-10" aria-label={locale === "es" ? "Filtrar por segmento" : "Filter by segment"}>
+          <div className="max-w-6xl mx-auto px-6 flex flex-wrap items-center gap-2">
+            {[{ key: "all" as const, label: locale === "es" ? "Todos" : "All", color: "#FFFFFF" }, ...segmentsInUse.map((s) => ({ key: s.key, label: locale === "es" ? s.label : s.label_en, color: s.color }))].map((chip) => {
+              const active = segment === chip.key;
+              return (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => setSegment(chip.key)}
+                  aria-pressed={active}
+                  data-segment={chip.key}
+                  className={`px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] border transition-colors ${
+                    active ? "text-[#0A0A0A]" : "text-white/70 hover:text-white border-white/15 hover:border-white/40"
+                  }`}
+                  style={active ? { backgroundColor: chip.color, borderColor: chip.color } : undefined}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Featured Events — full-width posters */}
       {featured.map((event) => (
         <section key={event.id} className="pb-16">

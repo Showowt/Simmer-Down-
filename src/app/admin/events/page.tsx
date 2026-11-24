@@ -26,6 +26,12 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import TicketTierEditor, { emptyTier } from "@/components/admin/TicketTierEditor";
 import { isPastEvent } from "@/lib/events";
 import {
+  EVENT_SEGMENTS,
+  eventSegment,
+  segmentMeta,
+  type EventSegment,
+} from "@/lib/event-segments";
+import {
   feePercent as eventFeePercent,
   money,
   parseTicketTiers,
@@ -73,6 +79,8 @@ interface DbEvent {
   is_featured: boolean;
   is_published: boolean;
   tags: string[] | null;
+  /** Programme (Simmermanía / Frontline / Otros) — see lib/event-segments. */
+  segment: EventSegment | string | null;
   created_at: string;
   updated_at: string;
 }
@@ -110,6 +118,7 @@ const emptyEvent: Partial<DbEvent> = {
   is_featured: false,
   is_published: true,
   tags: [],
+  segment: "otros",
 };
 
 // ─────────────────────────────────────────────
@@ -283,6 +292,7 @@ export default function AdminEventsPage() {
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<FilterMode>("upcoming");
+  const [segmentFilter, setSegmentFilter] = useState<EventSegment | "all">("all");
   const [search, setSearch] = useState("");
 
   // ── Fetch data ──────────────────────────────
@@ -390,6 +400,7 @@ export default function AdminEventsPage() {
         is_featured: !!editing.is_featured,
         is_published: editing.is_published !== false,
         tags: editing.tags || [],
+        segment: eventSegment(editing.segment),
         updated_at: new Date().toISOString(),
       };
 
@@ -506,6 +517,7 @@ export default function AdminEventsPage() {
       if (filter === "published" && !e.is_published) return false;
       if (filter === "draft" && e.is_published) return false;
       if (filter === "featured" && !e.is_featured) return false;
+      if (segmentFilter !== "all" && eventSegment(e.segment) !== segmentFilter) return false;
       if (
         search &&
         !e.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -580,6 +592,20 @@ export default function AdminEventsPage() {
           <option value="featured">
             Destacados ({events.filter((e) => e.is_featured).length})
           </option>
+        </select>
+        {/* Segmento: Simmermanía / Frontline / Otros (client request, Nov 2026) */}
+        <select
+          value={segmentFilter}
+          onChange={(e) => setSegmentFilter(e.target.value as EventSegment | "all")}
+          aria-label="Filtrar por segmento"
+          className="bg-[#252320] border border-[#3D3936] text-[#FFF8F0] px-4 py-2 focus:border-[#FF6B35] focus:outline-none"
+        >
+          <option value="all">Todos los segmentos</option>
+          {EVENT_SEGMENTS.map((s) => (
+            <option key={s.key} value={s.key}>
+              {s.label} ({events.filter((e) => eventSegment(e.segment) === s.key).length})
+            </option>
+          ))}
         </select>
       </div>
 
@@ -669,6 +695,18 @@ export default function AdminEventsPage() {
 
               {/* Card Body */}
               <div className="p-4">
+                {(() => {
+                  const seg = segmentMeta(event.segment);
+                  return (
+                    <span
+                      className="inline-block mb-2 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide border"
+                      style={{ color: seg.color, borderColor: `${seg.color}66`, backgroundColor: `${seg.color}14` }}
+                      data-testid="event-segment"
+                    >
+                      {seg.label}
+                    </span>
+                  );
+                })()}
                 <h3 className="font-semibold text-[#FFF8F0] text-lg mb-1 truncate">
                   {event.title}
                 </h3>
@@ -850,6 +888,30 @@ export default function AdminEventsPage() {
                   className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
                   placeholder="Noche de Jazz"
                 />
+              </div>
+
+              {/* Segmento: which programme the event belongs to */}
+              <div>
+                <label className="block text-sm font-medium text-[#B8B0A8] mb-2" htmlFor="event-segment">
+                  Segmento
+                </label>
+                <select
+                  id="event-segment"
+                  value={eventSegment(editing.segment)}
+                  onChange={(e) =>
+                    setEditing({ ...editing, segment: e.target.value as EventSegment })
+                  }
+                  className="w-full px-4 py-3 bg-[#1F1D1A] border border-[#3D3936] text-[#FFF8F0] focus:border-[#FF6B35] focus:outline-none"
+                >
+                  {EVENT_SEGMENTS.map((s) => (
+                    <option key={s.key} value={s.key}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-[#6B6560] mt-1">
+                  Agrupa el evento en el panel y en la página TicketManía (filtros Simmermanía · Frontline · Otros).
+                </p>
               </div>
 
               {/* Slug */}

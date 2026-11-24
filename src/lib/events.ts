@@ -36,6 +36,8 @@ export interface PublicEvent {
   is_featured?: boolean
   is_published?: boolean
   tags?: string[] | null
+  /** Programme: simmermania | frontline | otros (lib/event-segments). Older rows read as "otros". */
+  segment?: string | null
   created_at?: string
   rsvp_enabled?: boolean
   has_capacity_limit?: boolean
