@@ -14,6 +14,7 @@ import {
   money,
   percentLabel,
 } from "@/lib/ticket-tiers";
+import { trackBeginCheckout } from "@/lib/track";
 
 export interface CheckoutTier {
   id: string;
@@ -155,13 +156,15 @@ export default function TicketCheckout({
       setOrderId(data.orderId);
       setOrderNumber(data.orderNumber ?? null);
       setStep("payment");
+      // GA4 funnel: reached the card step (add_payment_info fires on submit, purchase on approval).
+      trackBeginCheckout(totals.total);
     } catch (e) {
       console.error("[TicketCheckout] create order failed", e);
       setError(e instanceof Error ? e.message : "Error al crear la orden.");
     } finally {
       setLoading(false);
     }
-  }, [totals.seats, typed, detailsValid, event.slug, lines, name, phone]);
+  }, [totals.seats, totals.total, typed, detailsValid, event.slug, lines, name, phone]);
 
   // Step 2 → 3: initiate the certified PowerTranz payment.
   const handlePayment = useCallback(
@@ -503,12 +506,14 @@ export default function TicketCheckout({
         {step === "payment" && (
           <div className="space-y-4">
             <div className="bg-[#141414] border border-white/10 rounded-xl p-5">{summary}</div>
-            {/* Don't make the buyer type their WhatsApp twice. */}
+            {/* Name + WhatsApp come from the previous step — never typed twice. */}
             <CardPaymentForm
               onSubmit={handlePayment}
               loading={loading}
               error={error}
               defaultBilling={{ phone: phone.trim() }}
+              defaultHolder={name.trim()}
+              amountLabel={money(totals.total)}
             />
           </div>
         )}

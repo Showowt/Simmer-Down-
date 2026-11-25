@@ -592,6 +592,8 @@ export default function CheckoutPage() {
                 email: customerEmail || undefined,
                 phone: customerPhone || undefined,
               }}
+              defaultHolder={name}
+              amountLabel={`$${orderData.total.toFixed(2)}`}
             />
           </motion.div>
         )}

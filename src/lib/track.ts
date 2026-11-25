@@ -87,3 +87,15 @@ export function trackBeginCheckout(value?: number): void {
     ...(typeof value === "number" ? { value, currency: "USD" } : {}),
   });
 }
+
+/** Card form submitted with valid data (before the bank answers) — the step
+ *  between begin_checkout and purchase where ticket buyers were dropping. */
+export function trackAddPaymentInfo(value?: number): void {
+  gtag("event", "add_payment_info", {
+    payment_type: "card",
+    ...(typeof value === "number" ? { value, currency: "USD" } : {}),
+  });
+  fbq("track", "AddPaymentInfo", {
+    ...(typeof value === "number" ? { value, currency: "USD" } : {}),
+  });
+}
