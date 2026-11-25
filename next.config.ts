@@ -7,14 +7,17 @@ import path from "path";
 // Google Tag Manager (NEXT_PUBLIC_GTM_ID): scripts from googletagmanager.com,
 // GA4 hits to *.google-analytics.com / *.analytics.google.com, Google Signals /
 // Ads to google.com + doubleclick, tagassistant.google.com for GTM Preview.
+// Google Signals (ga-audiences) pixels go to the visitor's Google ccTLD
+// (google.com.sv for El Salvador, .co, .mx, .gt…) — listed explicitly, CSP
+// cannot wildcard a TLD. The client's GA4 tag (G-XNL18V2PFV) already fires them.
 // Any NEW third-party tag the client adds in GTM needs its host here too.
 const baseCsp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://*.vercel.app https://*.powertranz.com https://www.googletagmanager.com https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.fontshare.com",
   "font-src 'self' https://fonts.gstatic.com https://api.fontshare.com data:",
-  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://*.google-analytics.com https://*.google.com https://*.doubleclick.net",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://*.google.com https://*.doubleclick.net https://tagassistant.google.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.facebook.com https://www.google-analytics.com https://*.google-analytics.com https://*.google.com https://*.google.com.sv https://*.google.com.gt https://*.google.com.hn https://*.google.com.ni https://*.google.com.cr https://*.google.com.pa https://*.google.com.mx https://*.google.com.co https://*.google.es https://*.doubleclick.net",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://staging.ptranz.com https://gateway.ptranz.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://*.google.com https://*.google.com.sv https://*.google.com.gt https://*.google.com.hn https://*.google.com.ni https://*.google.com.cr https://*.google.com.pa https://*.google.com.mx https://*.google.com.co https://*.google.es https://*.doubleclick.net https://tagassistant.google.com",
   "frame-src https: http:",
   "form-action 'self' https://staging.ptranz.com https://gateway.ptranz.com",
   "frame-ancestors 'self'",
