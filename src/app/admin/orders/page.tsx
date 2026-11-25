@@ -20,9 +20,11 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
 import {
+  ORDER_EVENT_EMBED,
   deliveryAddressLine,
   isDeliveryOrder,
   orderChannelMeta,
+  ticketEventLine,
 } from "@/lib/order-channel";
 
 const statusOptions = [
@@ -76,7 +78,7 @@ export default function AdminOrdersPage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("orders")
-        .select("*")
+        .select(`*, ${ORDER_EVENT_EMBED}`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -195,6 +197,7 @@ export default function AdminOrdersPage() {
         <p class="meta">${order.customer_phone}</p>
         ${isDeliveryOrder(order) && deliveryAddressLine(order) ? `<p class="meta">${deliveryAddressLine(order)}</p>` : ""}
         <p class="meta">${orderChannelMeta(order).printLabel}</p>
+        ${ticketEventLine(order) ? `<p class="meta">${ticketEventLine(order)}</p>` : ""}
         <div class="divider"></div>
         <table>
           ${itemsHtml}
@@ -260,7 +263,11 @@ export default function AdminOrdersPage() {
       const matchesOrder = (o.order_number || o.id)
         .toLowerCase()
         .includes(searchLower);
-      if (!matchesName && !matchesPhone && !matchesOrder) return false;
+      const matchesEvent = (o.event?.title ?? "")
+        .toLowerCase()
+        .includes(searchLower);
+      if (!matchesName && !matchesPhone && !matchesOrder && !matchesEvent)
+        return false;
     }
 
     // Date range filter
@@ -488,14 +495,26 @@ export default function AdminOrdersPage() {
                       <td className="px-6 py-4">
                         {(() => {
                           const ch = orderChannelMeta(order);
+                          const eventLine = ticketEventLine(order);
                           return (
-                            <span
-                              className="text-sm font-medium"
-                              style={{ color: ch.color }}
-                              data-channel={ch.key}
-                            >
-                              {ch.label}
-                            </span>
+                            <>
+                              <span
+                                className="text-sm font-medium"
+                                style={{ color: ch.color }}
+                                data-channel={ch.key}
+                              >
+                                {ch.label}
+                              </span>
+                              {eventLine && (
+                                <p
+                                  className="mt-0.5 max-w-[240px] truncate text-xs text-[#B8B0A8]"
+                                  title={eventLine}
+                                  data-testid="order-event"
+                                >
+                                  {eventLine}
+                                </p>
+                              )}
+                            </>
                           );
                         })()}
                       </td>
@@ -686,6 +705,14 @@ export default function AdminOrdersPage() {
                       <p className="text-sm text-[#6B6560]">
                         {orderChannelMeta(selectedOrder).label}
                       </p>
+                      {ticketEventLine(selectedOrder) && (
+                        <p
+                          className="text-sm text-[#FBBF24]"
+                          data-testid="order-event"
+                        >
+                          {ticketEventLine(selectedOrder)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-[#B8B0A8]">
@@ -710,7 +737,14 @@ export default function AdminOrdersPage() {
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-[#6B6560]">Items</h3>
                 <div className="bg-[#1F1D1A] p-4 space-y-3">
-                  {selectedOrder.items_json ? (
+                  {ticketEventLine(selectedOrder) ? (
+                    <div className="flex justify-between text-[#B8B0A8]">
+                      <span>{ticketEventLine(selectedOrder)}</span>
+                      <span className="font-medium">
+                        ${(selectedOrder.total_amount ?? 0).toFixed(2)}
+                      </span>
+                    </div>
+                  ) : selectedOrder.items_json ? (
                     Array.isArray(selectedOrder.items_json) ? (
                       selectedOrder.items_json.map(
                         (

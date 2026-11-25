@@ -21,7 +21,12 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Order } from "@/lib/types";
-import { orderChannelMeta, type OrderChannel } from "@/lib/order-channel";
+import {
+  ORDER_EVENT_EMBED,
+  orderChannelMeta,
+  ticketEventLine,
+  type OrderChannel,
+} from "@/lib/order-channel";
 import Link from "next/link";
 import SegmentBreakdown from "@/components/admin/SegmentBreakdown";
 
@@ -90,7 +95,7 @@ export default function AdminDashboard() {
         fetch("/api/admin/dashboard").then((r) => (r.ok ? r.json() : null)),
         supabase
           .from("orders")
-          .select("*")
+          .select(`*, ${ORDER_EVENT_EMBED}`)
           .order("created_at", { ascending: false })
           .limit(8),
       ]);
@@ -601,15 +606,27 @@ export default function AdminDashboard() {
                       {(() => {
                         const ch = orderChannelMeta(order);
                         const Icon = CHANNEL_ICON[ch.key];
+                        const eventLine = ticketEventLine(order);
                         return (
-                          <span
-                            className="inline-flex items-center gap-1.5 text-sm font-medium"
-                            style={{ color: ch.color }}
-                            data-channel={ch.key}
-                          >
-                            <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                            {ch.label}
-                          </span>
+                          <>
+                            <span
+                              className="inline-flex items-center gap-1.5 text-sm font-medium"
+                              style={{ color: ch.color }}
+                              data-channel={ch.key}
+                            >
+                              <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                              {ch.label}
+                            </span>
+                            {eventLine && (
+                              <p
+                                className="mt-0.5 max-w-[240px] truncate text-xs text-[#B8B0A8]"
+                                title={eventLine}
+                                data-testid="order-event"
+                              >
+                                {eventLine}
+                              </p>
+                            )}
+                          </>
                         );
                       })()}
                     </td>

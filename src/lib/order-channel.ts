@@ -49,6 +49,36 @@ export const ORDER_CHANNEL_META: Record<OrderChannel, OrderChannelMeta> = {
   otro: { key: "otro", label: "Otro", printLabel: "OTRO", color: "#6B6560" },
 };
 
+/**
+ * PostgREST embed that attaches the event to each order on admin reads
+ * (`.select(`*, ${ORDER_EVENT_EMBED}`)`). The FK hint is required: PostgREST
+ * also sees orders ↔ events through event_tickets (a junction table) and
+ * rejects the bare `events(...)` embed as ambiguous. Client request
+ * (2026-11-25): "para identificar el evento podríamos hacer algo".
+ */
+export const ORDER_EVENT_EMBED =
+  "event:events!orders_event_id_fkey(id,title,title_es,starts_at)";
+
+export interface OrderEventInput extends OrderChannelInput {
+  ticket_quantity?: number | null;
+  event?: { title?: string | null; title_es?: string | null } | null;
+}
+
+/**
+ * "Los Iracundos Live in Concert · 2 boletos" for a ticket order. Null for
+ * every other channel, and for a ticket order whose event this reader cannot
+ * see (RLS: staff without admin/manager only read published events) — the
+ * row then shows plain "Boletos" instead of a blank line.
+ */
+export function ticketEventLine(o: OrderEventInput): string | null {
+  if (orderChannel(o) !== "tickets") return null;
+  const title = (o.event?.title ?? o.event?.title_es ?? "").trim();
+  if (!title) return null;
+  const qty = Number(o.ticket_quantity ?? 0);
+  if (!Number.isFinite(qty) || qty <= 0) return title;
+  return `${title} · ${qty} boleto${qty === 1 ? "" : "s"}`;
+}
+
 /** Classify an order. Tickets and estadía win over order_type (they are stored as 'pickup'). */
 export function orderChannel(o: OrderChannelInput): OrderChannel {
   if (o.event_id) return "tickets";

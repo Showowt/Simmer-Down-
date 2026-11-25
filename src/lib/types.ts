@@ -99,6 +99,14 @@ export interface Payment {
   created_at: string;
 }
 
+/** The event a ticket order belongs to — embedded on admin reads (lib/order-channel ORDER_EVENT_EMBED). */
+export interface OrderEventRef {
+  id: string;
+  title: string;
+  title_es?: string | null;
+  starts_at?: string | null;
+}
+
 export interface Order {
   id: string;
   order_number?: string;
@@ -132,6 +140,7 @@ export interface Order {
   ticket_quantity?: number | null;
   ticket_lines?: unknown;
   room_booking_id?: string | null;
+  event?: OrderEventRef | null;
   placed_at?: string | null;
   confirmed_at?: string | null;
   estimated_ready_at?: string | null;
