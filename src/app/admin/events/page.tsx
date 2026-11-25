@@ -283,8 +283,14 @@ function generateSlug(title: string): string {
 // ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
+// After a save or a publish toggle: tell the admin whether the event is live.
+// Client question (2026-11-25): "subimos este evento pero no aparece en la
+// página" — it was a draft, and nothing on screen said a draft is invisible.
+type SaveNotice = { kind: "draft" | "published"; event: DbEvent };
+
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<DbEvent[]>([]);
+  const [notice, setNotice] = useState<SaveNotice | null>(null);
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -294,6 +300,13 @@ export default function AdminEventsPage() {
   const [filter, setFilter] = useState<FilterMode>("upcoming");
   const [segmentFilter, setSegmentFilter] = useState<EventSegment | "all">("all");
   const [search, setSearch] = useState("");
+
+  // A "publicado" notice clears itself; a draft notice stays until acted on.
+  useEffect(() => {
+    if (notice?.kind !== "published") return;
+    const t = setTimeout(() => setNotice(null), 8000);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   // ── Fetch data ──────────────────────────────
   useEffect(() => {
@@ -412,7 +425,9 @@ export default function AdminEventsPage() {
           .single();
 
         if (insertErr) throw insertErr;
-        setEvents([withParsedTiers(data as DbEvent), ...events]);
+        const saved = withParsedTiers(data as DbEvent);
+        setEvents([saved, ...events]);
+        setNotice({ kind: saved.is_published ? "published" : "draft", event: saved });
       } else if (editing.id) {
         // Read the row back: the DB normalises the ticket types and price.
         const { data, error: updateErr } = await supabase
@@ -425,6 +440,7 @@ export default function AdminEventsPage() {
         if (updateErr) throw updateErr;
         const saved = withParsedTiers(data as DbEvent);
         setEvents(events.map((e) => (e.id === saved.id ? saved : e)));
+        setNotice({ kind: saved.is_published ? "published" : "draft", event: saved });
       }
 
       setEditing(null);
@@ -474,13 +490,12 @@ export default function AdminEventsPage() {
         .eq("id", event.id);
 
       if (updateErr) throw updateErr;
-      setEvents(
-        events.map((e) =>
-          e.id === event.id ? { ...e, is_published: next } : e,
-        ),
-      );
+      const updated = { ...event, is_published: next };
+      setEvents(events.map((e) => (e.id === event.id ? updated : e)));
+      setNotice({ kind: next ? "published" : "draft", event: updated });
     } catch (err) {
       console.error("[AdminEventsPage] togglePublished:", err);
+      alert("No se pudo cambiar la publicación. Revisa tu internet e intenta de nuevo.");
     }
   };
 
@@ -608,6 +623,62 @@ export default function AdminEventsPage() {
           ))}
         </select>
       </div>
+
+      {/* Save / publish notice */}
+      {notice && (
+        <div
+          role="status"
+          data-testid="event-save-notice"
+          data-kind={notice.kind}
+          className={`mb-6 flex flex-wrap items-center gap-3 border px-4 py-3 ${
+            notice.kind === "draft"
+              ? "border-[#FBBF24]/40 bg-[#FBBF24]/10"
+              : "border-[#4CAF50]/40 bg-[#4CAF50]/10"
+          }`}
+        >
+          {notice.kind === "draft" ? (
+            <>
+              <EyeOff className="w-5 h-5 shrink-0 text-[#FBBF24]" aria-hidden="true" />
+              <p className="flex-1 min-w-[200px] text-sm text-[#FFF8F0]">
+                <strong>«{notice.event.title_es || notice.event.title}»</strong> quedó
+                guardado como <strong>borrador</strong>: no aparece en la página hasta
+                que lo publiques.
+              </p>
+              <button
+                type="button"
+                onClick={() => togglePublished(notice.event)}
+                className="bg-[#FBBF24] px-4 py-2 text-xs font-semibold text-[#1F1D1A] hover:bg-[#F5D47A] transition"
+              >
+                Publicar ahora
+              </button>
+            </>
+          ) : (
+            <>
+              <Eye className="w-5 h-5 shrink-0 text-[#4CAF50]" aria-hidden="true" />
+              <p className="flex-1 min-w-[200px] text-sm text-[#FFF8F0]">
+                <strong>«{notice.event.title_es || notice.event.title}»</strong> está{" "}
+                <strong>publicado</strong> y ya aparece en TicketManía.
+              </p>
+              <a
+                href={`/ticketmania/${notice.event.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-semibold text-[#4CAF50] hover:underline"
+              >
+                Ver en la página
+              </a>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            aria-label="Cerrar aviso"
+            className="p-1 text-[#6B6560] hover:text-[#FFF8F0] transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Content States */}
       {loading ? (
