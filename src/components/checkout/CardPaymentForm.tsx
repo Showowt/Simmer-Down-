@@ -458,8 +458,8 @@ export default function CardPaymentForm({
           {fieldError('email')}
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="col-span-2">
+        <div className="grid grid-cols-5 gap-3">
+          <div className="col-span-3">
             <label htmlFor="card-line1" className="block text-xs text-white/50 mb-1.5">
               Dirección
             </label>
@@ -480,7 +480,7 @@ export default function CardPaymentForm({
             />
             {fieldError('line1')}
           </div>
-          <div>
+          <div className="col-span-2">
             <label htmlFor="card-city" className="block text-xs text-white/50 mb-1.5">
               Ciudad
             </label>
