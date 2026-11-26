@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, type FormEvent } from 'react'
+import { useState, useCallback, useEffect, useRef, type FormEvent } from 'react'
 import { CreditCard, Lock, Eye, EyeOff, ShieldCheck, Pencil } from 'lucide-react'
 import type { CardPaymentInput, BillingAddressInput } from '@/lib/powertranz/schemas'
 import { trackAddPaymentInfo } from '@/lib/track'
@@ -129,6 +129,65 @@ const FIELD_LABELS: Record<Field, string> = {
 }
 
 // ═════════════════════════════════════════════════
+// Final gate: the server's own rules
+//
+// 2026-11-26: "cesar membreno@gmail.com" (space) and accented emails passed the
+// loose check above, then /api/payments/initiate refused them with a generic
+// "revisa los campos" before any payment row existed — the buyer saw every
+// field looking fine and gave up. Before sending, the payload now runs through
+// the exact schemas the server uses (lib/powertranz/schemas), so the form can
+// never send what the server will refuse, and the failing field is named.
+// ═════════════════════════════════════════════════
+
+const PATH_TO_FIELD: Record<string, Field> = {
+  'card.pan': 'pan',
+  'card.exp': 'exp',
+  'card.cvv': 'cvv',
+  'card.holder': 'holder',
+  'billing.email': 'email',
+  'billing.line1': 'line1',
+  'billing.line2': 'line1',
+  'billing.city': 'city',
+  'billing.phone': 'phone',
+}
+
+const GATE_MESSAGES: Record<Field, string> = {
+  pan: 'Revisa el número de tarjeta',
+  exp: 'Revisa el vencimiento (MM/AA)',
+  cvv: 'Revisa el CVV',
+  holder: 'Solo letras en el nombre (sin números ni símbolos)',
+  email: 'Revisa tu correo: sin espacios ni tildes (ej. nombre@gmail.com)',
+  line1: 'Revisa la dirección',
+  city: 'Revisa la ciudad (máximo 60 letras)',
+  phone: 'Revisa tu número de WhatsApp',
+}
+
+const loadServerRules = () => import('@/lib/powertranz/schemas')
+
+async function serverRuleErrors(data: CardFormData): Promise<Partial<Record<Field, string>>> {
+  try {
+    const { cardPaymentSchema, billingAddressSchema } = await loadServerRules()
+    const errors: Partial<Record<Field, string>> = {}
+    const checks = [
+      ['card', cardPaymentSchema.safeParse(data.card)],
+      ['billing', billingAddressSchema.safeParse(data.billing)],
+    ] as const
+    for (const [prefix, result] of checks) {
+      if (result.success) continue
+      for (const issue of result.error.issues) {
+        const field = PATH_TO_FIELD[`${prefix}.${issue.path.join('.')}`]
+        if (field && !errors[field]) errors[field] = GATE_MESSAGES[field]
+      }
+    }
+    return errors
+  } catch (error) {
+    // Chunk failed to load (flaky mobile data): the server still validates.
+    console.error('[CardPaymentForm] server rules unavailable', error)
+    return {}
+  }
+}
+
+// ═════════════════════════════════════════════════
 // Component
 //
 // Shortened 2026-11-24: 7 of 8 ticket buyers in one night reached this form
@@ -165,6 +224,12 @@ export default function CardPaymentForm({
   // Validation
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<Field, string>>>({})
   const formRef = useRef<HTMLFormElement>(null)
+  const checkingRef = useRef(false)
+
+  // Warm the server-rules chunk while the buyer types, so the final gate is instant.
+  useEffect(() => {
+    void loadServerRules().catch(() => undefined)
+  }, [])
 
   const brand = detectBrand(pan)
   const maxCvv = brand === 'amex' ? 4 : 3
@@ -267,15 +332,23 @@ export default function CardPaymentForm({
     }
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (loading) return
+    if (loading || checkingRef.current) return
     setFieldErrors({})
     const data = validate()
-    if (data) {
-      trackAddPaymentInfo()
-      onSubmit(data)
+    if (!data) return
+    checkingRef.current = true
+    const gate = await serverRuleErrors(data)
+    checkingRef.current = false
+    const first = FIELD_ORDER.find((f) => gate[f])
+    if (first) {
+      setFieldErrors(gate)
+      focusField(first)
+      return
     }
+    trackAddPaymentInfo()
+    onSubmit(data)
   }
 
   const invalid = FIELD_ORDER.filter((f) => fieldErrors[f])

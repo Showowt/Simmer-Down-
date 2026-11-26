@@ -52,6 +52,38 @@ interface InitiateFailure {
 
 type InitiateResponse = InitiateSuccess | InitiateFailure;
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * The buyer pressed Pagar but the form data was refused before the bank.
+ * Until 2026-11-26 this left NO trace — 9 ticket orders in a row sat
+ * "Pendiente" with zero payment rows and nobody could tell whether the buyer
+ * ever tried. Keep a card-free audit row (field NAMES only, never values) so
+ * "no pudo pagar" is answerable from the database. An unknown order id is
+ * ignored (FK violation); any other failure is logged, never thrown.
+ */
+async function recordValidationRefusal(body: unknown, fields: string[]): Promise<void> {
+  const orderId =
+    typeof body === "object" && body !== null ? (body as { orderId?: unknown }).orderId : undefined;
+  if (typeof orderId !== "string" || !UUID_RE.test(orderId)) return;
+  const names = [...new Set(fields)].join(", ");
+  logger.warn("[payments/initiate] validation refused", { orderId, fields: names });
+  try {
+    const { error } = await createServiceClient().from("payment_attempts").insert({
+      order_id: orderId,
+      stage: "sale",
+      http_status: 400,
+      response_message: "Rechazado por validación antes del banco",
+      error_detail: `validation: ${names}`.slice(0, 500),
+    });
+    if (error && error.code !== "23503") {
+      logger.error("[payments/initiate] record refusal failed", error.message);
+    }
+  } catch (err) {
+    logger.error("[payments/initiate] record refusal failed", err);
+  }
+}
+
 export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<InitiateResponse>> {
@@ -79,9 +111,9 @@ export async function POST(
 
   const parsed = initiatePaymentSchema.safeParse(body);
   if (!parsed.success) {
-    return validationErrorResponse(
-      formatZodErrors(parsed.error),
-    ) as NextResponse<InitiateResponse>;
+    const errors = formatZodErrors(parsed.error);
+    await recordValidationRefusal(body, errors.map((e) => e.field));
+    return validationErrorResponse(errors) as NextResponse<InitiateResponse>;
   }
   const { orderId, card, billing } = parsed.data;
   const cardLast4 = last4(card.pan);
