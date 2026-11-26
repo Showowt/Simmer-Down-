@@ -10,6 +10,7 @@ import { useCartStore } from '@/lib/store'
 import { useAuth } from '@/hooks/useAuth'
 import { useI18n, translations } from '@/lib/i18n'
 import LanguageToggle from '@/components/LanguageToggle'
+import { BRAND_LOGO, logoHeightClass } from '@/lib/brand'
 
 export default function Header() {
   const pathname = usePathname()
@@ -52,7 +53,7 @@ export default function Header() {
               href="/"
               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
             >
-              <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down — Pizzeria y Restaurante" width={120} height={40} className="h-10 w-auto" />
+              <Image src={BRAND_LOGO.src} alt="Simmer Down — Pizzeria y Restaurante" width={BRAND_LOGO.width} height={BRAND_LOGO.height} className={`${logoHeightClass('h-10', 'h-12')} w-auto`} />
             </Link>
 
             {/* Desktop Nav — clean, spaced, understated */}
@@ -134,7 +135,7 @@ export default function Header() {
             >
               <div className="space-y-1 text-center">
                 <div className="mb-8">
-                  <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={168} height={56} className="h-14 w-auto mx-auto" />
+                  <Image src={BRAND_LOGO.src} alt="Simmer Down" width={BRAND_LOGO.width} height={BRAND_LOGO.height} className={`${logoHeightClass('h-14', 'h-16')} w-auto mx-auto`} />
                 </div>
                 {navLinks.map((link, i) => (
                   <motion.div

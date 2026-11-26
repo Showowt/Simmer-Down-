@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { BRAND_LOGO, logoHeightClass } from '@/lib/brand'
 import { usePathname } from 'next/navigation'
 import { Globe, Menu, X } from 'lucide-react'
 import { useUIStore, useTranslation } from '@/lib/store'
@@ -71,11 +72,11 @@ export default function NewHeader() {
             aria-label="Simmer Down — Inicio"
           >
             <Image
-              src="/logos/logo-simmer-light.svg"
+              src={BRAND_LOGO.src}
               alt="Simmer Down"
-              width={120}
-              height={32}
-              className="h-8 w-auto"
+              width={BRAND_LOGO.width}
+              height={BRAND_LOGO.height}
+              className={`${logoHeightClass('h-8', 'h-10')} w-auto`}
               priority
             />
           </Link>

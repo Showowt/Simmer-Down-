@@ -13,7 +13,7 @@ import { formatStatPlus } from '@/lib/site-content'
 import {
   LOCATIONS,
   MENU_CATEGORIES,
-  getFeaturedItems,
+  MENU_ITEMS,
   formatPrice,
   isLocationOpen,
 } from '@/lib/data'
@@ -54,10 +54,6 @@ const LOCATION_COVER: Record<string, string> = {
   'simmer-garden': '/images/locations/drive-garden/garden-drive-04.jpg',
 }
 
-// ─── Pre-computed featured items (stable reference) ───────────────────────
-
-const FEATURED_ITEMS = getFeaturedItems()
-
 // ─── Homepage ─────────────────────────────────────────────────────────────
 
 export default function HomePage() {
@@ -67,13 +63,19 @@ export default function HomePage() {
   const { locationMedia, historia } = useSiteContent()
   // Client-only clock: the page is prerendered, so open/closed must not be in the HTML.
   const now = useNow()
-  const featuredItems = useMemo(
-    () =>
-      FEATURED_ITEMS.map((i) => mergeMenuItem(i, menuOverrides)).filter(
-        (i) => i.isAvailable && i.isFeatured,
-      ),
-    [menuOverrides],
-  )
+  // «Destacado» in admin Carta decides what shows here. This used to start
+  // from the items featured in code, so the admin switch could only REMOVE an
+  // item — the client starred both combos (2026-11-26) and they never appeared.
+  // Combos lead: they're the offers being pushed.
+  const featuredItems = useMemo(() => {
+    const featured = MENU_ITEMS.map((i) => mergeMenuItem(i, menuOverrides)).filter(
+      (i) => i.isAvailable && i.isFeatured && !i.dineInOnly,
+    )
+    return [
+      ...featured.filter((i) => i.categoryId === 'combos'),
+      ...featured.filter((i) => i.categoryId !== 'combos'),
+    ]
+  }, [menuOverrides])
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden pb-24 lg:pb-0">
@@ -323,13 +325,26 @@ export default function HomePage() {
                       {locale === 'es' ? 'Desde ' : 'From '}
                       {formatPrice(item.basePrice)}
                     </p>
-                    <button
-                      onClick={() => addItem(item, 1)}
-                      className="bg-[#E85D04] hover:bg-[#C2410C] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors active:scale-95"
-                      aria-label={`${locale === 'es' ? 'Agregar' : 'Add'} ${locale === 'es' ? item.nameEs : item.name}`}
-                    >
-                      {locale === 'es' ? 'Agregar' : 'Add'}
-                    </button>
+                    {item.comboPicks?.length ? (
+                      // A combo needs its flavors picked — open it in the menu sheet
+                      // (/carta?item= deep link) instead of adding it blind.
+                      <Link
+                        href={`/carta?item=${item.id}`}
+                        data-testid={`home-combo-${item.id}`}
+                        className="bg-[#E85D04] hover:bg-[#C2410C] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors active:scale-95"
+                        aria-label={`${locale === 'es' ? 'Elegir sabores de' : 'Pick flavors for'} ${locale === 'es' ? item.nameEs : item.name}`}
+                      >
+                        {locale === 'es' ? 'Elegir' : 'Choose'}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => addItem(item, 1)}
+                        className="bg-[#E85D04] hover:bg-[#C2410C] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors active:scale-95"
+                        aria-label={`${locale === 'es' ? 'Agregar' : 'Add'} ${locale === 'es' ? item.nameEs : item.name}`}
+                      >
+                        {locale === 'es' ? 'Agregar' : 'Add'}
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>

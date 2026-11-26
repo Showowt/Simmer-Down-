@@ -25,6 +25,7 @@ type SpeechWindow = Window & {
   webkitSpeechRecognition?: new () => SpeechRecognitionLike
 }
 import { useI18n } from '@/lib/i18n'
+import { BRAND_MASCOT } from '@/lib/brand'
 
 interface MenuItem {
   id: string
@@ -468,7 +469,7 @@ export default function AnimaChatV2() {
             whileTap={{ scale: 0.95 }}
             aria-label="Hablar con La Llamita"
           >
-            <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-6 h-6 lg:w-7 lg:h-7 object-contain relative z-10" />
+            <Image src={BRAND_MASCOT.src} alt="La Llamita" width={28} height={28} className="w-6 h-6 lg:w-7 lg:h-7 object-contain relative z-10" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 lg:w-3 lg:h-3 bg-[#4CAF50] rounded-full border-2 border-[#0A0A0A]" />
           </motion.button>
         )}
@@ -486,7 +487,7 @@ export default function AnimaChatV2() {
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center animate-pulse">
-                  <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
+                  <Image src={BRAND_MASCOT.src} alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white text-sm">La Llamita</h3>
@@ -535,7 +536,7 @@ export default function AnimaChatV2() {
             <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#1A1A1A]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#E85D04] flex items-center justify-center">
-                  <Image src="/logos/la-llamita.png" alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
+                  <Image src={BRAND_MASCOT.src} alt="La Llamita" width={28} height={28} className="w-7 h-7 object-contain" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-white">La Llamita</h3>

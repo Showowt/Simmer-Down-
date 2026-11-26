@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { BRAND_LOGO, logoHeightClass } from '@/lib/brand'
 
 export default function PublicLoading() {
   return (
@@ -9,7 +10,7 @@ export default function PublicLoading() {
           <div className="absolute inset-0 border-4 border-white/10" />
           <div className="absolute inset-0 border-4 border-transparent border-t-[#E85D04] animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={96} height={32} className="h-8 w-auto animate-pulse" />
+            <Image src={BRAND_LOGO.src} alt="Simmer Down" width={BRAND_LOGO.width} height={BRAND_LOGO.height} className={`${logoHeightClass('h-8', 'h-7')} w-auto animate-pulse`} />
           </div>
         </div>
 

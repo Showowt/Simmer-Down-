@@ -7,6 +7,7 @@ import { Mail, Lock, User, Phone, AlertCircle, Eye, EyeOff, Check, Gift } from '
 import { createClient } from '@/lib/supabase/client'
 import { useI18n, translations } from '@/lib/i18n'
 import Image from 'next/image'
+import { BRAND_LOGO, logoHeightClass } from '@/lib/brand'
 import Link from 'next/link'
 
 export default function SignupPage() {
@@ -149,7 +150,7 @@ export default function SignupPage() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
-            <Image src="/logos/logo-simmer-light.svg" alt="Simmer Down" width={144} height={48} className="h-12 w-auto mx-auto" />
+            <Image src={BRAND_LOGO.src} alt="Simmer Down" width={BRAND_LOGO.width} height={BRAND_LOGO.height} className={`${logoHeightClass('h-12', 'h-16')} w-auto mx-auto`} />
           </Link>
           <h1 className="text-2xl font-bold text-white">{t(translations.auth.joinSimmerLovers)}</h1>
           <p className="text-white/40 mt-2">{t(translations.auth.signupSubtitle, welcomePoints !== null ? { points: welcomePoints } : undefined)}</p>
