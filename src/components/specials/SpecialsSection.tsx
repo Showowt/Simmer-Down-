@@ -49,6 +49,18 @@ function validityLabel(s: PublicSpecial): string {
   return 'Disponible ahora'
 }
 
+// A gift card isn't on the menu: its special sells it at /giftcard (2026-11-26).
+function isGiftCardSpecial(s: PublicSpecial): boolean {
+  return /gift\s*card|tarjeta\s+de\s+regalo/i.test(s.title)
+}
+
+function ctaHref(s: PublicSpecial): string {
+  if (isGiftCardSpecial(s)) {
+    return s.special_price != null ? `/giftcard?monto=${Math.round(s.special_price)}` : '/giftcard'
+  }
+  return s.link_item_slug ? `/carta?item=${s.link_item_slug}` : '/carta'
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function SpecialsSection() {
@@ -225,11 +237,11 @@ export default function SpecialsSection() {
                     )}
                     {special.is_live ? (
                       <Link
-                        href={special.link_item_slug ? `/carta?item=${special.link_item_slug}` : '/carta'}
+                        href={ctaHref(special)}
                         className="ml-auto inline-flex shrink-0 items-center gap-0.5 rounded-md bg-[#E85D04] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#C2410C]"
-                        aria-label={`Ordenar ${special.title}`}
+                        aria-label={`${isGiftCardSpecial(special) ? 'Comprar' : 'Ordenar'} ${special.title}`}
                       >
-                        Ordenar
+                        {isGiftCardSpecial(special) ? 'Comprar' : 'Ordenar'}
                         <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     ) : (

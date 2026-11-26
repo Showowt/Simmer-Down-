@@ -169,6 +169,8 @@ export default function KitchenDisplayPage() {
       .select('id, order_number, status, order_type, customer_name, customer_phone, customer_notes, location_id, subtotal, delivery_fee, total_amount, created_at, order_items(id, order_id, item_name, unit_price, quantity, line_total)')
       .eq('location_id', locationId)
       .in('status', [...ACTIVE_STATUSES])
+      // A gift card sale is a confirmed order with nothing to cook — never on the line.
+      .is('gift_card_purchase_id', null)
       .order('created_at', { ascending: false })
 
     if (data) {

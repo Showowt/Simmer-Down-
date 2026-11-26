@@ -21,6 +21,7 @@ import { sendWhatsApp } from "@/lib/twilio/client";
 import { sendTelegram, notifyPaymentFailed } from "@/lib/telegram";
 import { formatPaymentConfirmWhatsApp } from "@/lib/notifications/order-notify";
 import { formatTicketSaleMessage } from "@/lib/notifications/ticket-sale";
+import { giftCodeTail, giftDateLong } from "@/lib/gift-cards";
 
 function hmacSign(payload: string): string {
   const secret = process.env.PAYMENT_CALLBACK_SECRET;
@@ -111,13 +112,38 @@ async function sendPaymentNotification(
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .select(
-        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city, event_id, ticket_quantity, room_booking_id",
+        "order_number, order_type, location_id, customer_name, customer_phone, customer_notes, subtotal, delivery_fee, discount_amount, discount_code, total_amount, delivery_address_line1, delivery_city, event_id, ticket_quantity, room_booking_id, gift_card_purchase_id",
       )
       .eq("id", orderId)
       .single();
 
     if (orderErr || !order) {
       logger.warn("Payment notification: order not found", { orderId });
+      return;
+    }
+
+    // Gift card purchase → a sale to record, NOTHING to prepare. The confirm
+    // trigger has already issued the card. Only the code's last 4 go to the
+    // group: the full code is a bearer instrument.
+    if (order.gift_card_purchase_id) {
+      const safe = (s: string) => String(s || "").replace(/[_*`[\]]/g, "");
+      const { data: gc } = await supabase
+        .from("gift_cards")
+        .select("code, initial_amount, recipient_name, sender_name, expires_at")
+        .eq("order_id", orderId)
+        .maybeSingle();
+      const giftMsg =
+        `🎁 *GIFT CARD VENDIDA — $${Number(order.total_amount).toFixed(2)}*\n` +
+        `_No hay nada que preparar._\n\n` +
+        (gc
+          ? `Para: ${safe(gc.recipient_name ?? "—")} · De: ${safe(gc.sender_name ?? "—")}\n` +
+            `Código: SD-····-····-${giftCodeTail(String(gc.code))}\n` +
+            `Vence: ${giftDateLong(String(gc.expires_at))}\n`
+          : `⚠️ Pago aprobado pero la tarjeta no aparece emitida — revisar en Admin → Gift Cards.\n`) +
+        `👤 Compró: ${safe(order.customer_name) || "Cliente"} · ${safe(order.customer_phone) || "—"}\n` +
+        `Pedido: #${order.order_number}`;
+      await sendTelegram(giftMsg);
+      await sendWhatsApp(staffPhone, giftMsg);
       return;
     }
 

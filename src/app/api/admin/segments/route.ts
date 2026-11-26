@@ -88,6 +88,7 @@ interface OrderRow {
   event_id: string | null;
   ticket_quantity: number | null;
   room_booking_id: string | null;
+  gift_card_purchase_id: string | null;
   created_at: string;
 }
 
@@ -181,7 +182,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       supabase
         .from("orders")
         .select(
-          "status, total_amount, location_id, order_type, event_id, ticket_quantity, room_booking_id, created_at",
+          "status, total_amount, location_id, order_type, event_id, ticket_quantity, room_booking_id, gift_card_purchase_id, created_at",
         )
         .gte("created_at", startUtc.toISOString())
         .lt("created_at", endUtc.toISOString()),
@@ -234,6 +235,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       // A room payment that flows through orders is counted via room_bookings,
       // never here, so stays are never double-counted.
       if (o.room_booking_id) continue;
+      // Gift card sales are prepaid money, not a food/ticket/stay segment —
+      // counting them as "Recoger" would inflate pickup revenue.
+      if (o.gift_card_purchase_id) continue;
 
       const total = Number(o.total_amount ?? 0);
       const venue = o.location_id ? uuidToVenue.get(o.location_id) ?? null : null;

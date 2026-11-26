@@ -105,6 +105,21 @@ export async function GET(request: NextRequest) {
     ticketToken = tickets[0]?.token ?? null;
   }
 
+  // Gift card order → the private view token of the card the confirm trigger
+  // issued, so the success screen opens the buyer's gift card immediately.
+  // The orderId (a v4 UUID the buyer's own browser holds) is the capability,
+  // same as the ticket tokens above.
+  let giftCardToken: string | null = null;
+  if (externalStatus === "paid") {
+    const { data: gc, error: gcErr } = await supabase
+      .from("gift_cards")
+      .select("view_token")
+      .eq("order_id", order.id)
+      .maybeSingle();
+    if (gcErr) logger.error("[payments/status] gift card lookup failed", gcErr, { orderId: order.id });
+    giftCardToken = (gc?.view_token as string | undefined) ?? null;
+  }
+
   // Strip sensitive fields from unauthenticated response.
   // authorizationCode, cardBrand, cardLast4 are only needed on the
   // authenticated order page — the 3DS modal only needs paymentStatus.
@@ -122,5 +137,6 @@ export async function GET(request: NextRequest) {
     loyalty,
     ticketToken,
     tickets,
+    giftCardToken,
   });
 }

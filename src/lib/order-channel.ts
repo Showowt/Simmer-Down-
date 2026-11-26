@@ -16,6 +16,7 @@
 export type OrderChannel =
   | "tickets"
   | "rooms"
+  | "giftcard"
   | "delivery"
   | "pickup"
   | "dine_in"
@@ -26,6 +27,8 @@ export interface OrderChannelInput {
   order_type?: string | null;
   event_id?: string | null;
   room_booking_id?: string | null;
+  /** Gift card purchase (2026-11-26) — prepaid money, nothing to prepare. */
+  gift_card_purchase_id?: string | null;
   /** Legacy UI field (never in the DB) — honoured so old fixtures still classify. */
   is_delivery?: boolean | null;
 }
@@ -42,6 +45,7 @@ export interface OrderChannelMeta {
 export const ORDER_CHANNEL_META: Record<OrderChannel, OrderChannelMeta> = {
   tickets: { key: "tickets", label: "Boletos", printLabel: "BOLETOS", color: "#FBBF24" },
   rooms: { key: "rooms", label: "Estadía", printLabel: "ESTADIA", color: "#A78BFA" },
+  giftcard: { key: "giftcard", label: "Gift Card", printLabel: "GIFT CARD", color: "#F472B6" },
   delivery: { key: "delivery", label: "Delivery", printLabel: "DELIVERY", color: "#FF6B35" },
   pickup: { key: "pickup", label: "Recoger", printLabel: "PARA RECOGER", color: "#4CAF50" },
   dine_in: { key: "dine_in", label: "En mesa", printLabel: "EN MESA", color: "#B8B0A8" },
@@ -83,6 +87,7 @@ export function ticketEventLine(o: OrderEventInput): string | null {
 export function orderChannel(o: OrderChannelInput): OrderChannel {
   if (o.event_id) return "tickets";
   if (o.room_booking_id) return "rooms";
+  if (o.gift_card_purchase_id) return "giftcard";
   const type = (o.order_type ?? "").toLowerCase();
   if (type === "delivery") return "delivery";
   if (type === "pickup") return "pickup";

@@ -16,6 +16,7 @@ export default function Footer() {
     { label: t(translations.footer.ourStory), href: '/nosotros' },
     { label: t(translations.footer.events), href: '/ticketmania' },
     { label: t(translations.footer.simmerLovers), href: '/simmerlovers' },
+    { label: 'Gift Cards', href: '/giftcard' },
     { label: t(translations.footer.contact), href: '/contact' },
   ]
 

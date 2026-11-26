@@ -71,6 +71,7 @@ const DAY_LETTERS = ["D", "L", "M", "X", "J", "V", "S"];
 const CHANNEL_ICON: Record<OrderChannel, LucideIcon> = {
   tickets: Ticket,
   rooms: BedDouble,
+  giftcard: Gift,
   delivery: Truck,
   pickup: ShoppingBag,
   dine_in: UtensilsCrossed,

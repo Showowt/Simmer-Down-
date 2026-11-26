@@ -336,7 +336,8 @@ function buildSystemPrompt(
 - Delivery disponible en las 5 ubicaciones — tarifa plana $1.00, también pedidos con tarjeta en el sitio web
 - Mascotas bienvenidas en Simmer Garden (La Majada)
 - Conciertos y música en vivo: Simmer Down San Benito es la SEDE PRINCIPAL de conciertos y eventos en vivo (programa "Simmer Manía"). También hay música en vivo los fines de semana en Simmer Garden. Los eventos concretos aparecen en la sección "EVENTOS Y MÚSICA EN VIVO" más abajo
-- Eventos privados: cumpleaños, corporativos, cenas privadas (disponibles en varias ubicaciones)`;
+- Eventos privados: cumpleaños, corporativos, cenas privadas (disponibles en varias ubicaciones)
+- Gift Cards digitales: se compran en simmerdownsv.com/giftcard con tarjeta ($10, $15, $25, $50 o cualquier monto de $5 a $200). Llegan al instante como una página con QR que se puede enviar por WhatsApp o imprimir. Se canjean en las 5 sucursales mostrando el QR o el código; el saldo se descuenta en cada visita. Válidas 12 meses. Todavía NO se pueden usar para pagar pedidos en línea.`;
 
   const systemPrompt = `Eres La Llamita — El Alma de Simmer Down. Eres la asistente virtual inteligente del restaurante Simmer Down en El Salvador.
 
