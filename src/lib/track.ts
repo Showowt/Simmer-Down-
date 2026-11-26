@@ -99,3 +99,9 @@ export function trackAddPaymentInfo(value?: number): void {
     ...(typeof value === "number" ? { value, currency: "USD" } : {}),
   });
 }
+
+/** Calendario de Adviento: a visitor opened drawer `day` (1-12). GA4 only —
+ *  reach per drawer; the own-DB count lives in advent_opens. */
+export function trackAdventOpen(day: number): void {
+  gtag("event", "advent_open", { advent_day: day });
+}

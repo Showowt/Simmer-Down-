@@ -27,6 +27,7 @@ import {
   BedDouble,
   LayoutTemplate,
   ScanLine,
+  CalendarHeart,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -41,6 +42,7 @@ const navItems = [
   { href: "/admin/fotos", label: "Fotos", icon: Camera },
   { href: "/admin/specials", label: "Especiales", icon: Tag },
   { href: "/admin/codigos", label: "Códigos Promo", icon: TicketPercent },
+  { href: "/admin/adviento", label: "Calendario Adviento", icon: CalendarHeart },
   { href: "/admin/events", label: "Eventos", icon: Calendar },
   { href: "/admin/boletos", label: "Escanear Boletos", icon: ScanLine },
   { href: "/admin/inquiries", label: "Consultas", icon: MessageSquare },

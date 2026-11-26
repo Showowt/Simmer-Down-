@@ -15,6 +15,8 @@ import { createApiClient } from "@/lib/supabase/api";
 import { isSpecialLive } from "@/lib/specials";
 import { isLiveOrUpcoming } from "@/lib/events";
 import { ticketsLineForAssistant } from "@/lib/ticket-tiers";
+import { readAdventRows } from "@/lib/advent-server";
+import { adventActive, adventState, formatAdventLong, svToday } from "@/lib/advent";
 import {
   MENU_ITEMS,
   MENU_CATEGORIES,
@@ -61,6 +63,40 @@ async function buildPromoBlock(): Promise<string> {
     return `\n## PROMOCIONES ACTUALES (verificadas hoy)\n${lines.join("\n")}\n${ivaLine}`;
   } catch {
     return `\n## PROMOCIONES ACTUALES\n- Consulta la sección de especiales en el sitio\n${ivaLine}`;
+  }
+}
+
+/**
+ * Calendario de Adviento (Dec 2026) — only while it is switched on in
+ * /admin/adviento, and only the drawers whose date has arrived (El Salvador
+ * time). A locked drawer's title/description is never put in the prompt, so
+ * La Llamita can't spoil a prize. Empty string when off or on any error.
+ */
+async function buildAdventBlock(): Promise<string> {
+  try {
+    const { isLive, days } = await readAdventRows();
+    const today = svToday();
+    const lastDate = days.reduce<string | null>((m, d) => (m === null || d.unlock_date > m ? d.unlock_date : m), null);
+    if (!adventActive(isLive, lastDate, today) || days.length === 0) return "";
+
+    const byDate = [...days].sort((a, b) => (a.unlock_date < b.unlock_date ? -1 : 1));
+    const schedule = byDate.map((d) => `casilla ${d.day}: ${formatAdventLong(d.unlock_date, "es")}`).join("; ");
+    const open = byDate
+      .map((d) => ({ d, state: adventState(d.unlock_date, today) }))
+      .filter(({ state }) => state !== "locked")
+      .map(({ d, state }) =>
+        `- Casilla ${d.day} (${formatAdventLong(d.unlock_date, "es")}${state === "today" ? ", HOY" : ""})${d.title ? `: ${d.title}` : ""}${d.description ? ` — ${d.description}` : ""}`,
+      );
+
+    return `\n## CALENDARIO DE ADVIENTO (diciembre)
+- Por primera vez Simmer Down tiene un Calendario de Adviento: 12 sorpresas en diciembre en simmerdownsv.com/adviento.
+- Cómo participar: 1) revisar las historias de Instagram (@simmerdown_sv) y entrar al calendario en el sitio; 2) abrir la casilla del día y descubrir el reto navideño; 3) visitar cualquiera de los 5 restaurantes y cumplir el reto; 4) recibir el premio.
+- Fechas: ${schedule}. Cada casilla se abre a las 12:00 AM (hora de El Salvador) de su fecha.
+${open.length ? `- Casillas ya abiertas:\n${open.join("\n")}` : "- Todavía no se abre ninguna casilla."}
+- El reto de cada casilla es una imagen: para verlo, manda a simmerdownsv.com/adviento. NUNCA adivines ni inventes el premio o el reto de una casilla que aún no se abre; solo di la fecha en que se abre.`;
+  } catch (error) {
+    logger.error("[anima] advent block", error);
+    return "";
   }
 }
 
@@ -520,14 +556,15 @@ export async function POST(request: NextRequest) {
       : message;
 
     // Call Claude API
-    const [promoBlock, eventsBlock, experiencesBlock] = await Promise.all([
+    const [promoBlock, eventsBlock, experiencesBlock, adventBlock] = await Promise.all([
       buildPromoBlock(),
       buildEventsBlock(),
       buildExperiencesBlock(),
+      buildAdventBlock(),
     ]);
     const systemPrompt = buildSystemPrompt(
       language,
-      promoBlock,
+      promoBlock + adventBlock,
       eventsBlock,
       experiencesBlock,
     );

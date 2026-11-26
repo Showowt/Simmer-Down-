@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useCartStore, useUIStore, useTranslation } from '@/lib/store'
 import { useMenuOverrides, mergeMenuItem } from '@/lib/use-menu-image-overrides'
+import { useAdventStatus } from '@/lib/use-advent-status'
 import {
   MENU_CATEGORIES,
   MENU_ITEMS,
@@ -583,9 +584,10 @@ function FloatingCartBar() {
 type DietaryFilter = 'vegetarian' | 'spicy' | 'gluten-free'
 
 export default function CartaPage() {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const { openMenuItemSheet } = useUIStore()
   const orderType = useCartStore((s) => s.orderType)
+  const advent = useAdventStatus()
 
   // ── Local state ──────────────────────────────────────────
   const menuOverrides = useMenuOverrides()
@@ -715,6 +717,23 @@ export default function CartaPage() {
 
           {/* CATEGORY CHIPS */}
           <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
+            {/* Calendario de Adviento — only while it's switched on in /admin/adviento */}
+            {advent.active && (
+              <Link
+                href="/adviento"
+                data-testid="advent-menu-chip"
+                className="shrink-0 px-4 py-2 rounded-full text-xs font-semibold border border-[#F5C451]/60 text-white flex items-center gap-1.5 shadow-[0_0_14px_rgba(245,196,81,0.25)] hover:brightness-110 transition"
+                style={{ background: 'linear-gradient(135deg, #C8283F 0%, #8E1426 100%)' }}
+              >
+                <span aria-hidden>🎁</span>
+                <span>{language === 'en' ? 'Christmas' : 'Navidad'}</span>
+                {advent.todayIsDrawer && (
+                  <span className="ml-0.5 rounded-full bg-[#F5C451] px-1.5 text-[9px] font-bold text-[#5A1A0C]">
+                    {language === 'en' ? 'TODAY' : 'HOY'}
+                  </span>
+                )}
+              </Link>
+            )}
             <button
               onClick={() => handleCategorySelect('all')}
               className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 ${

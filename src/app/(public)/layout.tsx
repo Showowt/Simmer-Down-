@@ -6,6 +6,7 @@ import LocationSheet from "@/components/layout/LocationSheet";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Footer from "@/components/Footer";
 import PromoSync from "@/components/PromoSync";
+import AdventFab from "@/components/advent/AdventFab";
 
 // NOTE: no `title` here — the ROOT layout owns the default + "%s | Simmer Down"
 // template. A second template at this level stacked with the root one and
@@ -41,6 +42,7 @@ export default function PublicLayout({
       <Footer />
       <LocationSheet />
       <WhatsAppButton />
+      <AdventFab />
       <NewBottomNav />
       <PromoSync />
     </div>
