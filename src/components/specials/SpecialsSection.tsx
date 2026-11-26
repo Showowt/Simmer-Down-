@@ -81,18 +81,18 @@ export default function SpecialsSection() {
   // Don't render section at all if no specials and not loading
   if (!loading && specials.length === 0) return null
 
-  // Loading skeleton
+  // Loading skeleton — same compact footprint as the real row
   if (loading) {
     return (
-      <section aria-label="Especiales" className="py-16 md:py-24 px-6 bg-[#0A0A0A]">
+      <section aria-label="Especiales" className="py-12 md:py-16 px-6 bg-[#0A0A0A]">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-10">
+          <div className="mb-6">
             <div className="h-3 w-32 bg-[#1A1A1A] rounded mb-3 animate-pulse" />
-            <div className="h-8 w-64 bg-[#1A1A1A] rounded animate-pulse" />
+            <div className="h-7 w-48 bg-[#1A1A1A] rounded animate-pulse" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="bg-[#1A1A1A] rounded-xl h-64 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#141414] rounded-xl h-[124px] animate-pulse" />
             ))}
           </div>
         </div>
@@ -103,155 +103,143 @@ export default function SpecialsSection() {
   // Error state — silent, don't break the page
   if (error) return null
 
+  const shown = specials.slice(0, 6)
+  // A badge on every card is noise: only mark featured ones when it sets them apart.
+  const markFeatured = shown.some((s) => s.featured) && !shown.every((s) => s.featured)
+  const lgCols = shown.length >= 4 ? 'lg:grid-cols-4' : shown.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'
+
+  // Compact promo row (2026-11-26: the 3:4 poster cards filled a whole screen).
+  // Phones: one swipeable row. md+: a grid, all four gift cards on one line.
   return (
-    <section aria-label="Especiales y Promociones" className="py-16 md:py-24 px-6 bg-[#0A0A0A]">
+    <section aria-label="Especiales y Promociones" className="py-12 md:py-16 px-6 bg-[#0A0A0A]">
       <div className="max-w-7xl mx-auto">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-10"
+          transition={{ duration: 0.5 }}
+          className="mb-6 flex items-end justify-between gap-4"
         >
-          <p className="text-[#E85D04] text-xs font-semibold uppercase tracking-[0.2em] mb-2">
-            Ofertas por tiempo limitado
-          </p>
-          <h2
-            className="font-display text-white leading-tight"
-            style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)' }}
-          >
-            ESPECIALES
-          </h2>
+          <div>
+            <p className="text-[#E85D04] text-xs font-semibold uppercase tracking-[0.2em] mb-1.5">
+              Ofertas por tiempo limitado
+            </p>
+            <h2
+              className="font-display text-white leading-tight"
+              style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)' }}
+            >
+              ESPECIALES
+            </h2>
+          </div>
+          {shown.length > 1 && (
+            <p className="md:hidden text-[11px] text-white/35 pb-1">Desliza →</p>
+          )}
         </motion.div>
 
-        {/* Specials grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {specials.slice(0, 6).map((special, i) => {
+        <div
+          className={`flex md:grid gap-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0 pb-1 md:pb-0 md:grid-cols-2 ${lgCols}`}
+          data-testid="specials-row"
+        >
+          {shown.map((special, i) => {
             const hero = heroContent(special)
+            const discounted =
+              special.special_price != null &&
+              special.original_price != null &&
+              special.original_price > special.special_price
             return (
-            <motion.div
-              key={special.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="group bg-[#1A1A1A] rounded-xl border border-white/8 overflow-hidden hover:border-[#E85D04]/40 transition-all duration-300 flex flex-col"
-            >
-              {/* Image or placeholder */}
-              {special.image_url ? (
-                <div className="relative aspect-[3/4] overflow-hidden bg-[#0A0A0A]">
-                  {/* Blurred fill: lets portrait/story flyers show whole without
-                      dead bars, and never crops the baked-in marketing. */}
-                  <Image
-                    src={special.image_url}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    className="object-cover scale-110 blur-2xl opacity-50"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                  {/* The full marketing image — contained, never cut. */}
-                  <Image
-                    src={special.image_url}
-                    alt={special.title}
-                    fill
-                    className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                  {special.featured && (
-                    <span className="absolute top-3 left-3 z-10 bg-white/95 text-[#9A3412] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1 shadow-sm">
-                      <Star className="w-3 h-3 fill-[#E85D04] text-[#E85D04]" /> Destacado
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div
-                  className="relative aspect-[3/4] overflow-hidden flex flex-col items-center justify-center text-center px-4"
-                  style={{ background: 'radial-gradient(130% 130% at 50% -10%, #FB923C 0%, #E85D04 46%, #7C2D12 100%)' }}
-                >
-                  {/* Texture + depth so it reads as designed, not empty */}
-                  <div
-                    className="absolute inset-0 opacity-[0.10] mix-blend-overlay"
-                    style={{ backgroundImage: 'repeating-linear-gradient(135deg, #000 0 2px, transparent 2px 11px)' }}
-                    aria-hidden="true"
-                  />
-                  <div className="absolute -top-12 -right-10 w-44 h-44 rounded-full bg-white/20 blur-3xl" aria-hidden="true" />
-                  <div className="absolute -bottom-14 -left-10 w-44 h-44 rounded-full bg-black/25 blur-3xl" aria-hidden="true" />
-                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-none" aria-hidden="true" />
-
-                  {/* Hero discount — the star of the card when there's no photo */}
-                  <div className="relative">
+              <motion.article
+                key={special.id}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+                data-testid="special-card"
+                className="group relative w-[85%] shrink-0 snap-start md:w-auto flex gap-3 rounded-xl border border-white/8 bg-[#141414] p-2.5 hover:border-[#E85D04]/40 transition-colors duration-300"
+              >
+                {/* Thumbnail: the whole image, never cropped, over its own blurred glow */}
+                <div className="relative w-24 h-24 sm:w-[104px] sm:h-[104px] shrink-0 overflow-hidden rounded-lg bg-[#0A0A0A]">
+                  {special.image_url ? (
+                    <>
+                      <Image
+                        src={special.image_url}
+                        alt=""
+                        aria-hidden="true"
+                        fill
+                        className="object-cover scale-125 blur-xl opacity-60"
+                        sizes="112px"
+                      />
+                      <Image
+                        src={special.image_url}
+                        alt={special.title}
+                        fill
+                        className="object-contain transition-transform duration-500 group-hover:scale-105"
+                        sizes="112px"
+                      />
+                    </>
+                  ) : (
                     <div
-                      className="font-display font-bold text-white leading-none"
-                      style={{ fontSize: 'clamp(2.75rem, 8vw, 3.75rem)', textShadow: '0 6px 28px rgba(0,0,0,0.4)' }}
+                      className="absolute inset-0 flex flex-col items-center justify-center text-center"
+                      style={{ background: 'radial-gradient(130% 130% at 50% -10%, #FB923C 0%, #E85D04 46%, #7C2D12 100%)' }}
                     >
-                      {hero.big}
+                      <span className="font-display text-white text-2xl leading-none drop-shadow">{hero.big}</span>
+                      {hero.small && (
+                        <span className="mt-1 text-[9px] font-extrabold uppercase tracking-[0.25em] text-white/90">
+                          {hero.small}
+                        </span>
+                      )}
                     </div>
-                    {hero.small && (
-                      <div className="mt-1 pl-[0.4em] text-white font-extrabold tracking-[0.4em] text-sm uppercase">
-                        {hero.small}
-                      </div>
-                    )}
-                  </div>
-
-                  {special.featured && (
-                    <span className="absolute top-3 left-3 bg-white/95 text-[#9A3412] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1 shadow-sm">
-                      <Star className="w-3 h-3 fill-[#E85D04] text-[#E85D04]" /> Destacado
-                    </span>
                   )}
                 </div>
-              )}
 
-              {/* Card body */}
-              <div className="p-4 flex flex-col gap-2.5 flex-1">
-                <h3 className="text-white font-semibold text-base leading-tight line-clamp-2">
-                  {special.title}
-                </h3>
-
-                {special.description && (
-                  <p className="text-white/45 text-xs leading-relaxed line-clamp-2">
-                    {special.description}
+                {/* Copy */}
+                <div className="flex min-w-0 flex-1 flex-col py-0.5">
+                  <h3 className="flex items-center gap-1.5 font-display text-lg tracking-wide text-white leading-tight">
+                    {markFeatured && special.featured && (
+                      <Star className="w-3.5 h-3.5 shrink-0 fill-[#E85D04] text-[#E85D04]" aria-label="Destacado" />
+                    )}
+                    <span className="truncate">{special.title}</span>
+                  </h3>
+                  {special.description && (
+                    <p className="mt-0.5 text-white/45 text-xs leading-snug line-clamp-1">
+                      {special.description}
+                    </p>
+                  )}
+                  <p className="mt-1 flex min-w-0 items-center gap-1 text-[10px] text-white/40">
+                    <Calendar className="w-3 h-3 shrink-0 text-[#FBBF24]" />
+                    <span className="truncate">{validityLabel(special)}</span>
                   </p>
-                )}
 
-                {/* Price row (fixed-price promos) */}
-                {special.special_price != null && (
-                  <div className="flex items-baseline gap-2">
-                    {special.original_price != null && (
-                      <span className="text-white/35 text-sm line-through">
-                        ${special.original_price.toFixed(2)}
+                  <div className="mt-auto flex items-center gap-2 pt-2">
+                    {special.special_price != null && (
+                      <span className="flex items-baseline gap-1.5">
+                        {discounted && (
+                          <span className="text-white/35 text-xs line-through">
+                            ${special.original_price!.toFixed(2)}
+                          </span>
+                        )}
+                        <span className="text-[#E85D04] font-bold text-sm">
+                          ${special.special_price.toFixed(2)}
+                        </span>
                       </span>
                     )}
-                    <span className="text-[#E85D04] font-bold text-lg">
-                      ${special.special_price.toFixed(2)}
-                    </span>
+                    {special.is_live ? (
+                      <Link
+                        href={special.link_item_slug ? `/carta?item=${special.link_item_slug}` : '/carta'}
+                        className="ml-auto inline-flex shrink-0 items-center gap-0.5 rounded-md bg-[#E85D04] px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#C2410C]"
+                        aria-label={`Ordenar ${special.title}`}
+                      >
+                        Ordenar
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    ) : (
+                      <span className="ml-auto shrink-0 rounded-full border border-[#FBBF24]/30 bg-[#FBBF24]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#FBBF24]">
+                        Pronto
+                      </span>
+                    )}
                   </div>
-                )}
-
-                {/* Validity */}
-                <div className="flex items-center gap-1.5 text-xs text-white/40 mt-auto pt-1">
-                  <Calendar className="w-3 h-3 text-[#FBBF24] flex-shrink-0" />
-                  <span>{validityLabel(special)}</span>
-                  {!special.is_live && (
-                    <span className="ml-auto text-[10px] font-semibold text-[#FBBF24] bg-[#FBBF24]/10 border border-[#FBBF24]/30 rounded-full px-2 py-0.5 uppercase tracking-wide">
-                      Próximamente
-                    </span>
-                  )}
                 </div>
-
-                {/* CTA */}
-                {special.is_live && (
-                  <Link
-                    href={special.link_item_slug ? `/carta?item=${special.link_item_slug}` : '/carta'}
-                    className="mt-2 inline-flex items-center justify-center gap-1.5 bg-[#E85D04] hover:bg-[#E85D04]/85 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                  >
-                    Ordenar ahora
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                )}
-              </div>
-            </motion.div>
+              </motion.article>
             )
           })}
         </div>
